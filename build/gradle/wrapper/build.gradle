@@ -1,8 +1,8 @@
 projectHome = '../../..'
 
 // set the sources for this build
-sourceSets.main.java.srcDirs = ["$projectHome/src/main/java", "$projectHome/src/app/java"]
-sourceSets.main.resources.srcDirs = ["$projectHome/src/main/java"]
+sourceSets.main.java.srcDirs = ["$projectHome/src/main/java", "$projectHome/src/app/main/java"]
+sourceSets.main.resources.srcDirs = ["$projectHome/src/yajsw/main/java"]
 sourceSets.main.resources.includes  = ['resources/*']
 
 // this project uses the ahessian sub-project

@@ -1,6 +1,6 @@
 projectHome = '../../..'
 
-sourceSets.main.java.srcDirs = ["$projectHome/src/hessian"]
+sourceSets.main.java.srcDirs = ["$projectHome/src/hessian/main/java"]
 
 dependencies {
     compile group: 'netty', 							name: 'netty', 										version: "$netty_version"
