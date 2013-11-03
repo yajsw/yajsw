@@ -42,6 +42,21 @@ public class ServerCallbackProxy implements InvocationHandler, Constants
 			return (Boolean)_message.isValid();
 		}
 
+		if ("toString".equals(method.getName()) && (args == null || args.length == 0))
+		{
+			return this.toString();
+		}
+
+		if ("hashCode".equals(method.getName()) && (args == null || args.length == 0))
+		{
+			return this.hashCode();
+		}
+
+		if ("equals".equals(method.getName()) && (args.length == 1))
+		{
+			return this.equals(args[0]);
+		}
+
 		CallbackReplyMessage reply = new CallbackReplyMessage(methodName, args, null, _message);
 		reply.setCallId((Long) _message.getHeaders().get(CALL_ID_HEADER_KEY));
 		reply.setGroup((Integer) _message.getHeaders().get(GROUP_HEADER_KEY));

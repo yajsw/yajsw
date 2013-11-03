@@ -24,10 +24,17 @@ public class HessianRPCCallEncoder extends SimpleChannelHandler
 	SerializerFactory sFactory = new SerializerFactory();
 	Hessian2Output hOut = null;
 	boolean _hasSessionFilter = false;
+	boolean _inverseServer = false;
 	
 	public HessianRPCCallEncoder()
 	{
 		super();
+	}
+	
+	public HessianRPCCallEncoder(boolean inverseServer)
+	{
+		super();
+		_inverseServer = inverseServer;
 	}
 	
 	public HessianRPCCallEncoder(AbstractSerializerFactory serializerFactory)
@@ -60,6 +67,8 @@ public class HessianRPCCallEncoder extends SimpleChannelHandler
 		message.setHasSessionFilter(_hasSessionFilter);
 		hOut.resetReferences();
 		hOut.call(message);
+		if (_inverseServer)
+		hOut.flush(e.getFuture());
  		}
 		catch (Exception ex)
 		{

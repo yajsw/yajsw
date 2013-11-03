@@ -57,8 +57,10 @@ public class ImmediateInvokeService extends HessianSkeleton implements Constants
 	public void messageReceived(HessianRPCCallMessage message)
 	{
 		ServiceSessionProvider.set(message.getSession());
+		ServiceSessionProvider.setHandler(message.getHandler());
 		invoke(message);
 		ServiceSessionProvider.remove();
+		ServiceSessionProvider.removeHandler();
 	}
 	
 	/**
@@ -81,15 +83,7 @@ public class ImmediateInvokeService extends HessianSkeleton implements Constants
 					if (args[i] instanceof ClientCallback)
 					{
 						ClientCallback cc = (ClientCallback) args[i];
-						ClassLoader cl = cc.getClass().getClassLoader();
-						Class clazz = cl.loadClass(cc.getCallbackClass());
-						List<Class> clazzes = new ArrayList();
-						while (clazz != null && (!clazz.equals(Object.class)))
-						{
-								clazzes.addAll(Arrays.asList(clazz.getInterfaces()));
-								clazz = clazz.getSuperclass();
-						}
-						args[i] = Proxy.newProxyInstance(cl, (Class[])clazzes.toArray(new Class[clazzes.size()]), new ServerCallbackProxy(_factory, message, (ClientCallback) args[i]));
+						args[i] = ClientCallback.clientCallbackArgProxy(cc, new ServerCallbackProxy(_factory, message, cc));
 					}
 				}
 			}

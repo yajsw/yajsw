@@ -4,7 +4,9 @@ import java.util.Map;
 
 import org.jboss.netty.channel.Channel;
 import org.rzo.netty.ahessian.Constants;
+import org.rzo.netty.ahessian.io.InputStreamDecoder;
 import org.rzo.netty.ahessian.io.OutputStreamEncoder;
+import org.rzo.netty.ahessian.rpc.server.HessianRPCServiceHandler;
 import org.rzo.netty.ahessian.session.ServerSessionFilter;
 import org.rzo.netty.ahessian.session.Session;
 
@@ -27,6 +29,7 @@ public class HessianRPCCallMessage implements Constants, GroupedMessage
 	boolean _hasSessionFilter = false;
 	transient boolean _isServer = false;
 	transient Session _session;
+	transient InputStreamDecoder _handler;
 	
 	/**
 	 * Gets the headers.
@@ -147,6 +150,16 @@ public class HessianRPCCallMessage implements Constants, GroupedMessage
 	public Session getSession()
 	{
 		return _session;
+	}
+
+	public void setHandler(InputStreamDecoder handler)
+	{
+		_handler = handler;
+	}
+	
+	public InputStreamDecoder getHandler()
+	{
+		return _handler;
 	}
 
 }

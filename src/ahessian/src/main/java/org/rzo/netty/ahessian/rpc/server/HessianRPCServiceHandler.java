@@ -19,6 +19,7 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.jboss.netty.util.Timer;
 import org.rzo.netty.ahessian.Constants;
+import org.rzo.netty.ahessian.rpc.message.FlushRequestMessage;
 import org.rzo.netty.ahessian.rpc.message.HessianRPCCallMessage;
 import org.rzo.netty.ahessian.rpc.message.HessianRPCReplyMessage;
 import org.rzo.netty.ahessian.utils.MyReentrantLock;
@@ -61,11 +62,24 @@ public class HessianRPCServiceHandler extends SimpleChannelUpstreamHandler imple
 	final AtomicLong _openCounter = new AtomicLong(0);
 	final Lock _lock = new MyReentrantLock();
 	final Condition _channelOpen = _lock.newCondition();
+	
+	boolean _inverseServer = false;
 
 	public HessianRPCServiceHandler(Executor executor)
 	{
-		this(executor, null, null);
+		this(executor, null, null, false);
 	}
+
+	public HessianRPCServiceHandler(Executor executor, boolean inverseServer)
+	{
+		this(executor, null, null, inverseServer);
+	}
+	
+	public HessianRPCServiceHandler(Executor executor, Map<String, Object> options, Timer timer)
+	{
+		this(executor, options, timer, false);
+	}
+
 
 	/**
 	 * Instantiates a new hessian rpc service handler.
@@ -73,8 +87,9 @@ public class HessianRPCServiceHandler extends SimpleChannelUpstreamHandler imple
 	 * @param executor
 	 *            the thread pool to get a thread to send replies
 	 */
-	public HessianRPCServiceHandler(Executor executor, Map<String, Object> options, Timer timer)
+	public HessianRPCServiceHandler(Executor executor, Map<String, Object> options, Timer timer, boolean inverseServer)
 	{
+		_inverseServer = inverseServer;
 		_executor = executor;
 		if (options == null || timer == null)
 			_pendingReplies = new TimedBlockingPriorityQueue<HessianRPCReplyMessage>("HessianRPCServiceHandler-PendingReplies");
@@ -216,7 +231,11 @@ public class HessianRPCServiceHandler extends SimpleChannelUpstreamHandler imple
 	{
 		Channel ch = message.getChannel();
 		if (ch != null)
+		{
 			ch.write(message);
+			if (_inverseServer)
+			ch.write(new FlushRequestMessage());
+		}
 		else
 			ahessianLogger.warn("message channel null -> ignored: #"+message.getCallId());
 		/*
@@ -349,6 +368,7 @@ public class HessianRPCServiceHandler extends SimpleChannelUpstreamHandler imple
 		}
 		*/
 		sendMessage(message);
+		
 	}
 
 	/*
@@ -410,5 +430,5 @@ public class HessianRPCServiceHandler extends SimpleChannelUpstreamHandler imple
 	{
 		_stop = true;
 	}
-
+	
 }

@@ -11,6 +11,7 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
+import org.rzo.netty.ahessian.rpc.server.HessianRPCServiceHandler;
 import org.rzo.netty.ahessian.stopable.StopableHandler;
 
 //import com.caucho.services.server.ServiceContext;
@@ -80,6 +81,8 @@ public class InputStreamDecoder extends SimpleChannelUpstreamHandler implements 
 	InputStreamBuffer _in = null;
 	boolean _stopEnabled = true;
 	boolean _crcCheck = false;
+	private volatile Runnable _disconnectListener = null;
+
 	
 	public InputStreamDecoder()
 	{
@@ -126,6 +129,13 @@ public class InputStreamDecoder extends SimpleChannelUpstreamHandler implements 
 		}		
 		ctx.sendUpstream(e);
 	}
+	
+	public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception
+	{
+		if (_disconnectListener !=null)
+		_disconnectListener.run();
+	}
+
 
 	public static InputStreamBuffer getInputStream(ChannelHandlerContext ctx)
 	{
@@ -155,5 +165,17 @@ public class InputStreamDecoder extends SimpleChannelUpstreamHandler implements 
 		}
 		_in = null;
 	}
+	
+	public void setDisconnectListener(Runnable disconnectListener)
+	{
+		_disconnectListener = disconnectListener;
+	}
+
+	public static InputStreamDecoder getHandler(ChannelHandlerContext ctx)
+	{
+		return ctx.getPipeline().get(InputStreamDecoder.class);
+	}
+
+
 
 }

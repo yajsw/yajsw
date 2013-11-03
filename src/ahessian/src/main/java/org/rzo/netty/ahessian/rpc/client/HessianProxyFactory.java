@@ -343,6 +343,9 @@ public class HessianProxyFactory extends SimpleChannelHandler implements Constan
 						{
 							public void run()
 							{
+								//System.out.println("executing callback");
+								try
+								{
 								if (message.getValue() instanceof InputStreamReplyMessage)
 								{
 									InputStream stream = _clientStreamManager.newInputStream(((InputStreamReplyMessage)message.getValue()).getId());
@@ -357,6 +360,11 @@ public class HessianProxyFactory extends SimpleChannelHandler implements Constan
 										_openCalls.remove(id);
 
 									}
+								}
+								catch (Throwable e)
+								{
+									e.printStackTrace();
+								}
 							}
 						});
 					else

@@ -106,6 +106,7 @@ public class HessianRPCCallDecoder implements InputStreamConsumer, Constants
 	    result.setServer(true);
 	    result.setHasSessionFilter((Boolean) headers.get(HAS_SESSION_FILTER_HEADER_KEY));
 	    result.setSession(ServerSessionFilter.getSession(ctx));
+	    result.setHandler(InputStreamDecoder.getHandler(ctx));
 		}
 		catch (Exception ex)
 		{
