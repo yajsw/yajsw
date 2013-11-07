@@ -1,5 +1,12 @@
 projectHome = '../../..'
-sourceSets.main.java.srcDirs = ["$projectHome/src/app/main/java"]
+sourceSets.main.java.srcDirs = ["$projectHome/src/app/src/main/java"]
+
+//println '---------------------------'
+//println 'src dirs:'
+//println '---------------------------'
+//sourceSets.main.java.srcDirs.each { File file -> println file.absolutePath }
+//println '---------------------------'
+
 
 dependencies {
     compile project(':wrapper')

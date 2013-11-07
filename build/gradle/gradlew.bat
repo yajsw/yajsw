@@ -8,7 +8,8 @@
 @rem Set local scope for the variables with windows NT shell
 if "%OS%"=="Windows_NT" setlocal
 
-set JAVA_OPTS=%JAVA_OPTS% -Dhttp.proxyHost=srvproxy.init-ka.lan -Dhttp.proxyPort=8080
+# set proxy here if needed
+#set JAVA_OPTS=%JAVA_OPTS% -Dhttp.proxyHost=srvproxy -Dhttp.proxyPort=8080
 
 @rem Uncomment those lines to set JVM options. GRADLE_OPTS and JAVA_OPTS can be used together.
 @rem set GRADLE_OPTS=%GRADLE_OPTS% -Xmx512m
@@ -66,6 +67,8 @@ set GRADLE_OPTS=%JAVA_OPTS% %GRADLE_OPTS% -Dorg.gradle.wrapper.properties="%WRAP
 
 @rem Execute Gradle
 "%JAVA_EXE%" %GRADLE_OPTS% -classpath "%CLASSPATH%" %STARTER_MAIN_CLASS% %CMD_LINE_ARGS%
+
+pause
 
 :end
 @rem End local scope for the variables with windows NT shell

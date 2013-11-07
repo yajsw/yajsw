@@ -1,6 +1,6 @@
 projectHome = '../../..'
 
-sourceSets.main.java.srcDirs = ["$projectHome/src/ahessian/main/java"]
+sourceSets.main.java.srcDirs = ["$projectHome/src/ahessian/src/main/java"]
 
 // this project uses the ahessian sub-project
 dependencies {

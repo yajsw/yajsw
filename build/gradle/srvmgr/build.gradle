@@ -1,6 +1,6 @@
 projectHome = '../../..'
 
-sourceSets.main.java.srcDirs = ["$projectHome/src/srvmgr/main/java"]
+sourceSets.main.java.srcDirs = ["$projectHome/src/srvmgr/src/main/java"]
 
 dependencies {
     compile project(':wrapper')
