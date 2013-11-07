@@ -1,5 +1,7 @@
 package org.rzo.yajsw.wrapper;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -11,6 +13,9 @@ import org.rzo.yajsw.os.OperatingSystem;
 
 public class WrappedRuntimeProcess extends AbstractWrappedProcess
 {
+	
+	File		_runtimePidFile;
+
 
 	@Override
 	void configProcess()
@@ -51,6 +56,7 @@ public class WrappedRuntimeProcess extends AbstractWrappedProcess
 	@Override
 	void postStart()
 	{
+		saveRuntimePidFile();
 	}
 
 	@Override
@@ -58,6 +64,7 @@ public class WrappedRuntimeProcess extends AbstractWrappedProcess
 	{
 		_controller.stop(RuntimeController.STATE_USER_STOPPED, reason);
 		_osProcess.stop(timeout, 999);
+		removeRuntimePidFile();
 	}
 
 	public boolean reconnect(int pid)
@@ -133,6 +140,55 @@ public class WrappedRuntimeProcess extends AbstractWrappedProcess
 	{
 		return "Native-" + super.getType();
 	}
+	
+	void saveRuntimePidFile()
+	{
+		String file = _config.getString("wrapper.runtime.pidfile");
+		if (file != null)
+		{
+			try
+			{
+				_runtimePidFile = new File(file);
+				if (!_runtimePidFile.exists())
+					_runtimePidFile.createNewFile();
+				FileWriter out = new FileWriter(_runtimePidFile, false);
+				out.write("" + getAppPid());
+				out.flush();
+				out.close();
+				if (_debug)
+					getWrapperLogger().info("created jva.pid file " + _runtimePidFile.getAbsolutePath());
+			}
+			catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * Removes the java pid file.
+	 */
+	void removeRuntimePidFile()
+	{
+		if (_runtimePidFile != null)
+		{
+			try
+			{
+				_runtimePidFile.delete();
+
+				if (_debug)
+					getWrapperLogger().info("removed java.pid file " + _runtimePidFile.getAbsolutePath());
+				_runtimePidFile = null;
+			}
+			catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
 
 	public static void main(String[] args)
 	{

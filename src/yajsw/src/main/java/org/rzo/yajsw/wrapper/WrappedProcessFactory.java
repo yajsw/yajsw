@@ -14,7 +14,10 @@ public class WrappedProcessFactory
 	public static WrappedProcess createProcess(YajswConfiguration config)
 	{
 		if (config.getString("wrapper.image") != null)
-			return new WrappedRuntimeProcess();
+			if ("true".equals(config.getString("wrapper.image.javawrapper")) )
+				return new WrappedRuntimeJavaProcess();
+			else
+				return new WrappedRuntimeProcess();
 		else if (config.getString("wrapper.groovy") != null)
 			return new WrappedGroovyProcess();
 		return new WrappedJavaProcess();

@@ -200,6 +200,26 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 	JdkLogger2Factory _internalLoggerFactory = null;
 	
 	volatile int _minAppLogLines = MIN_PROCESS_LINES_TO_LOG;
+	
+	public Configuration getConfiguration()
+	{
+		if (_config == null)
+		{
+			Map utils = new HashMap();
+			utils.put("util", new Utils(this));
+			try
+			{
+				VFSUtils.init();
+			}
+			catch (FileSystemException e)
+			{
+				e.printStackTrace();
+			}
+
+			_config = new YajswConfigurationImpl(_localConfiguration, _useSystemProperties, utils);
+		}
+		return _config;
+	}
 
 	/**
 	 * Inits the.
@@ -208,19 +228,12 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 	{
 		if (_init)
 			return;
-		Map utils = new HashMap();
-		utils.put("util", new Utils(this));
-		try
-		{
-			VFSUtils.init();
-		}
-		catch (FileSystemException e)
-		{
-			e.printStackTrace();
-		}
-		_config = new YajswConfigurationImpl(_localConfiguration, _useSystemProperties, utils);
+		
+		getConfiguration();
+		
 		VFSUtils.setLogger(getInternalWrapperLogger());
 		getTmpPath();
+
 		getWrapperLogger().warning("YAJSW: "+YajswVersion.YAJSW_VERSION);
 		getWrapperLogger().warning("OS   : "+YajswVersion.OS_VERSION);
 		getWrapperLogger().warning("JVM  : "+YajswVersion.JAVA_VERSION);

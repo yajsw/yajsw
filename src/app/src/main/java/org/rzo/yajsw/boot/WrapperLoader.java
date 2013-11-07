@@ -13,7 +13,6 @@ import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
-import org.rzo.yajsw.Constants;
 import org.rzo.yajsw.app.WrapperJVMMain;
 
 public class WrapperLoader
@@ -40,7 +39,15 @@ public class WrapperLoader
 	 */
 	public static String getWrapperJar()
 	{
-		return getJarFile(Constants.class);
+		try
+		{
+			return getJarFile(WrapperLoader.class.getClassLoader().loadClass("org.rzo.yajsw.Constants"));
+		}
+		catch (ClassNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	public static String getWrapperAppJar()
