@@ -81,7 +81,7 @@ public class CyclicBufferFileInputStream extends BufferedInputStream
 			ByteBuffer			posBuf;
 			ByteBuffer			lockBuf;
 
-			synchronized void open()
+			synchronized void open() throws IOException
 			{
 				if (opened)
 					return;
@@ -111,8 +111,10 @@ public class CyclicBufferFileInputStream extends BufferedInputStream
 						}
 						catch (InterruptedException e)
 						{
-							e.printStackTrace();
-							Thread.currentThread().interrupt();
+							//e.printStackTrace();
+							// Thread.currentThread().interrupt();
+							// may cause endless loop
+							throw new IOException(e);
 						}
 				}
 
