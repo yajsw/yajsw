@@ -25,6 +25,8 @@ import org.jboss.netty.logging.InternalLogger;
 import org.rzo.yajsw.boot.WrapperLoader;
 import org.rzo.yajsw.os.JavaHome;
 
+import com.sun.jna.Platform;
+
 // TODO: Auto-generated Javadoc
 /**
  * The Class JavaHome.
@@ -111,14 +113,15 @@ public class WindowsJavaHome implements JavaHome
 			boolean preferJdk = _config.getBoolean("wrapper.java.command.preferJdk", false);
 			boolean preferJre = _config.getBoolean("wrapper.java.command.preferJre", true && !preferJdk);
 			boolean jdkOnly = _config.getBoolean("wrapper.java.command.jdkOnly", false);
+			String registryBase = Platform.is64Bit() && (!b64bit) ? "SOFTWARE\\Wow6432Node" : "SOFTWARE";
 			if (!jdkOnly && (jreOnly || preferJre))
 			{
 				java = findJavaInRegistry(new String[]
-				{ "SOFTWARE\\JavaSoft\\Java Runtime Environment", "SOFTWARE\\IBM\\Java2 Runtime Environment" }, minVersion, maxVersion, b64bit);
+				{ registryBase+"\\JavaSoft\\Java Runtime Environment", registryBase+"\\IBM\\Java2 Runtime Environment" }, minVersion, maxVersion, b64bit);
 			}
 			if (java == null && !jreOnly)
 				java = findJavaInRegistry(new String[]
-				{ "SOFTWARE\\JavaSoft\\Java Development Kit", "SOFTWARE\\IBM\\Java Development Kit" }, minVersion, maxVersion, b64bit);
+				{ registryBase+"\\JavaSoft\\Java Development Kit", registryBase+"\\IBM\\Java Development Kit" }, minVersion, maxVersion, b64bit);
 		}
 		else if (customProcName != null)
 		{
