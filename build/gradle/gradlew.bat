@@ -8,8 +8,8 @@
 @rem Set local scope for the variables with windows NT shell
 if "%OS%"=="Windows_NT" setlocal
 
-# set proxy here if needed
-#set JAVA_OPTS=%JAVA_OPTS% -Dhttp.proxyHost=srvproxy -Dhttp.proxyPort=8080
+@rem set proxy here if needed
+@rem set JAVA_OPTS=%JAVA_OPTS% -Dhttp.proxyHost=srvproxy -Dhttp.proxyPort=8080
 
 @rem Uncomment those lines to set JVM options. GRADLE_OPTS and JAVA_OPTS can be used together.
 @rem set GRADLE_OPTS=%GRADLE_OPTS% -Xmx512m
