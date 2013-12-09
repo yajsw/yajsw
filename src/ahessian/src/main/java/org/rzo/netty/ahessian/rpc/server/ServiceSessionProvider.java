@@ -30,19 +30,19 @@ public class ServiceSessionProvider
 
 	public static InputStreamDecoder getHandler()
 	{
-		System.out.println("hessianRPCServiceHandler get ");
+		//System.out.println("hessianRPCServiceHandler get ");
 		return hessianRPCServiceHandler.get();
 	}
 	
 	protected static void setHandler(InputStreamDecoder handler)
 	{
-		System.out.println("hessianRPCServiceHandler set "+handler);
+		//System.out.println("hessianRPCServiceHandler set "+handler);
 		hessianRPCServiceHandler.set(handler);
 	}
 	
 	protected static void removeHandler()
 	{
-		System.out.println("hessianRPCServiceHandler remove ");
+		//System.out.println("hessianRPCServiceHandler remove ");
 		if (hessianRPCServiceHandler.get() == null)
 			return;
 		hessianRPCServiceHandler.remove();
