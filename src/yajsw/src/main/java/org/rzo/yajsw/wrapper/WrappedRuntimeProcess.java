@@ -63,7 +63,7 @@ public class WrappedRuntimeProcess extends AbstractWrappedProcess
 	void stopController(int timeout, String reason)
 	{
 		_controller.stop(RuntimeController.STATE_USER_STOPPED, reason);
-		_osProcess.stop(timeout, 999);
+			_osProcess.stop(timeout, 999);
 		removeRuntimePidFile();
 	}
 

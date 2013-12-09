@@ -164,7 +164,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 
 	long						_startupTimeout		= 0;
 
-	String						shutdownScript		= null;
+	volatile String						shutdownScript		= null;
 
 	Properties					_properties;
 
@@ -1240,6 +1240,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 				{
 					System.out.println("wrapper manager received stop command");
 					_stopping = true;
+
 					if (session != null)
 						session.close();
 					// Thread.sleep(100);
@@ -1256,8 +1257,11 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 						{
 							// DO NOTHING
 						}
+					executeShutdownScript();
 					if (!_externalStop)
+					{
 						System.exit(_exitCode);
+					}
 				}
 				catch (Exception ex)
 				{
@@ -1642,10 +1646,21 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 	{
 		if (shutdownScript != null & !"".equals(shutdownScript))
 		{
+			if (_debug)
+				System.out.println("executing shutdown script "+shutdownScript);
 			Script script = ScriptFactory.createScript(shutdownScript, "wrapper.app.shutdown.script", null, new String[0], log, 0, _config
 					.getString("wrapper.script.encoding"), _config.getBoolean("wrapper.script.reload", false), _debug);
+			// make sure it is invoked only once
+			// stop may be invoke multiple times
+			shutdownScript = null;
 			if (script != null)
+			{
 				script.execute();
+				if (_debug)
+				System.out.println("terminated shutdown script ");
+			}
+			else
+				System.out.println("Error "+shutdownScript + "not initialized");
 		}
 
 	}

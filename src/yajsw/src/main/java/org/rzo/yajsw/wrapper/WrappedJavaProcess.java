@@ -874,6 +874,12 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 	{
 		JVMController controller = (JVMController) _controller;
 		controller.stop(JVMController.STATE_USER_STOP, reason);
+		String shutdownScript = _config.getString("wrapper.app.shutdown.script", null);
+		if (shutdownScript != null && !"".equals(shutdownScript))
+		{
+			getWrapperLogger().log(Level.FINEST, "waiting for shutdownScript to terminate process");
+			_osProcess.waitFor(timeout);
+		}
 	}
 
 	public String getType()
