@@ -212,13 +212,13 @@ public class WrappedService
 		
 		for (Entry<String, String> e : _config.getEnvLookupSet().entrySet())
 		{
-			result.add("\"-D" + e.getKey() + "=" + e.getValue()+"\"");
+			result.add(Utils.getDOption(e.getKey(), e.getValue()));
 		}
 		for (Iterator it = _config.getLookupSet().iterator(); it.hasNext();)
 		{
 			String key = (String) it.next();
 			if (!"wrapper.working.dir".equals(key))
-			result.add("\"-D" + key + "=" + _config.getString(key)+"\"");
+			result.add(Utils.getDOption(key, _config.getString(key)));
 		}
 		}
 
@@ -226,9 +226,9 @@ public class WrappedService
 		{
 			String key = (String) it.next();
 			if (key.equals("wrapper.config"))
-				result.add("-D" + key + "=" + _config.getCachedPath());
+				result.add(Utils.getDOption(key, _config.getCachedPath()));
 			else
-				result.add("-D" + key + "=" + _config.getString(key));
+				result.add(Utils.getDOption(key, _config.getString(key)));
 			if (key.startsWith("wrapper.additional."))
 			{
 				additionalCount++;
@@ -265,7 +265,7 @@ public class WrappedService
 			}
 			// TODO lookup is currently done only for first configuration
 			// add list to service parameters
-			result.add("-D" + "wrapperx.config" + "=" + confList);
+			result.add(Utils.getDOption("wrapperx.config", confList));
 		}
 
 		if (!xrsFound)
@@ -275,7 +275,7 @@ public class WrappedService
 		if (_config.getString("wrapper.stop.conf") != null)
 			try
 			{
-				result.add("-Dwrapper.stop.conf=" + new File(_config.getString("wrapper.stop.conf")).getCanonicalPath());
+				result.add(Utils.getDOption("wrapper.stop.conf", new File(_config.getString("wrapper.stop.conf")).getCanonicalPath()));
 			}
 			catch (IOException e)
 			{
@@ -284,7 +284,7 @@ public class WrappedService
 		if (_config.getString("wrapper.groovy") != null)
 			try
 			{
-				result.add("-Dwrapper.groovy=" + new File(_config.getString("wrapper.groovy")).getCanonicalPath());
+				result.add(Utils.getDOption("wrapper.groovy", new File(_config.getString("wrapper.groovy")).getCanonicalPath()));
 			}
 			catch (IOException e)
 			{
@@ -294,7 +294,7 @@ public class WrappedService
 			if (tmpDir == null)
 				tmpDir = System.getProperty("java.io.tmpdir");
 			File tmpFile = new File(tmpDir);
-			result.add("\"-Djna_tmpdir=" + tmpFile.getAbsolutePath()+"\"");
+			result.add(Utils.getDOption("jna_tmpdir", tmpFile.getAbsolutePath()));
 
 		return result;
 	}
@@ -471,7 +471,7 @@ public class WrappedService
 			if (f.exists() && f.isDirectory())
 				try
 				{
-					result.add("-Dwrapper.working.dir=" + f.getCanonicalPath());
+					result.add(Utils.getDOption("wrapper.working.dir", f.getCanonicalPath()));
 				}
 				catch (IOException e)
 				{

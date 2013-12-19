@@ -8,7 +8,7 @@ import org.rzo.yajsw.os.SystemInformation;
 
 public class PosixSystemInformation implements SystemInformation
 {
-	Utils	_utils	= new Utils();
+	PosixUtils	_utils	= new PosixUtils();
 	Logger	_logger;
 
 	public void setLogger(Logger logger)

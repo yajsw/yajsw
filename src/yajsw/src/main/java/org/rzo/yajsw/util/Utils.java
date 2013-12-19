@@ -61,6 +61,18 @@ public class Utils
 				System.out.println("!! WARNING !! Windows JDK7 should set -Djava.net.preferIPv4Stack=true (see java bug 7179799 )");
 		}
 	}
+	
+	public static String getDOption(String key, String value)
+	{
+		value = value.replace("\"", "\\\"");
+		value = value.replace("\\", "\\\\");
+
+		if (value != null && !value.contains(" "))
+			return "-D" + key + "=" + value;
+		else
+			return "-D" + key + "=\"" + value + "\"";
+	}
+
 
 
 

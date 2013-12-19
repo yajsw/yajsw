@@ -19,6 +19,7 @@ import org.rzo.yajsw.boot.WrapperLoader;
 import org.rzo.yajsw.config.YajswConfigurationImpl;
 import org.rzo.yajsw.os.OperatingSystem;
 import org.rzo.yajsw.os.Process;
+import org.rzo.yajsw.util.Utils;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -56,13 +57,6 @@ public class WrapperTrayIconFactory
 		return result;
 	}
 	
-	static private String getDOption(String key, String value)
-	{
-		if (value != null && !value.contains(" "))
-			return "-D"+key+"="+value;
-		else
-			return "-D"+key+"=\""+value+"\"";
-	}
 
 
 	/**
@@ -87,14 +81,14 @@ public class WrapperTrayIconFactory
 			cmd.add(getJava());
 			for (Entry<String, String> e : config.getEnvLookupSet().entrySet())
 			{
-				String opt = getDOption(e.getKey(), e.getValue());
+				String opt = Utils.getDOption(e.getKey(), e.getValue());
 				if (!cmd.contains(opt))
 					cmd.add(opt);
 			}
 			String tmpDir = config.getString("wrapper.tmp.path", System.getProperty("jna_tmpdir", null));
 			if (tmpDir != null)
 			{
-				String opt = getDOption("jna_tmpdir", tmpDir);
+				String opt = Utils.getDOption("jna_tmpdir", tmpDir);
 				if (!cmd.contains(opt))
 					cmd.add(opt);
 			}
@@ -103,7 +97,7 @@ public class WrapperTrayIconFactory
 				tmpDir = config.getString("wrapper.tmp.path", System.getProperty("java.io.tmpdir", null));
 				if (tmpDir != null)
 				{
-					String opt = getDOption("jna_tmpdir", tmpDir);
+					String opt = Utils.getDOption("jna_tmpdir", tmpDir);
 					if (!cmd.contains(opt))
 						cmd.add(opt);
 				}

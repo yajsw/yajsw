@@ -14,6 +14,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.vfs2.FileObject;
+import org.rzo.yajsw.util.Utils;
 import org.rzo.yajsw.util.VFSUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -140,7 +141,7 @@ public class JnlpSupport
 		{
 			String key = args.item(i).getAttributes().getNamedItem("name").getTextContent();
 			String value = args.item(i).getAttributes().getNamedItem("value").getTextContent();
-			result.add("-D" + key + "=" + value);
+			result.add(Utils.getDOption(key, value));
 		}
 		return result;
 	}

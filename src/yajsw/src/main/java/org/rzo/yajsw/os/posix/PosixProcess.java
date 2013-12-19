@@ -46,7 +46,7 @@ public class PosixProcess extends AbstractProcess
 	protected static final Executor	executor		= Executors.newCachedThreadPool(new DaemonThreadFactory("posix.process.terminate"));
 	protected boolean				lock			= true;
 	volatile protected boolean		_terminated		= false;
-	protected Utils					_utils			= new Utils();
+	protected PosixUtils					_utils			= new PosixUtils();
 	boolean							_stopWaiter		= false;
 	String[]						_env			= null;
 	int stdout = -1;// should not be called in all sub classes // getStdOutNo();

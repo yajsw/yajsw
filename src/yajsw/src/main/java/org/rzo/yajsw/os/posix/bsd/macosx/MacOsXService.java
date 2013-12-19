@@ -16,7 +16,7 @@ import org.rzo.yajsw.boot.WrapperLoader;
 import org.rzo.yajsw.os.AbstractService;
 import org.rzo.yajsw.os.JavaHome;
 import org.rzo.yajsw.os.OperatingSystem;
-import org.rzo.yajsw.os.posix.Utils;
+import org.rzo.yajsw.os.posix.PosixUtils;
 import org.rzo.yajsw.os.posix.VelocityLog;
 
 public class MacOsXService extends AbstractService implements Constants
@@ -30,7 +30,7 @@ public class MacOsXService extends AbstractService implements Constants
 	String	_execCmd;
 
 	String	_confFile;
-	Utils	_utils	= new Utils();
+	PosixUtils	_utils	= new PosixUtils();
 
 	public void init()
 	{

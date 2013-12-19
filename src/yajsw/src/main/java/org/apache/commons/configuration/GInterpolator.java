@@ -88,7 +88,12 @@ public class GInterpolator implements Interpolator
 		{
 			result = (String)_binding.getVariable(value);
 			if (result != null)
-				_fromBinding.put(value, result);
+			{
+				String result1 = result;
+				while (result1 != null && result1.contains("${"))
+					result1 = (String) interpolate(result1);
+				_fromBinding.put(value, result1);
+			}
 		}
 		catch (Exception ex)
 		{

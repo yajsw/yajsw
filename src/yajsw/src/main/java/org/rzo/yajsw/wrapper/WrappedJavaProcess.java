@@ -38,6 +38,7 @@ import org.rzo.yajsw.controller.AbstractController.ControllerListener;
 import org.rzo.yajsw.controller.jvm.JVMController;
 import org.rzo.yajsw.os.JavaHome;
 import org.rzo.yajsw.os.OperatingSystem;
+import org.rzo.yajsw.util.Utils;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -144,16 +145,6 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		return _config.getString("wrapper.java.mainclass", "org.rzo.yajsw.app.WrapperJVMMain");
 	}
 
-	private String getDOption(String key, String value)
-	{
-		value = value.replace("\"", "\\\"");
-		value = value.replace("\\", "\\\\");
-
-		if (value != null && !value.contains(" "))
-			return "-D" + key + "=" + value;
-		else
-			return "-D" + key + "=\"" + value + "\"";
-	}
 
 	/**
 	 * Wrapper options.
@@ -165,12 +156,12 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		ArrayList result = new ArrayList();
 		JVMController controller = (JVMController) _controller;
 
-		result.add(getDOption("wrapper.port", "" + controller.getPort()));
-		result.add(getDOption("wrapper.key", controller.getKey()));
+		result.add(Utils.getDOption("wrapper.port", "" + controller.getPort()));
+		result.add(Utils.getDOption("wrapper.key", controller.getKey()));
 		if (_teeName != null)
-			result.add(getDOption("wrapper.teeName", _teeName));
-		result.add(getDOption("wrapper.tmp.path", _tmpPath));
-		result.add(getDOption("jna_tmpdir", _tmpPath));
+			result.add(Utils.getDOption("wrapper.teeName", _teeName));
+		result.add(Utils.getDOption("wrapper.tmp.path", _tmpPath));
+		result.add(Utils.getDOption("jna_tmpdir", _tmpPath));
 
 		for (Iterator it = _config.getSystemConfiguration().getKeys("wrapper"); it.hasNext();)
 		{
@@ -179,11 +170,11 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 				continue;
 			if ("wrapper.config".equals(key))
 			{
-				result.add(checkValue(getDOption(key, _config.getCachedPath())));
+				result.add(checkValue(Utils.getDOption(key, _config.getCachedPath())));
 			}
 			else
 			{
-				String opt = getDOption(key, _config.getProperty(key).toString());
+				String opt = Utils.getDOption(key, _config.getProperty(key).toString());
 				if (!result.contains(opt))
 					result.add(checkValue(opt));
 			}
@@ -193,7 +184,7 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		if ((gcPattern != null) && (gcPattern.length() > 0))
 		{
 			gcPattern = gcPattern.replaceAll(",", "\\\\,");
-			result.add(getDOption("wrapper.java.monitor.gc", gcPattern));
+			result.add(Utils.getDOption("wrapper.java.monitor.gc", gcPattern));
 		}
 
 		String preScript = _config.getString("wrapper.app.pre.script", null);
@@ -206,7 +197,7 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 				else
 				{
 					preScript = checkValue(f.getCanonicalPath());
-					result.add(getDOption("wrapper.app.pre.script", preScript));
+					result.add(Utils.getDOption("wrapper.app.pre.script", preScript));
 				}
 			}
 			catch (Exception ex)
@@ -261,7 +252,7 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 				if (it.hasNext())
 					sb.append(PATHSEP);
 			}
-			result.add(getDOption("java.library.path", sb.toString()));
+			result.add(Utils.getDOption("java.library.path", sb.toString()));
 		}
 
 		if (_config.getBoolean("wrapper.service", false) && !hasXrs && _config.getBoolean("wrapper.ntservice.reduce_signals", true))
@@ -338,14 +329,14 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		}
 		String preMainScript = _config.getString("wrapper.app.pre_main.script", null);
 		if (preMainScript != null && preMainScript.length() > 0)
-			result.add("-Dwrapper.app.pre_main.script=" + preMainScript);
+			result.add(Utils.getDOption("wrapper.app.pre_main.script",preMainScript));
 		// if we are running as service "remember" the system properties and env
 		// vars we have used
 		if (_config.getBoolean("wrapper.service", false) || _config.getBoolean("wrapper.console.use_interpolated", true))
 		{
 			for (Entry<String, String> e : _config.getEnvLookupSet().entrySet())
 			{
-				String opt = getDOption(e.getKey(), e.getValue());
+				String opt = Utils.getDOption(e.getKey(), e.getValue());
 				if (opt != null && !result.contains(opt))
 					result.add(opt);
 			}

@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 
 import org.rzo.yajsw.util.DaemonThreadFactory;
 
-public class Utils
+public class PosixUtils
 {
 	protected static final Executor	executor	= Executors.newCachedThreadPool(new DaemonThreadFactory("util.osCommand"));
 	protected Logger				_logger;
@@ -46,7 +46,7 @@ public class Utils
 			catch (Exception e)
 			{
 				if (_logger != null)
-					_logger.throwing(Utils.class.getName(), "readFile", e);
+					_logger.throwing(PosixUtils.class.getName(), "readFile", e);
 			}
 		else
 		{
@@ -115,7 +115,7 @@ public class Utils
 
 	public static void main(String[] args)
 	{
-		System.out.println(new Utils().osCommand("cmd /C dir", 500));
+		System.out.println(new PosixUtils().osCommand("cmd /C dir", 500));
 	}
 
 }

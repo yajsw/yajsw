@@ -21,6 +21,7 @@ import org.rzo.yajsw.os.AbstractService;
 import org.rzo.yajsw.os.JavaHome;
 import org.rzo.yajsw.os.OperatingSystem;
 import org.rzo.yajsw.os.posix.PosixProcess.CLibrary;
+import org.rzo.yajsw.util.Utils;
 
 public class PosixService extends AbstractService implements Constants
 {
@@ -40,7 +41,7 @@ public class PosixService extends AbstractService implements Constants
 
 	List<String>		_ksLinks	= new ArrayList<String>();
 	UpdateRcParser		_updateRcParser;
-	Utils				_utils		= new Utils();
+	PosixUtils				_utils		= new PosixUtils();
 
 	@Override
 	public void setLogger(Logger logger)
@@ -49,14 +50,6 @@ public class PosixService extends AbstractService implements Constants
 		_utils.setLog(logger);
 	}
 	
-	private String getDOption(String key, String value)
-	{
-		if (value != null && !value.contains(" "))
-			return "-D"+key+"="+value;
-		else
-			return "-D"+key+"=\""+value+"\"";
-	}
-
 
 	public void init()
 	{
@@ -252,7 +245,7 @@ public class PosixService extends AbstractService implements Constants
 		String opt = null;
 		if (tmpDir != null)
 		{
-			opt = getDOption("jna_tmpdir", tmpDir);
+			opt = Utils.getDOption("jna_tmpdir", tmpDir);
 			result.add(opt);
 		}
 		YajswConfigurationImpl config = (YajswConfigurationImpl) _config;
@@ -271,7 +264,7 @@ public class PosixService extends AbstractService implements Constants
 		
 		for (Entry<String, String> e : config.getEnvLookupSet().entrySet())
 		{
-			opt = getDOption(e.getKey(),e.getValue());
+			opt = Utils.getDOption(e.getKey(),e.getValue());
 			if (!result.contains(opt))
 			   result.add(opt);
 		}
@@ -287,7 +280,7 @@ public class PosixService extends AbstractService implements Constants
 		
 		_startCmd = new String[10+result.size()+configs.size()];
 		_startCmd[0] = java;
-		_startCmd[1] = "-Dwrapper.pidfile=" + _wrapperPidFile;
+		_startCmd[1] = Utils.getDOption("wrapper.pidfile", _wrapperPidFile);
 		_startCmd[2] = "-Dwrapper.service=true";
 		_startCmd[3] = "-Dwrapper.visible=false";
 		for (int i=0; i<result.size(); i++)

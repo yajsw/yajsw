@@ -9,6 +9,7 @@ import org.rzo.yajsw.config.YajswConfigurationImpl;
 import org.rzo.yajsw.os.JavaHome;
 import org.rzo.yajsw.os.OperatingSystem;
 import org.rzo.yajsw.os.Process;
+import org.rzo.yajsw.util.Utils;
 
 
 public class InstallAction
@@ -74,7 +75,7 @@ public class InstallAction
 			for (Object obj : System.getProperties().keySet())
 			{
 				String key = (String)obj;
-				result.add("-D"+key+"="+System.getProperty(key));
+				result.add(Utils.getDOption(key, System.getProperty(key)));
 			}
 			// set main class
 			result.add(InstallerBooter.class.getName());
