@@ -112,6 +112,18 @@ public class WrappedService
 		for (Iterator it = dependeciesSet.iterator(); it.hasNext(); i++)
 			dependencies[i] = (String) it.next();
 
+		dependeciesSet = new HashSet();
+		for (Iterator it = _config.getKeys("wrapper.ntservice.stop_dependency"); it.hasNext();)
+		{
+			String value = _config.getString((String) it.next());
+			if (value != null && value.length() > 0)
+				dependeciesSet.add(value);
+		}
+		String[] stopDependencies = new String[dependeciesSet.size()];
+		i = 0;
+		for (Iterator it = dependeciesSet.iterator(); it.hasNext(); i++)
+			stopDependencies[i] = (String) it.next();
+
 		String account = _config.getString("wrapper.ntservice.account");
 		String password = _config.getString("wrapper.ntservice.password");
 		String startType = _config.getString("wrapper.ntservice.starttype", Constants.DEFAULT_SERVICE_START_TYPE);
@@ -120,6 +132,7 @@ public class WrappedService
 		_osService.setAccount(account);
 		_osService.setCommand(command);
 		_osService.setDependencies(dependencies);
+		_osService.setStopDependencies(dependencies);
 		_osService.setDescription(description);
 		_osService.setDisplayName(displayName);
 		_osService.setPassword(password);

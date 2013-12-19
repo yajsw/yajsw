@@ -18,6 +18,7 @@ abstract public class AbstractService implements Service
 	protected boolean		_interactive;
 	protected Logger		_logger;
 	protected Object		_failureActions = null;
+	protected String[]		_stopDependencies;
 
 	public String getDisplayName()
 	{
@@ -177,6 +178,16 @@ abstract public class AbstractService implements Service
 	public Object getFailureActions()
 	{
 		return _failureActions;
+	}
+
+	public String[] getStopDependencies()
+	{
+		return _stopDependencies;
+	}
+
+	public void setStopDependencies(String[] stopDependencies)
+	{
+		_stopDependencies = stopDependencies;
 	}
 
 

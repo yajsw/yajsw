@@ -46,11 +46,14 @@ public class UpdateRcParser
 	private void addStopLink(String level, int priority)
 	{
 		_stopLinks.add(_runLevelDir.replaceFirst("X", "" + level) + "/K" + priority + _serviceName);
+        _stopLevels += level + " ";
 	}
 
 	private void addStopLink(int level, int priority)
 	{
 		_stopLinks.add(_runLevelDir.replaceFirst("X", "" + level) + "/K" + priority + _serviceName);
+        _stopLevels += level + " ";
+
 	}
 
 	private void setDefaultStartLinks(int priority)
@@ -64,11 +67,13 @@ public class UpdateRcParser
 	private void addStartLink(String level, int priority)
 	{
 		_startLinks.add(_runLevelDir.replaceFirst("X", "" + level) + "/S" + priority + _serviceName);
+        _startLevels += level + " ";
 	}
 
 	private void addStartLink(int level, int priority)
 	{
 		_startLinks.add(_runLevelDir.replaceFirst("X", "" + level) + "/S" + priority + _serviceName);
+        _startLevels += level + " ";
 	}
 
 	private void setLinks(String property)
@@ -113,7 +118,6 @@ public class UpdateRcParser
                 level = "" + Integer.parseInt( txt );
 
               addStartLink( level, priority );
-              _startLevels += level + " ";
             }
           }
           else if ( txt.trim().equals( "stop" ) )
@@ -130,7 +134,6 @@ public class UpdateRcParser
                 level = "" + Integer.parseInt( txt );
 
               addStopLink( level, priority );
-              _stopLevels += level + " ";
 
 						}
 					}

@@ -361,6 +361,10 @@ public class PosixService extends AbstractService implements Constants
 			context.put("w_conf_file", _confFile);
 			context.put("w_app_pid_file", _appPidFile);
 			context.put("w_wrapper_pid_file", _wrapperPidFile);
+			context.put("w_start_levels", _updateRcParser.getStartLevels());
+			context.put("w_stop_levels", _updateRcParser.getStopLevels());
+			context.put("start_dependencies", getStartDependencies());
+			context.put("stop_dependencies", getInternalStopDependencies());
 			FileWriter writer = new FileWriter(_daemonScript);
 
 			t.merge(context, writer);
@@ -418,6 +422,28 @@ public class PosixService extends AbstractService implements Constants
 		}
 		return true;
 	}
+
+	private String getInternalStopDependencies()
+	{
+		String result = "";
+		String[] dependencies = super.getStopDependencies();
+		if (dependencies != null)
+		for (String dep : dependencies)
+			result = result + dep + " ";
+		return result;
+	}
+
+
+	private String getStartDependencies()
+	{
+		String result = "";
+		String[] dependencies = super.getDependencies();
+		if (dependencies != null)
+		for (String dep : dependencies)
+			result = result + dep + " ";
+		return result;
+	}
+
 
 	private String toStrCommand(String[] cmd)
 	{

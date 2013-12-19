@@ -65,6 +65,10 @@ public interface Service
 
 	public void setDependencies(String[] dependencies);
 
+	public String[] getStopDependencies();
+
+	public void setStopDependencies(String[] dependencies);
+
 	public String getAccount();
 
 	public void setAccount(String account);
