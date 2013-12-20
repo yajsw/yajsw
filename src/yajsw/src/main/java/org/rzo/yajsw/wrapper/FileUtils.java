@@ -25,6 +25,8 @@ import org.apache.commons.configuration.ConfigurationConverter;
 import org.apache.commons.configuration.EnvironmentConfiguration;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 
+import com.sun.jna.Platform;
+
 // TODO: Auto-generated Javadoc
 /**
  * The Class FileUtils.
@@ -81,6 +83,15 @@ public class FileUtils
 		else
 			sh = s;
 
+		if (!Platform.isWindows() && pattern.startsWith("/"))
+		{
+			if (sh[0].equals("."))
+				sh[1] = "/"+sh[1];
+			else
+				sh[0] = "/"+sh[0];
+				
+		}
+		
 		Collection paths = new HashSet();
 		paths.add(sh[0]);
 		for (int i = 1; i < sh.length; i++)
