@@ -192,6 +192,7 @@ public class TrayIconMain
 				name = _config.getString("wrapper.ntservice.name");
 			if (name == null)
 				name = "yajsw.noname";
+			name = ObjectName.quote(name);
 			oName = new ObjectName("org.rzo.yajsw", "name", name);
 			_trayIcon = (WrapperTrayIconImpl) WrapperTrayIconFactory.createTrayIcon(getName(_config), _config.getString("wrapper.tray.icon"), _config);
 			reconnect();

@@ -691,6 +691,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 					name = _config.getString("wrapper.ntservice.name");
 				if (name == null)
 					name = "yajsw.noname";
+				name = ObjectName.quote(name);
 				ObjectName oName = new ObjectName("org.rzo.yajsw", "name", name);
 				_mbeanServer.registerMBean(this, oName);
 			}
