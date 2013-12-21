@@ -13,9 +13,8 @@ import org.rzo.yajsw.os.OperatingSystem;
 
 public class WrappedRuntimeProcess extends AbstractWrappedProcess
 {
-	
-	File		_runtimePidFile;
 
+	File _runtimePidFile;
 
 	@Override
 	void configProcess()
@@ -45,7 +44,11 @@ public class WrappedRuntimeProcess extends AbstractWrappedProcess
 		for (int i = 0; i < arrCmd.length; i++)
 			arrCmd[i] = (String) command.get(i);
 
-		_osProcess.setCommand(arrCmd);
+		if (arrCmd.length == 1)
+			_osProcess.setCommand(arrCmd[0]);
+		else
+			_osProcess.setCommand(arrCmd);
+		
 		// _osProcess.setPipeStreams(true, false);
 		// set this to false at your own risk.
 		boolean pipeStreams = _config.getBoolean("wrapper.console.pipestreams",
@@ -63,7 +66,7 @@ public class WrappedRuntimeProcess extends AbstractWrappedProcess
 	void stopController(int timeout, String reason)
 	{
 		_controller.stop(RuntimeController.STATE_USER_STOPPED, reason);
-			_osProcess.stop(timeout, 999);
+		_osProcess.stop(timeout, 999);
 		removeRuntimePidFile();
 	}
 
@@ -105,7 +108,8 @@ public class WrappedRuntimeProcess extends AbstractWrappedProcess
 	{
 		public void fire()
 		{
-			if (_state == STATE_RESTART_STOP || _state == STATE_RESTART || _state == STATE_RESTART_WAIT)
+			if (_state == STATE_RESTART_STOP || _state == STATE_RESTART
+					|| _state == STATE_RESTART_WAIT)
 				return;
 			getWrapperLogger().info("listener stopped");
 			if (_osProcess.isRunning())
@@ -140,7 +144,7 @@ public class WrappedRuntimeProcess extends AbstractWrappedProcess
 	{
 		return "Native-" + super.getType();
 	}
-	
+
 	void saveRuntimePidFile()
 	{
 		String file = _config.getString("wrapper.runtime.pidfile");
@@ -156,7 +160,9 @@ public class WrappedRuntimeProcess extends AbstractWrappedProcess
 				out.flush();
 				out.close();
 				if (_debug)
-					getWrapperLogger().info("created jva.pid file " + _runtimePidFile.getAbsolutePath());
+					getWrapperLogger().info(
+							"created jva.pid file "
+									+ _runtimePidFile.getAbsolutePath());
 			}
 			catch (Exception e)
 			{
@@ -178,7 +184,9 @@ public class WrappedRuntimeProcess extends AbstractWrappedProcess
 				_runtimePidFile.delete();
 
 				if (_debug)
-					getWrapperLogger().info("removed java.pid file " + _runtimePidFile.getAbsolutePath());
+					getWrapperLogger().info(
+							"removed java.pid file "
+									+ _runtimePidFile.getAbsolutePath());
 				_runtimePidFile = null;
 			}
 			catch (Exception e)
@@ -188,7 +196,6 @@ public class WrappedRuntimeProcess extends AbstractWrappedProcess
 			}
 		}
 	}
-
 
 	public static void main(String[] args)
 	{

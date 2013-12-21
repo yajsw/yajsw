@@ -10,18 +10,13 @@ public class WrappedRuntimeJavaProcess extends WrappedJavaProcess
 	public void init()
 	{
 		super.init();
-		_config.getSystemConfiguration().setProperty("wrapper.java.app.mainclass", "org.rzo.yajsw.boot.RuntimeJavaMainBooter");
-		_config.getSystemConfiguration().setProperty("wrapper.java.classpath.x1", WrapperLoader.getWrapperJar());
-		_config.getSystemConfiguration().setProperty("wrapper.java.classpath.x2", WrapperLoader.getWrapperAppJar());
-		//_config.getSystemConfiguration().setProperty("wrapper.app.parameter.0", _config.getString("wrapper.image"));
-		/*
-		Iterator<String> keys = _config.getKeys("wrapper.app.parameter");
-		while (keys.hasNext())
-		{
-			String key = keys.next();
-			_config.getSystemConfiguration().setProperty(key, _config.getString(key));			
-		}
-		*/
+		_localConfiguration.setProperty("wrapper.java.app.mainclass", "org.rzo.yajsw.boot.RuntimeJavaMainBooter");
+		_localConfiguration.setProperty("wrapper.java.classpath.x1", WrapperLoader.getWrapperJar());
+		_localConfiguration.setProperty("wrapper.java.classpath.x2", WrapperLoader.getWrapperAppJar());
+		if (_debug)
+			_localConfiguration.setProperty("wrapper.java.additional.x1", "-Dwrapper.debug=true");
+		if (_config.getBoolean("wrapper.runtime.java.default.shutdown", false))
+			_localConfiguration.setProperty("wrapper.java.additional.x2", "-Dwrapper.runtime.java.default.shutdown=true");			
 	}
 
 }

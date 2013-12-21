@@ -14,6 +14,7 @@ import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.MapConfiguration;
 import org.apache.commons.vfs2.FileSystemException;
+import org.rzo.yajsw.Constants;
 import org.rzo.yajsw.config.YajswConfiguration;
 import org.rzo.yajsw.config.YajswConfigurationImpl;
 import org.rzo.yajsw.os.OperatingSystem;
@@ -28,118 +29,11 @@ import org.rzo.yajsw.os.Process;
 public class RuntimeJavaMain
 {
 	static boolean _stop = false;
+	static boolean _debug = false;
+
 	public static void main(String[] args)
 	{
-		/*
-		try
-		{
-			final Process p = Runtime.getRuntime().exec(args);
-			waitFor(p);
-			Runtime.getRuntime().addShutdownHook(new Thread(new Runnable()
-			{
-				public void run()
-				{
-					if (_stop)
-						return;
-					p.destroy();
-					_stop = true;
-					System.exit(p.exitValue());
-				}
-			}));
-			startInGobbler(p.getErrorStream());
-			startInGobbler(p.getInputStream());
-			startOutGobbler(p.getOutputStream());
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-	}
-
-	private static void waitFor(final Process p)
-	{
-		new Thread(new Runnable()
-		{
-			
-			public void run()
-			{
-				try
-				{
-					p.waitFor();
-					_stop = true;
-				}
-				catch (InterruptedException e)
-				{
-					e.printStackTrace();
-				}
-				try
-				{
-				System.exit(p.exitValue());
-				}
-				catch (Exception ex)
-				{
-					ex.printStackTrace();
-				}
-			}
-		}).start();
-	}
-
-	private static void startOutGobbler(final OutputStream out)
-	{
-		new Thread(new Runnable()
-		{
-
-			public void run()
-			{
-				try
-				{
-					byte[] buffer = new byte[1024];
-					for (int s = System.in.read(buffer); s != -1 && !_stop; s = System.in
-							.read(buffer))
-					{
-						
-						if (s == 0)
-							Thread.sleep(100);
-						else
-							out.write(buffer, 0, s);
-					}
-				}
-				catch (Exception ex)
-				{
-					System.err.println(ex.getMessage());
-				}
-
-			}
-		}).start();
-	}
-
-	private static void startInGobbler(final InputStream in)
-	{
-		new Thread(new Runnable()
-		{
-
-			public void run()
-			{
-				try
-				{
-					byte[] buffer = new byte[1024];
-					for (int s = in.read(buffer); s != -1 && !_stop; s = in.read(buffer))
-					{
-						
-						if (s == 0)
-							Thread.sleep(100);
-						else
-							System.out.write(buffer, 0, s);
-					}
-				}
-				catch (Exception ex)
-				{
-					System.err.println(ex.getMessage());
-				}
-
-			}
-		}).start();
-		*/
+		_debug = "true".equals(System.getProperty("wrapper.debug", "false"));
 		final WrappedRuntimeProcess p = new WrappedRuntimeProcess();
 		Configuration conf = p.getConfiguration();
 		clearKeys(conf, "wrapper.filter");
@@ -152,54 +46,63 @@ public class RuntimeJavaMain
 		conf.setProperty("wrapper.control", "APPLICATION");
 		conf.setProperty("wrapper.console.loglevel", "INFO");
 		conf.setProperty("wrapper.logfile.loglevel", "NONE");
-		//conf.setProperty("wrapper.on_exit.default", "SHUTDOWN");
+		if ("true".equals(System.getProperty(
+				"wrapper.runtime.java.default.shutdown", "false")))
+			conf.setProperty("wrapper.on_exit.default", "SHUTDOWN");
 		conf.setProperty("wrapper.console.pipestreams", true);
-		
-		System.out.println(""+conf.getBoolean("wrapper.tray", false));
-		
+
+		// System.out.println(""+conf.getBoolean("wrapper.tray", false));
+
 		stopIfRunning(conf);
-		
-		
+
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable()
 		{
 			public void run()
 			{
+				if (_debug)
+					System.err
+							.println("runtime process wrapper is shutting down, stopping runtime process");
 				p.stop();
 			}
 		}));
-		
-		p.addStateChangeListener(WrappedProcess.STATE_IDLE, new StateChangeListener()
-		{
-			
-			public void stateChange(int newState, int oldState)
-			{
-				p.shutdown();
-				System.exit(p.getExitCode());
-			}
-		});
-		
+
+		p.addStateChangeListener(WrappedProcess.STATE_IDLE,
+				new StateChangeListener()
+				{
+
+					public void stateChange(int newState, int oldState)
+					{
+						if (_debug)
+							System.err
+									.println("wrapped runtime process stopped with exit code "
+											+ p.getExitCode());
+						p.shutdown();
+						System.exit(p.getExitCode());
+					}
+				});
+
 		p.start();
-		
+
 	}
-	
+
 	private static void stopIfRunning(Configuration conf)
 	{
+		int pid = -1;
 		String file = conf.getString("wrapper.runtime.pidfile");
 		if (file != null)
 		{
 			File f = new File(file);
 			BufferedReader b = null;
-			int pid = -1;
 			if (f.exists())
-			try
-			{
-				b = new BufferedReader(new FileReader(f));
-				pid = Integer.parseInt(b.readLine());
-			}
-			catch (Exception ex)
-			{
-				ex.printStackTrace();
-			}
+				try
+				{
+					b = new BufferedReader(new FileReader(f));
+					pid = Integer.parseInt(b.readLine());
+				}
+				catch (Exception ex)
+				{
+					ex.printStackTrace();
+				}
 			if (b != null)
 				try
 				{
@@ -211,18 +114,27 @@ public class RuntimeJavaMain
 				}
 			if (pid != -1)
 			{
-				stopProcess(pid);
+				int shutdownWaitTime = conf.getInt("wrapper.shutdown.timeout",
+						Constants.DEFAULT_SHUTDOWN_TIMEOUT) * 1000;
+				stopProcess(shutdownWaitTime, pid);
 			}
 		}
 
 	}
-	private static void stopProcess(int pid)
+
+	private static void stopProcess(int timeout, int pid)
 	{
 		try
 		{
-		Process p = OperatingSystem.instance().processManagerInstance().getProcess(pid);
-		if (p != null)
-			p.kill(999);
+			Process p = OperatingSystem.instance().processManagerInstance()
+					.getProcess(pid);
+			if (p != null)
+			{
+				if (_debug)
+					System.out.println("stopping process with pid/timeout "
+							+ pid + " " + timeout);
+				p.stop(timeout, 999);
+			}
 		}
 		catch (Exception ex)
 		{
@@ -238,5 +150,5 @@ public class RuntimeJavaMain
 		while (keys.hasNext())
 			conf.clearProperty(keys.next());
 	}
-	
+
 }
