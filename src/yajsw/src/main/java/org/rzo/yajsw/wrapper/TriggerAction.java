@@ -13,4 +13,5 @@ public interface TriggerAction
 	 *            the line
 	 */
 	public Object execute(String line);
+	public String getId();
 }

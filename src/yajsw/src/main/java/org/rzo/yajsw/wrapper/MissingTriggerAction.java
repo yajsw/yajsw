@@ -12,12 +12,14 @@ class MissingTriggerAction implements TriggerAction
 	private int				_count;
 	private TriggerAction[]	_actions;
 	Executor				_executor;
+	String _id;
 
-	MissingTriggerAction(Executor executor, long period, int count, TriggerAction[] actions, final boolean autoStop, final Logger logger)
+	MissingTriggerAction(String id, Executor executor, long period, int count, TriggerAction[] actions, final boolean autoStop, final Logger logger)
 	{
 		_count = count;
 		_executor = executor;
 		_actions = actions;
+		_id = id;
 		_cycler = new Cycler(period, period, executor, new Runnable()
 		{
 			public void run()
@@ -63,6 +65,11 @@ class MissingTriggerAction implements TriggerAction
 	{
 		_counter++;
 		return null;
+	}
+
+	public String getId()
+	{
+		return _id;
 	}
 
 }

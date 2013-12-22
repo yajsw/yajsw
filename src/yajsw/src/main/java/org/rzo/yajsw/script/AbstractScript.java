@@ -143,5 +143,10 @@ public abstract class AbstractScript implements Script
 	{
 		_timeout = timeout;
 	}
+	
+	public String getId()
+	{
+		return _id;
+	}
 
 }

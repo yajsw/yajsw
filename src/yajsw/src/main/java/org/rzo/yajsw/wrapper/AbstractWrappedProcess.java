@@ -1001,6 +1001,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 			// otherwise resources will be released by gc -> finalize
 			_controller.reset();
 			_controller.setDebug(isDebug());
+			_controller.setDebugComm(isDebugComm());
 			_controller.setLogger(getWrapperLogger());
 			configController();
 			if (!_controller.start())
@@ -1080,6 +1081,11 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 		// win 64 test
 		// WindowsXPProcess.getProcess(getPid());
 
+	}
+
+	private boolean isDebugComm()
+	{
+		return _config.getBoolean("wrapper.debug.comm", false);
 	}
 
 	protected void reloadConfiguration()
@@ -1592,11 +1598,11 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 				getWrapperLogger().log(Level.SEVERE, "check parameters for " + tKey, ex);
 			}
 			String tName = tKey.substring("wrapper.filter.missing.trigger.".length());
-			setTriggerDebug(tName, tValue);
+			setTriggerDebug(tName);
 			boolean autoStop = _config.getBoolean("wrapper.filter.missing.autostop."+tName, true);
 			String aKey = "wrapper.filter.missing.action." + tName;
 			String aValue = _config.getString(aKey, "");
-			Object action = getTriggerAction(aValue);
+			Object action = getTriggerAction(aValue, tName);
 			String sKey = "wrapper.filter.missing.script." + tName;
 			String sValue = _config.getString(sKey, "");
 			List args = _config.getList(sKey + ".args", null);
@@ -1608,10 +1614,10 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 				for (int i = 0; i < strArgs.length; i++)
 					strArgs[i] = args.get(i).toString();
 			}
-			Object script = getTriggerScript(sValue, tKey.substring(tKey.lastIndexOf('.')+1), strArgs, timeout);
+			Object script = getTriggerScript(sValue, tName, strArgs, timeout);
 			if (action != null || script != null)
 			{
-				result.put(tValue, new MissingTriggerAction(executor, periodValue, countValue, new TriggerAction[]
+				result.put(tValue, new MissingTriggerAction(tName, executor, periodValue, countValue, new TriggerAction[]
 				{ (TriggerAction) script, (TriggerAction) action }, autoStop, getWrapperLogger()));
 			}
 		}
@@ -1656,11 +1662,11 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 				getWrapperLogger().log(Level.SEVERE, "check parameters for " + tKey, ex);
 			}
 			String tName = tKey.substring("wrapper.filter.missing.trigger-regex.".length());
-			setTriggerDebug(tName, tValue);
+			setTriggerDebug(tName);
 			boolean autoStop = _config.getBoolean("wrapper.filter.missing.autostop."+tName, true);
 			String aKey = "wrapper.filter.missing.action." + tName;
 			String aValue = _config.getString(aKey, "");
-			Object action = getTriggerAction(aValue);
+			Object action = getTriggerAction(aValue, tName);
 			String sKey = "wrapper.filter.missing.script." + tName;
 			String sValue = _config.getString(sKey, "");
 			List args = _config.getList(sKey + ".args", null);
@@ -1672,22 +1678,22 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 				for (int i = 0; i < strArgs.length; i++)
 					strArgs[i] = args.get(i).toString();
 			}
-			Object script = getTriggerScript(sValue, tKey.substring(tKey.lastIndexOf('.')), strArgs, timeout);
+			Object script = getTriggerScript(sValue, tName, strArgs, timeout);
 			if (action != null || script != null)
 			{
-				result.put(tValue, new MissingTriggerAction(executor, periodValue, countValue, new TriggerAction[]
+				result.put(tValue, new MissingTriggerAction(tName, executor, periodValue, countValue, new TriggerAction[]
 				{ (TriggerAction) script, (TriggerAction) action }, autoStop, getWrapperLogger()));
 			}
 		}
 		return result;
 	}
 
-	HashSet<String> disabledTriggerDebug = new HashSet<String>();
+	HashSet<String> enabledTriggerDebug = new HashSet<String>();
 	
-	private void setTriggerDebug(String tName,String tValue)
+	private void setTriggerDebug(String tName)
 		{
-			if (!_config.getBoolean("wrapper.filter.debug." + tName, true))
-				disabledTriggerDebug.add(tValue);
+			if (_config.getBoolean("wrapper.filter.debug." + tName, false))
+				enabledTriggerDebug.add(tName);
 		}
 	/**
 	 * Gets the trigger actions.
@@ -1711,10 +1717,10 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 			if (tValue == null || tValue.length() == 0)
 				continue;
 			String tName = tKey.substring("wrapper.filter.trigger.".length());
-			setTriggerDebug(tName, tValue);
+			setTriggerDebug(tName);
 			String aKey = "wrapper.filter.action." + tName;
 			String aValue = _config.getString(aKey, "");
-			Object action = getTriggerAction(aValue);
+			Object action = getTriggerAction(aValue, tName);
 			String sKey = "wrapper.filter.script." + tName;
 			String sValue = _config.getString(sKey, "");
 			List args = _config.getList(sKey + ".args", null);
@@ -1726,7 +1732,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 				for (int i = 0; i < strArgs.length; i++)
 					strArgs[i] = args.get(i).toString();
 			}
-			Object script = getTriggerScript(sValue, tKey.substring(tKey.lastIndexOf('.')+1), strArgs, timeout);
+			Object script = getTriggerScript(sValue, tName, strArgs, timeout);
 			if (action != null && script != null)
 			{
 				addToActionMap(result, tValue, Arrays.asList(new Object[]
@@ -1794,10 +1800,10 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 			if (tValue == null || tValue.length() == 0)
 				continue;
 			String tName = tKey.substring("wrapper.filter.trigger-regex.".length());
-			setTriggerDebug(tName, tValue);
+			setTriggerDebug(tName);
 			String aKey = "wrapper.filter.action." + tName;
 			String aValue = _config.getString(aKey, "");
-			Object action = getTriggerAction(aValue);
+			Object action = getTriggerAction(aValue, tName);
 			String sKey = "wrapper.filter.script." + tName;
 			String sValue = _config.getString(sKey, "");
 			List args = _config.getList(sKey + ".args", null);
@@ -1810,7 +1816,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 					strArgs[i] = args.get(i).toString();
 			}
 
-			Object script = getTriggerScript(sValue, tKey.substring(tKey.lastIndexOf('.')+1), strArgs, timeout);
+			Object script = getTriggerScript(sValue, tName, strArgs, timeout);
 			if (action != null && script != null)
 			{
 				addToActionMap(result, tValue, Arrays.asList(new Object[]
@@ -1836,11 +1842,11 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 	 * 
 	 * @return the trigger script
 	 */
-	private Object getTriggerScript(String script, String key, String[] args, int timeout)
+	private Object getTriggerScript(String script, final String key, String[] args, int timeout)
 	{
 		if (script == null || "".equals(script))
 			return null;
-		final boolean scriptDebug = _config.getBoolean("wrapper.filter.debug." + key, true);
+		final boolean scriptDebug = _config.getBoolean("wrapper.filter.debug." + key, false);
 		final Script s = ScriptFactory.createScript(script, key, this, args, getInternalWrapperLogger(), timeout, _config.getString("wrapper.script.encoding"), _config.getBoolean("wrapper.script.reload", false), _debug);
 		if (s == null)
 		{
@@ -1853,6 +1859,10 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 
 		return new TriggerAction()
 		{
+			public String getId()
+			{
+				return key;
+			}
 			public Object execute(final String line)
 			{
 				if (scriptExecutor.getActiveCount() > 20)
@@ -1885,11 +1895,15 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 	 * 
 	 * @return the trigger action
 	 */
-	private Object getTriggerAction(String value)
+	private Object getTriggerAction(String value, final String key)
 	{
 		if ("RESTART".equals(value))
 			return new TriggerAction()
 			{
+			public String getId()
+			{
+				return key;
+			}
 				public Object execute(String line)
 				{
 					if (allowRestart())
@@ -1902,6 +1916,10 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 		else if ("SHUTDOWN".equals(value))
 			return new TriggerAction()
 			{
+			public String getId()
+			{
+				return key;
+			}
 				public Object execute(String line)
 				{
 					stop("TRIGGER");
@@ -2797,7 +2815,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 								if (obj instanceof TriggerAction)
 								{
 									TriggerAction action = (TriggerAction) obj;
-									if (disabledTriggerDebug.contains(action))
+									if (enabledTriggerDebug.contains(action.getId()))
 									{
 									getWrapperLogger().info("Trigger found: " + _actionTriggers[i] + " in line: ");
 									getWrapperLogger().info(line);
@@ -2810,7 +2828,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 									for (Iterator it = c.iterator(); it.hasNext();)
 									{
 										TriggerAction action = (TriggerAction) it.next();
-										if (disabledTriggerDebug.contains(action))
+										if (enabledTriggerDebug.contains(action.getId()))
 										{
 										getWrapperLogger().info("Trigger found: " + action + " in line: ");
 										getWrapperLogger().info(line);
@@ -2831,7 +2849,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 								if (obj instanceof TriggerAction)
 								{
 									TriggerAction action = (TriggerAction) obj;
-									if (disabledTriggerDebug.contains(action))
+									if (enabledTriggerDebug.contains(action.getId()))
 									{
 									getWrapperLogger().info("Trigger found: " + _actionTriggers[i] + " in line: ");
 									getWrapperLogger().info(line);
@@ -2844,7 +2862,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 									for (Iterator it = c.iterator(); it.hasNext();)
 									{
 										TriggerAction action = (TriggerAction) it.next();
-										if (disabledTriggerDebug.contains(action))
+										if (enabledTriggerDebug.contains(action.getId()))
 										{
 										getWrapperLogger().info("Trigger found: " + _actionTriggers[i] + " in line: ");
 										getWrapperLogger().info(line);
@@ -2865,7 +2883,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 								if (obj instanceof TriggerAction)
 								{
 									TriggerAction action = (TriggerAction) obj;
-									if (disabledTriggerDebug.contains(action))
+									if (enabledTriggerDebug.contains(action.getId()))
 									  getWrapperLogger().info("found missing trigger : " + _missingActionTriggers[i]);
 									action.execute(new String(line));
 								}
@@ -2882,7 +2900,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 								if (obj instanceof TriggerAction)
 								{
 									TriggerAction action = (TriggerAction) obj;
-									if (disabledTriggerDebug.contains(action))
+									if (enabledTriggerDebug.contains(action.getId()))
 									  getWrapperLogger().info("found missing trigger : " + _missingActionTriggers[i]);
 									action.execute(new String(line));
 								}
