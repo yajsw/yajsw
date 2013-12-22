@@ -481,7 +481,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 	{
 		initGCBeans();
 		String mFormat = config.getString("wrapper.java.monitor.gc", null);
-		if (mFormat != null)
+		boolean gcRestart = config.getBoolean("wrapper.java.monitor.gc.restart", false);
+		if (mFormat != null || gcRestart)
 			try
 			{
 				if (_debug)
