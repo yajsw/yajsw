@@ -103,4 +103,10 @@ public class RuntimeController extends AbstractController
 		
 	}
 
+	public void setDebugComm(boolean debugComm)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
 }

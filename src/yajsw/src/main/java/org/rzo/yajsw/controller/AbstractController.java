@@ -28,6 +28,7 @@ public abstract class AbstractController implements Constants, Controller
 	public int						_state		= 0;
 	/** The _debug. */
 	protected boolean				_debug		= false;
+	protected boolean				_debugComm		= false;
 
 	/**
 	 * The listener interface for receiving controller events. The class that is

@@ -183,7 +183,7 @@ public class JVMController extends AbstractController
 		// ???do not allow multiple servers to bind on the same port
 		_acceptor.setOption("reuseAddress", false);
 		_acceptor.setOption("tcpNoDelay", true);
-		_acceptor.setPipelineFactory(new ControllerPipelineFactory(this, _debug));
+		_acceptor.setPipelineFactory(new ControllerPipelineFactory(this, _debugComm));
 
 		_init = true;
 
@@ -470,6 +470,11 @@ public class JVMController extends AbstractController
 	public void setDebug(boolean debug)
 	{
 		_debug = debug;
+	}
+
+	public void setDebugComm(boolean debug)
+	{
+		_debugComm = debug;
 	}
 
 	/**

@@ -99,6 +99,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 
 	/** The _debug. */
 	boolean						_debug				= false;
+	boolean						_debugComm				= false;
 
 	/** The log. */
 	final InternalLogger		log					= SimpleLoggerFactory.getInstance("WrapperManager");
@@ -261,6 +262,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 		// config.setDebug(false);
 		config.init();
 		_debug = config.getBoolean("wrapper.debug", false);
+		_debugComm = config.getBoolean("wrapper.debug.comm", false);
 		logJavaInfo(args);
 
 		try
@@ -1024,7 +1026,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 				executor));
 		// add logging
 		ChannelPipelineFactory pf;
-		if (_debug)
+		if (_debugComm)
 		{
 			pf = new ChannelPipelineFactory()
 			{

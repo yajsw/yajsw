@@ -25,4 +25,6 @@ public interface Controller
 	
 	void beginWaitForStartup();
 
+	void setDebugComm(boolean debugComm);
+
 }

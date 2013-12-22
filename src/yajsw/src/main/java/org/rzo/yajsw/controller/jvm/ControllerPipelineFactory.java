@@ -81,7 +81,7 @@ class ControllerPipelineFactory implements ChannelPipelineFactory
 		pipeline.addLast("messageEncoder", new MessageEncoder());
 		pipeline.addLast("messageDecoder", new MessageDecoder());
 
-		if (_controller.isDebug())
+		if (_debug)
 		{
 			pipeline.addLast("logging", new LoggingFilter(_controller.getLog(), "controller"));
 			_controller.getLog().info("jvm controller set set netty logger");
