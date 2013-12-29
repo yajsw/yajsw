@@ -55,7 +55,7 @@ public class WindowsXPService extends AbstractService
 			if (_command[i].startsWith("\""))
 				command += _command[i] + " ";
 			else
-				command += '"' + _command[i] + "\" ";
+				command += _command[i] + " ";
 
 		return _service.install(_displayName, _description, _dependencies, _account, _password, command, _startType, _interactive, _failureActions);
 	}

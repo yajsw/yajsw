@@ -225,7 +225,10 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 			sb.append(PATHSEP);
 			sb.append(appCp);
 		}
-		result.add(checkValue(sb.toString()));
+		String cp = sb.toString();
+		if (cp.contains(" "))
+			cp = "\"" + cp + "\"";
+		result.add(checkValue(cp));
 		boolean hasXrs = false;
 		boolean hasXmx = false;
 		boolean hasXms = false;

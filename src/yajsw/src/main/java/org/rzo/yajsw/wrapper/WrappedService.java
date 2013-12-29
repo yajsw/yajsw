@@ -474,7 +474,10 @@ public class WrappedService
 			if (it.hasNext())
 				sb.append(PATHSEP);
 		}
-		result.add(sb.toString());
+		String cp = sb.toString();
+		if (cp.contains(" "))
+			cp = "\""+cp+"\"";
+		result.add(cp);
 		result.add("-Xrs");
 		result.add("-Dwrapper.service=true");
 		String wDir = _config.getString("wrapper.working.dir");
