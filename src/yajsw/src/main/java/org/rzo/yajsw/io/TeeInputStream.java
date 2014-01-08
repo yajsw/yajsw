@@ -186,7 +186,7 @@ public class TeeInputStream extends InputStream
 		byte[]			buff	= new byte[512];
 
 		/** The stop. */
-		boolean			stop	= false;
+		volatile boolean			stop	= false;
 
 		/** The data available. */
 		Condition		dataAvailable;

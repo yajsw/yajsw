@@ -73,8 +73,8 @@ public class CyclicBufferFileInputStream extends BufferedInputStream
 		return new InputStream()
 		{
 
-			boolean				closed	= false;
-			boolean				opened	= false;
+			volatile boolean	closed	= false;
+			volatile boolean	opened	= false;
 			Lock				lock	= new MyReentrantLock();
 			RandomAccessFile	raf;
 			ByteBuffer			buf;
