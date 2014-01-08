@@ -713,7 +713,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 	 * 
 	 * @return the priority
 	 */
-	protected int getPriority(String priority)
+	public int getPriority(String priority)
 	{
 
 		if ("LOW".equals(priority))
@@ -2796,6 +2796,13 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 					}
 				while ((line = br.readLine()) != null)
 				{
+	                if (AbstractWrappedProcess.this._osProcess == null || _pid == AbstractWrappedProcess.this._osProcess.getPid())
+	                {
+	                	if (_debug)
+	                     getWrapperLogger().info("process not running, terminating gobler " + _name);
+	                    break;
+	                }
+
 					if (_drain)
 						_drainBuffer.write(line);
 					if (k > _minAppLogLines)

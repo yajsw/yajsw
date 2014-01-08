@@ -24,7 +24,9 @@ import org.rzo.yajsw.Constants;
 import org.rzo.yajsw.boot.WrapperLoader;
 import org.rzo.yajsw.config.YajswConfigurationImpl;
 import org.rzo.yajsw.os.OperatingSystem;
+import org.rzo.yajsw.os.Process;
 import org.rzo.yajsw.os.StopableService;
+import org.rzo.yajsw.os.ms.win.w32.WindowsXPProcess;
 import org.rzo.yajsw.wrapper.WrappedProcess;
 import org.rzo.yajsw.wrapper.WrappedProcessFactory;
 import org.rzo.yajsw.wrapper.WrappedProcessList;
@@ -51,6 +53,24 @@ public class WrapperMainServiceWin extends Win32Service implements StopableServi
 	public WrapperMainServiceWin()
 	{
 	}
+	
+	private static int getPriority(YajswConfigurationImpl config)
+	{
+		String priority = config.getString("wrapper.ntservice.process_priority", "");
+
+		if ("LOW".equals(priority))
+			return Process.PRIORITY_LOW;
+		else if ("BELOW_NORMAL".equals(priority))
+			return Process.PRIORITY_BELOW_NORMAL;
+		else if ("NORMAL".equals(priority))
+			return Process.PRIORITY_NORMAL;
+		else if ("ABOVE_NORMAL".equals(priority))
+			return Process.PRIORITY_ABOVE_NORMAL;
+		else if ("HIGH".equals(priority))
+			return Process.PRIORITY_HIGH;
+		return Process.PRIORITY_UNDEFINED;
+	}
+
 
 	// this is the wrapper for services
 	/**
@@ -106,6 +126,13 @@ public class WrapperMainServiceWin extends Win32Service implements StopableServi
 		}
 		
 		w = wList.get(0);
+		
+		int priority = getPriority(_config);
+		if (priority != -1)
+		{
+			int myPid = OperatingSystem.instance().processManagerInstance().currentProcessId();
+			WindowsXPProcess.setProcessPriority(myPid, priority);
+		}
 
 			
 

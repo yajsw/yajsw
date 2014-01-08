@@ -623,6 +623,15 @@ public class WindowsXPProcess extends AbstractProcess
 		 * @return true, if successful
 		 */
 		boolean SetProcessAffinityMask(HANDLE handle, int dwProcessAffinityMask);
+		
+		/*
+		 * BOOL WINAPI SetPriorityClass(
+  		 * _In_  HANDLE hProcess,
+  		 *_In_  DWORD dwPriorityClass
+		 * );
+		 */
+		boolean SetPriorityClass(HANDLE handle, int dwPriorityClass);
+
 
 		/*
 		 * BOOL WINAPI CloseHandle( HANDLE hObject );
@@ -1842,7 +1851,7 @@ public class WindowsXPProcess extends AbstractProcess
 
 			}
 
-			creationFlag |= getPriorityFlag();
+			creationFlag |= getPriorityFlag(_priority);
 
 			// do not inherit handles. otherwise resources are not freed if
 			// parent is killed
@@ -1918,7 +1927,7 @@ public class WindowsXPProcess extends AbstractProcess
 							//_startupInfo.lpDesktop = new WString("winsta0\\default");
 							creationFlag = 0;
 							creationFlag |= MyKernel32.CREATE_NO_WINDOW | MyKernel32.CREATE_UNICODE_ENVIRONMENT;
-							creationFlag |= getPriorityFlag();
+							creationFlag |= getPriorityFlag(_priority);
 							result = MyAdvapi.INSTANCE.CreateProcessAsUserW(phNewToken.getValue(), null, cmd, null, null, _pipeStreams, creationFlag,
 									null, new WString(getWorkingDir()), _startupInfo, _processInformation);
 							log("started "+result);
@@ -2191,9 +2200,9 @@ public class WindowsXPProcess extends AbstractProcess
 	 * 
 	 * @return the priority flag
 	 */
-	private int getPriorityFlag()
+	private static int getPriorityFlag(int priority)
 	{
-		switch (_priority)
+		switch (priority)
 		{
 		case PRIORITY_NORMAL:
 			return MyKernel32.NORMAL_PRIORITY_CLASS;
@@ -3845,6 +3854,30 @@ public class WindowsXPProcess extends AbstractProcess
 			}
 		}
 		return false;
+	}
+	
+	public static void setProcessPriority(int pid, int priority)
+	{
+		HANDLE hProcess = null;
+		try
+		{
+		hProcess = MyKernel32.INSTANCE.OpenProcess(MyKernel32.PROCESS_ALL_ACCESS, false, pid);
+		if (hProcess == null)
+			hProcess = MyKernel32.INSTANCE.OpenProcess(MyKernel32.PROCESS_QUERY_INFORMATION, false, pid);
+		if (hProcess == null)
+			return;
+		 MyKernel32.INSTANCE.SetPriorityClass(hProcess, getPriorityFlag(priority));
+		}
+		catch (Throwable ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			if (hProcess != null) 
+				MyKernel32.INSTANCE.CloseHandle(hProcess);
+			
+		}
 	}
 	
 	HWND lastActiveWindow = null;
