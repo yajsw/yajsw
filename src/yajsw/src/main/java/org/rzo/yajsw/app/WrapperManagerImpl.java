@@ -487,7 +487,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 			{
 				if (_debug)
 					System.out.println("monitor GC: " + mFormat);
-				gcFormat = new MessageFormat(mFormat);
+				if (mFormat != null)
+					gcFormat = new MessageFormat(mFormat);
 				final long cycle = config.getLong("wrapper.java.monitor.gc.interval", 1) * 1000;
 
 				if (_debug)
