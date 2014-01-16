@@ -36,22 +36,28 @@ public class RuntimeJavaMain
 		_debug = "true".equals(System.getProperty("wrapper.debug", "false"));
 		final WrappedRuntimeProcess p = new WrappedRuntimeProcess();
 		Configuration conf = p.getConfiguration();
+		clearKeys(conf, "wrapper.control");
+		clearKeys(conf, "wrapper.console");
+		clearKeys(conf, "wrapper.logfile");
+		clearKeys(conf, "wrapper.on_exit");
+
 		clearKeys(conf, "wrapper.filter");
 		clearKeys(conf, "wrapper.tray");
 		clearKeys(conf, "wrapper.image.javawrapper");
-		clearKeys(conf, "wrapper.logfile");
 		clearKeys(conf, "wrapper.script");
-		clearKeys(conf, "wrapper.console.pipestreams");
+		clearKeys(conf, "wrapper.restart.reload_configuration");
+		clearKeys(conf, "wrapper.filter");
+		clearKeys(conf, "wrapper.java");
 
 		conf.setProperty("wrapper.control", "APPLICATION");
 		conf.setProperty("wrapper.console.loglevel", "INFO");
+		conf.setProperty("wrapper.console.format", "ZM");
 		conf.setProperty("wrapper.logfile.loglevel", "NONE");
-		if ("true".equals(System.getProperty(
-				"wrapper.runtime.java.default.shutdown", "false")))
+		if ("true".equals(System.getProperty("wrapper.runtime.java.default.shutdown", "false")))
 			conf.setProperty("wrapper.on_exit.default", "SHUTDOWN");
-		conf.setProperty("wrapper.console.pipestreams", true);
+		conf.setProperty("wrapper.console.pipestreams", "true");
 
-		// System.out.println(""+conf.getBoolean("wrapper.tray", false));
+		System.out.println(conf.getProperty("wrapper.console.pipestreams"));
 
 		stopIfRunning(conf);
 
@@ -60,9 +66,13 @@ public class RuntimeJavaMain
 			public void run()
 			{
 				if (_debug)
-					System.err
-							.println("runtime process wrapper is shutting down, stopping runtime process");
-				p.stop();
+					System.err.println("ShutdownHook started");
+				if (p.isOSProcessRunning())
+				{
+					if (_debug)
+						System.err.println("runtime process warapper is shutting down, stopping runtime process");
+					p.stop();
+				}
 			}
 		}));
 
@@ -70,15 +80,15 @@ public class RuntimeJavaMain
 				new StateChangeListener()
 				{
 
-					public void stateChange(int newState, int oldState)
-					{
-						if (_debug)
-							System.err
-									.println("wrapped runtime process stopped with exit code "
-											+ p.getExitCode());
-						p.shutdown();
-						System.exit(p.getExitCode());
-					}
+			public void stateChange(int newState, int oldState)
+			{
+				int exitCode = p.getExitCode();
+				if (_debug)
+				System.err.println("wrapped runtime process stopped with exit code " + exitCode);
+				if (p.isOSProcessRunning())
+					p.shutdown();
+				System.exit(exitCode);
+			}
 				});
 
 		p.start();
