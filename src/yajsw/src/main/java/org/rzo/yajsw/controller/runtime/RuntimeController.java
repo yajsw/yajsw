@@ -38,7 +38,8 @@ public class RuntimeController extends AbstractController
 				_wrappedProcess.setAppReportedReady(true);
 				setState(STATE_RUNNING);
 				((WrappedRuntimeProcess) _wrappedProcess)._osProcess.waitFor();
-				getLog().info("process exited");
+				getLog().info("process terminated");
+				_wrappedProcess.osProcessTerminated();
 				if (_state == STATE_USER_STOP_REQUEST)
 					setState(STATE_USER_STOPPED);
 				else
