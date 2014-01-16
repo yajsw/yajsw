@@ -1040,6 +1040,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 		configProcess();
 		_firstRestartTime = System.currentTimeMillis();
 		// _restartCount++;
+		enabledTriggerDebug.clear();
 		Map triggerActions = getTriggerActions();
 		Map regexTriggerActions = getRegexTriggerActions();
 		Map missingTriggerActions = getMissingTriggerActions();
@@ -2824,8 +2825,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 									TriggerAction action = (TriggerAction) obj;
 									if (enabledTriggerDebug.contains(action.getId()))
 									{
-									getWrapperLogger().info("Trigger found: " + _actionTriggers[i] + " in line: ");
-									getWrapperLogger().info(line);
+									getWrapperLogger().info("Trigger found: " + _actionTriggers[i] + " in line: "+line);
 									}
 									action.execute(new String(line));
 								}
@@ -2837,8 +2837,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 										TriggerAction action = (TriggerAction) it.next();
 										if (enabledTriggerDebug.contains(action.getId()))
 										{
-										getWrapperLogger().info("Trigger found: " + action + " in line: ");
-										getWrapperLogger().info(line);
+										getWrapperLogger().info("Trigger found: " + action + " in line: "+line);
 										}
 										action.execute(new String(line));
 									}
@@ -2858,8 +2857,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 									TriggerAction action = (TriggerAction) obj;
 									if (enabledTriggerDebug.contains(action.getId()))
 									{
-									getWrapperLogger().info("Trigger found: " + _actionTriggers[i] + " in line: ");
-									getWrapperLogger().info(line);
+									getWrapperLogger().info("Trigger found: " + _actionTriggersRegex[i] + " in line: "+line);
 									}
 									action.execute(new String(line));
 								}
@@ -2871,8 +2869,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 										TriggerAction action = (TriggerAction) it.next();
 										if (enabledTriggerDebug.contains(action.getId()))
 										{
-										getWrapperLogger().info("Trigger found: " + _actionTriggers[i] + " in line: ");
-										getWrapperLogger().info(line);
+										getWrapperLogger().info("Trigger found: " + _actionTriggersRegex[i] + " in line: "+line);
 										}
 										action.execute(new String(line));
 									}
@@ -2908,7 +2905,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 								{
 									TriggerAction action = (TriggerAction) obj;
 									if (enabledTriggerDebug.contains(action.getId()))
-									  getWrapperLogger().info("found missing trigger : " + _missingActionTriggers[i]);
+									  getWrapperLogger().info("found missing trigger : " + _missingActionTriggersRegex[i]);
 									action.execute(new String(line));
 								}
 								// break;
