@@ -153,6 +153,8 @@ public class WrappedRuntimeProcess extends AbstractWrappedProcess
 			try
 			{
 				_runtimePidFile = new File(file);
+				if (!_runtimePidFile.getParentFile().exists())
+					_runtimePidFile.getParentFile().mkdirs();
 				if (!_runtimePidFile.exists())
 					_runtimePidFile.createNewFile();
 				FileWriter out = new FileWriter(_runtimePidFile, false);
