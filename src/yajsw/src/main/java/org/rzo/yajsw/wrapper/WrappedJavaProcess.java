@@ -40,6 +40,9 @@ import org.rzo.yajsw.os.JavaHome;
 import org.rzo.yajsw.os.OperatingSystem;
 import org.rzo.yajsw.util.Utils;
 
+import com.sun.jna.Platform;
+import com.sun.jna.PlatformEx;
+
 // TODO: Auto-generated Javadoc
 /**
  * The Class WrappedJavaProcess.
@@ -226,7 +229,7 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 			sb.append(appCp);
 		}
 		String cp = sb.toString();
-		if (cp.contains(" "))
+		if (cp.contains(" ") && Platform.isWindows())
 			cp = "\"" + cp + "\"";
 		result.add(checkValue(cp));
 		boolean hasXrs = false;
@@ -382,6 +385,7 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 	 */
 	private StringBuilder getAppClassPath(String workingDir, Iterator keys)
 	{
+		workingDir = workingDir.replaceAll("\"", "");
 		List configList = new ArrayList();
 		for (Iterator it = keys; it.hasNext();)
 		{
@@ -392,6 +396,7 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		String jar = _config.getString("wrapper.java.app.jar", null);
 		if (jar != null)
 		{
+			jar = jar.replaceAll("\"", "");
 			Collection jars = FileUtils.getFiles(workingDir, jar);
 			files.addAll(jars);
 			files.addAll(classpathFromJar(jars, workingDir));
@@ -399,6 +404,7 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		for (Iterator it = configList.listIterator(); it.hasNext();)
 		{
 			String file = _config.getString((String) it.next());
+			file = file.replaceAll("\"", "");
 			if (file == null)
 				continue;
 			files.addAll(FileUtils.getFiles(workingDir, file));

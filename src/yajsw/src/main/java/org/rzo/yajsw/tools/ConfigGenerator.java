@@ -212,7 +212,8 @@ public class ConfigGenerator
 			{
 				arg = relativeString(arg, workingDir);
 				arg = confString(arg);
-				conf.setProperty("wrapper.app.parameter." + i++, arg);
+				if (arg != null && !"".equals(arg))
+					conf.setProperty("wrapper.app.parameter." + i++, arg);
 			}
 			/*
 			 * // bug in MonitoredVMUtil '"-Xd=a a"' returns '-Xd=a a' //String

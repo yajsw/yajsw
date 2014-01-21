@@ -447,13 +447,24 @@ public class PosixService extends AbstractService implements Constants
 
 	private String toStrCommand(String[] cmd)
 	{
-		String tmp = "";
+		StringBuffer  tmp = new StringBuffer();
 		for (String s : cmd)
 		{
-			if (s != null)
-				tmp += "\"" + s + "\" ";
+			if (s != null && s.contains(" ") && !s.contains("\""))
+			{
+				tmp.append("\"");
+				tmp.append(s);
+				tmp.append("\"");
+			}
+			else if (s != null)
+			{
+				tmp.append(s);
+			}
+			if (s != null && s != cmd[cmd.length-1])
+				tmp.append(" ");
+
 		}
-		return tmp;
+		return tmp.toString();
 	}
 
 	public boolean isInstalled()

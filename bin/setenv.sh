@@ -4,15 +4,26 @@
 #
 # -----------------------------------------------------------------------------
 
+echo '++++++++++ YAJSW SET ENV ++++++++++'
+
+#remember current dir
+current=$(pwd)
 # resolve links - $0 may be a softlink
+PRGDIR=$(dirname "$(dirname $0)")
 
-current=`pwd`
-cd `dirname "$0"`
-PRGDIR=`pwd`
-cd "$current"
+cd "$PRGDIR"
 
-wrapper_home="$PRGDIR"/..
+# path to yajsw bin folder
+PRGDIR=$(pwd)
+
+cd ".."
+
+# path to wrapper home
+wrapper_home=$(pwd)
 export wrapper_home
+
+# return to original folder
+cd "$current"
 
 wrapper_jar="$wrapper_home"/wrapper.jar
 export wrapper_jar
@@ -38,5 +49,9 @@ export conf_file
 conf_default_file="$wrapper_home"/conf/wrapper.conf.default
 export conf_default_file
 
+echo "wrapper home : $wrapper_home"
+echo "configuration: $conf_file"
 
-
+# show java version
+"$java_exe" -version
+echo '---------- YAJSW SET ENV ----------'

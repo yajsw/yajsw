@@ -1541,11 +1541,13 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 	private String getLogFile()
 	{
 		String result = _config.getString("wrapper.logfile", "log/wrapper.log");
+		result = result.replaceAll("\"", "");
 		File r = new File(result);
 		File f = null;
 		if (!r.isAbsolute())
 		{
 			String wDir = _config.getString("wrapper.working.dir", ".");
+			wDir = wDir.replaceAll("\"", "");
 			f = new File(wDir, result);
 		}
 		else
@@ -2456,6 +2458,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess, Constant
 				_tmpPath = System.getProperty("java.io.tmpdir");
 			if (_tmpPath == null || _tmpPath.startsWith("?"))
 				_tmpPath = "tmp";
+			_tmpPath = _tmpPath.replaceAll("\"", "");
 			File t = new File(_tmpPath);
 			if (!t.exists())
 				t.mkdirs();

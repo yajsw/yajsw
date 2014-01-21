@@ -908,8 +908,10 @@ public final class Native {
 
     static File getTempDir() {
     	String tmpDir = System.getProperty("jna_tmpdir");
+    	
     	if (tmpDir == null)
     		tmpDir = System.getProperty("java.io.tmpdir");
+    	tmpDir = tmpDir.replaceAll("\"", "");
         File tmp = new File(tmpDir);
         File jnatmp = new File(tmp, "jna-" + System.getProperty("user.name"));
         jnatmp.mkdirs();

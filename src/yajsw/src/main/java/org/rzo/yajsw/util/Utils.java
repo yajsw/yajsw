@@ -64,8 +64,9 @@ public class Utils
 	
 	public static String getDOption(String key, String value)
 	{
-		value = value.replace("\"", "\\\"");
-		value = value.replace("\\", "\\\\");
+		//value = value.replace("\"", "\\\"");
+		//value = value.replace("\\", "\\\\");
+		value = value.replaceAll("\"", "");
 
 		if (value != null && !value.contains(" "))
 			return "-D" + key + "=" + value;

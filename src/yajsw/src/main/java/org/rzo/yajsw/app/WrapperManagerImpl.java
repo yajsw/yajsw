@@ -234,6 +234,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 		instance = this;
 		String outFile = getSystemProperty("wrapper.teeName");
 		String outPath = getSystemProperty("wrapper.tmp.path");
+		if (outPath != null)
+			outPath = outPath.replaceAll("\"", "");
 		String vStr = getSystemProperty("wrapper.console.visible");
 		boolean visible = vStr != null && vStr.equals("true");
 		if (outFile != null)

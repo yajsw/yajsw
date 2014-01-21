@@ -1305,7 +1305,7 @@ public class PosixProcess extends AbstractProcess
 
 	private String getCommandInternal()
 	{
-		String result = _utils.readFile("/proc/" + getPid() + "/cmdline");
+		String result = _utils.readFileQuoted("/proc/" + getPid() + "/cmdline");
 		if (result == null || result.length() == 0)
 			result = "?";
 		// System.out.println("cmd line: "+result);

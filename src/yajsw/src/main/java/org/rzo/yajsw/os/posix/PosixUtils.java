@@ -3,6 +3,8 @@ package org.rzo.yajsw.os.posix;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -21,7 +23,7 @@ public class PosixUtils
 	{
 		_logger = logger;
 	}
-
+	
 	public String readFile(String file)
 	{
 		String result = "";
@@ -32,13 +34,16 @@ public class PosixUtils
 				InputStream in = new FileInputStream(f);
 				byte[] buffer = new byte[10 * 1024];
 				int size = 0;
+				String rest = "";
 				
 				while ((size = in.read(buffer)) > 0)
 				{
 				// System.out.println("size "+size);
 				for (int i = 0; i < size; i++)
 					if (buffer[i] == 0)
-						buffer[i] = (byte) ' ';
+					{
+						buffer[i] = (byte)' ';
+					}
 				result += new String(buffer, 0, size);
 				}
 				in.close();
@@ -56,6 +61,71 @@ public class PosixUtils
 		}
 		return result;
 
+	}
+
+
+	public String readFileQuoted(String file)
+	{
+		List<String> result = new ArrayList<String>();
+		File f = new File(file);
+		if (f.exists())
+			try
+			{
+				InputStream in = new FileInputStream(f);
+				byte[] buffer = new byte[10 * 1024];
+				int size = 0;
+				String rest = "";
+				
+				while ((size = in.read(buffer)) > 0)
+				{
+				// System.out.println("size "+size);
+				int k = 0;
+				for (int i = 0; i < size; i++)
+					if (buffer[i] == 0)
+					{
+						result.add(rest + new String(buffer, k, i-k));
+						rest = "";
+						k = i+1;
+					}
+				rest = new String(buffer, k, size);
+				}
+				if (rest.length() > 0)
+					result.add(rest);
+				in.close();
+			}
+			catch (Exception e)
+			{
+				if (_logger != null)
+					_logger.throwing(PosixUtils.class.getName(), "readFile", e);
+			}
+		else
+		{
+			if (_logger != null)
+				_logger.info("could not find file " + f.getAbsolutePath());
+			// throw new NullPointerException();
+		}
+		return toQuotedString(result);
+
+	}
+
+	private String toQuotedString(List<String> strings)
+	{
+		StringBuffer sb = new StringBuffer();
+		for (int i=0; i<strings.size(); i++)
+		{
+			String x = strings.get(i);
+			if (x.contains(" ") && !(x.contains("\"") || x.contains("'")))
+			{
+				sb.append("\"");
+				sb.append(x);
+				sb.append("\"");
+			}
+			else
+				sb.append(x);
+			if (i != strings.size())
+				sb.append(" ");
+		}
+		return sb.toString();
 	}
 
 	public String osCommand(String cmd)
