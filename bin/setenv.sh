@@ -9,7 +9,7 @@ echo '++++++++++ YAJSW SET ENV ++++++++++'
 #remember current dir
 current=$(pwd)
 # resolve links - $0 may be a softlink
-PRGDIR=$(dirname "$(dirname $0)")
+PRGDIR=$(dirname $0)
 
 cd "$PRGDIR"
 

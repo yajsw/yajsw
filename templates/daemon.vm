@@ -21,16 +21,16 @@ $H END INIT INFO
 #-----------------------------------------------------------------------------
 
 status() {
-     "$w_status_cmd"
+     $w_status_cmd
 }
 
 stopit() {
     echo "Stopping $w_name ..."
-	 "$w_stop_cmd"
+	 $w_stop_cmd
 }
 startit() {
     echo "Starting $w_name ..."
-     "$w_start_cmd"
+     $w_start_cmd
 }
 
 
