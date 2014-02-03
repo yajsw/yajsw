@@ -48,11 +48,12 @@
 
 package com.caucho.hessian4.io;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.InflaterInputStream;
+import java.util.*;
+import java.util.zip.*;
+
+import java.io.*;
+
+import com.caucho.hessian4.io.*;
 
 public class Deflation extends HessianEnvelope {
   public Deflation()
@@ -80,7 +81,7 @@ public class Deflation extends HessianEnvelope {
 
     if (! method.equals(getClass().getName()))
       throw new IOException("expected hessian Envelope method '" +
-			    getClass().getName() + "' at '" + method + "'");
+                            getClass().getName() + "' at '" + method + "'");
 
     return unwrapHeaders(in);
   }
@@ -135,14 +136,14 @@ public class Deflation extends HessianEnvelope {
       _out = null;
 
       if (out != null) {
-	_deflateOut.close();
-	_bodyOut.close();
+        _deflateOut.close();
+        _bodyOut.close();
 
-	out.writeInt(0);
+        out.writeInt(0);
 
         out.completeEnvelope();
           
-	out.close();
+        out.close();
       }
     }
   }
@@ -187,17 +188,17 @@ public class Deflation extends HessianEnvelope {
       _in = null;
 
       if (in != null) {
-	_inflateIn.close();
-	_bodyIn.close();
+        _inflateIn.close();
+        _bodyIn.close();
 
-	int len = in.readInt();
+        int len = in.readInt();
 
-	if (len != 0)
-	  throw new IOException("Unexpected footer");
+        if (len != 0)
+          throw new IOException("Unexpected footer");
 
         in.completeEnvelope();
 
-	in.close();
+        in.close();
       }
     }
   }

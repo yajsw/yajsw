@@ -50,11 +50,18 @@ package com.caucho.hessian4.io;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import java.util.logging.*;
 
 /**
  * Input stream for Hessian 2 streaming requests using WebSocket.
+ * 
+ * For best performance, use HessianFactory:
+ * 
+ * <code><pre>
+ * HessianFactory factory = new HessianFactory();
+ * Hessian2StreamingInput hIn = factory.createHessian2StreamingInput(is);
+ * </pre></code>
  */
 public class Hessian2StreamingInput
 {
@@ -150,11 +157,11 @@ public class Hessian2StreamingInput
     public boolean isDataAvailable()
     {
       try {
-	return _is != null && _is.available() > 0;
+        return _is != null && _is.available() > 0;
       } catch (IOException e) {
-	log.log(Level.FINER, e.toString(), e);
-	
-	return true;
+        log.log(Level.FINER, e.toString(), e);
+
+        return true;
       }
     }
 
@@ -163,7 +170,7 @@ public class Hessian2StreamingInput
     {
       // skip zero-length packets
       do {
-	_isPacketEnd = false;
+        _isPacketEnd = false;
       } while ((_length = readChunkLength(_is)) == 0);
 
       return _length > 0;
@@ -173,27 +180,34 @@ public class Hessian2StreamingInput
       throws IOException
     {
       while (! _isPacketEnd) {
-	if (_length <= 0)
-	  _length = readChunkLength(_is);
+        if (_length <= 0)
+          _length = readChunkLength(_is);
 
-	if (_length > 0)
-	  _is.skip(_length);
+        if (_length > 0) {
+          _is.skip(_length);
+          _length = 0;
+        }
+      }
+      
+      if (_length > 0) {
+        _is.skip(_length);
+        _length = 0;
       }
     }
 
     public int read()
       throws IOException
     {
-      if (_isPacketEnd)
-	throw new IllegalStateException();
-      
       InputStream is = _is;
       
       if (_length == 0) {
-	_length = readChunkLength(is);
+        if (_isPacketEnd)
+          return -1;
+        
+        _length = readChunkLength(is);
 
-	if (_length <= 0)
-	  return -1;
+        if (_length <= 0)
+          return -1;
       }
 
       _length--;
@@ -201,29 +215,30 @@ public class Hessian2StreamingInput
       return is.read();
     }
 
+    @Override
     public int read(byte []buffer, int offset, int length)
       throws IOException
     {
-      if (_isPacketEnd)
-	throw new IllegalStateException();
-      
       InputStream is = _is;
       
       if (_length <= 0) {
-	_length = readChunkLength(is);
+        if (_isPacketEnd)
+          return -1;
+        
+        _length = readChunkLength(is);
 
-	if (_length <= 0)
-	  return -1;
+        if (_length <= 0)
+          return -1;
       }
 
       int sublen = _length;
       if (length < sublen)
-	sublen = length;
-
+        sublen = length;
+      
       sublen = is.read(buffer, offset, sublen);
 
       if (sublen < 0)
-	return -1;
+        return -1;
 
       _length -= sublen;
 
@@ -234,43 +249,40 @@ public class Hessian2StreamingInput
       throws IOException
     {
       if (_isPacketEnd)
-	return -1;
+        return -1;
       
       int length = 0;
-	
+
       int code = is.read();
 
       if (code < 0) {
         _isPacketEnd = true;
         return -1;
       }
-      else if ((code & 0x80) != 0x80) {
-	int len = 256;
-	StringBuilder sb = new StringBuilder();
-	int ch;
-	
-	while ((len-- > 0 && is.available() > 0 && (ch = is.read()) >= 0))
-	  sb.append((char) ch);
-	
-        throw new IllegalStateException("WebSocket binary must begin with a 0x80 packet at 0x" + Integer.toHexString(code)
-                                        + " ("+ (char) code + ")"
-					+ " context[" + sb + "]");
+      
+      _isPacketEnd = (code & 0x80) == 0;
+      
+      int len = is.read() & 0x7f;
+      
+      if (len < 0x7e) {
+        length = len;
+      }
+      else if (len == 0x7e) {
+        length = (((is.read() & 0xff) << 8)
+                  + (is.read() & 0xff));
+      }
+      else {
+        length = (((is.read() & 0xff) << 56)
+                  + ((is.read() & 0xff) << 48)
+                  + ((is.read() & 0xff) << 40)
+                  + ((is.read() & 0xff) << 32)
+                  + ((is.read() & 0xff) << 24)
+                  + ((is.read() & 0xff) << 16)
+                  + ((is.read() & 0xff) << 8)
+                  + ((is.read() & 0xff)));
       }
 
-      while ((code = is.read()) >= 0) {
-	length = (length << 7) + (code & 0x7f);
-
-	if ((code & 0x80) == 0) {
-	  if (length == 0)
-	    _isPacketEnd = true;
-
-	  return length;
-	}
-      }
-
-      _isPacketEnd = true;
-
-      return -1;
+      return length;
     }
   }
 }

@@ -49,7 +49,7 @@
 package com.caucho.hessian4.io;
 
 import java.io.IOException;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 import com.caucho.hessian4.HessianException;
 
@@ -62,6 +62,7 @@ abstract public class AbstractSerializer implements Serializer {
   protected static final Logger log
     = Logger.getLogger(AbstractSerializer.class.getName());
   
+  @Override
   public void writeObject(Object obj, AbstractHessianOutput out)
     throws IOException
   {
@@ -73,13 +74,13 @@ abstract public class AbstractSerializer implements Serializer {
       Object replace = writeReplace(obj);
       
       if (replace != null) {
-	// out.removeRef(obj);
+        // out.removeRef(obj);
 
-	out.writeObject(replace);
+        out.writeObject(replace);
 
-	out.replaceRef(replace, obj);
+        out.replaceRef(replace, obj);
 
-	return;
+        return;
       }
     } catch (RuntimeException e) {
       throw e;
@@ -97,9 +98,9 @@ abstract public class AbstractSerializer implements Serializer {
     }
     else {
       if (ref == -1) {
-	writeDefinition20(cl, out);
-	
-	out.writeObjectBegin(cl.getName());
+        writeDefinition20(cl, out);
+
+        out.writeObjectBegin(cl.getName());
       }
 
       writeInstance(obj, out);
@@ -117,7 +118,7 @@ abstract public class AbstractSerializer implements Serializer {
   }
 
   protected void writeObject10(Object obj,
-			    AbstractHessianOutput out)
+                            AbstractHessianOutput out)
     throws IOException
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -131,7 +132,7 @@ abstract public class AbstractSerializer implements Serializer {
   }
 
   protected void writeInstance(Object obj,
-			    AbstractHessianOutput out)
+                            AbstractHessianOutput out)
     throws IOException
   {
     throw new UnsupportedOperationException(getClass().getName());

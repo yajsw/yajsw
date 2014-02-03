@@ -48,6 +48,7 @@
 
 package com.caucho.hessian4.io;
 
+import java.io.IOException;
 
 /**
  * Serializing an object. 

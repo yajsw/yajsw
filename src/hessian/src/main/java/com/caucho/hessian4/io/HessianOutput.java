@@ -567,11 +567,11 @@ public class HessianOutput extends AbstractHessianOutput {
       while (length > 0x8000) {
         int sublen = 0x8000;
 
-	// chunk can't end in high surrogate
-	char tail = value.charAt(offset + sublen - 1);
+        // chunk can't end in high surrogate
+        char tail = value.charAt(offset + sublen - 1);
 
-	if (0xd800 <= tail && tail <= 0xdbff)
-	  sublen--;
+        if (0xd800 <= tail && tail <= 0xdbff)
+          sublen--;
         
         os.write('s');
         os.write(sublen >> 8);
@@ -617,11 +617,11 @@ public class HessianOutput extends AbstractHessianOutput {
       while (length > 0x8000) {
         int sublen = 0x8000;
 
-	// chunk can't end in high surrogate
-	char tail = buffer[offset + sublen - 1];
+        // chunk can't end in high surrogate
+        char tail = buffer[offset + sublen - 1];
 
-	if (0xd800 <= tail && tail <= 0xdbff)
-	  sublen--;
+        if (0xd800 <= tail && tail <= 0xdbff)
+          sublen--;
         
         os.write('s');
         os.write(sublen >> 8);
@@ -734,7 +734,7 @@ public class HessianOutput extends AbstractHessianOutput {
       int sublen = length;
 
       if (0x8000 < sublen)
-	sublen = 0x8000;
+        sublen = 0x8000;
 
       os.write('b');
       os.write(sublen >> 8);
@@ -817,6 +817,22 @@ public class HessianOutput extends AbstractHessianOutput {
       return false;
     }
   }
+  
+  @Override
+  public int getRef(Object obj)
+  {
+    Integer value;
+    
+    if (_refs == null)
+      return -1;
+    
+    value = (Integer) _refs.get(obj);
+    
+    if (value == null)
+      return -1;
+    else
+      return value;
+  }
 
   /**
    * Resets the references for streaming.
@@ -852,6 +868,7 @@ public class HessianOutput extends AbstractHessianOutput {
 
     if (value != null) {
       _refs.put(newRef, value);
+      
       return true;
     }
     else

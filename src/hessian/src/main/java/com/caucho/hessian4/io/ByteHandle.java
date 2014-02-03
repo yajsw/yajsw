@@ -48,6 +48,7 @@
 
 package com.caucho.hessian4.io;
 
+import java.net.URL;
 import java.io.Serializable;
 
 /**

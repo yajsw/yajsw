@@ -49,6 +49,7 @@
 package com.caucho.hessian4.io;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Serializing a stream object.

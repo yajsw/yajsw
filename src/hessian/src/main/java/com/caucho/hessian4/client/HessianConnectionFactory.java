@@ -48,8 +48,8 @@
 
 package com.caucho.hessian4.client;
 
-import java.io.IOException;
 import java.net.URL;
+import java.io.IOException;
 
 /**
  * Internal factory for creating connections to the server.  The default

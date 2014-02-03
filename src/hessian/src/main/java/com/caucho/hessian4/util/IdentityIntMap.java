@@ -109,7 +109,7 @@ public class IdentityIntMap {
   public final int get(Object key)
   {
     int prime = _prime;
-    int hash = hashCode(key) % prime;
+    int hash = System.identityHashCode(key) % prime;
     // int hash = key.hashCode() & mask;
 
     final Object []keys = _keys;
@@ -119,7 +119,7 @@ public class IdentityIntMap {
 
       if (mapKey == null)
         return NULL;
-      else if (isEqual(mapKey, key))
+      else if (mapKey == key)
         return _values[hash];
 
       hash = (hash + 1) % prime;
@@ -132,8 +132,8 @@ public class IdentityIntMap {
   public final int put(Object key, int value, boolean isReplace)
   {
     int prime = _prime;
-    int hash = hashCode(key) % prime;
-    //int hash = key.hashCode() % prime;
+    int hash = Math.abs(System.identityHashCode(key) % prime);
+    // int hash = key.hashCode() % prime;
 
     Object []keys = _keys;
 
@@ -151,7 +151,7 @@ public class IdentityIntMap {
 
         return value;
       }
-      else if (!isEqual(key, testKey)) {
+      else if (key != testKey) {
         hash = (hash + 1) % prime;
 
         continue;
@@ -166,6 +166,16 @@ public class IdentityIntMap {
       else {
         return _values[hash];
       }
+    }
+  }
+
+  /**
+   * Removes a value in the property table.
+   */
+  public final void remove(Object key)
+  {
+    if (put(key, NULL, true) != NULL) {
+      _size--;
     }
   }
 
@@ -185,31 +195,17 @@ public class IdentityIntMap {
 
     for (int i = keys.length - 1; i >= 0; i--) {
       Object key = keys[i];
+      int value = values[i];
 
-      if (key != null) {
-        put(key, values[i], true);
+      if (key != null && value != NULL) {
+        put(key, value, true);
       }
     }
   }
 
   protected int hashCode(Object value)
   {
-	  int result = 0;
-	  if (value instanceof String)
-		  result = value.hashCode();
-	  else
-		  result = System.identityHashCode(value);
-	  if (result < 0)
-		  result = -result;
-	  return result;
-  }
-  
-  protected boolean isEqual(Object obj1, Object obj2)
-  {
-	  if (obj1 instanceof String && obj2 instanceof String)
-		  return obj1.equals(obj2);
-	  else
-		  return obj1 == obj2;
+    return System.identityHashCode(value);
   }
 
   public String toString()

@@ -48,9 +48,10 @@
 
 package com.caucho.hessian4.client;
 
-import java.io.IOException;
+import java.net.URL;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.IOException;
 
 /**
  * Internal connection to a server.  The default connection is based on
@@ -92,6 +93,12 @@ abstract public class AbstractHessianConnection implements HessianConnection {
   abstract public InputStream getInputStream()
     throws IOException;
 
+  @Override
+  public String getContentEncoding()
+  {
+    return null;
+  }
+  
   /**
    * Close/free the connection, using keepalive if appropriate.
    */

@@ -48,6 +48,8 @@
 
 package com.caucho.hessian4.io;
 
+import java.io.*;
+import java.util.HashMap;
 
 /**
  * Deserializing a JDK 1.4 StackTraceElement

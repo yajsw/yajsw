@@ -54,11 +54,12 @@ import java.io.IOException;
  * Deserializing a byte stream
  */
 abstract public class AbstractStreamDeserializer extends AbstractDeserializer {
-  abstract public Class getType();
+  abstract public Class<?> getType();
   
   /**
    * Reads the Hessian 1.0 style map.
    */
+  @Override
   public Object readMap(AbstractHessianInput in)
     throws IOException
   {
@@ -70,7 +71,7 @@ abstract public class AbstractStreamDeserializer extends AbstractDeserializer {
       if (key.equals("value"))
         value = readStreamValue(in);
       else
-	in.readObject();
+        in.readObject();
     }
 
     in.readMapEnd();
@@ -78,6 +79,7 @@ abstract public class AbstractStreamDeserializer extends AbstractDeserializer {
     return value;
   }
   
+  @Override
   public Object readObject(AbstractHessianInput in, Object []fields)
     throws IOException
   {
@@ -86,10 +88,13 @@ abstract public class AbstractStreamDeserializer extends AbstractDeserializer {
     Object value = null;
 
     for (int i = 0; i < fieldNames.length; i++) {
-      if ("value".equals(fieldNames[i]))
+      if ("value".equals(fieldNames[i])) {
         value = readStreamValue(in);
-      else
-	in.readObject();
+        in.addRef(value);
+      }
+      else {
+        in.readObject();
+      }
     }
 
     return value;

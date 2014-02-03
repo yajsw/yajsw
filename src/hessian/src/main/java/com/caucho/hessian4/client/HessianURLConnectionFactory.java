@@ -48,11 +48,14 @@
 
 package com.caucho.hessian4.client;
 
-import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.logging.Level;
+import java.net.HttpURLConnection;
+
+import java.io.IOException;
+
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Internal factory for creating connections to the server.  The default
@@ -104,9 +107,9 @@ public class HessianURLConnectionFactory implements HessianConnectionFactory {
     // Used chunked mode when available, i.e. JDK 1.5.
     if (_proxyFactory.isChunkedPost() && conn instanceof HttpURLConnection) {
       try {
-	HttpURLConnection httpConn = (HttpURLConnection) conn;
+        HttpURLConnection httpConn = (HttpURLConnection) conn;
 
-	httpConn.setChunkedStreamingMode(8 * 1024);
+        httpConn.setChunkedStreamingMode(8 * 1024);
       } catch (Throwable e) {
       }
     }

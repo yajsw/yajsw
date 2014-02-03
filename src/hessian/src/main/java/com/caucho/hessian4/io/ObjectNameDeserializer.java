@@ -56,21 +56,10 @@ import com.caucho.hessian4.HessianException;
  * Deserializing an ObjectName
  */
 public class ObjectNameDeserializer extends AbstractStringValueDeserializer {
-	
-	static final String CLASS_NAME = "javax.management.ObjectName";
-	
   @Override
-  public Class getType()
+  public Class<?> getType()
   {
-    try
-	{
-		return Class.forName(CLASS_NAME);
-	}
-	catch (ClassNotFoundException e)
-	{
-		e.printStackTrace();
-		return null;
-	}
+    return ObjectName.class;
   }
 
   @Override

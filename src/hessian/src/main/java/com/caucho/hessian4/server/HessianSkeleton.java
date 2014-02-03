@@ -60,13 +60,10 @@ import java.util.logging.Logger;
 
 import com.caucho.hessian4.io.AbstractHessianInput;
 import com.caucho.hessian4.io.AbstractHessianOutput;
-import com.caucho.hessian4.io.Hessian2Input;
-import com.caucho.hessian4.io.Hessian2Output;
 import com.caucho.hessian4.io.HessianDebugInputStream;
 import com.caucho.hessian4.io.HessianDebugOutputStream;
-import com.caucho.hessian4.io.HessianInput;
+import com.caucho.hessian4.io.HessianFactory;
 import com.caucho.hessian4.io.HessianInputFactory;
-import com.caucho.hessian4.io.HessianOutput;
 import com.caucho.hessian4.io.SerializerFactory;
 import com.caucho.hessian4.services.server.AbstractSkeleton;
 
@@ -78,7 +75,9 @@ public class HessianSkeleton extends AbstractSkeleton {
     = Logger.getLogger(HessianSkeleton.class.getName());
 
   private boolean _isDebug;
+  
   private HessianInputFactory _inputFactory = new HessianInputFactory();
+  private HessianFactory _hessianFactory = new HessianFactory();
 
   private Object _service;
 
@@ -88,7 +87,7 @@ public class HessianSkeleton extends AbstractSkeleton {
    * @param service the underlying service object.
    * @param apiClass the API interface
    */
-  public HessianSkeleton(Object service, Class apiClass)
+  public HessianSkeleton(Object service, Class<?> apiClass)
   {
     super(apiClass);
 
@@ -107,7 +106,7 @@ public class HessianSkeleton extends AbstractSkeleton {
    * @param service the underlying service object.
    * @param apiClass the API interface
    */
-  public HessianSkeleton(Class apiClass)
+  public HessianSkeleton(Class<?> apiClass)
   {
     super(apiClass);
   }
@@ -120,6 +119,11 @@ public class HessianSkeleton extends AbstractSkeleton {
   public boolean isDebug()
   {
     return _isDebug;
+  }
+  
+  public void setHessianFactory(HessianFactory factory)
+  {
+    _hessianFactory = factory;
   }
 
   /**
@@ -165,19 +169,19 @@ public class HessianSkeleton extends AbstractSkeleton {
 
     switch (header) {
     case CALL_1_REPLY_1:
-      in = new HessianInput(is);
-      out = new HessianOutput(os);
+      in = _hessianFactory.createHessianInput(is);
+      out = _hessianFactory.createHessianOutput(os);
       break;
 
     case CALL_1_REPLY_2:
-      in = new HessianInput(is);
-      out = new Hessian2Output(os);
+      in = _hessianFactory.createHessianInput(is);
+      out = _hessianFactory.createHessian2Output(os);
       break;
 
     case HESSIAN_2:
-      in = new Hessian2Input(is);
+      in = _hessianFactory.createHessian2Input(is);
       in.readCall();
-      out = new Hessian2Output(os);
+      out = _hessianFactory.createHessian2Output(os);
       break;
 
     default:
@@ -268,7 +272,7 @@ public class HessianSkeleton extends AbstractSkeleton {
     }
     else if (method == null) {
       out.writeFault("NoSuchMethodException",
-                     "The service has no method named: " + in.getMethod(),
+                     escapeMessage("The service has no method named: " + in.getMethod()),
                      null);
       out.close();
       return;
@@ -278,7 +282,7 @@ public class HessianSkeleton extends AbstractSkeleton {
 
     if (argLength != args.length && argLength >= 0) {
       out.writeFault("NoSuchMethod",
-                     "method " + method + " argument length mismatch, received length=" + argLength,
+                     escapeMessage("method " + method + " argument length mismatch, received length=" + argLength),
                      null);
       out.close();
       return;
@@ -302,7 +306,9 @@ public class HessianSkeleton extends AbstractSkeleton {
 
       log.log(Level.FINE, this + " " + e1.toString(), e1);
 
-      out.writeFault("ServiceException", e.getMessage(), e);
+      out.writeFault("ServiceException", 
+                     escapeMessage(e1.getMessage()), 
+                     e1);
       out.close();
       return;
     }
@@ -315,11 +321,44 @@ public class HessianSkeleton extends AbstractSkeleton {
 
     out.close();
   }
+  
+  private String escapeMessage(String msg)
+  {
+    if (msg == null)
+      return null;
+    
+    StringBuilder sb = new StringBuilder();
+    
+    int length = msg.length();
+    for (int i = 0; i < length; i++) {
+      char ch = msg.charAt(i);
+      
+      switch (ch) {
+      case '<':
+        sb.append("&lt;");
+        break;
+      case '>':
+        sb.append("&gt;");
+        break;
+      case 0x0:
+        sb.append("&#00;");
+        break;
+      case '&':
+        sb.append("&amp;");
+        break;
+      default:
+        sb.append(ch);
+        break;
+      }
+    }
+    
+    return sb.toString();
+  }
 
   protected boolean isDebugInvoke()
   {
     return (log.isLoggable(Level.FINEST)
-	    || isDebug() && log.isLoggable(Level.FINE));
+            || isDebug() && log.isLoggable(Level.FINE));
   }
   
   /**

@@ -55,7 +55,7 @@ import java.math.BigDecimal;
  */
 public class BigDecimalDeserializer extends AbstractStringValueDeserializer {
   @Override
-  public Class getType()
+  public Class<?> getType()
   {
     return BigDecimal.class;
   }

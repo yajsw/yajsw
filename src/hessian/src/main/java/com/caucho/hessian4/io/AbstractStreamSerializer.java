@@ -50,6 +50,7 @@ package com.caucho.hessian4.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Level;
 
 /**
  * Serializing an object containing a byte stream.
@@ -59,6 +60,7 @@ abstract public class AbstractStreamSerializer extends AbstractSerializer
   /**
    * Writes the object to the output stream.
    */
+  @Override
   public void writeObject(Object obj, AbstractHessianOutput out)
     throws IOException
   {
@@ -71,33 +73,50 @@ abstract public class AbstractStreamSerializer extends AbstractSerializer
     if (ref < -1) {
       out.writeString("value");
 
-      InputStream is = getInputStream(obj);
+      InputStream is = null;
+
       try {
-	out.writeByteStream(is);
-      } finally {
-	is.close();
+        is = getInputStream(obj);
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
+      
+      if (is != null) {
+        try {
+          out.writeByteStream(is);
+        } finally {
+          is.close();
+        }
+      } else {
+        out.writeNull();
       }
       
       out.writeMapEnd();
     }
     else {
       if (ref == -1) {
-	out.writeClassFieldLength(1);
-	out.writeString("value");
+        out.writeClassFieldLength(1);
+        out.writeString("value");
 
-	out.writeObjectBegin(getClassName(obj));
+        out.writeObjectBegin(getClassName(obj));
       }
 
-      InputStream is = getInputStream(obj);
+      InputStream is = null;
 
       try {
-	if (is != null)
-	  out.writeByteStream(is);
-	else
-	  out.writeNull();
+        is = getInputStream(obj);
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
+
+      try {
+        if (is != null)
+          out.writeByteStream(is);
+        else
+          out.writeNull();
       } finally {
-	if (is != null)
-	  is.close();
+        if (is != null)
+          is.close();
       }
     }
   }

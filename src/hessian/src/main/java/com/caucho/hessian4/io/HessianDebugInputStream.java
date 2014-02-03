@@ -51,10 +51,12 @@ package com.caucho.hessian4.io;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.logging.Level;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Debugging input stream for Hessian requests.
@@ -92,6 +94,19 @@ public class HessianDebugInputStream extends InputStream
   public HessianDebugInputStream(InputStream is, Logger log, Level level)
   {
     this(is, new PrintWriter(new LogWriter(log, level)));
+  }
+  
+  /**
+   * Creates an uninitialized Hessian input stream.
+   */
+  public HessianDebugInputStream(Logger log, Level level)
+  {
+    this(null, log, level);
+  }
+  
+  public void initPacket(InputStream is)
+  {
+    _is = is;
   }
 
   public void startTop2()
@@ -164,24 +179,24 @@ public class HessianDebugInputStream extends InputStream
     public void write(char ch)
     {
       if (ch == '\n' && _sb.length() > 0) {
-	_log.log(_level, _sb.toString());
-	_sb.setLength(0);
+        _log.log(_level, _sb.toString());
+        _sb.setLength(0);
       }
       else
-	_sb.append((char) ch);
+        _sb.append((char) ch);
     }
 
     public void write(char []buffer, int offset, int length)
     {
       for (int i = 0; i < length; i++) {
-	char ch = buffer[offset + i];
-	
-	if (ch == '\n' && _sb.length() > 0) {
-	  _log.log(_level, _sb.toString());
-	  _sb.setLength(0);
-	}
-	else
-	  _sb.append((char) ch);
+        char ch = buffer[offset + i];
+
+        if (ch == '\n' && _sb.length() > 0) {
+          _log.log(_level, _sb.toString());
+          _sb.setLength(0);
+        }
+        else
+          _sb.append((char) ch);
       }
     }
 

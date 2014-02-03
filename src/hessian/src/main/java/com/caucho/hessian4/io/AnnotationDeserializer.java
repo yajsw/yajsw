@@ -49,9 +49,15 @@
 package com.caucho.hessian4.io;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
-import java.util.logging.Logger;
+
+import java.util.logging.*;
 
 import com.caucho.hessian4.HessianException;
 
@@ -84,17 +90,17 @@ public class AnnotationDeserializer extends AbstractMapDeserializer {
 
       while (! in.isEnd()) {
         String key = in.readString();
-	Object value = in.readObject();
+        Object value = in.readObject();
 
-	valueMap.put(key, value);
+        valueMap.put(key, value);
       }
       
       in.readMapEnd();
 
       return Proxy.newProxyInstance(_annType.getClassLoader(),
-			       new Class[] { _annType },
-			       new AnnotationInvocationHandler(_annType, valueMap));
-			       
+                                    new Class[] { _annType },
+                                    new AnnotationInvocationHandler(_annType, valueMap));
+      
     } catch (IOException e) {
       throw e;
     } catch (Exception e) {
@@ -103,26 +109,26 @@ public class AnnotationDeserializer extends AbstractMapDeserializer {
   }
     
   public Object readObject(AbstractHessianInput in,
-			   Object []fields)
+                           Object []fields)
     throws IOException
   {
     String []fieldNames = (String []) fields;
     
     try {
-      int ref = in.addRef(null);
+      in.addRef(null);
 
       HashMap<String,Object> valueMap = new HashMap<String,Object>(8);
       
       for (int i = 0; i < fieldNames.length; i++) {
         String name = fieldNames[i];
 
-	valueMap.put(name, in.readObject());
+        valueMap.put(name, in.readObject());
       }
 
       return Proxy.newProxyInstance(_annType.getClassLoader(),
-			       new Class[] { _annType },
-			       new AnnotationInvocationHandler(_annType, valueMap));
-			       
+                                    new Class[] { _annType },
+                                    new AnnotationInvocationHandler(_annType, valueMap));
+      
     } catch (IOException e) {
       throw e;
     } catch (Exception e) {

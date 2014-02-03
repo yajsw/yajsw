@@ -68,7 +68,8 @@ public class BasicSerializer extends AbstractSerializer
   public static final int CHARACTER = DOUBLE + 1;
   public static final int CHARACTER_OBJECT = CHARACTER + 1;
   public static final int STRING = CHARACTER_OBJECT + 1;
-  public static final int DATE = STRING + 1;
+  public static final int STRING_BUILDER = STRING + 1;
+  public static final int DATE = STRING_BUILDER + 1;
   public static final int NUMBER = DATE + 1;
   public static final int OBJECT = NUMBER + 1;
   
@@ -149,6 +150,10 @@ public class BasicSerializer extends AbstractSerializer
       out.writeString((String) obj);
       break;
       
+    case STRING_BUILDER:
+      out.writeString(((StringBuilder) obj).toString());
+      break;
+      
     case DATE:
       out.writeUTCDate(((Date) obj).getTime());
       break;
@@ -164,7 +169,7 @@ public class BasicSerializer extends AbstractSerializer
         out.writeBoolean(data[i]);
 
       if (hasEnd)
-	out.writeListEnd();
+        out.writeListEnd();
       
       break;
     }
@@ -188,7 +193,7 @@ public class BasicSerializer extends AbstractSerializer
         out.writeInt(data[i]);
 
       if (hasEnd)
-	out.writeListEnd();
+        out.writeListEnd();
       break;
     }
 
@@ -205,7 +210,7 @@ public class BasicSerializer extends AbstractSerializer
         out.writeInt(data[i]);
 
       if (hasEnd)
-	out.writeListEnd();
+        out.writeListEnd();
       
       break;
     }
@@ -223,7 +228,7 @@ public class BasicSerializer extends AbstractSerializer
         out.writeLong(data[i]);
 
       if (hasEnd)
-	out.writeListEnd();
+        out.writeListEnd();
       break;
     }
 
@@ -240,7 +245,7 @@ public class BasicSerializer extends AbstractSerializer
         out.writeDouble(data[i]);
 
       if (hasEnd)
-	out.writeListEnd();
+        out.writeListEnd();
       break;
     }
 
@@ -256,7 +261,7 @@ public class BasicSerializer extends AbstractSerializer
         out.writeDouble(data[i]);
 
       if (hasEnd)
-	out.writeListEnd();
+        out.writeListEnd();
       break;
     }
 
@@ -274,7 +279,7 @@ public class BasicSerializer extends AbstractSerializer
       }
 
       if (hasEnd)
-	out.writeListEnd();
+        out.writeListEnd();
       break;
     }
 
@@ -299,7 +304,7 @@ public class BasicSerializer extends AbstractSerializer
       }
 
       if (hasEnd)
-	out.writeListEnd();
+        out.writeListEnd();
       break;
     }
     

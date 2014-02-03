@@ -48,20 +48,18 @@
 
 package com.caucho.hessian4.io;
 
-import java.io.InputStream;
-import java.lang.ref.SoftReference;
+import com.caucho.hessian4.HessianException;
+
+import java.io.*;
+import java.math.BigDecimal;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
-import java.util.WeakHashMap;
+import java.lang.ref.SoftReference;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.caucho.hessian4.HessianException;
+import java.lang.annotation.Annotation;
+import java.lang.ref.WeakReference;
 
 /**
  * The classloader-specific Factory for returning serialization
@@ -85,7 +83,7 @@ public class ContextSerializerFactory
   private static HashMap _staticClassNameMap;
 
   private ContextSerializerFactory _parent;
-  private ClassLoader _loader;
+  private WeakReference<ClassLoader> _loaderRef;
 
   private final HashSet<String> _serializerFiles = new HashSet<String>();
   private final HashSet<String> _deserializerFiles = new HashSet<String>();
@@ -96,8 +94,8 @@ public class ContextSerializerFactory
   private final ConcurrentHashMap<String,Serializer> _customSerializerMap
     = new ConcurrentHashMap<String,Serializer>();
 
-  private final HashMap<Class,Serializer> _serializerInterfaceMap
-    = new HashMap<Class,Serializer>();
+  private final HashMap<Class<?>,Serializer> _serializerInterfaceMap
+    = new HashMap<Class<?>,Serializer>();
 
   private final HashMap<String,Deserializer> _deserializerClassMap
     = new HashMap<String,Deserializer>();
@@ -108,8 +106,8 @@ public class ContextSerializerFactory
   private final ConcurrentHashMap<String,Deserializer> _customDeserializerMap
     = new ConcurrentHashMap<String,Deserializer>();
 
-  private final HashMap<Class,Deserializer> _deserializerInterfaceMap
-    = new HashMap<Class,Deserializer>();
+  private final HashMap<Class<?>,Deserializer> _deserializerInterfaceMap
+    = new HashMap<Class<?>,Deserializer>();
 
   public ContextSerializerFactory(ContextSerializerFactory parent,
                                   ClassLoader loader)
@@ -117,7 +115,7 @@ public class ContextSerializerFactory
     if (loader == null)
       loader = _systemClassLoader;
 
-    _loader = loader;
+    _loaderRef = new WeakReference<ClassLoader>(loader);
 
     init();
   }
@@ -156,7 +154,12 @@ public class ContextSerializerFactory
 
   public ClassLoader getClassLoader()
   {
-    return _loader;
+    WeakReference<ClassLoader> loaderRef = _loaderRef;
+    
+    if (loaderRef != null)
+      return loaderRef.get();
+    else
+      return null;
   }
 
   /**
@@ -324,9 +327,16 @@ public class ContextSerializerFactory
                                    Class type)
   {
     try {
-      Enumeration iter;
+      ClassLoader classLoader = getClassLoader();
+      
+      // on systems with the security manager enabled, the system classloader
+      // is null
+      if (classLoader == null)
+        return;
 
-      iter = getClassLoader().getResources(fileName);
+      Enumeration iter;
+      
+      iter = classLoader.getResources(fileName);
       while (iter.hasMoreElements()) {
         URL url = (URL) iter.nextElement();
 
@@ -350,14 +360,14 @@ public class ContextSerializerFactory
             Class serializerClass = null;
 
             try {
-              apiClass = Class.forName(apiName, false, getClassLoader());
+              apiClass = Class.forName(apiName, false, classLoader);
             } catch (ClassNotFoundException e) {
               log.fine(url + ": " + apiName + " is not available in this context: " + getClassLoader());
               continue;
             }
 
             try {
-              serializerClass = Class.forName(serializerName, false, getClassLoader());
+              serializerClass = Class.forName(serializerName, false, classLoader);
             } catch (ClassNotFoundException e) {
               log.fine(url + ": " + serializerName + " is not available in this context: " + getClassLoader());
               continue;
@@ -419,6 +429,7 @@ public class ContextSerializerFactory
 
     addBasic(boolean[].class, "[boolean", BasicSerializer.BOOLEAN_ARRAY);
     addBasic(byte[].class, "[byte", BasicSerializer.BYTE_ARRAY);
+    _staticSerializerMap.put(byte[].class.getName(), ByteArraySerializer.SER);
     addBasic(short[].class, "[short", BasicSerializer.SHORT_ARRAY);
     addBasic(int[].class, "[int", BasicSerializer.INTEGER_ARRAY);
     addBasic(long[].class, "[long", BasicSerializer.LONG_ARRAY);

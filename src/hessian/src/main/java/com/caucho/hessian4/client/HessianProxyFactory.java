@@ -55,7 +55,15 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Hashtable;
 import java.util.logging.Logger;
+
+import javax.naming.Context;
+import javax.naming.Name;
+import javax.naming.NamingException;
+import javax.naming.RefAddr;
+import javax.naming.Reference;
+import javax.naming.spi.ObjectFactory;
 
 import com.caucho.hessian4.io.AbstractHessianInput;
 import com.caucho.hessian4.io.AbstractHessianOutput;
@@ -109,7 +117,7 @@ import com.caucho.hessian4.services.client.ServiceProxyFactory;
  * <p>The proxy can use HTTP basic authentication if the user and the
  * password are set.
  */
-public class HessianProxyFactory implements ServiceProxyFactory /*, ObjectFactory */{
+public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
   protected static Logger log
     = Logger.getLogger(HessianProxyFactory.class.getName());
 
@@ -340,13 +348,13 @@ public class HessianProxyFactory implements ServiceProxyFactory /*, ObjectFactor
       
     try {
       if (className != null) {
-	ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	
-	Class<?> cl = Class.forName(className, false, loader);
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-	factory = (HessianConnectionFactory) cl.newInstance();
+        Class<?> cl = Class.forName(className, false, loader);
 
-	return factory;
+        factory = (HessianConnectionFactory) cl.newInstance();
+
+        return factory;
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -414,7 +422,7 @@ public class HessianProxyFactory implements ServiceProxyFactory /*, ObjectFactor
    *
    * @return a proxy to the object with the specified interface.
    */
-  public Object create(Class api, String urlName, ClassLoader loader)
+  public Object create(Class<?> api, String urlName, ClassLoader loader)
     throws MalformedURLException
   {
     URL url = new URL(urlName);
@@ -506,46 +514,44 @@ public class HessianProxyFactory implements ServiceProxyFactory /*, ObjectFactor
     return out;
   }
 
-//  /**
-//   * JNDI object factory so the proxy can be used as a resource.
-//   */
-//  public Object getObjectInstance(Object obj, Name name,
-//                                  Context nameCtx, Hashtable<?,?> environment)
-//    throws Exception
-//  {
-//    Reference ref = (Reference) obj;
-//
-//    String api = null;
-//    String url = null;
-//    String user = null;
-//    String password = null;
-//
-//    for (int i = 0; i < ref.size(); i++) {
-//      RefAddr addr = ref.get(i);
-//
-//      String type = addr.getType();
-//      String value = (String) addr.getContent();
-//
-//      if (type.equals("type"))
-//        api = value;
-//      else if (type.equals("url"))
-//        url = value;
-//      else if (type.equals("user"))
-//        setUser(value);
-//      else if (type.equals("password"))
-//        setPassword(value);
-//    }
-//
-//    if (url == null)
-//      throw new NamingException("`url' must be configured for HessianProxyFactory.");
-//    // XXX: could use meta protocol to grab this
-//    if (api == null)
-//      throw new NamingException("`type' must be configured for HessianProxyFactory.");
-//
-//    Class apiClass = Class.forName(api, false, _loader);
-//
-//    return create(apiClass, url);
-//  }
+  /**
+   * JNDI object factory so the proxy can be used as a resource.
+   */
+  public Object getObjectInstance(Object obj, Name name,
+                                  Context nameCtx, Hashtable<?,?> environment)
+    throws Exception
+  {
+    Reference ref = (Reference) obj;
+
+    String api = null;
+    String url = null;
+    
+    for (int i = 0; i < ref.size(); i++) {
+      RefAddr addr = ref.get(i);
+
+      String type = addr.getType();
+      String value = (String) addr.getContent();
+
+      if (type.equals("type"))
+        api = value;
+      else if (type.equals("url"))
+        url = value;
+      else if (type.equals("user"))
+        setUser(value);
+      else if (type.equals("password"))
+        setPassword(value);
+    }
+
+    if (url == null)
+      throw new NamingException("`url' must be configured for HessianProxyFactory.");
+    // XXX: could use meta protocol to grab this
+    if (api == null)
+      throw new NamingException("`type' must be configured for HessianProxyFactory.");
+
+    Class apiClass = Class.forName(api, false, _loader);
+
+    return create(apiClass, url);
+  }
 
   /**
    * Creates the Base64 value.
