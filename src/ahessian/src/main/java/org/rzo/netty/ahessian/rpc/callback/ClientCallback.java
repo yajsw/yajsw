@@ -5,10 +5,16 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelHandlerContext;
 import org.rzo.netty.ahessian.Constants;
+import org.rzo.netty.ahessian.rpc.message.HessianRPCCallMessage;
+import org.rzo.netty.ahessian.rpc.message.HessianRPCReplyMessage;
 
 
 public class ClientCallback implements Serializable
@@ -18,6 +24,7 @@ public class ClientCallback implements Serializable
 	private Long _id;
 	private String _callbackClass;
 	private String[] _interfaces;
+	private String[] _returnMethods;
 	private static final AtomicLong _idCounter = new AtomicLong();
 	private transient boolean _done = false;
 	
@@ -35,7 +42,27 @@ public class ClientCallback implements Serializable
 		// determine the interfaces on the client, 
 		// to avoid that the server needs to know the callback implementation
 		_interfaces = determineInterfaces(_callback.getClass());
+		_returnMethods = determineReturnMethods(_callback.getClass());
 	}
+
+	private String[] determineReturnMethods(Class<? extends Callback> clazz)
+	{
+		List<Method> methods = new ArrayList();
+		for (Method method : clazz.getDeclaredMethods())
+		{
+			if (!method.getReturnType().equals(Void.TYPE))
+				methods.add(method);
+		}
+		String[] result = new String[methods.size()];
+		int i = 0;
+		for (Method method : methods)
+		{
+			result[i] = method.getName();
+			i++;
+		}
+		return result;
+	}
+
 
 	private String[] determineInterfaces(Class clazz)
 	{
@@ -61,11 +88,13 @@ public class ClientCallback implements Serializable
 		return _id;
 	}
 
-	public void invoke(CallbackReplyMessage message)
+	public void invoke(CallbackReplyMessage message, ChannelHandlerContext ctx)
 	{
+		String methodName = message.getMethod();
+		Object result = null;
+		Exception fault = null;
 		try
 		{
-		String methodName = message.getMethod();
 		Object[] args = message.getArgs();
 		if (args == null)
 			args = new Object[0];
@@ -74,16 +103,34 @@ public class ClientCallback implements Serializable
 		{
 			if (methodName.equals(method.getName()) && method.getParameterTypes().length == args.length)
 			{
-				method.invoke(_callback, args);
+				result = method.invoke(_callback, args);
 				break;
 			}
 		}
 		}
 		catch (Exception ex)
 		{
-			Constants.ahessianLogger.warn("", ex);
+			Constants.ahessianLogger.warn("error invoking "+methodName, ex);
+			fault = ex;
 		}
+		handleCallbackResult(fault, result, message, ctx);
 	}
+	
+	private void handleCallbackResult(Object fault, Object result, CallbackReplyMessage message, ChannelHandlerContext ctx)
+	{
+		Map<Object, Object> headers = new HashMap();
+		headers.put(Constants.ICALLBACK_CALL_ID_HEADER_KEY, message.getCallbackCallId());
+		HessianRPCCallMessage call = new HessianRPCCallMessage(message.getCallbackMethod(), new Object[]{fault, result}, headers, null);
+		writeResult(call, ctx.getChannel());
+	}
+	
+
+
+	private void writeResult(HessianRPCCallMessage reply, Channel channel)
+	{
+		channel.write(reply);
+	}
+
 
 	public String getCallbackClass()
 	{
@@ -101,9 +148,24 @@ public class ClientCallback implements Serializable
 		ClassLoader cl = cc.getClass().getClassLoader();
 		List<Class> clazzes = new ArrayList();
 		for (String clz : cc.getInterfaces())
+			try
+		{
 			clazzes.add(cl.loadClass(clz));
+		}
+		catch (Exception ex)
+		{
+			System.out.println("error loading: "+clz);
+		}
+		if (!clazzes.contains(Callback.class))
+			clazzes.add(Callback.class);
 		return Proxy.newProxyInstance(cl, (Class[])clazzes.toArray(new Class[clazzes.size()]), serverCallbackProxy);
 
+	}
+
+
+	public String[] getReturnMethods()
+	{
+		return _returnMethods;
 	}
 	
 }

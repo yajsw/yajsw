@@ -149,6 +149,11 @@ public class Hessian2Output extends com.caucho.hessian4.io.Hessian2Output implem
 				writeInt(CALL_ID_HEADER_KEY);
 				writeObject(message.getCallId());				
 			}
+			if (message.getCallbackCallId() != null)
+			{
+				writeInt(CALLBACK_CALL_ID_HEADER_KEY);
+				writeObject(message.getCallbackCallId());				
+			}
 			if (message.getCompleted() != null)
 			{
 				writeInt(COMPLETED_HEADER_KEY);

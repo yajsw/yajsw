@@ -17,6 +17,9 @@ public interface Constants
 	
 	public static final Integer COMPLETED_HEADER_KEY = 7;
 	public static final Integer HAS_SESSION_FILTER_HEADER_KEY = 8;
+
+	public static final Integer CALLBACK_CALL_ID_HEADER_KEY = 9;
+
 	
 	public static final int IGROUP_HEADER_KEY = 0;
 	public static final int ICALL_ID_HEADER_KEY = 1;
@@ -27,9 +30,11 @@ public interface Constants
 	public static final int ICALLBACK_ARGS_HEADER_KEY = 5;
 	public static final int ICALLBACK_DONE_HEADER_KEY = 6;
 	
+	
 	public static final int ICOMPLETED_HEADER_KEY = 7;
 	public static final int IHAS_SESSION_FILTER_HEADER_KEY = 8;
 	
+	public static final int ICALLBACK_CALL_ID_HEADER_KEY = 9;
 	
 	public static final InternalLogger ahessianLogger =
         InternalLoggerFactory.getInstance("ahessian");

@@ -314,7 +314,7 @@ public class HessianProxyFactory extends SimpleChannelHandler implements Constan
 	 * org.jboss.netty.channel.MessageEvent)
 	 */
 	@Override
-	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception
+	public void messageReceived(final ChannelHandlerContext ctx, MessageEvent e) throws Exception
 	{
 		if (e.getMessage() instanceof HessianRPCReplyMessage)
 		{
@@ -352,7 +352,7 @@ public class HessianProxyFactory extends SimpleChannelHandler implements Constan
 									// caller should get a stream, not the reply
 									message.setValue(stream);
 								}
-								future.set(message);
+								future.set(message, ctx);
 								// check in case this was a callback
 								if (future.isDone())
 									if (!future.hasCallbacks())

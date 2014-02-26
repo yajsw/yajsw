@@ -93,7 +93,10 @@ public class HessianRPCCallMessage implements Constants, GroupedMessage
 		if (_args != null)
 		for (int i=0; i<_args.length; i++)
 		{
+			if (_args[i] != null)
 			sb.append(_args[i].toString());
+			else
+				sb.append("null");
 			if (i != _args.length-1)
 				sb.append(',');
 		}

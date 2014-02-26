@@ -69,6 +69,7 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 		Object value = null;
 		Object fault = null;
 		Long callbackId = null;
+		Long callbackCallId = null;
 		String callbackMethod = null;
 		Object[] callbackArgs = null;
 		Boolean callbackDone = null;
@@ -100,6 +101,9 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 				
 				case ICALLBACK_ID_HEADER_KEY:
 					callbackId = (Long)hvalue;
+					break;
+				case ICALLBACK_CALL_ID_HEADER_KEY:
+					callbackCallId = (Long)hvalue;
 					break;
 				case ICALLBACK_METHOD_HEADER_KEY:
 					callbackMethod = (String) hvalue;
@@ -157,6 +161,7 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 				result.setCallId(callId);
 				result.setCompleted(completed);
 				result.setGroup(group);
+				result.setCallbackCallId(callbackCallId);
 				return result;
 			}
 			else

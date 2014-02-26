@@ -1,7 +1,11 @@
 package org.rzo.netty.ahessian.rpc.message;
 
+import java.util.Map;
+
 import org.jboss.netty.channel.Channel;
 import org.rzo.netty.ahessian.Constants;
+import org.rzo.netty.ahessian.io.OutputStreamEncoder;
+import org.rzo.netty.ahessian.rpc.callback.CallbackReplyMessage;
 
 /**
  * reply message for a remote invocation
@@ -22,7 +26,10 @@ public class HessianRPCReplyMessage implements Constants, GroupedMessage
 	String _callbackMethod;
 	Integer _group;
 	Boolean _completed;
-	int _headersCount = 0;
+	protected int _headersCount = 0;
+	
+	private Long _callbackCallId = null;
+
 	
 	
 	
@@ -42,6 +49,9 @@ public class HessianRPCReplyMessage implements Constants, GroupedMessage
 		_fault = (Throwable) fault;
 		_call = call;
 	}
+	
+
+
 
 	public HessianRPCReplyMessage()
 	{
@@ -199,6 +209,22 @@ public class HessianRPCReplyMessage implements Constants, GroupedMessage
 	{
 		return _headersCount;
 	}
+	
+	public void setCallbackCallId(Long callId)
+	{
+		if (callId != null)
+		{
+			_callbackCallId = callId;
+			_headersCount++;
+		}
+	}
+	
+	public Long getCallbackCallId()
+	{
+		return _callbackCallId;
+	}
+
+
 	
 	
 

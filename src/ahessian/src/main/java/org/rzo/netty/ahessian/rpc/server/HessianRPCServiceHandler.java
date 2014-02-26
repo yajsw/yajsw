@@ -19,6 +19,7 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.jboss.netty.util.Timer;
 import org.rzo.netty.ahessian.Constants;
+import org.rzo.netty.ahessian.rpc.callback.ServerCallbackProxy;
 import org.rzo.netty.ahessian.rpc.message.FlushRequestMessage;
 import org.rzo.netty.ahessian.rpc.message.HessianRPCCallMessage;
 import org.rzo.netty.ahessian.rpc.message.HessianRPCReplyMessage;
@@ -337,10 +338,27 @@ public class HessianRPCServiceHandler extends SimpleChannelUpstreamHandler imple
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception
 	{
-		HessianRPCCallMessage message = (HessianRPCCallMessage) e.getMessage();
+		Object obj = e.getMessage();
+		if (obj instanceof HessianRPCCallMessage)
+		{
+		HessianRPCCallMessage message = (HessianRPCCallMessage) obj;
+		Long callbackCallId = (Long) message.getHeaders().get(Constants.CALLBACK_CALL_ID_HEADER_KEY);
+		if (callbackCallId == null)
+		{
 		Integer group = (Integer) message.getHeaders().get(Constants.GROUP_HEADER_KEY);
 		_pendingCalls.put(message, group);
+		}
+		else
+			handleCallbackReply(message);
+		}
+		else
+			throw new RuntimeException("unexpected message type: "+obj.getClass());
+	}
 
+	private void handleCallbackReply(HessianRPCCallMessage message)
+	{
+		System.out.println("received callback reply "+message.getMethod() + " "+ message.getHeaders().get(Constants.CALLBACK_CALL_ID_HEADER_KEY));
+		ServerCallbackProxy.setCallbackResult(message);
 	}
 
 	private HessianSkeleton getService(HessianRPCCallMessage message)

@@ -13,11 +13,13 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.util.Timeout;
 import org.rzo.netty.ahessian.Constants;
 import org.rzo.netty.ahessian.rpc.callback.Callback;
 import org.rzo.netty.ahessian.rpc.callback.CallbackReplyMessage;
 import org.rzo.netty.ahessian.rpc.callback.ClientCallback;
+import org.rzo.netty.ahessian.rpc.message.HessianRPCCallMessage;
 import org.rzo.netty.ahessian.rpc.message.HessianRPCReplyMessage;
 import org.rzo.netty.ahessian.utils.MyReentrantLock;
 
@@ -44,6 +46,7 @@ public class HessianProxyFuture implements Future<Object>, Constants
 	private Collection<Runnable> _listeners = Collections.synchronizedCollection(new ArrayList<Runnable>());
 	private volatile Map<Long, ClientCallback> _callbacks = Collections.synchronizedMap(new HashMap());
 	private volatile Timeout _timeout = null;
+	private volatile HessianRPCCallMessage _callbackResult;
 
 	/* (non-Javadoc)
 	 * @see java.util.concurrent.Future#cancel(boolean)
@@ -73,6 +76,37 @@ public class HessianProxyFuture implements Future<Object>, Constants
 				throw new ExecutionException(_result.getFault());
 			else
 				return _result.getValue();
+		}
+		finally
+		{
+			_lock.unlock();
+		}
+	}
+
+	public Object getCallbackResult() throws InterruptedException, ExecutionException
+	{
+		_lock.lock();
+		try
+		{
+			while (_callbackResult == null)
+			{
+				_resultReceived.await();
+			}
+			Throwable exception = null;
+			Object result = null;
+			Object[] args = _callbackResult.getArgs();
+			if (args == null)
+				return null;
+			if (args.length == 0)
+				return null;
+			if (args.length >= 1)
+				exception = (Throwable) args[0];
+			if (args.length == 2)
+				result = args[1];
+			if (exception != null)
+				throw new ExecutionException(exception);
+			else
+				return result;
 		}
 		finally
 		{
@@ -122,8 +156,13 @@ public class HessianProxyFuture implements Future<Object>, Constants
 	{
 		return _done;
 	}
-
+	
 	protected synchronized void set(HessianRPCReplyMessage message)
+	{
+		set( message, null);
+	}
+	
+	public synchronized void set(HessianRPCReplyMessage message, ChannelHandlerContext ctx)
 	{
 		_lock.lock();
 		if (_timeout != null)
@@ -132,7 +171,7 @@ public class HessianProxyFuture implements Future<Object>, Constants
 		{
 			if (message instanceof CallbackReplyMessage)
 			{
-				handleCallbackReply((CallbackReplyMessage)message);					
+				handleCallbackReply((CallbackReplyMessage)message, ctx);					
 			}
 			else
 			{
@@ -148,7 +187,25 @@ public class HessianProxyFuture implements Future<Object>, Constants
 		}
 	}
 	
-	private void handleCallbackReply(CallbackReplyMessage message)
+	public synchronized void setCallbackResult(HessianRPCCallMessage result)
+	{
+		_lock.lock();
+		if (_timeout != null)
+			_timeout.cancel();
+		try
+		{
+			_done = true;
+			_callbackResult = result;
+			_resultReceived.signal();
+			callListners();
+		}
+		finally
+		{
+			_lock.unlock();
+		}
+	}
+	
+	private void handleCallbackReply(CallbackReplyMessage message, ChannelHandlerContext ctx)
 	{
 		Long callbackId = message.getCallbackId();
 		if (callbackId == null)
@@ -159,7 +216,7 @@ public class HessianProxyFuture implements Future<Object>, Constants
 			System.out.println("no callback found for "+callbackId);
 			return;
 		}
-		callback.invoke(message);
+		callback.invoke(message, ctx);
 		if (message.isDone())
 		{
 			_callbacks.remove(callbackId);
@@ -240,7 +297,7 @@ public class HessianProxyFuture implements Future<Object>, Constants
 		_timeout = null;
 		try
 		{
-			this.set(new HessianRPCReplyMessage(null, new TimeoutException(),null));
+			this.set(new HessianRPCReplyMessage(null, new TimeoutException(), null));
 		}
 		finally
 		{
