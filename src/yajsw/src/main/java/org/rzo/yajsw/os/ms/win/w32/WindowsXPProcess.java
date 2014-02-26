@@ -1467,7 +1467,7 @@ public class WindowsXPProcess extends AbstractProcess
 		 * lpProcessInfo );
 		 */
 		boolean CreateProcessWithLogonW(WString lpUsername, WString lpDomain, WString lpPassword, int dwLogonFlags, WString lpApplicationName,
-				WString lpCommandLine, int dwCreationFlags, Pointer lpEnvironment, WString lpCurrentDirectory, Structure lpStartupInfo,
+				WString lpCommandLine, int dwCreationFlags, Memory lpEnvironment, WString lpCurrentDirectory, Structure lpStartupInfo,
 				Structure lpProcessInfo);
 
 		public static final int	LOGON_WITH_PROFILE			= 0x00000001;
@@ -1512,7 +1512,7 @@ public class WindowsXPProcess extends AbstractProcess
 		 * LPPROCESS_INFORMATION lpProcessInformation );
 		 */
 		boolean CreateProcessAsUserW(Pointer hToken, WString lpApplicationName, WString lpCommandLine, Structure lpProcessAttributes,
-				Structure lpThreadAttributes, boolean bInheritHandles, int dwCreationFlags, Structure lpEnvironment, WString lpCurrentDirectory,
+				Structure lpThreadAttributes, boolean bInheritHandles, int dwCreationFlags, Memory lpEnvironment, WString lpCurrentDirectory,
 				Structure lpStartupInfo, Structure lpProcessInformation);
 
 		static class SECURITY_ATTRIBUTES
@@ -1929,7 +1929,7 @@ public class WindowsXPProcess extends AbstractProcess
 							creationFlag |= MyKernel32.CREATE_NO_WINDOW | MyKernel32.CREATE_UNICODE_ENVIRONMENT;
 							creationFlag |= getPriorityFlag(_priority);
 							result = MyAdvapi.INSTANCE.CreateProcessAsUserW(phNewToken.getValue(), null, cmd, null, null, _pipeStreams, creationFlag,
-									null, new WString(getWorkingDir()), _startupInfo, _processInformation);
+									environment, new WString(getWorkingDir()), _startupInfo, _processInformation);
 							log("started "+result);
 						}
 					}
@@ -2092,7 +2092,7 @@ public class WindowsXPProcess extends AbstractProcess
 							// creationFlag, null, wDir, _startupInfo,
 							// _processInformation);
 							result = MyAdvapi.INSTANCE.CreateProcessAsUserW(phToken.getValue(), null, cmd, null, null, _pipeStreams, creationFlag,
-									null, new WString(getWorkingDir()), _startupInfo, _processInformation);
+									environment, new WString(getWorkingDir()), _startupInfo, _processInformation);
 
 					}
 
