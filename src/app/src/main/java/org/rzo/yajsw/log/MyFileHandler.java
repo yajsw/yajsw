@@ -409,6 +409,9 @@ public class MyFileHandler extends StreamHandler {
 		    // object.  Try again.
 		    continue;
 	        }
+		File f = new File(lockFileName);
+		if (!f.getParentFile().exists())
+			f.mkdirs();
 		FileChannel fc;
 		try {
 		    lockStream = new FileOutputStream(lockFileName);
