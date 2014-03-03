@@ -17,6 +17,7 @@ import org.rzo.netty.ahessian.rpc.server.HessianRPCServiceHandler;
 import org.rzo.netty.ahessian.session.ServerSessionFilter;
 
 import com.caucho.hessian4.io.AbstractSerializerFactory;
+import com.caucho.hessian4.io.HessianProtocolException;
 import com.caucho.hessian4.io.SerializerFactory;
 
 /**
@@ -44,7 +45,7 @@ public class HessianRPCCallDecoder implements InputStreamConsumer, Constants
 	}
 
 	
-    public void consume(ChannelHandlerContext ctx, InputStream inx) 
+    public void consume(ChannelHandlerContext ctx, InputStream inx)
     {
 		HessianRPCCallMessage result = null;
 		boolean getNextMessage = true;
@@ -67,7 +68,10 @@ public class HessianRPCCallDecoder implements InputStreamConsumer, Constants
 		int ch;
 		if ((ch=in.read()) != 'H')
 		{
-			ahessianLogger.warn("H expected got " + "0x" + Integer.toHexString(ch & 0xff) + " (" + (char) + ch + ")");
+			if (ch == 0)
+				ahessianLogger.info("H expected got Ping");
+			else
+				ahessianLogger.warn("H expected got " + "0x" + Integer.toHexString(ch & 0xff) + " (" + (char) + ch + ")");
 			continue;
 		}
 		in.read();

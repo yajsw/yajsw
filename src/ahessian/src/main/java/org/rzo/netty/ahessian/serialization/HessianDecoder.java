@@ -61,7 +61,10 @@ public class HessianDecoder extends SimpleChannelUpstreamHandler
 		}
 		catch (Exception ex)
 		{
-			Constants.ahessianLogger.debug("", ex);
+			if (ex.getMessage().startsWith("H expected got 0x0 ("))
+				Constants.ahessianLogger.info("Ping received");
+			else
+				Constants.ahessianLogger.debug("", ex);
 		}
     }
     

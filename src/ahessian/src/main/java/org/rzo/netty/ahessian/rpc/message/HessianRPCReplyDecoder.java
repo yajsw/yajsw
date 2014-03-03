@@ -46,7 +46,10 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 	{
 		while (ctx.getChannel().isConnected() && !isBufferEmpty())
 		{
-			Channels.fireMessageReceived(ctx, parseReply(in));
+			HessianRPCReplyMessage m = parseReply(in);
+			if (m != null)
+			Channels.fireMessageReceived(ctx, m);
+
 			in.resetReferences();
 
 				if (isBufferEmpty())
@@ -54,6 +57,7 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 					break;
 				}
 		}
+
 	}
 
 	/**
@@ -81,7 +85,7 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 		{
 			if ((code = in.read()) != 'H')
 			{
-				throw new HessianProtocolException("'" + (char) code + "' is an unknown code");
+				throw new HessianProtocolException("H expected got " + "0x" + Integer.toHexString(code & 0xff) + " (" + (char) + code + ")");
 			}
 			in.read();
 			in.read();
@@ -176,16 +180,21 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 		}
 		catch (Throwable ex)
 		{
-			Constants.ahessianLogger.warn("", ex);
+			if (ex.getMessage().startsWith("H expected got 0x0"))
+				Constants.ahessianLogger.info("received Ping");
+			else
+				Constants.ahessianLogger.warn("", ex);
+			if (callId != null)
 			{
 				HessianRPCReplyMessage result = new HessianRPCReplyMessage(null, ex, null);
 				result.setCallId(callId);
 				result.setGroup(group);
 				result.setCallbackId(callbackId);
 				return result;
-
 			}
+
 		}
+		return null;
 
 	}
 
