@@ -1,6 +1,7 @@
 package org.rzo.netty.ahessian.stopable;
 
-import org.jboss.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandler;
+
 
 public interface StopableHandler extends ChannelHandler
 {

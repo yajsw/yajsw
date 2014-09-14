@@ -1,5 +1,7 @@
 package org.rzo.netty.ahessian.rpc.client;
 
+import io.netty.channel.Channel;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -9,7 +11,6 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.Future;
 
-import org.jboss.netty.channel.Channel;
 import org.rzo.netty.ahessian.Constants;
 import org.rzo.netty.ahessian.rpc.message.HessianRPCReplyMessage;
 
@@ -62,8 +63,19 @@ public class AsyncHessianProxy implements InvocationHandler, Constants
 		  public Object invoke(Object proxy, Method method, Object []args)
 		    throws Throwable
 		  {
+			  
+			  if (method.getName().equals("hashCode")  && (args == null || args.length == 0))
+					return new Integer(System.identityHashCode(this));
+				      else if (method.getName().equals("getHessianType"))
+					return proxy.getClass().getInterfaces()[0].getName();
+				      else if (method.getName().equals("toString") && (args == null || args.length == 0))
+					return "HessianProxy[" + _api + "]";
+			  
 		    String mangleName;
 		    Channel channel = getChannel();
+
+		    if (method.getName().equals("getHessianURL"))
+			return channel == null ? "?" : channel.toString();
 
 		    synchronized (_mangleMap) {
 		      mangleName = _mangleMap.get(method);
@@ -89,14 +101,6 @@ public class AsyncHessianProxy implements InvocationHandler, Constants
 
 			return new Boolean(this.equals(handler));
 		      }
-		      else if (methodName.equals("hashCode") && params.length == 0)
-			return new Integer(System.identityHashCode(this));
-		      else if (methodName.equals("getHessianType"))
-			return proxy.getClass().getInterfaces()[0].getName();
-		      else if (methodName.equals("getHessianURL"))
-			return channel == null ? "?" : channel.toString();
-		      else if (methodName.equals("toString") && params.length == 0)
-			return "HessianProxy[" + _api + "]";
 		      
 		      if (! _factory.isOverloadEnabled())
 			mangleName = method.getName();
@@ -179,7 +183,7 @@ public class AsyncHessianProxy implements InvocationHandler, Constants
 			  Channel c = getChannel();
 			  if (c == null)
 				  return null;
-			  InetSocketAddress addr =  (InetSocketAddress) c.getRemoteAddress();
+			  InetSocketAddress addr =  (InetSocketAddress) c.remoteAddress();
 			  return addr.getHostName();
 		  }
 		  

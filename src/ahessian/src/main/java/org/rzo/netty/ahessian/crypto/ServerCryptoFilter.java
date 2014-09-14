@@ -1,5 +1,12 @@
 package org.rzo.netty.ahessian.crypto;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerAdapter;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
+
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -10,22 +17,12 @@ import java.util.List;
 
 import javax.crypto.Cipher;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
 import org.rzo.netty.ahessian.log.OutLogger;
 
-public class ServerCryptoFilter extends SimpleChannelHandler implements CryptoConstants
+public class ServerCryptoFilter extends ChannelHandlerAdapter implements CryptoConstants
 {
 	KeyPair _serverKeyPair;
 	Key		_clientKey;
-	ChannelStateEvent _connectedEvent;
 	private StreamCipher _encodeCipher;
 	private StreamCipher _decodeCipher;
 	private byte[] _cryptedIvKeyMessage;
@@ -34,26 +31,22 @@ public class ServerCryptoFilter extends SimpleChannelHandler implements CryptoCo
 
 
 	@Override
-    public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		// send public key
 		sendByteArray(ctx, getPublicKeyEncoded());
-		// remember this event, so that we can propagate it to the rest of the pipeline once we have 
-		// the client's secret key
-		_connectedEvent = e;
     }
 
 	private void sendByteArray(ChannelHandlerContext ctx, byte[] buffer)
 	{
 		try
 		{
-        Channel channel = ctx.getChannel();
-		ChannelFuture future = Channels.future(ctx.getChannel());
-		ChannelBuffer b = ChannelBuffers.dynamicBuffer();
+        Channel channel = ctx.channel();
+		ByteBuf b = Unpooled.buffer();
 		// first send encoded key bytes size
 		b.writeInt(buffer.length);
 		// then the public key
 		b.writeBytes(buffer);
-		Channels.write(ctx, future, b);
+		ctx.write(b);
 		}
 		catch (Exception e)
 		{
@@ -83,18 +76,18 @@ public class ServerCryptoFilter extends SimpleChannelHandler implements CryptoCo
 	}
 	
 	@Override
-	public void messageReceived(
-            ChannelHandlerContext ctx, MessageEvent e) throws Exception
+	public void channelRead(
+            ChannelHandlerContext ctx, Object e) throws Exception
             {
 				// have we sent our secret key ?
 				if (_decodeCipher != null)
 				{
-					MessageEvent m = Util.code(_decodeCipher, e, true);
-					ctx.sendUpstream(m);
+					ByteBuf m = Util.code(_decodeCipher, (ByteBuf) e, true);
+					ctx.fireChannelRead(m);
 				}
 				else
 				{
-					ChannelBuffer b = (ChannelBuffer) e.getMessage();
+					ByteBuf b = (ByteBuf) e;
 					// is this our first message ?
 					if (_cryptedIvKeyMessage == null)
 					{
@@ -102,7 +95,7 @@ public class ServerCryptoFilter extends SimpleChannelHandler implements CryptoCo
 						// consistency check, so we do not get an out of memory exception
 						if (size > 1024)
 						{
-							ctx.getChannel().close();
+							ctx.channel().close();
 							return;
 						}
 						_cryptedIvKeyMessage = new byte[size];
@@ -124,11 +117,11 @@ public class ServerCryptoFilter extends SimpleChannelHandler implements CryptoCo
 						catch (Exception ex)
 						{
 							ex.printStackTrace();
-							ctx.getChannel().close();
+							ctx.channel().close();
 						}
 						// inform pipline that we are ready for encrypted communication
 						if (ok)
-							ctx.sendUpstream(_connectedEvent);
+							ctx.fireChannelActive();
 					}
 				}
             }
@@ -186,13 +179,12 @@ public class ServerCryptoFilter extends SimpleChannelHandler implements CryptoCo
 
 
 	@Override
-	public void writeRequested(
-            ChannelHandlerContext ctx, MessageEvent e) throws Exception
+	public void write(ChannelHandlerContext ctx, Object e, ChannelPromise promise) throws Exception
             {
 		if (_encodeCipher != null)
 		{
-			MessageEvent m = Util.code(_encodeCipher, e, false);
-			ctx.sendDownstream(m);
+			ByteBuf m = Util.code(_encodeCipher, (ByteBuf) e, false);
+			ctx.write(m);
 		}
 		
             }

@@ -11,6 +11,7 @@
 package org.rzo.yajsw.os.ms.win.w32;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -375,6 +376,15 @@ public class Pdh
 
 		/** The Value. */
 		public ValueUnion	Value;
+		
+		@Override
+		protected List getFieldOrder()
+		{
+			return Arrays.asList(new String[]{
+					"CStatus","Value"
+			});
+		}
+
 	}
 
 	/**

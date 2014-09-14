@@ -1,25 +1,24 @@
 package org.rzo.netty.ahessian.io;
 
+import io.netty.channel.ChannelHandlerAdapter;
+import io.netty.channel.ChannelHandlerContext;
+
 import java.io.InputStream;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.rzo.netty.ahessian.Constants;
 import org.rzo.netty.ahessian.stopable.StopableHandler;
 import org.rzo.netty.ahessian.utils.MyReentrantLock;
 
-public class PullInputStreamConsumer extends SimpleChannelUpstreamHandler implements StopableHandler
+public class PullInputStreamConsumer extends ChannelHandlerAdapter implements StopableHandler
 {
 	final InputStreamConsumer _consumer;
-	final Executor _executor;
+	static ExecutorService _executor = Executors.newCachedThreadPool();
 	final Lock _lock = new MyReentrantLock();
 	final Condition _hasData = _lock.newCondition();
 	volatile boolean _stop = false;
@@ -28,41 +27,18 @@ public class PullInputStreamConsumer extends SimpleChannelUpstreamHandler implem
 	volatile boolean _waiting = false;
 	static AtomicInteger _threadCounter = new AtomicInteger(0);
 	private boolean	_stopEnabled = true;
+	volatile Thread _currentThread = null;
 	
 	
-	public PullInputStreamConsumer(InputStreamConsumer consumer, Executor executor)
+	public PullInputStreamConsumer(InputStreamConsumer consumer)
 	{
 		_consumer = consumer;
-		_executor = executor;
-		
-		_executor.execute(new Runnable()
-		{
-			public void run()
-			{
-				String tName = Thread.currentThread().getName();
-				Thread.currentThread().setName("ahessian-PullInputStreamConsumer-#"+_threadCounter.incrementAndGet());
-				try
-				{
-				waitForData();
-				while (!_stop)
-				{
-					_consumer.consume(_ctx, _inputStream);
-					waitForData();
-					}
-				}
-				finally
-				{
-					Thread.currentThread().setName(tName);
-					_threadCounter.decrementAndGet();
-				}
-			}
-		});
 	}
 	
-	private void waitForData()
+	private void waitForData() throws Exception
 	{
-		//System.out.println("wait for data");
-		while (! _stop &&( _consumer == null || _consumer.isBufferEmpty() || _ctx == null || !_ctx.getChannel().isConnected()))
+		//System.out.println("wait for data "+System.currentTimeMillis());
+		while (! _stop && (_ctx == null || !_ctx.channel().isActive() || _inputStream == null || _inputStream.available() == 0))
 		{
 
 		_lock.lock();
@@ -81,21 +57,64 @@ public class PullInputStreamConsumer extends SimpleChannelUpstreamHandler implem
 		_lock.unlock();
 		}
 		}
-		//System.out.println("got data");
+		//System.out.println("got data "+System.currentTimeMillis());
 	}
 	
 
 	
 	@Override
-	public void messageReceived(ChannelHandlerContext ctx, MessageEvent evnt) throws Exception
+	public void channelActive(ChannelHandlerContext ctx) throws Exception
 	{
+		//if (_executor == null)
+		{
+		//_executor = Executors.newSingleThreadExecutor();
+		
+		_executor.execute(new Runnable()
+		{
+			public void run()
+			{
+				String tName = Thread.currentThread().getName();
+				Thread.currentThread().setName("ahessian-PullInputStreamConsumer-#"+_threadCounter.incrementAndGet());
+				_currentThread = Thread.currentThread();
+				try
+				{
+				waitForData();
+				while (!_stop)
+				{
+					try
+					{
+					_consumer.consume(_ctx, _inputStream);
+					//System.out.println("consumed "+System.currentTimeMillis());
+					}
+					catch (Exception ex)
+					{
+						ex.printStackTrace();
+					}
+					waitForData();
+					}
+				}
+				catch (Exception ex)
+				{
+					ex.printStackTrace();
+				}
+				finally
+				{
+					Thread.currentThread().setName(tName);
+					//_threadCounter.decrementAndGet();
+				}
+			}
+		});
+		}
+
 			if (_ctx != ctx)
 				_ctx = ctx;
-			if (_inputStream != evnt.getMessage())
+			InputStream in = InputStreamHandler.getInputStream(ctx);
+			if (_inputStream != in)
 			{
-				_inputStream = (InputStream) evnt.getMessage();
+				_inputStream = in;
 			((InputStreamBuffer)_inputStream).setReadTimeout(-1);
 			}
+	    	_consumer.setContext(ctx);
 			if (_waiting)
 			{
 		_lock.lock();
@@ -108,22 +127,24 @@ public class PullInputStreamConsumer extends SimpleChannelUpstreamHandler implem
 		_lock.unlock();
 		}
 		}
+			ctx.fireChannelActive();
 	}
 	
-    public void channelConnected(
-            ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception 
+	@Override
+    public void channelInactive(
+            ChannelHandlerContext ctx) throws Exception 
             {
     	_lock.lock();
     	try
     	{
-    	_consumer.setContext(ctx);
+    	_consumer.setContext(null);
     	_ctx = ctx;
     	}
     	finally
     	{
     	_lock.unlock();
     	}
-        ctx.sendUpstream(e);
+        ctx.fireChannelInactive();
     }
     
 	public boolean isStopEnabled()
@@ -139,6 +160,29 @@ public class PullInputStreamConsumer extends SimpleChannelUpstreamHandler implem
 	public void stop()
 	{
 			_stop = true;
+			//_executor.shutdown();
+			_currentThread.interrupt();
+	}
+	
+	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception
+	{
+		//System.out.println(System.currentTimeMillis()+" PullInputStream.channelRead +");
+
+		_lock.lock();
+		try
+		{
+			if (_waiting)
+			{
+				//System.out.println("signal "+System.currentTimeMillis());
+				_hasData.signal();
+			}
+		}
+		finally
+		{
+		_lock.unlock();
+		}
+		//System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+" PullInputStream.channelRead -");
+		
 	}
 	
 	

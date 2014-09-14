@@ -1,9 +1,10 @@
 package org.rzo.yajsw.action;
 
+import io.netty.channel.Channel;
+
 import java.io.IOException;
 import java.io.PrintStream;
 
-import org.jboss.netty.channel.Channel;
 import org.rzo.yajsw.controller.Message;
 
 public interface Action

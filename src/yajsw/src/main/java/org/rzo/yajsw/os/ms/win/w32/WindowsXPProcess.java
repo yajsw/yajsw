@@ -20,18 +20,21 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import jnacontrib.jna.Advapi32;
 import jnacontrib.jna.Options;
 
-import org.apache.commons.collections.MultiHashMap;
+import org.apache.commons.collections.map.MultiValueMap;
 import org.rzo.yajsw.io.CyclicBufferFileInputStream;
 import org.rzo.yajsw.io.CyclicBufferFilePrintStream;
 import org.rzo.yajsw.os.AbstractProcess;
@@ -48,6 +51,7 @@ import org.rzo.yajsw.os.ms.win.w32.WindowsXPProcess.Ntdll.PROCESS_BASIC_INFORMAT
 import org.rzo.yajsw.os.ms.win.w32.WindowsXPProcess.Ntdll.RTL_USER_PROCESS_PARAMETERS;
 import org.rzo.yajsw.os.ms.win.w32.WindowsXPProcess.Shell32.SHELLEXECUTEINFO;
 
+import com.sun.jna.Callback;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
@@ -127,7 +131,13 @@ public class WindowsXPProcess extends AbstractProcess
 			  public Pointer      hkeyClass;
 			  public int     dwHotKey;
 			  public Pointer hMonitor;
-			  public HANDLE    hProcess;			
+			  public HANDLE    hProcess;	
+			  
+			  @Override
+			  protected List getFieldOrder() {
+			  return Arrays.asList(new String[]{"cbSize", "fMask", "hwnd", "lpVerb", "lpFile", "lpParameters", "lpDirectory", "nShow", "hInstApp", "lpIDList",
+			  "lpClass", "hKeyClass", "dwHotKey", "hMonitor", "hProcess"});
+			  }
 		}
 		
 		public static final int SEE_MASK_DEFAULT = 0x00000000;
@@ -283,6 +293,7 @@ public class WindowsXPProcess extends AbstractProcess
 		}
 
 		boolean EnumWindows(WNDENUMPROC lpEnumFunc, int data);
+		
 
 	}
 
@@ -405,6 +416,11 @@ public class WindowsXPProcess extends AbstractProcess
 			public int		dwThreadId	= -1;
 			
 			@Override
+			protected List getFieldOrder() {
+			return Arrays.asList(new String[]{"hProcess", "hThread", "dwProcessId", "dwThreadId"});
+			}
+			
+			@Override
 			public void finalize()
 			{
 				try
@@ -487,6 +503,13 @@ public class WindowsXPProcess extends AbstractProcess
 
 			/** The h std error. */
 			public Pointer	hStdError;
+			
+			@Override
+			protected List getFieldOrder() {
+			return Arrays.asList(new String[]{"cb", "lpReserved", "lpDesktop", "lpTitle", "dwX", "dwY", "dwXSize", "dwYSize", 
+					"dwXCountChars", "dwYCountChars", "dwFillAttribute", "dwFlags", "wShowWindow", "cbReserved2", "lpReserved2",
+					"hStdInput", "hStdOutput","hStdError"});
+			}
 			
 			@Override
 			public void finalize()
@@ -729,6 +752,12 @@ public class WindowsXPProcess extends AbstractProcess
 
 			/** The sz exe file. */
 			public char[]	szExeFile;
+			
+			@Override
+			protected List getFieldOrder() {
+			return Arrays.asList(new String[]{"dwSize", "cntUsage", "th32ProcessID", "th32DefaultHeapID", "th32ModuleID", 
+			"cntThreads", "th32ParentProcessID", "pcPriClassBase", "dwFlags", "szExeFile"});
+			}
 		}
 
 		/** The MA x_ path. */
@@ -847,6 +876,11 @@ public class WindowsXPProcess extends AbstractProcess
 
 			/** The b inherit handle. */
 			public boolean	bInheritHandle;
+			
+			@Override
+		    protected List getFieldOrder() {
+		      return Arrays.asList(new String[] { "nLength", "lpSecurityDescriptor", "bInheritHandle"});
+		    }
 		}
 
 		/*
@@ -1002,6 +1036,12 @@ public class WindowsXPProcess extends AbstractProcess
 			public int		State;
 			public int		Protect;
 			public int		Type;
+			
+			@Override
+		    protected List getFieldOrder() {
+		      return Arrays.asList(new String[] { "BaseAddress", "AllocationBase", "AllocationProtect", "RegionSize",
+		    		  "State", "Protect", "Type"});
+		    }
 		}
 
 		public static int	PAGE_NOACCESS	= 0x01;
@@ -1020,6 +1060,46 @@ public class WindowsXPProcess extends AbstractProcess
 		 * DWORD WTSGetActiveConsoleSessionId(void);
 		 */
 		int WTSGetActiveConsoleSessionId();
+		
+		/*
+		 * BOOL WINAPI AttachConsole(
+  _In_  DWORD dwProcessId
+);
+		 */
+		boolean AttachConsole(
+				  int dwProcessId
+				);
+
+		/*
+		 * BOOL WINAPI SetConsoleCtrlHandler(
+  _In_opt_  PHANDLER_ROUTINE HandlerRoutine,
+  _In_      BOOL Add
+);
+		 */
+		boolean SetConsoleCtrlHandler(
+				    Callback HandlerRoutine,
+				    boolean Add
+				);
+		
+		/*
+		 * BOOL WINAPI GenerateConsoleCtrlEvent(
+  _In_  DWORD dwCtrlEvent,
+  _In_  DWORD dwProcessGroupId
+);
+		 */
+		boolean GenerateConsoleCtrlEvent(
+				  int dwCtrlEvent,
+				  int dwProcessGroupId
+				);
+		
+		public static final int CTRL_C_EVENT = 0;
+		public static final int CTRL_BREAK_EVENT = 1;
+		
+		/*
+		 * BOOL WINAPI FreeConsole(void);
+		 */
+		public boolean FreeConsole();
+		
 
 	}
 
@@ -1106,6 +1186,11 @@ public class WindowsXPProcess extends AbstractProcess
 
 			/** The Reserved3. */
 			public Pointer	Reserved3;
+			
+			@Override
+		    protected List getFieldOrder() {
+		      return Arrays.asList(new String[] { "Reserved1", "PebBaseAddress", "Reserved2", "UniqueProcessId", "Reserved3" });
+		    }
 		}
 
 		/*
@@ -1157,6 +1242,13 @@ public class WindowsXPProcess extends AbstractProcess
 
 			/** The Session id. */
 			public int		SessionId;
+			
+			@Override
+		    protected List getFieldOrder() {
+		      return Arrays.asList(new String[] { "Reserved1", "BeingDebugged", "Reserved2", "Reserved3",
+		    		  "Ldr", "ProcessParameters", "Reserved4", "Reserved5", "PostProcessInitRoutine", "Reserved6", 
+		    		  "Reserved7", "SessionId"});
+		    }
 
 		}
 
@@ -1177,6 +1269,12 @@ public class WindowsXPProcess extends AbstractProcess
 			public Pointer	PostProcessInitRoutine;
 			public byte[]	Reserved4	= new byte[136];
 			public int		SessionId;
+			
+			@Override
+		    protected List getFieldOrder() {
+		      return Arrays.asList(new String[] { "Reserved1", "BeingDebugged", "Reserved2", "Ldr",
+		    		  "ProcessParameters", "Reserved3", "PostProcessInitRoutine", "Reserved4", "SessionId"});
+		    }
 		}
 
 		/*
@@ -1246,6 +1344,19 @@ public class WindowsXPProcess extends AbstractProcess
 			public UNICODE_STRING ShellInfo;
 			public UNICODE_STRING RuntimeInfo;
 			public RTL_DRIVE_LETTER_CURDIR[] DLCurrentDirectory = new RTL_DRIVE_LETTER_CURDIR[0x20];
+			
+			@Override
+		    protected List getFieldOrder() {
+		      return Arrays.asList(new String[] {
+		"AllocationSize", "Size", "Flags", "DebugFlags",
+		"hConsole", "ProcessGroup", "hStdInput", "hStdOutput", "hStdError",
+		"CurrentDirectoryPath", "CurrentDirectoryHandle", "DllPath", "ImagePathName", "CommandLine",
+		"Environment", "dwX", "dwY", "dwXSize", "dwYSize",
+		"dwXCountChars", "dwYCountChars", "dwFillAttribute", "dwFlags", "wShowWindow",
+		"WindowTitle", "Desktop", "ShellInfo", "RuntimeInfo", "DLCurrentDirectory"     
+		      });
+		    }
+
 		}
 		
 		class  RTL_DRIVE_LETTER_CURDIR  extends Structure 
@@ -1254,6 +1365,14 @@ public class WindowsXPProcess extends AbstractProcess
 			public int Length;
 			public int TimeStamp;
 			public UNICODE_STRING DosPath;
+			
+			@Override
+		    protected List getFieldOrder() {
+		      return Arrays.asList(new String[] {
+		"Flags", "Length", "TimeStamp", "DosPath",      
+		      });
+		    }
+
 	        };
 
 		/*
@@ -1275,6 +1394,14 @@ public class WindowsXPProcess extends AbstractProcess
 
 			/** The Buffer. */
 			public Pointer	Buffer;
+			
+			@Override
+		    protected List getFieldOrder() {
+		      return Arrays.asList(new String[] {
+		"Length", "MaximumLength", "Buffer",      
+		      });
+		    }
+
 		}
 	}
 
@@ -1299,6 +1426,14 @@ public class WindowsXPProcess extends AbstractProcess
 		{
 			public Pointer	Sid;
 			public int		Attributes;
+			
+			@Override
+		    protected List getFieldOrder() {
+		      return Arrays.asList(new String[] {
+		"Sid", "Attributes"     
+		      });
+		    }
+
 		}
 
 		/*
@@ -1308,6 +1443,14 @@ public class WindowsXPProcess extends AbstractProcess
 		static class TOKEN_USER extends Structure
 		{
 			public SID_AND_ATTRIBUTES	User;
+			
+			@Override
+		    protected List getFieldOrder() {
+		      return Arrays.asList(new String[] {
+		"User"     
+		      });
+		    }
+
 
 			public TOKEN_USER(Pointer p)
 			{
@@ -1329,6 +1472,14 @@ public class WindowsXPProcess extends AbstractProcess
 		static class TOKEN_ELEVATION  extends Structure
 		{
 			  public int TokenIsElevated = 0;
+			  
+			  @Override
+			    protected List getFieldOrder() {
+			      return Arrays.asList(new String[] {
+			"TokenIsElevated"
+			      });
+			    }
+
 			  
 				public TOKEN_ELEVATION(Pointer p)
 				{
@@ -1378,6 +1529,14 @@ public class WindowsXPProcess extends AbstractProcess
 		{
 			public int	LowPart;
 			public int	HighPart;
+			
+			@Override
+		    protected List getFieldOrder() {
+		      return Arrays.asList(new String[] {
+		    		  "LowPart", "HighPart"
+		      });
+		    }
+
 		}
 
 		/*
@@ -1388,6 +1547,14 @@ public class WindowsXPProcess extends AbstractProcess
 		{
 			public LUID	Luid;
 			public int	Attributes;
+			
+			@Override
+		    protected List getFieldOrder() {
+		      return Arrays.asList(new String[] {
+		    		  "Luid", "Attributes"
+		      });
+		    }
+
 		}
 
 		/*
@@ -1399,6 +1566,14 @@ public class WindowsXPProcess extends AbstractProcess
 		{
 			public int						PrivilegeCount	= 1;
 			public LUID_AND_ATTRIBUTES[]	Privileges		= new LUID_AND_ATTRIBUTES[1];
+			
+			@Override
+		    protected List getFieldOrder() {
+		      return Arrays.asList(new String[] {
+		    		  "PrivilegeCount", "Privileges"
+		      });
+		    }
+
 
 			public TOKEN_PRIVILEGES()
 			{
@@ -2108,6 +2283,7 @@ public class WindowsXPProcess extends AbstractProcess
 				return result;
 			}
 			_started = true;
+			_pid = _processInformation.dwProcessId;
 
 			// Thread.sleep(1000);
 
@@ -2164,12 +2340,11 @@ public class WindowsXPProcess extends AbstractProcess
 				new File(_tmpPath, "err_" + _teeName).deleteOnExit();
 			}
 
-			_pid = _processInformation.dwProcessId;
 		}
 		catch (Exception ex)
 		{
 			log("exception in process start: " + ex);
-			ex.printStackTrace();
+			throwing(getClass().toString(), "start", ex);
 		}
 
 		return result;
@@ -2333,6 +2508,7 @@ public class WindowsXPProcess extends AbstractProcess
 		// first try polite kill
 		// e.g. post WM_CLOSE to all windows whose PID
 		// matches our process.
+		final AtomicBoolean messagePosted = new AtomicBoolean(false);
 		MyUser32.WNDENUMPROC closeWindow = new MyUser32.WNDENUMPROC()
 		{
 			// lParam is the pid of our process
@@ -2350,6 +2526,7 @@ public class WindowsXPProcess extends AbstractProcess
 					// null, null) ;
 					// MyUser32.INSTANCE.PostMessageA(wnd, MyUser32.WM_DESTROY,
 					// null, null) ;
+					messagePosted.set(true);
 				}
 				// continue with next window
 				return true;
@@ -2365,6 +2542,12 @@ public class WindowsXPProcess extends AbstractProcess
 		{
 			e.printStackTrace();
 			Thread.currentThread().interrupt();
+		}
+		
+		if (!messagePosted.get())
+		{
+			log("seems the process does not have a window");
+			sendCtnrlC();
 		}
 
 		// Wait for process to terminate
@@ -2386,7 +2569,7 @@ public class WindowsXPProcess extends AbstractProcess
 		// If still running -> hard kill
 		if (isRunning())
 		{
-			log("process is not polite -> hard kill");
+			log("process is not polite within " + timeout + "ms -> hard kill");
 			return kill(code);
 		}
 		else
@@ -2432,6 +2615,34 @@ public class WindowsXPProcess extends AbstractProcess
 	// return false;
 	//
 	// }
+
+	// stop the process by sending a CNTRL-C
+	public void sendCtnrlC()
+	{
+		if (_pid <= 0)
+			return;
+		log("try sending cntrl-c to the process");
+		//This does not require the console window to be visible.
+		  if (MyKernel32.INSTANCE.AttachConsole(_pid))
+		  {
+		    //Disable Ctrl-C handling for our program
+			  MyKernel32.INSTANCE.SetConsoleCtrlHandler(null, true); 
+			  MyKernel32.INSTANCE.GenerateConsoleCtrlEvent(MyKernel32.CTRL_C_EVENT, 0);
+
+		    //Must wait here. If we don't and re-enable Ctrl-C
+		    //handling below too fast, we might terminate ourselves.
+		    waitFor(2000);
+
+		    MyKernel32.INSTANCE.FreeConsole();
+
+		    //Re-enable Ctrl-C handling or any subsequently started
+		    //programs will inherit the disabled state.
+		    MyKernel32.INSTANCE.SetConsoleCtrlHandler(null, false); 
+		  }
+		  else
+			  log("error in send cntrl-c: AttachConsole failed: either run this with javaw or set visible to true for sub process");
+			  
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -2535,7 +2746,7 @@ public class WindowsXPProcess extends AbstractProcess
 	public static Map[] getProcessMaps(int pid)
 	{
 		Map processMap = new HashMap();
-		Map childrenMap = new MultiHashMap();
+		Map childrenMap = new MultiValueMap();
 		Map[] result = new Map[]
 		{ processMap, childrenMap };
 
@@ -2553,7 +2764,7 @@ public class WindowsXPProcess extends AbstractProcess
 		me.dwSize = size;
 		if (MyKernel32.INSTANCE.Process32First(processes, me))
 		{
-			System.out.println("ProcessList:");
+			//System.out.println("ProcessList:");
 			do
 			{
 				// System.out.println(/* new String(next.szExeFile) + */" " +
@@ -2566,7 +2777,7 @@ public class WindowsXPProcess extends AbstractProcess
 				{
 					childrenMap.put(new Integer(me.th32ParentProcessID), new Integer(me.th32ProcessID));
 				}
-				System.out.println("\tProcessID=" + me.th32ProcessID + "\t\t -> ParentProcessID=" + me.th32ParentProcessID);
+				//System.out.println("\tProcessID=" + me.th32ProcessID + "\t\t -> ParentProcessID=" + me.th32ParentProcessID);
 
 				// else
 				// System.out.println("not added");
@@ -2953,7 +3164,7 @@ public class WindowsXPProcess extends AbstractProcess
 	 */
 	boolean readVirtualMemoryToMemory(Pointer baseAddress, Memory goal)
 	{
-		int size = (int) goal.getSize();
+		int size = (int) goal.size();
 		// System.out.println("readVirtualMemoryToMemory "+size);
 		int ret = Ntdll.INSTANCE.ZwReadVirtualMemory(_processInformation.hProcess.getPointer(), baseAddress, goal, size, null);
 		if (ret != 0)
@@ -3382,8 +3593,9 @@ public class WindowsXPProcess extends AbstractProcess
 	 * 
 	 * @param args
 	 *            the arguments
+	 * @throws InterruptedException 
 	 */
-	public static void main(String[] args)
+	public static void main(String[] args) throws InterruptedException
 	{
 		/*
 		 * WindowsXPProcess[] p = new WindowsXPProcess[1]; for (int i = 0; i <
@@ -3425,37 +3637,51 @@ public class WindowsXPProcess extends AbstractProcess
 		 * p.setUser("test\\yajsw"); p.setPassword("yajsw"); p.start();
 		 */
 		// getProcess(3332);
-		/*
-		Process p = new WindowsXPProcess();
-		// p.setCommand("ping 127.0.0.1");
-		p.setCommand("set.bat");
-		List<String[]> env = OperatingSystem.instance().processManagerInstance().getProcess(
-				OperatingSystem.instance().processManagerInstance().currentProcessId()).getEnvironment();
-		p.setEnvironment(env);
-		System.out.println(p.getEnvironmentAsMap().get("Path"));
-		System.out.println(env.get(0)[0]);
+		
+		final Process p = new WindowsXPProcess();
+		p.setVisible(false);
+		 p.setCommand("ping localhost -t");
+		//p.setCommand("set.bat");
+		//List<String[]> env = OperatingSystem.instance().processManagerInstance().getProcess(
+		//		OperatingSystem.instance().processManagerInstance().currentProcessId()).getEnvironment();
+		//p.setEnvironment(env);
+		//System.out.println(p.getEnvironmentAsMap().get("Path"));
+		//System.out.println(env.get(0)[0]);
 		p.setPipeStreams(true, false);
 		p.start();
-		String line = null;
-		int k = 0;
-		try
+		
+		new Thread(new Runnable()
 		{
-			InputStreamReader isr = new InputStreamReader(p.getInputStream());
-			BufferedReader br = new BufferedReader(isr);
-			line = br.readLine();
-			System.out.println(line);
-			while (k < 30 && line != null)
+
+			@Override
+			public void run()
 			{
-				System.out.println(line);
-				line = br.readLine();
-				k++;
+				String line = null;
+				int k = 0;
+				try
+				{
+					InputStreamReader isr = new InputStreamReader(p.getInputStream());
+					BufferedReader br = new BufferedReader(isr);
+					line = "";//br.readLine();
+					System.out.println(line);
+					while (line != null)
+					{
+						System.out.println(line);
+						line = br.readLine();
+					}
+				}
+				catch (Exception ex)
+				{
+					ex.printStackTrace();
+				}
 			}
-		}
-		catch (Exception ex)
-		{
-			ex.printStackTrace();
-		}
-		*/
+			
+		}).start();
+		
+		Thread.sleep(4000);
+		p.stop(3000, -1);
+		
+		
 
 		/*
 		System.out.println("start -----------------");
@@ -3487,7 +3713,7 @@ public class WindowsXPProcess extends AbstractProcess
 		System.out.println(p.getPid());
 		System.out.println(p.getExitCode());
 		}
-		*/
+		
 		WindowsXPProcess p = (WindowsXPProcess) getProcess(4664);
 		for (int i=0; i<4; i++)
 		{
@@ -3502,6 +3728,7 @@ public class WindowsXPProcess extends AbstractProcess
 				e.printStackTrace();
 			}
 		}
+		*/
 		
 		
 		//p.sendKey('B');
@@ -3595,7 +3822,7 @@ public class WindowsXPProcess extends AbstractProcess
 
 	public String standardizeUser(String user)
 	{
-		if (user == null)
+		if (user == null || "".equals(user))
 			return null;
 		if (user.indexOf("\\") == -1)
 			return currentUserDomain() + "\\" + user.toUpperCase();

@@ -1,8 +1,9 @@
 package org.rzo.netty.ahessian.rpc.client;
 
-import org.jboss.netty.bootstrap.ClientBootstrap;
+import io.netty.bootstrap.AbstractBootstrap;
+
 
 public interface BootstrapProvider
 {
-	public ClientBootstrap getBootstrap();
+	public AbstractBootstrap getBootstrap();
 }

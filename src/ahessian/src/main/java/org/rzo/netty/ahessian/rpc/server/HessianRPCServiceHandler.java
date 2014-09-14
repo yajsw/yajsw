@@ -1,5 +1,12 @@
 package org.rzo.netty.ahessian.rpc.server;
 
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler.Sharable;
+import io.netty.channel.ChannelHandlerAdapter;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPipeline;
+import io.netty.util.Timer;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -7,17 +14,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineCoverage;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.util.Timer;
 import org.rzo.netty.ahessian.Constants;
 import org.rzo.netty.ahessian.rpc.callback.ServerCallbackProxy;
 import org.rzo.netty.ahessian.rpc.message.FlushRequestMessage;
@@ -43,8 +40,8 @@ import org.rzo.netty.ahessian.utils.TimedBlockingPriorityQueue;
  *  pipeline.addLast(&quot;hessianRPCServer&quot;, handler);
  * </pre>
  */
-@ChannelPipelineCoverage("one")
-public class HessianRPCServiceHandler extends SimpleChannelUpstreamHandler implements Constants
+@Sharable
+public class HessianRPCServiceHandler extends ChannelHandlerAdapter implements Constants
 {
 
 	/** maps service names to services. */
@@ -65,6 +62,14 @@ public class HessianRPCServiceHandler extends SimpleChannelUpstreamHandler imple
 	final Condition _channelOpen = _lock.newCondition();
 	
 	boolean _inverseServer = false;
+	
+	ConnectListener _connectListener;
+	ConnectListener _disconnectListener;
+	
+	public interface ConnectListener extends Runnable
+	{
+		public void run(Channel channel);
+	}
 
 	public HessianRPCServiceHandler(Executor executor)
 	{
@@ -79,6 +84,16 @@ public class HessianRPCServiceHandler extends SimpleChannelUpstreamHandler imple
 	public HessianRPCServiceHandler(Executor executor, Map<String, Object> options, Timer timer)
 	{
 		this(executor, options, timer, false);
+	}
+	
+	public void setConnectListener(ConnectListener listener)
+	{
+		_connectListener = listener;
+	}
+
+	public void setDisconnectListener(ConnectListener listener)
+	{
+		_disconnectListener = listener;
 	}
 
 
@@ -233,6 +248,18 @@ public class HessianRPCServiceHandler extends SimpleChannelUpstreamHandler imple
 		Channel ch = message.getChannel();
 		if (ch != null)
 		{
+			int i = 0;
+			while (!ch.isWritable() && ch.isActive())
+				try
+				{
+					//System.out.println("result wait for channel writeable "+i++);//+Thread.currentThread().getName());
+					Thread.sleep(10);
+				}
+				catch (InterruptedException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			ch.write(message);
 			if (_inverseServer)
 			ch.write(new FlushRequestMessage());
@@ -336,9 +363,8 @@ public class HessianRPCServiceHandler extends SimpleChannelUpstreamHandler imple
 	 * org.jboss.netty.channel.MessageEvent)
 	 */
 	@Override
-	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception
+	public void channelRead(ChannelHandlerContext ctx, Object obj) throws Exception
 	{
-		Object obj = e.getMessage();
 		if (obj instanceof HessianRPCCallMessage)
 		{
 		HessianRPCCallMessage message = (HessianRPCCallMessage) obj;
@@ -353,11 +379,12 @@ public class HessianRPCServiceHandler extends SimpleChannelUpstreamHandler imple
 		}
 		else
 			throw new RuntimeException("unexpected message type: "+obj.getClass());
+		ctx.fireChannelReadComplete();
 	}
 
 	private void handleCallbackReply(HessianRPCCallMessage message)
 	{
-		System.out.println("received callback reply "+message.getMethod() + " "+ message.getHeaders().get(Constants.CALLBACK_CALL_ID_HEADER_KEY));
+		//System.out.println("received callback reply "+message.getMethod() + " "+ message.getHeaders().get(Constants.CALLBACK_CALL_ID_HEADER_KEY));
 		ServerCallbackProxy.setCallbackResult(message);
 	}
 
@@ -397,9 +424,10 @@ public class HessianRPCServiceHandler extends SimpleChannelUpstreamHandler imple
 	 * (org.jboss.netty.channel.ChannelHandlerContext,
 	 * org.jboss.netty.channel.ChannelStateEvent)
 	 */
-	public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception
+	@Override
+	public void channelActive(final ChannelHandlerContext ctx) throws Exception
 	{
-		ahessianLogger.warn(ctx.getChannel()+" connected");
+		ahessianLogger.warn(ctx.channel()+" connected");
 		if (_openCounter.incrementAndGet() == 1)
 		{
 		_lock.lock();
@@ -415,10 +443,19 @@ public class HessianRPCServiceHandler extends SimpleChannelUpstreamHandler imple
 		{
 			_lock.unlock();
 		}
-		}
-		
-		
-		super.channelOpen(ctx, e);
+		}		
+		super.channelActive(ctx);
+		if (_connectListener != null)
+			_executor.execute(new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					_connectListener.run(ctx.channel());
+				}
+			});
+
 	}
 
 	/*
@@ -429,19 +466,33 @@ public class HessianRPCServiceHandler extends SimpleChannelUpstreamHandler imple
 	 * (org.jboss.netty.channel.ChannelHandlerContext,
 	 * org.jboss.netty.channel.ChannelStateEvent)
 	 */
-	public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception
+	@Override
+	public void channelInactive(final ChannelHandlerContext ctx) throws Exception
 	{
-		ahessianLogger.warn(ctx.getChannel()+" disconnected");
+		ahessianLogger.warn(ctx.channel()+" disconnected");
 
 		_openCounter.decrementAndGet();
-		super.channelClosed(ctx, e);
+		ctx.fireChannelInactive();
+		
+		if (_disconnectListener != null)
+			_executor.execute(new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					_disconnectListener.run(ctx.channel());
+				}
+			});
+
 	}
 	
 	@Override
 	public void exceptionCaught(
-            ChannelHandlerContext ctx, ExceptionEvent e) throws Exception
+            ChannelHandlerContext ctx, Throwable e) throws Exception
             {
-				ahessianLogger.warn(ctx.getChannel()+" exception "+ e.getCause());
+		e.printStackTrace();
+				ahessianLogger.warn(ctx.channel()+" exception "+ e.getCause());
             }
 	//TODO
 	public void stop()

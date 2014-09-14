@@ -1,14 +1,14 @@
 package org.rzo.netty.ahessian.rpc.message;
 
-import java.io.OutputStream;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipelineCoverage;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
+import java.io.OutputStream;
+import java.util.concurrent.Executor;
+
 import org.rzo.netty.ahessian.Constants;
-import org.rzo.netty.ahessian.io.OutputStreamEncoder;
+import org.rzo.netty.ahessian.io.OutputProducer;
+import org.rzo.netty.ahessian.io.OutputStreamHandler;
 import org.rzo.netty.ahessian.rpc.io.Hessian2Output;
 
 import com.caucho.hessian4.io.AbstractSerializerFactory;
@@ -16,34 +16,38 @@ import com.caucho.hessian4.io.AbstractSerializerFactory;
 /**
  * writes an invocation reply message to an output stream
  */
-@ChannelPipelineCoverage("one")
-public class HessianRPCReplyEncoder extends SimpleChannelHandler
+public class HessianRPCReplyEncoder extends OutputProducer
 	{
 	volatile Hessian2Output hOut = null;
 	volatile AbstractSerializerFactory _serializerFactory;
 	
-	public HessianRPCReplyEncoder()
+	public HessianRPCReplyEncoder(Executor executor)
 	{
-		this(null);
+		this(null, executor);
 	}
 
-	public HessianRPCReplyEncoder(AbstractSerializerFactory serializerFactory)
+	public HessianRPCReplyEncoder(AbstractSerializerFactory serializerFactory, Executor executor)
 	{
+		super(executor);
 		_serializerFactory = serializerFactory;
 	}
 
 		/* (non-Javadoc)
 		 * @see org.jboss.netty.channel.SimpleChannelDownstreamHandler#writeRequested(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.MessageEvent)
 		 */
-		synchronized public void writeRequested(ChannelHandlerContext ctx, MessageEvent e) throws Exception
+	@Override
+		synchronized public void produceOutput(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception
 		{
- 			Object msg = e.getMessage();
+		if (ctx == null || ctx.channel() == null  || !ctx.channel().isActive())
+			throw new RuntimeException("channel closed");
+		/*
  			if (msg instanceof FlushRequestMessage)
  			{
- 				hOut.flush(e.getFuture());
- 				e.getFuture().await(5000);
+ 				hOut.flush(promise);
+ 				promise.await(5000);
  				return;
  			}
+ 			*/
 
 			try
 			{
@@ -52,7 +56,7 @@ public class HessianRPCReplyEncoder extends SimpleChannelHandler
 //					hOut.flush();
 //					return;
 //				}
-			HessianRPCReplyMessage message = (HessianRPCReplyMessage) e.getMessage();
+			HessianRPCReplyMessage message = (HessianRPCReplyMessage) msg;
 			//Constants.ahessianLogger.warn("encode reply for #"+message.getHeaders().get(Constants.CALL_ID_STRING));
 
 			hOut.resetReferences();
@@ -63,23 +67,33 @@ public class HessianRPCReplyEncoder extends SimpleChannelHandler
 			catch (Exception ex)
 			{
 				Constants.ahessianLogger.warn("", ex);
-				e.getFuture().setFailure(ex);
+				promise.setFailure(ex);
 			}
 		}
 		
-		public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception
+		public void channelActive(ChannelHandlerContext ctx) throws Exception
 		{
+			super.channelActive(ctx);
 			if (hOut == null)
 			{
-				OutputStream out = OutputStreamEncoder.getOutputStream(ctx);
+				OutputStream out = OutputStreamHandler.getOutputStream(ctx);
 				hOut = new Hessian2Output(out);
 				if (_serializerFactory != null)
 					hOut.getSerializerFactory().addFactory(_serializerFactory);
 			}
 			else
 				hOut.reset();
-				ctx.sendUpstream(e);
+				ctx.fireChannelActive();
 		}
+		
+		@Override
+		protected void flashOutput(ChannelHandlerContext ctx) throws Exception
+		{
+			if (!ctx.channel().isActive())
+				throw new RuntimeException("channel not active");
+			hOut.flush();
+		}
+
 
 
 }

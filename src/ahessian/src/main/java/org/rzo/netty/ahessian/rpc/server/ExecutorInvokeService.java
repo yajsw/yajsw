@@ -2,17 +2,12 @@ package org.rzo.netty.ahessian.rpc.server;
 
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.Executor;
 
 import org.rzo.netty.ahessian.Constants;
 import org.rzo.netty.ahessian.rpc.callback.ClientCallback;
 import org.rzo.netty.ahessian.rpc.callback.ServerCallbackProxy;
 import org.rzo.netty.ahessian.rpc.message.HessianRPCCallMessage;
-import org.rzo.netty.ahessian.rpc.message.HessianRPCReplyMessage;
 
 /**
  * Wraps an object as a {@link Service}. Methods are invoked as soon as they are received.
@@ -96,7 +91,11 @@ import org.rzo.netty.ahessian.rpc.message.HessianRPCReplyMessage;
 						}
 						ServiceSessionProvider.set(message.getSession());
 						ServiceSessionProvider.setHandler(message.getHandler());
+						threadLocalChannel.set(message.getChannel());
+
 						result = method.invoke(_service, args);
+
+						threadLocalChannel.remove();
 						ServiceSessionProvider.remove();
 						ServiceSessionProvider.removeHandler();
 					}

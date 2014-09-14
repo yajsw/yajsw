@@ -1,12 +1,12 @@
 package org.rzo.netty.ahessian.rpc.message;
 
+import io.netty.channel.ChannelHandlerContext;
+
 import java.io.InputStream;
 
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.Channels;
 import org.rzo.netty.ahessian.Constants;
 import org.rzo.netty.ahessian.io.InputStreamConsumer;
-import org.rzo.netty.ahessian.io.InputStreamDecoder;
+import org.rzo.netty.ahessian.io.InputStreamHandler;
 import org.rzo.netty.ahessian.rpc.callback.CallbackReplyMessage;
 import org.rzo.netty.ahessian.rpc.client.HessianProxyFactory;
 import org.rzo.netty.ahessian.rpc.io.Hessian2Input;
@@ -44,11 +44,11 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 
 	public void consume(ChannelHandlerContext ctx, InputStream inx)
 	{
-		while (ctx.getChannel().isConnected() && !isBufferEmpty())
+		while (ctx.channel().isActive() && !isBufferEmpty())
 		{
 			HessianRPCReplyMessage m = parseReply(in);
 			if (m != null)
-			Channels.fireMessageReceived(ctx, m);
+			ctx.fireChannelRead(m);
 
 			in.resetReferences();
 
@@ -180,7 +180,7 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 		}
 		catch (Throwable ex)
 		{
-			if (ex.getMessage().startsWith("H expected got 0x0"))
+			if (ex.getMessage() != null && ex.getMessage().startsWith("H expected got 0x0"))
 				Constants.ahessianLogger.info("received Ping");
 			else
 				Constants.ahessianLogger.warn("", ex);
@@ -207,7 +207,7 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 	{
 		if (in == null)
 		{
-			in = new Hessian2Input(InputStreamDecoder.getInputStream(ctx));
+			in = new Hessian2Input(InputStreamHandler.getInputStream(ctx));
 			if (_serializerFactory != null)
 				in.getSerializerFactory().addFactory(_serializerFactory);
 		}

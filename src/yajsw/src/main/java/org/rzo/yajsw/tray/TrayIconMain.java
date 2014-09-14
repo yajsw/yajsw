@@ -10,6 +10,8 @@
  */
 package org.rzo.yajsw.tray;
 
+import io.netty.util.internal.logging.SimpleLogger;
+
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
@@ -88,49 +90,6 @@ public class TrayIconMain
 
 	}
 
-	private static void reconnect() throws InterruptedException
-	{
-		if (jmxc != null)
-		{
-			try
-			{
-				_ahessianClient.close();
-			} catch (Throwable e)
-			{
-				e.printStackTrace();
-			}			
-			jmxc = null;
-		}
-		_trayIcon.closeConsole();
-		_trayIcon.setProcess(null);
-		proxy = null;
-		System.out.println("trying to connect");
-		while (jmxc == null)
-			try
-			{
-				if (_trayIcon.isStop())
-					return;
-				// TODO disableFunctions();
-
-				jmxc = _ahessianClient.getMBeanServer();
-				if (jmxc != null)
-				{
-					proxy = (AbstractWrappedProcessMBean) MBeanServerInvocationHandler.newProxyInstance(jmxc, oName,
-							AbstractWrappedProcessMBean.class, false);
-					_trayIcon.setProcess(proxy);
-					_ahessianClient.open();
-					System.out.println("connected");
-				}
-				else
-					Thread.sleep(1000);
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-				Thread.sleep(1000);
-			}
-
-	}
 
 	/**
 	 * The main method.
@@ -157,8 +116,9 @@ public class TrayIconMain
 		if (config != null)
 		{
 			canonName = new File(config).getCanonicalPath();
-			File lockFile = new File(System.getProperty("java.io.tmpdir"), "" + "yajsw." + canonName.hashCode() + ".lck");
-			System.out.println("system tray lock file: " + lockFile.getCanonicalPath());
+			String tmpDir = System.getProperty("jna_tmpdir", System.getProperty("java.io.tmpdir"));
+			File lockFile = new File(tmpDir + "/yajsw" + canonName.hashCode() + ".lck");
+			//System.out.println("system tray lock file: " + lockFile.getCanonicalPath());
 			FileChannel channel = new RandomAccessFile(lockFile, "rw").getChannel();
 			// Try acquiring the lock without blocking. This method returns
 			// null or throws an exception if the file is already locked.
@@ -182,8 +142,6 @@ public class TrayIconMain
 			localConf.addProperty("wrapper.config", config);
 		YajswConfigurationImpl _config = new YajswConfigurationImpl(localConf, true);
 
-		Utils.verifyIPv4IsPreferred(null);
-		_ahessianClient = new AHessianJmxClient(canonName, _config.getInt("wrapper.tray.port", 0));
 
 		try
 		{
@@ -195,7 +153,59 @@ public class TrayIconMain
 			name = ObjectName.quote(name);
 			oName = new ObjectName("org.rzo.yajsw", "name", name);
 			_trayIcon = (WrapperTrayIconImpl) WrapperTrayIconFactory.createTrayIcon(getName(_config), _config.getString("wrapper.tray.icon"), _config);
-			reconnect();
+			Utils.verifyIPv4IsPreferred(null);
+			_ahessianClient = new AHessianJmxClient(canonName, _config.getInt("wrapper.tray.port", 0), true, new SimpleLogger());
+			_ahessianClient.setConnectListener(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					if (_trayIcon.isStop())
+						return;
+					// TODO disableFunctions();
+
+					try
+					{
+					jmxc = _ahessianClient.getMBeanServer();
+					if (jmxc != null)
+					{
+						proxy = (AbstractWrappedProcessMBean) MBeanServerInvocationHandler.newProxyInstance(jmxc, oName,
+								AbstractWrappedProcessMBean.class, false);
+						_trayIcon.setProcess(proxy);
+						_ahessianClient.open();
+					}
+					}
+					catch (Exception ex)
+					{
+						ex.printStackTrace();
+					}
+					
+				}
+				
+			});
+			_ahessianClient.setDisconnectListener(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					jmxc = null;
+					proxy = null;
+					try
+					{
+					_trayIcon.closeConsole();
+					_trayIcon.setProcess(null);
+					}
+					catch (Exception ex)
+					{
+						ex.printStackTrace();
+					}
+
+				}
+				
+			});
+			_ahessianClient.start();
 			while (!_trayIcon.isStop())
 			{
 				if (jmxc != null && proxy != null)
@@ -211,8 +221,8 @@ public class TrayIconMain
 					catch (Exception ex)
 					{
 						ex.printStackTrace();
+						
 						System.out.println("error accessing server " + ex);
-						reconnect();
 					}
 				// System.out.println(">> "+proxy);
 				try
@@ -222,7 +232,6 @@ public class TrayIconMain
 				catch (InterruptedException e)
 				{
 					System.out.println(e.getMessage());
-					Thread.currentThread().interrupt();
 				}
 			}
 		}

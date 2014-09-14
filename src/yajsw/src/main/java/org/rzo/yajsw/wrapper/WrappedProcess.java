@@ -1,11 +1,13 @@
 package org.rzo.yajsw.wrapper;
 
+import io.netty.util.internal.logging.InternalLogger;
+
 import java.io.OutputStream;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.apache.commons.configuration.Configuration;
-import org.jboss.netty.logging.InternalLogger;
 
 public interface WrappedProcess
 {
@@ -130,7 +132,7 @@ public interface WrappedProcess
 
 	public void startDrain();
 
-	public String readDrainLine();
+	public List<String> readDrainLine();
 
 	public void stopDrain();
 

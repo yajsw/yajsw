@@ -17,15 +17,14 @@ import java.util.concurrent.Semaphore;
 import jnacontrib.jna.Options;
 
 import org.apache.commons.collections.BidiMap;
-import org.apache.commons.collections.MultiHashMap;
 import org.apache.commons.collections.bidimap.DualHashBidiMap;
+import org.apache.commons.collections.map.MultiValueMap;
 import org.rzo.yajsw.os.ms.win.w32.DummyWindow.MyUser32.WNDCLASSEX;
 import org.rzo.yajsw.os.ms.win.w32.DummyWindow.MyUser32.WNDPROC;
 
 import com.sun.jna.Callback;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
-import com.sun.jna.Structure;
 import com.sun.jna.platform.win32.GDI32;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.User32;
@@ -173,48 +172,6 @@ public class DummyWindow
 		/** The C s_ vredraw. */
 		int	CS_VREDRAW	= 1;
 
-		/**
-		 * The Class WNDCLASSEX.
-		 */
-		static class WNDCLASSEX extends Structure
-		{
-
-			/** The cb size. */
-			public int		cbSize			= size();
-
-			/** The style. */
-			public int		style			= 0;
-
-			/** The lpfn wnd proc. */
-			public WNDPROC	lpfnWndProc;
-
-			/** The cb cls extra. */
-			public int		cbClsExtra		= 0;
-
-			/** The cb wnd extra. */
-			public int		cbWndExtra		= 0;
-
-			/** The h instance. */
-			public Pointer	hInstance;
-
-			/** The h icon. */
-			public Pointer	hIcon			= null;
-
-			/** The h cursor. */
-			public Pointer	hCursor			= null;
-
-			/** The hbr background. */
-			public Pointer	hbrBackground	= null;
-
-			/** The lpsz menu name. */
-			public String	lpszMenuName	= null;
-
-			/** The lpsz class name. */
-			public String	lpszClassName	= "JavaDummyWnd";
-
-			/** The h icon sm. */
-			public Pointer	hIconSm			= null;
-		}
 
 		/*
 		 * ATOM RegisterClassEx( CONST WNDCLASSEXlpwcx );
@@ -389,34 +346,6 @@ public class DummyWindow
 		int UpdateWindow(Pointer hWnd // handle to window
 		);
 
-		/*
-		 * typedef struct { HWND hwnd; UINT message; WPARAM wParam; LPARAM
-		 * lParam; DWORD time; POINT pt; } MSG,PMSG;
-		 */
-		/**
-		 * The Class MSG.
-		 */
-		class MSG extends Structure
-		{
-
-			/** The hwnd. */
-			public Pointer	hwnd;
-
-			/** The message. */
-			public int		message;
-
-			/** The w param. */
-			public int		wParam;
-
-			/** The l param. */
-			public int		lParam;
-
-			/** The time. */
-			public int		time;
-
-			/** The pt. */
-			public POINT	pt;
-		}
 
 		/*
 		 * BOOL GetMessage( LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT
@@ -517,7 +446,7 @@ public class DummyWindow
 	static DummyWindow			_instance;
 
 	/** The _listners. */
-	static Map					_listners	= new MultiHashMap();
+	static Map					_listners	= new MultiValueMap();
 
 	/** The _wnd proc. */
 	WndProc						_wndProc	= new WndProc();
@@ -598,7 +527,7 @@ public class DummyWindow
 	/**
 	 * The Class WndProc.
 	 */
-	static class WndProc extends Structure implements WNDPROC
+	static class WndProc implements WNDPROC
 	{
 
 		/*
@@ -628,7 +557,7 @@ public class DummyWindow
 		WndProc()
 		{
 			super();
-			allocateMemory(4);
+			//allocateMemory(4);
 		}
 	}
 

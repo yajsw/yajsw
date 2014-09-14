@@ -14,17 +14,16 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import jnacontrib.jna.Advapi32;
+import jnacontrib.jna.Advapi32.ENUM_SERVICE_STATUS_PROCESS;
+import jnacontrib.jna.Advapi32.QUERY_SERVICE_CONFIG;
+import jnacontrib.jna.Advapi32.SERVICE_DELAYED_AUTO_START_INFO;
+import jnacontrib.jna.Advapi32.SERVICE_DESCRIPTION;
+import jnacontrib.jna.Advapi32.SERVICE_FAILURE_ACTIONS;
 import jnacontrib.jna.WINERROR;
 import jnacontrib.jna.WINNT;
 import jnacontrib.jna.WINSVC;
-import jnacontrib.jna.Advapi32.ENUM_SERVICE_STATUS_PROCESS;
-import jnacontrib.jna.Advapi32.QUERY_SERVICE_CONFIG;
-import jnacontrib.jna.Advapi32.SERVICE_DESCRIPTION;
-import jnacontrib.jna.Advapi32.SERVICE_FAILURE_ACTIONS;
-import jnacontrib.jna.Advapi32.SERVICE_STATUS_PROCESS;
 
 import org.rzo.yajsw.os.Service;
 import org.rzo.yajsw.os.ServiceInfo;
@@ -37,7 +36,14 @@ import com.sun.jna.PlatformEx;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.Kernel32Util;
+import com.sun.jna.platform.win32.WinNT;
+import com.sun.jna.platform.win32.Winsvc;
+import com.sun.jna.platform.win32.Winsvc.SC_HANDLE;
+import com.sun.jna.platform.win32.Winsvc.SC_STATUS_TYPE;
+import com.sun.jna.platform.win32.Winsvc.SERVICE_STATUS_PROCESS;
 import com.sun.jna.ptr.IntByReference;
+//import jnacontrib.jna.Advapi32.SERVICE_STATUS_PROCESS.SERVICE_DELAYED_AUTO_START_INFO;
+//import jnacontrib.jna.Advapi32.SERVICE_STATUS_PROCESS;
 
 /**
  * Baseclass for a Win32 service.
@@ -137,7 +143,8 @@ abstract public class Win32Service
 	{
 		Advapi32 advapi32;
 		Advapi32.SERVICE_DESCRIPTION desc;
-		Pointer serviceManager, service;
+		SC_HANDLE serviceManager;
+		Pointer service;
 		boolean success = false;
 		String dep = "";
 
@@ -154,7 +161,7 @@ abstract public class Win32Service
 		desc.lpDescription = description;
 
 		advapi32 = Advapi32.INSTANCE;
-		serviceManager = openServiceControlManager(null, WINSVC.SC_MANAGER_ALL_ACCESS);
+		serviceManager = openServiceControlManager(null, Winsvc.SC_MANAGER_ALL_ACCESS);
 
 		int winStartType = "DEMAND_START".equals(startType) ? WINSVC.SERVICE_DEMAND_START : WINSVC.SERVICE_AUTO_START;
 		int dwServiceType = WINSVC.SERVICE_WIN32_OWN_PROCESS;
@@ -181,7 +188,7 @@ abstract public class Win32Service
 				success = advapi32.ChangeServiceConfig2(service, WINSVC.SERVICE_CONFIG_DESCRIPTION, desc);
 				if (PlatformEx.isWinVista() && "DELAYED_AUTO_START".equals(startType))
 				{
-					Advapi32.SERVICE_DELAYED_AUTO_START_INFO delayedDesc = new Advapi32.SERVICE_DELAYED_AUTO_START_INFO();
+					SERVICE_DELAYED_AUTO_START_INFO delayedDesc = new SERVICE_DELAYED_AUTO_START_INFO();
 					delayedDesc.fDelayedAutostart = true;
 					success = advapi32.ChangeServiceConfig2(service, WINSVC.SERVICE_CONFIG_DELAYED_AUTO_START_INFO, delayedDesc);					
 				}
@@ -208,7 +215,8 @@ abstract public class Win32Service
 	public boolean uninstall()
 	{
 		Advapi32 advapi32;
-		Pointer serviceManager, service;
+		SC_HANDLE serviceManager;
+		SC_HANDLE service;
 		boolean success = false;
 
 		advapi32 = Advapi32.INSTANCE;
@@ -234,12 +242,13 @@ abstract public class Win32Service
 		result.setName(name);
 
 		Advapi32 advapi32;
-		Pointer serviceManager, service;
+		SC_HANDLE serviceManager;
+		SC_HANDLE service;
 		int state = Service.STATE_UNKNOWN;
 
 		advapi32 = Advapi32.INSTANCE;
 
-		serviceManager = openServiceControlManager(null, WINNT.GENERIC_READ);
+		serviceManager = openServiceControlManager(null, WinNT.GENERIC_READ);
 
 		if (serviceManager != null)
 		{
@@ -261,14 +270,14 @@ abstract public class Win32Service
 					{
 						QUERY_SERVICE_CONFIG lpServiceConfig = new QUERY_SERVICE_CONFIG();
 						lpServiceConfig.init(buffer);
-						if (lpServiceConfig.dwStartType == Advapi32.SERVICE_DISABLED)
+						if (lpServiceConfig.dwStartType == WINSVC.SERVICE_DISABLED)
 							state |= Service.STATE_DISABLED;
-						if (lpServiceConfig.dwStartType == Advapi32.SERVICE_BOOT_START | lpServiceConfig.dwStartType == Advapi32.SERVICE_SYSTEM_START
-								| lpServiceConfig.dwStartType == Advapi32.SERVICE_AUTO_START)
+						if (lpServiceConfig.dwStartType == WINSVC.SERVICE_BOOT_START | lpServiceConfig.dwStartType == WINSVC.SERVICE_SYSTEM_START
+								| lpServiceConfig.dwStartType == WINSVC.SERVICE_AUTO_START)
 							state |= Service.STATE_AUTOMATIC;
-						if (lpServiceConfig.dwStartType == Advapi32.SERVICE_DEMAND_START)
+						if (lpServiceConfig.dwStartType == WINSVC.SERVICE_DEMAND_START)
 							state |= Service.STATE_MANUAL;
-						if ((lpServiceConfig.dwServiceType & Advapi32.SERVICE_INTERACTIVE_PROCESS) != 0)
+						if ((lpServiceConfig.dwServiceType & WINSVC.SERVICE_INTERACTIVE_PROCESS) != 0)
 							state |= Service.STATE_INTERACTIVE;
 						result.setAccount(lpServiceConfig.lpServiceStartName);
 						result.setCommand(lpServiceConfig.lpBinaryPathName);
@@ -287,25 +296,24 @@ abstract public class Win32Service
 					state |= Service.STATE_UNKNOWN;
 					System.out.println("Error in QueryServiceConfig: " + Native.getLastError());
 				}
-				if (!advapi32.QueryServiceStatusEx(service, (byte) advapi32.SC_STATUS_PROCESS_INFO, null, 0, pcbBytesNeeded))
+				if (!advapi32.QueryServiceStatusEx(service, (byte) SC_STATUS_TYPE.SC_STATUS_PROCESS_INFO, null, 0, pcbBytesNeeded))
 				{
 					// now get the data
 					int cbBufSize = pcbBytesNeeded.getValue();
-					Memory buffer = new Memory(cbBufSize);
+					SERVICE_STATUS_PROCESS buffer = new SERVICE_STATUS_PROCESS(cbBufSize);
 					buffer.clear();
-					if (advapi32.QueryServiceStatusEx(service, (byte) advapi32.SC_STATUS_PROCESS_INFO, buffer, cbBufSize, pcbBytesNeeded))
+					if (advapi32.QueryServiceStatusEx(service, (byte) SC_STATUS_TYPE.SC_STATUS_PROCESS_INFO, buffer, cbBufSize, pcbBytesNeeded))
 					{
-						SERVICE_STATUS_PROCESS lpBuffer = new SERVICE_STATUS_PROCESS();
-						lpBuffer.init(buffer);
-						if (lpBuffer.dwCurrentState == advapi32.SERVICE_RUNNING)
+						buffer.read();
+						if (buffer.dwCurrentState == WINSVC.SERVICE_RUNNING)
 							state |= Service.STATE_RUNNING;
-						if (lpBuffer.dwCurrentState == advapi32.SERVICE_PAUSED)
+						if (buffer.dwCurrentState == WINSVC.SERVICE_PAUSED)
 							state |= Service.STATE_PAUSED;
-						if (lpBuffer.dwCurrentState == advapi32.SERVICE_START_PENDING)
+						if (buffer.dwCurrentState == WINSVC.SERVICE_START_PENDING)
 							state |= Service.STATE_STARTING;
-						if (lpBuffer.dwCurrentState == advapi32.SERVICE_STOP_PENDING)
+						if (buffer.dwCurrentState == WINSVC.SERVICE_STOP_PENDING)
 							state |= Service.STATE_STOPPING;
-						result.setPid(lpBuffer.dwProcessId);
+						result.setPid(buffer.dwProcessId);
 					}
 					else
 					{
@@ -313,13 +321,13 @@ abstract public class Win32Service
 						System.out.println("Error in QueryServiceStatusEx: " + Native.getLastError());
 					}
 				}
-				if (!advapi32.QueryServiceConfig2(service, (byte) advapi32.SERVICE_CONFIG_DESCRIPTION, null, 0, pcbBytesNeeded))
+				if (!advapi32.QueryServiceConfig2(service, (byte) WINSVC.SERVICE_CONFIG_DESCRIPTION, null, 0, pcbBytesNeeded))
 				{
 					// now get the data
 					int cbBufSize = pcbBytesNeeded.getValue();
 					Memory buffer = new Memory(cbBufSize);
 					buffer.clear();
-					if (advapi32.QueryServiceConfig2(service, (byte) advapi32.SERVICE_CONFIG_DESCRIPTION, buffer, cbBufSize, pcbBytesNeeded))
+					if (advapi32.QueryServiceConfig2(service, (byte) WINSVC.SERVICE_CONFIG_DESCRIPTION, buffer, cbBufSize, pcbBytesNeeded))
 					{
 						SERVICE_DESCRIPTION lpBuffer = new SERVICE_DESCRIPTION();
 						lpBuffer.init(buffer);
@@ -351,7 +359,8 @@ abstract public class Win32Service
 	public int state()
 	{
 		Advapi32 advapi32;
-		Pointer serviceManager, service;
+		SC_HANDLE serviceManager;
+		SC_HANDLE service;
 		int result = Service.STATE_UNKNOWN;
 
 		advapi32 = Advapi32.INSTANCE;
@@ -382,14 +391,14 @@ abstract public class Win32Service
 					{
 						QUERY_SERVICE_CONFIG lpServiceConfig = new QUERY_SERVICE_CONFIG();
 						lpServiceConfig.init(buffer);
-						if (lpServiceConfig.dwStartType == Advapi32.SERVICE_DISABLED)
+						if (lpServiceConfig.dwStartType == WINSVC.SERVICE_DISABLED)
 							result |= Service.STATE_DISABLED;
-						if (lpServiceConfig.dwStartType == Advapi32.SERVICE_BOOT_START | lpServiceConfig.dwStartType == Advapi32.SERVICE_SYSTEM_START
-								| lpServiceConfig.dwStartType == Advapi32.SERVICE_AUTO_START)
+						if (lpServiceConfig.dwStartType == WINSVC.SERVICE_BOOT_START | lpServiceConfig.dwStartType == WINSVC.SERVICE_SYSTEM_START
+								| lpServiceConfig.dwStartType == WINSVC.SERVICE_AUTO_START)
 							result |= Service.STATE_AUTOMATIC;
-						if (lpServiceConfig.dwStartType == Advapi32.SERVICE_DEMAND_START)
+						if (lpServiceConfig.dwStartType == WINSVC.SERVICE_DEMAND_START)
 							result |= Service.STATE_MANUAL;
-						if ((lpServiceConfig.dwServiceType & Advapi32.SERVICE_INTERACTIVE_PROCESS) != 0)
+						if ((lpServiceConfig.dwServiceType & WINSVC.SERVICE_INTERACTIVE_PROCESS) != 0)
 							result |= Service.STATE_INTERACTIVE;
 
 					}
@@ -406,19 +415,18 @@ abstract public class Win32Service
 					int error = Native.getLastError();
 					System.out.println("Error in QueryServiceConfig: " + error + " " + Kernel32Util.formatMessageFromLastErrorCode(error));
 				}
-				if (!advapi32.QueryServiceStatusEx(service, (byte) advapi32.SC_STATUS_PROCESS_INFO, null, 0, pcbBytesNeeded))
+				if (!advapi32.QueryServiceStatusEx(service, (byte) Winsvc.SC_STATUS_TYPE.SC_STATUS_PROCESS_INFO, null, 0, pcbBytesNeeded))
 				{
 					// now get the data
 					int cbBufSize = pcbBytesNeeded.getValue();
-					Memory buffer = new Memory(cbBufSize);
+					SERVICE_STATUS_PROCESS buffer = new SERVICE_STATUS_PROCESS(cbBufSize);
 					buffer.clear();
-					if (advapi32.QueryServiceStatusEx(service, (byte) advapi32.SC_STATUS_PROCESS_INFO, buffer, cbBufSize, pcbBytesNeeded))
+					if (advapi32.QueryServiceStatusEx(service, (byte) Winsvc.SC_STATUS_TYPE.SC_STATUS_PROCESS_INFO, buffer, cbBufSize, pcbBytesNeeded))
 					{
-						SERVICE_STATUS_PROCESS lpBuffer = new SERVICE_STATUS_PROCESS();
-						lpBuffer.init(buffer);
-						if (lpBuffer.dwCurrentState == advapi32.SERVICE_RUNNING)
+						buffer.read();
+						if (buffer.dwCurrentState == WINSVC.SERVICE_RUNNING)
 							result |= Service.STATE_RUNNING;
-						if (lpBuffer.dwCurrentState == advapi32.SERVICE_PAUSED)
+						if (buffer.dwCurrentState == WINSVC.SERVICE_PAUSED)
 							result |= Service.STATE_PAUSED;
 						// System.out.println("Win32Service.state() dwCurrentState "+lpBuffer.dwCurrentState);
 
@@ -454,7 +462,8 @@ abstract public class Win32Service
 	public boolean start()
 	{
 		Advapi32 advapi32;
-		Pointer serviceManager, service;
+		SC_HANDLE serviceManager;
+		SC_HANDLE service;
 		boolean success = false;
 
 		advapi32 = Advapi32.INSTANCE;
@@ -487,8 +496,9 @@ abstract public class Win32Service
 	public boolean stop() throws Exception
 	{
 		Advapi32 advapi32;
-		Pointer serviceManager, service;
-		Advapi32.SERVICE_STATUS serviceStatus;
+		SC_HANDLE serviceManager;
+		SC_HANDLE service;
+		Winsvc.SERVICE_STATUS serviceStatus;
 		boolean success = false;
 
 		advapi32 = Advapi32.INSTANCE;
@@ -501,7 +511,7 @@ abstract public class Win32Service
 
 			if (service != null)
 			{
-				serviceStatus = new Advapi32.SERVICE_STATUS();
+				serviceStatus = new Winsvc.SERVICE_STATUS();
 				success = advapi32.ControlService(service, WINSVC.SERVICE_CONTROL_STOP, serviceStatus);
 				advapi32.CloseServiceHandle(service);
 			}
@@ -583,9 +593,9 @@ abstract public class Win32Service
 	 *            access flags
 	 * @return handle to ServiceControlManager or null when failed
 	 */
-	static private Pointer openServiceControlManager(String machine, int access)
+	static private SC_HANDLE openServiceControlManager(String machine, int access)
 	{
-		Pointer handle = null;
+		SC_HANDLE handle = null;
 		Advapi32 advapi32;
 
 		advapi32 = Advapi32.INSTANCE;
@@ -606,7 +616,7 @@ abstract public class Win32Service
 	{
 		Map<String, ENUM_SERVICE_STATUS_PROCESS> result = new HashMap();
 		// Open the Service Control Manager
-		Pointer sc = openServiceControlManager(machine, WINSVC.SC_MANAGER_ENUMERATE_SERVICE);
+		SC_HANDLE sc = openServiceControlManager(machine, WINSVC.SC_MANAGER_ENUMERATE_SERVICE);
 
 		// Check if OpenSCManager returns NULL. Otherwise proceed
 		if (sc != null && !sc.equals(null))
@@ -676,10 +686,10 @@ abstract public class Win32Service
 	protected void reportStatus(int status, int win32ExitCode, int waitHint)
 	{
 		Advapi32 advapi32;
-		Advapi32.SERVICE_STATUS serviceStatus;
+		Winsvc.SERVICE_STATUS serviceStatus;
 
 		advapi32 = Advapi32.INSTANCE;
-		serviceStatus = new Advapi32.SERVICE_STATUS();
+		serviceStatus = new Winsvc.SERVICE_STATUS();
 		serviceStatus.dwServiceType = WINNT.SERVICE_WIN32_OWN_PROCESS;
 		serviceStatus.dwControlsAccepted = WINSVC.SERVICE_ACCEPT_STOP | WINSVC.SERVICE_ACCEPT_SHUTDOWN;
 		serviceStatus.dwWin32ExitCode = win32ExitCode;

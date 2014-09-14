@@ -1,11 +1,8 @@
 package org.rzo.netty.ahessian.rpc.message;
 
-import java.util.Map;
+import io.netty.channel.Channel;
 
-import org.jboss.netty.channel.Channel;
 import org.rzo.netty.ahessian.Constants;
-import org.rzo.netty.ahessian.io.OutputStreamEncoder;
-import org.rzo.netty.ahessian.rpc.callback.CallbackReplyMessage;
 
 /**
  * reply message for a remote invocation

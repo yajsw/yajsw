@@ -15,10 +15,10 @@
  */
 package org.rzo.yajsw.tray.ahessian.server;
 
+import io.netty.util.internal.logging.AbstractInternalLogger;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.jboss.netty.logging.AbstractInternalLogger;
 
 /**
  * <a href="http://java.sun.com/javase/6/docs/technotes/guides/logging/index.html">java.util.logging</a>
@@ -36,6 +36,7 @@ class JdkLogger extends AbstractInternalLogger {
     private final String loggerName;
 
     JdkLogger(Logger logger, String loggerName) {
+    	super(loggerName);
         this.logger = logger;
         this.loggerName = loggerName;
     }
@@ -92,4 +93,135 @@ class JdkLogger extends AbstractInternalLogger {
     public String toString() {
         return loggerName;
     }
+
+	@Override
+	public boolean isTraceEnabled()
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void trace(String paramString)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void trace(String paramString, Object paramObject)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void trace(String paramString, Object paramObject1,
+			Object paramObject2)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void trace(String paramString, Object... paramArrayOfObject)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void trace(String paramString, Throwable paramThrowable)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void debug(String paramString, Object paramObject)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void debug(String paramString, Object paramObject1,
+			Object paramObject2)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void debug(String paramString, Object... paramArrayOfObject)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void info(String paramString, Object paramObject)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void info(String paramString, Object paramObject1,
+			Object paramObject2)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void info(String paramString, Object... paramArrayOfObject)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void warn(String paramString, Object paramObject)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void warn(String paramString, Object... paramArrayOfObject)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void warn(String paramString, Object paramObject1,
+			Object paramObject2)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void error(String paramString, Object paramObject)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void error(String paramString, Object paramObject1,
+			Object paramObject2)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void error(String paramString, Object... paramArrayOfObject)
+	{
+		// TODO Auto-generated method stub
+		
+	}
 }

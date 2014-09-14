@@ -1,16 +1,12 @@
 package org.rzo.yajsw.controller.jvm;
 
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipelineCoverage;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
+import io.netty.channel.ChannelHandlerAdapter;
+import io.netty.channel.ChannelHandlerContext;
+
 import org.rzo.yajsw.Constants;
 import org.rzo.yajsw.controller.Message;
 
-@ChannelPipelineCoverage("one")
-public class ControllerHandler extends SimpleChannelUpstreamHandler implements Constants
+public class ControllerHandler extends ChannelHandlerAdapter implements Constants
 {
 
 	JVMController	_controller;
@@ -21,16 +17,16 @@ public class ControllerHandler extends SimpleChannelUpstreamHandler implements C
 	}
 
 	@Override
-	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception
+	public void channelRead(ChannelHandlerContext ctx, Object in) throws Exception
 	{
 		if (_controller.getState() == JVMController.STATE_USER_STOP)
 		{
 			// set the channel if not set
-			_controller._channel = ctx.getChannel();
+			_controller._channel = ctx.channel();
 			_controller.stop(JVMController.STATE_USER_STOP, "INTERNAL");
 			return;
 		}
-		Message message = (Message) e.getMessage();
+		Message message = (Message) in;
 		switch (message.getCode())
 		{
 		case WRAPPER_MSG_KEY:
@@ -38,10 +34,10 @@ public class ControllerHandler extends SimpleChannelUpstreamHandler implements C
 			if (_controller._key.equals(message.getMessage()))
 			{
 				// we set the channel not in channelConnected, 
-				_controller._channel = ctx.getChannel();
+				_controller._channel = ctx.channel();
 				_controller.setState(JVMController.STATE_LOGGED_ON);
 				_controller.startupOK();
-				ctx.getChannel().write(new Message(Constants.WRAPPER_MSG_OKKEY, "" + _controller._wrappedProcess.getAppPid()));
+				ctx.channel().writeAndFlush(new Message(Constants.WRAPPER_MSG_OKKEY, "" + _controller._wrappedProcess.getAppPid()));
 				if (_controller.isDebug())
 					_controller.getLog().info("Correct key");
 			}
@@ -50,8 +46,8 @@ public class ControllerHandler extends SimpleChannelUpstreamHandler implements C
 			{
 				if (_controller.isDebug())
 					_controller.getLog().info("Wrong key -> closing session");
-				ctx.getChannel().write(new Message(Constants.WRAPPER_MSG_BADKEY, null));
-				ctx.getChannel().close();
+				ctx.channel().writeAndFlush(new Message(Constants.WRAPPER_MSG_BADKEY, null));
+				ctx.channel().close();
 			}
 			break;
 		case Constants.WRAPPER_MSG_STOP:
@@ -105,7 +101,7 @@ public class ControllerHandler extends SimpleChannelUpstreamHandler implements C
 	}
 
 	@Override
-	public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception
+	public void channelActive(ChannelHandlerContext ctx) throws Exception
 	{
 
 		synchronized (_controller)
@@ -113,11 +109,11 @@ public class ControllerHandler extends SimpleChannelUpstreamHandler implements C
 
 		// we accept only one session. if we already have one -> close the
 		// new session
-		if (_controller._channel != null && _controller._channel != ctx.getChannel())
+		if (_controller._channel != null && _controller._channel != ctx.channel())
 		{
 			if (_controller.isDebug())
 				_controller.getLog().info("session already established -> ignore further sessions");
-			ctx.getChannel().close();
+			ctx.channel().close();
 		}
 		else if (_controller._channel == null)
 		{
@@ -134,14 +130,14 @@ public class ControllerHandler extends SimpleChannelUpstreamHandler implements C
 	}
 
 	@Override
-	public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception
+	public void channelInactive(ChannelHandlerContext ctx) throws Exception
 	{
 		synchronized (_controller)
 		{
-		if (_controller._channel == ctx.getChannel())
+		if (_controller._channel == ctx.channel())
 		{
 			// stop processing outgoing messages
-			_controller.workerExecutor.shutdownNow();
+			//_controller.workerExecutor.shutdownNow();
 
 			// stop the controller
 			_controller._channel = null;
@@ -154,10 +150,10 @@ public class ControllerHandler extends SimpleChannelUpstreamHandler implements C
 	}
 
 	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) throws Exception
 	{
 		if (_controller.isDebug())
-			_controller.getLog().info(e.getCause().getMessage());
+			_controller.getLog().info(e.getMessage());
 
 	}
 

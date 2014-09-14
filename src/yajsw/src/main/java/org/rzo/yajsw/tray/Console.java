@@ -17,6 +17,7 @@ import java.awt.event.WindowEvent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
@@ -44,7 +45,7 @@ public class Console extends JFrame
 	WrapperTrayIconImpl				_trayIcon;
 
 	/** true if the console has been shut down */
-	boolean							stop;
+	volatile boolean							stop;
 	protected static final Executor	executor			= Executors.newCachedThreadPool(new DaemonThreadFactory("console"));
 
 	/** The max lines in the output window */
@@ -458,19 +459,47 @@ public class Console extends JFrame
 
 			public void run()
 			{
+				while (!stop)
+				{
+						_trayIcon.showState(_trayIcon._process.getState());
+					try
+					{
+						Thread.sleep(500);
+					}
+					catch (InterruptedException e)
+					{
+						e.printStackTrace();
+					}
+				}
+			}
+
+		});
+		executor.execute(new Runnable()
+		{
+
+			public void run()
+			{
 				_trayIcon._process.startDrain();
+				long t, t2;
 				while (!stop)
 				{
 					if (!_outputPaused)
 					{
-						_trayIcon.showState(_trayIcon._process.getState());
-						String line;
-						while ((line = _trayIcon._process.readDrainLine()) != null)
-							addLine(line);
+						List<String> lines;
+						t = System.currentTimeMillis();
+						while (!stop && !_outputPaused && (lines = _trayIcon._process.readDrainLine()) != null)
+						{
+							t2 = System.currentTimeMillis();
+							for (String line : lines)
+								addLine(line);
+						//System.out.println(System.currentTimeMillis()+" readDrainLine "+(System.currentTimeMillis()-t)+"/"+(System.currentTimeMillis()-t2)+" "+(lines == null ? null : lines.size()));
+						t = System.currentTimeMillis();
+						}
 					}
 					try
 					{
-						Thread.sleep(500);
+						Thread.sleep(100);
+						t = System.currentTimeMillis();
 					}
 					catch (InterruptedException e)
 					{
@@ -555,6 +584,9 @@ public class Console extends JFrame
 	 */
 	public void close()
 	{
+		if (stop)
+			return;
+		//System.out.println("console close");
 		stop = true;
 		this.setVisible(false);
 		this.dispose();

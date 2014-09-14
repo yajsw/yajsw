@@ -1,66 +1,140 @@
 package org.rzo.netty.ahessian.log;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.ChannelEvent;
-import org.jboss.netty.channel.DownstreamMessageEvent;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.UpstreamMessageEvent;
-import org.jboss.netty.handler.logging.LoggingHandler;
-import org.rzo.netty.ahessian.Constants;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
+import io.netty.handler.logging.LoggingHandler;
+
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public class OutLogger extends LoggingHandler
 {
 	String _name;
+	boolean _stateOnly;
+	private static int MSG_LOG_LENGTH = 100;
 	public OutLogger(String name)
+	{
+		this(name, false);
+	}
+	
+	public OutLogger(String name, boolean stateOnly)
 	{
 		super(name);
 		_name = name;
+		_stateOnly = stateOnly;
+		Logger logger = Logger.getLogger(name);
+		if (!isNew(logger))
+			return;
+		Logger.getLogger(name).setLevel(Level.ALL);
+		ConsoleHandler console = new ConsoleHandler();
+		console.setLevel(Level.ALL);
+		console.setFormatter(new SimpleFormatter ()
+		{
+			 public synchronized String format(LogRecord record)
+			 {
+				 return System.currentTimeMillis() + " (" +_name+") "+record.getMessage() + "\r\n";
+			 }
+		});
+		Logger.getLogger(name).addHandler(console);
 	}
-    @Override
-	public void log(ChannelEvent e)
+	
+    private boolean isNew(Logger logger)
 	{
-    	StringBuilder sb = new StringBuilder();
+		return logger.getHandlers().length == 0;
+	}
 
-		//System.out.println(e);
-		if (e instanceof DownstreamMessageEvent)
+	@Override
+    public void channelRead(ChannelHandlerContext ctx, Object e) throws Exception {
+		if (_stateOnly)
 		{
-			DownstreamMessageEvent devm = (DownstreamMessageEvent) e;
-			Object mes = devm.getMessage();
-			sb.append('[');
-			sb.append(e.getChannel().getId());
-			sb.append(" >out> ");
-			if (mes instanceof ChannelBuffer)
-				encodeBuffer((ChannelBuffer)((DownstreamMessageEvent)e).getMessage(), sb);
-			else
-				sb.append(mes.toString());
-		} else
-		if (e instanceof UpstreamMessageEvent)
-		{
-			sb.append(e.getChannel().getId());
-			sb.append(" <in< ");
-			Object message = ((UpstreamMessageEvent)e).getMessage();
-			if (message instanceof ChannelBuffer)
-			encodeBuffer((ChannelBuffer)((UpstreamMessageEvent)e).getMessage(), sb);
+			ctx.fireChannelRead(e);
+			return;
 		}
-		else if (e instanceof ExceptionEvent)
+    	StringBuilder sb = new StringBuilder();
+		sb.append('[');
+		sb.append(""+System.currentTimeMillis());
+		sb.append("/");
+		sb.append(_name);
+		sb.append("/");
+		sb.append(Thread.currentThread().getName());
+		sb.append(" ");
+		sb.append(ctx.channel().id());
+		sb.append(" <in< ");
+		sb.append(']');
+		if (e instanceof ByteBuf)
 		{
-			sb.append(e.toString());
+		encodeBuffer((ByteBuf)e, sb);
 		}
+
+        if (logger.isEnabled(internalLevel)) 
+        {
+            logger.log(internalLevel, sb.toString());
+        }
+    	
+       ctx.fireChannelRead(e);
+    }
+
+    @Override
+    public void write(ChannelHandlerContext ctx, Object e, ChannelPromise promise) throws Exception {
+		if (_stateOnly)
+		{
+			 ctx.write(e, promise);
+			return;
+		}
+
+    	StringBuilder sb = new StringBuilder();
+    	
+		sb.append('[');
+		sb.append(""+System.currentTimeMillis());
+		sb.append("/");
+		sb.append(_name);
+		sb.append("/");
+		sb.append(Thread.currentThread().getName());
+		sb.append(" ");
+		sb.append(ctx.channel().id());
+		sb.append(" >out> ");
+		sb.append(']');
+		if (e instanceof ByteBuf)
+			encodeBuffer((ByteBuf)e, sb);
 		else
 			sb.append(e.toString());
 		
-		Constants.ahessianLogger.info(sb.toString());
-	}
+        if (logger.isEnabled(internalLevel)) 
+        {
+            logger.log(internalLevel, sb.toString());
+        }
+
+
+        //System.out.println(promise);
+        ctx.write(e, promise);
+    }
     
-    static private void encodeBuffer(ChannelBuffer buffer, StringBuilder sb)
+    @Override
+    public void flush(ChannelHandlerContext ctx) throws Exception
+    {
+		if (_stateOnly)
+		{
+			ctx.flush();
+			return;
+		}
+		super.flush(ctx);
+    	
+    }
+
+    
+    static private void encodeBuffer(ByteBuf buffer, StringBuilder sb)
     {
     	if (buffer == null)
     		return;
     	sb.append("("+buffer.readableBytes()+") ");
-    	int size = Math.min(50, buffer.readableBytes());
+    	int size = Math.min(MSG_LOG_LENGTH, buffer.readableBytes());
     	byte[] b = new byte[size];
     	buffer.getBytes(0, b);
-    	for (int i=0; i<b.length && i < 50; i++)
+    	for (int i=0; i<b.length && i < MSG_LOG_LENGTH; i++)
     	{
     		toDebugChar(sb, b[i]);
     	}

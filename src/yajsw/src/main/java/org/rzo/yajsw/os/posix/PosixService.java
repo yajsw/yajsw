@@ -264,6 +264,8 @@ public class PosixService extends AbstractService implements Constants
 		
 		for (Entry<String, String> e : config.getEnvLookupSet().entrySet())
 		{
+			if (e.getKey().contains("password"))
+				continue;
 			opt = Utils.getDOption(e.getKey(),e.getValue());
 			if (!result.contains(opt))
 			   result.add(opt);

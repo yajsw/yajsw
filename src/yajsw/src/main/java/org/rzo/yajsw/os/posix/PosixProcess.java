@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -162,10 +163,20 @@ public class PosixProcess extends AbstractProcess
 			public short	d_reclen;
 			public char		d_type;
 			public char[]	d_name	= new char[256];
+			
+			@Override
+			protected List getFieldOrder()
+			{
+				return Arrays.asList(new String[]{
+						
+						"d_ino","d_off","d_reclen","d_type","d_name"
+				});
+			}
+
 
 			public String getName()
 			{
-				return getPointer().getString(8 + 8 + 2 + 1, false);
+				return getPointer().getString(8 + 8 + 2 + 1);
 			}
 		};
 
@@ -179,6 +190,15 @@ public class PosixProcess extends AbstractProcess
 			public int		d_off;
 			public short	d_reclen;
 			public String	d_name;
+			
+			@Override
+			protected List getFieldOrder()
+			{
+				return Arrays.asList(new String[]{
+						"d_ino","d_off","d_reclen","d_name"
+				});
+			}
+
 		};
 
 		/*
@@ -253,6 +273,16 @@ public class PosixProcess extends AbstractProcess
 			public String	pw_gecos;
 			public String	pw_dir;
 			public String	pw_shell;
+			
+			@Override
+			protected List getFieldOrder()
+			{
+				return Arrays.asList(new String[]{
+						"pw_name","pw_passwd",
+						"pw_uid","pw_gid","pw_gecos","pw_dir","pw_shell"
+				});
+			}
+
 
 			public String getName()
 			{
@@ -346,6 +376,15 @@ public class PosixProcess extends AbstractProcess
 			public String	gr_password	= null;
 			public int		gr_gid		= 0;
 			public Pointer	gr_mem		= null;
+			
+			@Override
+			protected List getFieldOrder()
+			{
+				return Arrays.asList(new String[]{
+						"gr_name","gr_password","gr_gid","gr_mem"
+				});
+			}
+
 
 			public String getName()
 			{
@@ -477,6 +516,18 @@ public class PosixProcess extends AbstractProcess
 			public long	__unused4;
 			public long	__unused5;
 			public long	__unused6;
+			
+			@Override
+			protected List getFieldOrder()
+			{
+				return Arrays.asList(new String[]{
+						"st_dev","st_ino","st_nlink","st_mode",
+						"st_uid","st_gid","st_rdev","st_size","st_blksize",
+						"st_blocks","st_atime","st_atimensec","st_mtime","st_mtimensec",
+						"st_ctime","st_ctimensec","__unused4","__unused5","__unused6"
+				});
+			}
+
 
 			public boolean isSocket()
 			{
@@ -510,6 +561,18 @@ public class PosixProcess extends AbstractProcess
 			// (nanoseconds)
 			public int		__unused4;
 			public int		__unused5;
+			
+			@Override
+			protected List getFieldOrder()
+			{
+				return Arrays.asList(new String[]{
+						"st_dev","__pad1","st_ino","st_mode","st_nlink",
+						"st_uid","st_gid","st_rdev","__pad2","st_size",
+						"st_blksize","st_blocks","st_atime","st_atimensec","st_mtime",
+						"st_mtimensec","st_ctime","st_ctimensec","__unused4","__unused5"
+				});
+			}
+
 
 			public boolean isSocket()
 			{

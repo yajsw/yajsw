@@ -1,9 +1,9 @@
 package org.rzo.yajsw.tray.ahessian.server;
 
-import java.util.logging.Logger;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 
-import org.jboss.netty.logging.InternalLogger;
-import org.jboss.netty.logging.InternalLoggerFactory;
+import java.util.logging.Logger;
 
 public class AhessianLogging
 {

@@ -1,12 +1,9 @@
 package org.rzo.yajsw.nettyutils;
 
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipelineCoverage;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
+import io.netty.channel.ChannelHandlerAdapter;
+import io.netty.channel.ChannelHandlerContext;
 
-@ChannelPipelineCoverage("all")
-public class ConditionFilter extends SimpleChannelUpstreamHandler
+public class ConditionFilter extends ChannelHandlerAdapter
 {
 
 	Condition	_condition;
@@ -17,16 +14,16 @@ public class ConditionFilter extends SimpleChannelUpstreamHandler
 	}
 
 	@Override
-	public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception
+	public void channelActive(ChannelHandlerContext ctx) throws Exception
 	{
-		if (_condition.isOk(ctx, e))
+		if (_condition.isOk(ctx, null))
 		{
 			// forward if condtion met
-			ctx.sendUpstream(e);
+			ctx.fireChannelActive();
 		}
 		else
 		{
-			ctx.getChannel().close();
+			ctx.channel().close();
 		}
 	}
 

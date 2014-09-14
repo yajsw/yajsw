@@ -1,14 +1,13 @@
 package org.rzo.netty.ahessian.auth;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
+
 import java.util.Arrays;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.logging.InternalLogger;
-import org.jboss.netty.logging.InternalLoggerFactory;
 
 /**
  * A Simple Authentication Token.
@@ -53,9 +52,9 @@ public class SimpleAuthToken implements AuthToken
 	/* (non-Javadoc)
 	 * @see org.rzo.netty.ahessian.auth.AuthToken#authenticate(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.MessageEvent)
 	 */
-	public int authenticate(ChannelHandlerContext ctx, MessageEvent e)
+	public int authenticate(ChannelHandlerContext ctx, ByteBuf e)
 	{
-			ChannelBuffer b = (ChannelBuffer) e.getMessage();
+			ByteBuf b =  e;
 			int toCopy = Math.min(_receivedBytes.length-_receivedLength, b.readableBytes());
 			byte[] bytes = new byte[toCopy];
 			b.readBytes(bytes);
@@ -67,7 +66,7 @@ public class SimpleAuthToken implements AuthToken
 				{
 					logger.info("authenticated");
 					if (b.readableBytes() != 0)
-						ctx.sendUpstream(e);
+						ctx.fireChannelRead(e);
 					return PASSED;
 				}
 				else
@@ -82,7 +81,7 @@ public class SimpleAuthToken implements AuthToken
 	 */
 	public void sendPassword(ChannelHandlerContext ctx)
 	{
-		Channels.write(ctx, Channels.future(ctx.getChannel()), ChannelBuffers.wrappedBuffer(_password));
+		ctx.write( Unpooled.wrappedBuffer(_password));
 	}
 
 	public boolean isLoggedOn()

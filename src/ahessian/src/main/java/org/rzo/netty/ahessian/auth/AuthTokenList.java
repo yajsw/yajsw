@@ -1,14 +1,14 @@
 package org.rzo.netty.ahessian.auth;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.logging.InternalLogger;
-import org.jboss.netty.logging.InternalLoggerFactory;
 
 public class AuthTokenList implements AuthToken
 {
@@ -48,9 +48,9 @@ public class AuthTokenList implements AuthToken
 	}
 
 	
-	public int authenticate(ChannelHandlerContext ctx, MessageEvent e)
+	public int authenticate(ChannelHandlerContext ctx, ByteBuf e)
 	{
-				ChannelBuffer b = (ChannelBuffer) e.getMessage();
+				ByteBuf b = e;
 				int toCopy = Math.min(_receivedBytes.length-_receivedLength, b.readableBytes());
 				byte[] bytes = new byte[toCopy];
 				b.readBytes(bytes);
@@ -64,7 +64,7 @@ public class AuthTokenList implements AuthToken
 						logger.info("authenticated");
 						((SimpleAuthToken)_currentToken).setLoggedOn(true);
 						if (b.readableBytes() != 0)
-							ctx.sendUpstream(e);
+							ctx.fireChannelRead(e);
 						return PASSED;
 					}
 					else

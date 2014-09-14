@@ -10,7 +10,6 @@ import java.nio.channels.FileChannel;
 
 import org.rzo.yajsw.os.Process;
 import org.rzo.yajsw.os.posix.PosixProcess;
-import org.rzo.yajsw.os.posix.bsd.macosx.MacOsXProcess;
 
 import com.sun.jna.Memory;
 

@@ -4,27 +4,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
-import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.MapConfiguration;
-import org.apache.commons.vfs2.FileSystemException;
 import org.rzo.yajsw.Constants;
-import org.rzo.yajsw.config.YajswConfiguration;
-import org.rzo.yajsw.config.YajswConfigurationImpl;
 import org.rzo.yajsw.os.OperatingSystem;
-import org.rzo.yajsw.util.Utils;
-import org.rzo.yajsw.util.VFSUtils;
+import org.rzo.yajsw.os.Process;
 import org.rzo.yajsw.wrapper.StateChangeListener;
 import org.rzo.yajsw.wrapper.WrappedProcess;
-import org.rzo.yajsw.wrapper.WrappedProcessFactory;
 import org.rzo.yajsw.wrapper.WrappedRuntimeProcess;
-import org.rzo.yajsw.os.Process;
 
 public class RuntimeJavaMain
 {

@@ -1,5 +1,8 @@
 package org.rzo.netty.ahessian.rpc.callback;
 
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -10,11 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
 import org.rzo.netty.ahessian.Constants;
 import org.rzo.netty.ahessian.rpc.message.HessianRPCCallMessage;
-import org.rzo.netty.ahessian.rpc.message.HessianRPCReplyMessage;
 
 
 public class ClientCallback implements Serializable
@@ -121,7 +121,7 @@ public class ClientCallback implements Serializable
 		Map<Object, Object> headers = new HashMap();
 		headers.put(Constants.ICALLBACK_CALL_ID_HEADER_KEY, message.getCallbackCallId());
 		HessianRPCCallMessage call = new HessianRPCCallMessage(message.getCallbackMethod(), new Object[]{fault, result}, headers, null);
-		writeResult(call, ctx.getChannel());
+		writeResult(call, ctx.channel());
 	}
 	
 

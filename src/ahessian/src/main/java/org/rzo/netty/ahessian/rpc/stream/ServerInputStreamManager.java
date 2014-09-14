@@ -1,11 +1,12 @@
 package org.rzo.netty.ahessian.rpc.stream;
 
+import io.netty.channel.Channel;
+
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-import org.jboss.netty.channel.Channel;
 
 public class ServerInputStreamManager
 {

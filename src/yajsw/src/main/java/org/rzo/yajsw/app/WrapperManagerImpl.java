@@ -10,6 +10,22 @@
  */
 package org.rzo.yajsw.app;
 
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerAdapter;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import io.netty.handler.codec.Delimiters;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.SimpleLoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -46,22 +62,6 @@ import javax.management.ObjectName;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.logging.LogFactory;
-import org.jboss.netty.bootstrap.ClientBootstrap;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
-import org.jboss.netty.channel.socket.oio.OioClientSocketChannelFactory;
-import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
-import org.jboss.netty.handler.codec.frame.Delimiters;
-import org.jboss.netty.logging.InternalLogger;
-import org.jboss.netty.logging.SimpleLoggerFactory;
 import org.rzo.yajsw.Constants;
 import org.rzo.yajsw.YajswVersion;
 import org.rzo.yajsw.action.Action;
@@ -91,113 +91,116 @@ import com.sun.management.HotSpotDiagnosticMXBean;
 /**
  * The Class WrapperManagerImpl.
  */
-public class WrapperManagerImpl implements WrapperManager, Constants, WrapperManagerImplMBean
+public class WrapperManagerImpl implements WrapperManager, Constants,
+		WrapperManagerImplMBean
 {
 
 	/** The _port. */
-	int							_port				= DEFAULT_PORT;
+	int _port = DEFAULT_PORT;
 
 	/** The _debug. */
-	boolean						_debug				= false;
-	boolean						_debugComm				= false;
+	boolean _debug = false;
+	boolean _debugComm = false;
 
 	/** The log. */
-	final InternalLogger		log					= SimpleLoggerFactory.getInstance("WrapperManager");
+	final InternalLogger log = SimpleLoggerFactory
+			.getInstance("WrapperManager");
 
 	/** The _started. */
-	volatile boolean			_started			= false;
+	volatile boolean _started = false;
 
 	/** The _key. */
-	String						_key;
+	String _key;
 
 	/** The _ping interval. */
-	int							_pingInterval		= 5;
+	int _pingInterval = 5000;
 
 	/** The connector. */
-	ClientBootstrap				connector;
+	Bootstrap connector;
 
 	/** The _session. */
-	volatile Channel			_session;
+	volatile Channel _session;
 
 	/** The _stopping. */
-	volatile boolean			_stopping			= false;
+	volatile boolean _stopping = false;
 
 	/** The _config. */
-	Configuration				_config;
+	Configuration _config;
 
 	/** The instance. */
-	static WrapperManagerImpl	instance;
+	static WrapperManagerImpl instance;
 
 	/** The _exit code. */
-	int							_exitCode			= 0;
+	int _exitCode = 0;
 
 	/** The main method. */
-	Method						mainMethod			= null;
+	Method mainMethod = null;
 
 	/** The main method args. */
-	String[]					mainMethodArgs		= null;
+	String[] mainMethodArgs = null;
 
 	/** The exit on main terminate. */
-	int							exitOnMainTerminate	= -1;
-	private int					exitOnException		= 999;
+	int exitOnMainTerminate = -1;
+	private int exitOnException = 999;
 
 	/** The _my pid. */
-	volatile int				_myPid				= -1;
+	volatile int _myPid = -1;
 
-	boolean						_externalStop		= false;
+	boolean _externalStop = false;
 
-	String						_groovyScript		= null;
+	String _groovyScript = null;
 
-	Cycler						_pinger;
+	Cycler _pinger;
 
-	OutputStream				_outStream;
-	OutputStream				_errStream;
+	OutputStream _outStream;
+	OutputStream _errStream;
 
-	volatile boolean			_appearHanging		= false;
+	volatile boolean _appearHanging = false;
 
-	boolean						_overrideStdErr		= false;
+	boolean _overrideStdErr = false;
 
-	boolean						_haltAppOnWrapper	= false;
+	boolean _haltAppOnWrapper = false;
 
-	Lock						_lock				= new ReentrantLock();
-	Condition					_connectEnd			= _lock.newCondition();
-	Executor					executor			= Executors.newCachedThreadPool(new DaemonThreadFactory("yajsw-pool", Thread.MAX_PRIORITY));
+	Lock _lock = new ReentrantLock();
+	Condition _connectEnd = _lock.newCondition();
+	Executor executor = Executors.newCachedThreadPool(new DaemonThreadFactory(
+			"yajsw-pool", Thread.MAX_PRIORITY));
 
-	long						_startupTimeout		= 0;
+	long _startupTimeout = 0;
 
-	volatile String						shutdownScript		= null;
+	volatile String shutdownScript = null;
 
-	Properties					_properties;
+	Properties _properties;
 
-	volatile boolean			_dumpingHeap		= false;
+	volatile boolean _dumpingHeap = false;
 
-	volatile String				_stopReason			= null;
+	volatile String _stopReason = null;
 
-	float						currentPercentHeap	= -1;
-	long						minorGCDuration		= -1;
-	long						fullGCDuration		= -1;
-	final MemoryMXBean			memoryBean			= ManagementFactory.getMemoryMXBean();
-	final long					maxHeap				= memoryBean.getHeapMemoryUsage().getMax();
-	final Object				_heapDataLock		= new Object();
-	boolean						_sendHeapData		= false;
+	float currentPercentHeap = -1;
+	long minorGCDuration = -1;
+	long fullGCDuration = -1;
+	final MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+	final long maxHeap = memoryBean.getHeapMemoryUsage().getMax();
+	final Object _heapDataLock = new Object();
+	boolean _sendHeapData = false;
 
-	private long				lastMinorCollectionCount;
-	private long				lastMinorCollectionTime;
+	private long lastMinorCollectionCount;
+	private long lastMinorCollectionTime;
 
-	private long				lastFullCollectionCount;
-	private long				lastFullCollectionTime;
+	private long lastFullCollectionCount;
+	private long lastFullCollectionTime;
 
-	Long						usedHeap			= null;
-	Long						timeMinorGC			= null;
-	Long						timeFullGC			= null;
-	Long 						lastUsedHeap		= null;
+	Long usedHeap = null;
+	Long timeMinorGC = null;
+	Long timeFullGC = null;
+	Long lastUsedHeap = null;
 
-	GarbageCollectorMXBean		minorGCBean;
-	GarbageCollectorMXBean		fullGCBean;
+	GarbageCollectorMXBean minorGCBean;
+	GarbageCollectorMXBean fullGCBean;
 
-	MessageFormat				gcFormat			= null;
+	MessageFormat gcFormat = null;
 
-	boolean						_initGCBeans		= false;
+	boolean _initGCBeans = false;
 
 	private String getSystemProperty(String key)
 	{
@@ -222,15 +225,19 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 		 * (InterruptedException e1) { // TODO Auto-generated catch block
 		 * e1.printStackTrace(); }
 		 */
-		System.out.println("YAJSW: "+YajswVersion.YAJSW_VERSION);
-		System.out.println("OS   : "+YajswVersion.OS_VERSION);
-		System.out.println("JVM  : "+YajswVersion.JAVA_VERSION);
+		System.out.println("YAJSW: " + YajswVersion.YAJSW_VERSION);
+		System.out.println("OS   : " + YajswVersion.OS_VERSION);
+		System.out.println("JVM  : " + YajswVersion.JAVA_VERSION);
 		// set commons logging for vfs -> avoid using default java logger
-		ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
+		ClassLoader currentClassLoader = Thread.currentThread()
+				.getContextClassLoader();
 		Thread.currentThread().setContextClassLoader(wrapperClassLoader);
-		//String commonsLog = getSystemProperty("org.apache.commons.logging.Log");
-		//System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
-		LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
+		// String commonsLog =
+		// getSystemProperty("org.apache.commons.logging.Log");
+		// System.setProperty("org.apache.commons.logging.Log",
+		// "org.apache.commons.logging.impl.SimpleLog");
+		LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log",
+				"org.apache.commons.logging.impl.SimpleLog");
 		instance = this;
 		String outFile = getSystemProperty("wrapper.teeName");
 		String outPath = getSystemProperty("wrapper.tmp.path");
@@ -248,12 +255,16 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 			try
 			{
 				if (_debug)
-					System.out.println("wrapped process: executing pre script " + preScript);
-				Script script = ScriptFactory.createScript(preScript, "wrapper.app.pre.script", null, new String[0], log, 0, "UTF-8", false, _debug);
+					System.out.println("wrapped process: executing pre script "
+							+ preScript);
+				Script script = ScriptFactory.createScript(preScript,
+						"wrapper.app.pre.script", null, new String[0], log, 0,
+						"UTF-8", false, _debug);
 				if (script != null)
 					script.execute();
 				else
-					System.out.println("wrapped process: executing pre script error: could not open script");
+					System.out
+							.println("wrapped process: executing pre script error: could not open script");
 			}
 			catch (Throwable ex)
 			{
@@ -269,24 +280,31 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 
 		try
 		{
-			_overrideStdErr = config.getBoolean("wrapper.java.dump.override", false);
+			_overrideStdErr = config.getBoolean("wrapper.java.dump.override",
+					false);
 		}
 		catch (Exception ex)
 		{
-			System.out.println("Error getting wrapper.java.dump.override " + ex.getMessage());
+			System.out.println("Error getting wrapper.java.dump.override "
+					+ ex.getMessage());
 		}
 		try
 		{
-			String mainClassName = config.getString("wrapper.java.app.mainclass");
+			String mainClassName = config
+					.getString("wrapper.java.app.mainclass");
 			String jarName = config.getString("wrapper.java.app.jar");
 			String groovyScript = config.getString("wrapper.groovy");
-			if (mainClassName == null && jarName == null && groovyScript == null)
+			if (mainClassName == null && jarName == null
+					&& groovyScript == null)
 				mainClassName = config.getString("wrapper.app.parameter.1");
 			if (_debug)
-				System.out.println("mainClass/jar/script: " + mainClassName + "/" + jarName + "/" + groovyScript);
-			if (jarName == null && mainClassName == null && groovyScript == null)
+				System.out.println("mainClass/jar/script: " + mainClassName
+						+ "/" + jarName + "/" + groovyScript);
+			if (jarName == null && mainClassName == null
+					&& groovyScript == null)
 			{
-				System.out.println("missing main class name or jar file or groovy file. please check configuration");
+				System.out
+						.println("missing main class name or jar file or groovy file. please check configuration");
 				return;
 			}
 			if (jarName != null)
@@ -296,14 +314,16 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 			else if (mainClassName != null)
 				try
 				{
-					Class cls = ClassLoader.getSystemClassLoader().loadClass(mainClassName);// Class.forName(mainClassName,
+					Class cls = ClassLoader.getSystemClassLoader().loadClass(
+							mainClassName);// Class.forName(mainClassName,
 					// currentContext);
-					mainMethod = cls.getMethod("main", new Class[]
-					{ String[].class });
+					mainMethod = cls.getMethod("main",
+							new Class[] { String[].class });
 				}
 				catch (Exception e)
 				{
-					System.out.println("error finding main method in class: " + mainClassName + " : " + e.getMessage());
+					System.out.println("error finding main method in class: "
+							+ mainClassName + " : " + e.getMessage());
 					// log.throwing(WrapperMain.class.getName(), "main", e);
 					e.printStackTrace();
 					return;
@@ -320,27 +340,34 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 			if (_debug)
 				System.out.println("external stop " + _externalStop);
 
-			exitOnMainTerminate = config.getInt("wrapper.exit_on_main_terminate", DEFAULT_EXIT_ON_MAIN_TERMINATE);
+			exitOnMainTerminate = config.getInt(
+					"wrapper.exit_on_main_terminate",
+					DEFAULT_EXIT_ON_MAIN_TERMINATE);
 
-			exitOnException = config.getInt("wrapper.exit_on_main_exception", DEFAULT_EXIT_ON_MAIN_EXCEPTION);
+			exitOnException = config.getInt("wrapper.exit_on_main_exception",
+					DEFAULT_EXIT_ON_MAIN_EXCEPTION);
 
 			mainMethodArgs = getAppParam((Configuration) config);
 			setConfiguration((Configuration) config);
 			if (_config.getBoolean("wrapper.java.jmx", false))
 				registerMBean(config);
 
-			String control = _config.getString("wrapper.control", DEFAULT_CONTROL);
+			String control = _config.getString("wrapper.control",
+					DEFAULT_CONTROL);
 			if ("TIGHT".equals(control) || "APPLICATION".equals(control))
 				_haltAppOnWrapper = true;
 
 			setKey(_config.getString("wrapper.key"));
 			// setDebug(true);
 			setPort(_config.getInt("wrapper.port"));
-			setPingInterval(_config.getInt("wrapper.ping.interval", Constants.DEFAULT_PING_INTERVAL));
+			setPingInterval(_config.getInt("wrapper.ping.interval",
+					Constants.DEFAULT_PING_INTERVAL));
 
-			_startupTimeout = _config.getInt("wrapper.startup.timeout", DEFAULT_STARTUP_TIMEOUT) * 1000;
+			_startupTimeout = _config.getInt("wrapper.startup.timeout",
+					DEFAULT_STARTUP_TIMEOUT) * 1000;
 
-			shutdownScript = _config.getString("wrapper.app.shutdown.script", null);
+			shutdownScript = _config.getString("wrapper.app.shutdown.script",
+					null);
 			if (shutdownScript != null && !"".equals(shutdownScript))
 			{
 				Runtime.getRuntime().addShutdownHook(new Thread()
@@ -355,12 +382,15 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 
 			try
 			{
-				_sendHeapData = config.getBoolean("wrapper.java.monitor.gc.restart", false)
-						|| config.getBoolean("wrapper.java.monitor.heap", false);
+				_sendHeapData = config.getBoolean(
+						"wrapper.java.monitor.gc.restart", false)
+						|| config
+								.getBoolean("wrapper.java.monitor.heap", false);
 			}
 			catch (Exception ex)
 			{
-				System.out.println("error reading wrapper.java.monitor.*.restart");
+				System.out
+						.println("error reading wrapper.java.monitor.*.restart");
 			}
 
 			monitorDeadLocks(config);
@@ -369,10 +399,10 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 
 			if (_debug)
 				System.out.println("terminated WrapperManager.init()");
-			//if (commonsLog != null)
-			//	System.setProperty("org.apache.commons.logging.Log", commonsLog);
-			LogFactory.getFactory().removeAttribute("org.apache.commons.logging.Log");
-
+			// if (commonsLog != null)
+			// System.setProperty("org.apache.commons.logging.Log", commonsLog);
+			LogFactory.getFactory().removeAttribute(
+					"org.apache.commons.logging.Log");
 
 			Utils.verifyIPv4IsPreferred(null);
 		}
@@ -389,7 +419,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 	{
 		if (config.getBoolean("wrapper.java.monitor.deadlock", false))
 		{
-			final long cycle = config.getLong("wrapper.java.monitor.deadlock.interval", 30) * 1000;
+			final long cycle = config.getLong(
+					"wrapper.java.monitor.deadlock.interval", 30) * 1000;
 			final ThreadMXBean bean = ManagementFactory.getThreadMXBean();
 			if (_debug)
 				System.out.println("monitor deadlock: start");
@@ -403,7 +434,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 						long[] ids = bean.findDeadlockedThreads();
 						if (ids != null && ids.length > 0)
 						{
-							System.err.println("wrapper.java.monitor.deadlock: DEADLOCK IN THREADS: ");
+							System.err
+									.println("wrapper.java.monitor.deadlock: DEADLOCK IN THREADS: ");
 							threadDump(ids);
 							// exit loop once we find a deadlock
 							return;
@@ -425,14 +457,16 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 		}
 	}
 
-	volatile boolean	_heapNotified	= false;
+	volatile boolean _heapNotified = false;
 
 	private void monitorHeap(YajswConfigurationImpl config)
 	{
 		if (config.getBoolean("wrapper.java.monitor.heap", false))
 		{
-			final long cycle = config.getLong("wrapper.java.monitor.heap.interval", 30) * 1000;
-			final int thresholdPercent = config.getInt("wrapper.java.monitor.heap.threshold.percent", 95);
+			final long cycle = config.getLong(
+					"wrapper.java.monitor.heap.interval", 30) * 1000;
+			final int thresholdPercent = config.getInt(
+					"wrapper.java.monitor.heap.threshold.percent", 95);
 			if (_debug)
 				System.out.println("monitor heap: start");
 			executor.execute(new Runnable()
@@ -444,20 +478,47 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 					{
 						synchronized (_heapDataLock)
 						{
-							currentPercentHeap = ((float) memoryBean.getHeapMemoryUsage().getUsed() / maxHeap) * 100;
+							// currentPercentHeap = ((float)
+							// memoryBean.getHeapMemoryUsage().getUsed() /
+							// maxHeap) * 100;
+							long usedMem = memoryBean.getHeapMemoryUsage()
+									.getUsed();
+							currentPercentHeap = (float) ((((double) usedMem) / maxHeap) * 100d);
 							if (currentPercentHeap > thresholdPercent)
 							{
 								if (!_heapNotified)
 								{
-									System.err.println("wrapper.java.monitor.heap: HEAP SIZE EXCEEDS THRESHOLD: "
-											+ memoryBean.getHeapMemoryUsage().getUsed() + "/" + maxHeap);
+									// System.err.println("wrapper.java.monitor.heap: HEAP SIZE EXCEEDS THRESHOLD: "
+									// +
+									// memoryBean.getHeapMemoryUsage().getUsed()
+									// + "/" + maxHeap);
+									System.err
+											.println("wrapper.java.monitor.heap: HEAP SIZE EXCEEDS THRESHOLD: "
+													+ usedMem
+													+ "/"
+													+ maxHeap
+													+ " => "
+													+ currentPercentHeap + "%");
 									_heapNotified = true;
 								}
 							}
 							else if (_heapNotified)
 							{
-								System.err.println("wrapper.java.monitor.heap: HEAP SIZE OK: " + memoryBean.getHeapMemoryUsage().getUsed() + "/"
-										+ maxHeap);
+								/*
+								 * System.err .println(
+								 * "wrapper.java.monitor.heap: HEAP SIZE OK: " +
+								 * memoryBean .getHeapMemoryUsage() .getUsed() +
+								 * "/" + maxHeap);
+								 */
+								System.err
+										.println("wrapper.java.monitor.heap: HEAP SIZE OK: "
+												+ usedMem
+												+ "/"
+												+ maxHeap
+												+ " => "
+												+ currentPercentHeap
+												+ "%");
+
 								_heapNotified = false;
 
 							}
@@ -483,7 +544,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 	{
 		initGCBeans();
 		String mFormat = config.getString("wrapper.java.monitor.gc", null);
-		boolean gcRestart = config.getBoolean("wrapper.java.monitor.gc.restart", false);
+		boolean gcRestart = config.getBoolean(
+				"wrapper.java.monitor.gc.restart", false);
 		if (mFormat != null || gcRestart)
 			try
 			{
@@ -491,13 +553,17 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 					System.out.println("monitor GC: " + mFormat);
 				if (mFormat != null)
 					gcFormat = new MessageFormat(mFormat);
-				final long cycle = config.getLong("wrapper.java.monitor.gc.interval", 1) * 1000;
+				final long cycle = config.getLong(
+						"wrapper.java.monitor.gc.interval", 1) * 1000;
 
 				if (_debug)
 				{
-					System.out.println("monitor gc: minorGCBean/fullGCBean: " + minorGCBean.getName() + "/" + fullGCBean.getName());
+					System.out.println("monitor gc: minorGCBean/fullGCBean: "
+							+ minorGCBean.getName() + "/"
+							+ fullGCBean.getName());
 
-					System.out.println("monitor gc: start cycle " + cycle + "ms");
+					System.out.println("monitor gc: start cycle " + cycle
+							+ "ms");
 				}
 				executor.execute(new Runnable()
 				{
@@ -505,12 +571,14 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 					{
 						if (minorGCBean == null)
 						{
-							System.err.println("monitor gc: could not find minorGCBean -> abort monitor");
+							System.err
+									.println("monitor gc: could not find minorGCBean -> abort monitor");
 							return;
 						}
 						if (fullGCBean == null)
 						{
-							System.err.println("monitor gc: could not find fullGCBean -> abort monitor");
+							System.err
+									.println("monitor gc: could not find fullGCBean -> abort monitor");
 							return;
 						}
 						try
@@ -548,7 +616,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 
 		try
 		{
-			List<GarbageCollectorMXBean> gcMBeans = ManagementFactory.getGarbageCollectorMXBeans();
+			List<GarbageCollectorMXBean> gcMBeans = ManagementFactory
+					.getGarbageCollectorMXBeans();
 			for (GarbageCollectorMXBean gcBean : gcMBeans)
 			{
 				if (gcBean.getName().toLowerCase().contains("copy"))
@@ -569,7 +638,9 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 				}
 				else
 				{
-					System.err.println("Unable to classify GarbageCollectorMXBean [" + gcBean.getName() + "]");
+					System.err
+							.println("Unable to classify GarbageCollectorMXBean ["
+									+ gcBean.getName() + "]");
 				}
 			}
 		}
@@ -590,8 +661,10 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 			return;
 		if (minorGCBean.getCollectionCount() != lastMinorCollectionCount)
 		{
-			long diffCount = minorGCBean.getCollectionCount() - lastMinorCollectionCount;
-			long diffTime = minorGCBean.getCollectionTime() - lastMinorCollectionTime;
+			long diffCount = minorGCBean.getCollectionCount()
+					- lastMinorCollectionCount;
+			long diffTime = minorGCBean.getCollectionTime()
+					- lastMinorCollectionTime;
 			if (diffCount != 0 && diffCount != 1)
 				timeMinorGC = diffTime / diffCount;
 			else
@@ -604,8 +677,10 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 
 		if (fullGCBean.getCollectionCount() != lastFullCollectionCount)
 		{
-			long diffCount = fullGCBean.getCollectionCount() - lastFullCollectionCount;
-			long diffTime = fullGCBean.getCollectionTime() - lastFullCollectionTime;
+			long diffCount = fullGCBean.getCollectionCount()
+					- lastFullCollectionCount;
+			long diffTime = fullGCBean.getCollectionTime()
+					- lastFullCollectionTime;
 			if (diffCount != 0 && diffCount != 1)
 				timeFullGC = diffTime / diffCount;
 			else
@@ -635,10 +710,10 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 			}
 
 			lastUsedHeap = usedHeap;
-			
+
 			if (gcFormat != null)
-				System.err.println(gcFormat.format(new Object[]
-				{ usedHeap, timeMinorGC, timeFullGC }));
+				System.err.println(gcFormat.format(new Object[] { usedHeap,
+						timeMinorGC, timeFullGC }));
 			usedHeap = null;
 			timeMinorGC = null;
 			timeFullGC = null;
@@ -749,40 +824,21 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 
 		String cl = attr.getValue("Class-Path");
 		ClassLoader loader = null;
-		/*		if (cl != null)
-		{
-			ArrayList classpath = new ArrayList();
-			String[] clArr = cl.split(" ");
-			for (int i = 0; i < clArr.length; i++)
-			{
-				String file = clArr[i];
-				File myFile;
-				try
-				{
-					myFile = new File(file);
-					classpath.add(myFile);
-				}
-				catch (Exception e)
-				{
-					e.printStackTrace();
-				}
-			}
-
-			URL[] urlsArr = new URL[classpath.size()];
-			int i = 0;
-			for (Iterator it = classpath.iterator(); it.hasNext(); i++)
-				try
-				{
-					urlsArr[i] = ((File) it.next()).toURI().toURL();
-				}
-				catch (Exception e)
-				{
-					e.printStackTrace();
-				}
-
-			loader = new URLClassLoader(urlsArr, ClassLoader.getSystemClassLoader());
-		}
-*/		if (loader == null)
+		/*
+		 * if (cl != null) { ArrayList classpath = new ArrayList(); String[]
+		 * clArr = cl.split(" "); for (int i = 0; i < clArr.length; i++) {
+		 * String file = clArr[i]; File myFile; try { myFile = new File(file);
+		 * classpath.add(myFile); } catch (Exception e) { e.printStackTrace(); }
+		 * }
+		 * 
+		 * URL[] urlsArr = new URL[classpath.size()]; int i = 0; for (Iterator
+		 * it = classpath.iterator(); it.hasNext(); i++) try { urlsArr[i] =
+		 * ((File) it.next()).toURI().toURL(); } catch (Exception e) {
+		 * e.printStackTrace(); }
+		 * 
+		 * loader = new URLClassLoader(urlsArr,
+		 * ClassLoader.getSystemClassLoader()); }
+		 */if (loader == null)
 			loader = ClassLoader.getSystemClassLoader();
 
 		String mainClassName = attr.getValue("Main-Class");
@@ -792,13 +848,14 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 		try
 		{
 			Class cls = loader.loadClass(mainClassName);// cl.loadClass(mainClassName);
-			mainMethod = cls.getMethod("main", new Class[]
-			{ String[].class });
+			mainMethod = cls.getMethod("main", new Class[] { String[].class });
 		}
 		catch (Exception ex)
 		{
 			ex.printStackTrace();
-			System.err.println("ERROR: could not load main method from class/jar: "+mainClassName+"/"+jarName);
+			System.err
+					.println("ERROR: could not load main method from class/jar: "
+							+ mainClassName + "/" + jarName);
 		}
 
 		return mainMethod;
@@ -829,10 +886,10 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 					result.createNewFile();
 				}
 				result.deleteOnExit();
-					Process p = Runtime.getRuntime().exec("chmod 777 " + absPath);
-					// p.waitFor();
-					Thread.sleep(500);
-					p.destroy();
+				Process p = Runtime.getRuntime().exec("chmod 777 " + absPath);
+				// p.waitFor();
+				Thread.sleep(500);
+				p.destroy();
 			}
 			catch (Exception ex)
 			{
@@ -868,7 +925,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 
 		try
 		{
-			PrintStream wrapperOut = (PrintStream) new CyclicBufferFilePrintStream(fOut);
+			PrintStream wrapperOut = (PrintStream) new CyclicBufferFilePrintStream(
+					fOut);
 			TeeOutputStream newOut = (TeeOutputStream) new TeeOutputStream();
 			newOut.connect(wrapperOut);
 			// pipe output to console only if it is visible
@@ -885,7 +943,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 		try
 		{
 
-			PrintStream wrapperErr = (PrintStream) new CyclicBufferFilePrintStream(fErr);
+			PrintStream wrapperErr = (PrintStream) new CyclicBufferFilePrintStream(
+					fErr);
 			TeeOutputStream newErr = (TeeOutputStream) new TeeOutputStream();
 			newErr.connect(wrapperErr);
 			// pipe output to console only if it is visible
@@ -901,7 +960,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 
 		try
 		{
-			CyclicBufferFileInputStream wrapperIn = new CyclicBufferFileInputStream(fIn, "r");
+			CyclicBufferFileInputStream wrapperIn = new CyclicBufferFileInputStream(
+					fIn, "r");
 			TeeInputStream newIn = (TeeInputStream) new TeeInputStream();
 			newIn.connect(wrapperIn);
 			newIn.connect(System.in);
@@ -923,13 +983,19 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 	{
 		if (_debug)
 		{
-			System.out.println("APP user name=" + getSystemProperty("user.name"));
-			System.out.println("APP working dir=" + getSystemProperty("user.dir"));
-			System.out.println("APP java version=" + getSystemProperty("java.version"));
-			System.out.println("APP class path=" + getSystemProperty("java.class.path"));
-			System.out.println("APP library path=" + getSystemProperty("java.library.path"));
+			System.out.println("APP user name="
+					+ getSystemProperty("user.name"));
+			System.out.println("APP working dir="
+					+ getSystemProperty("user.dir"));
+			System.out.println("APP java version="
+					+ getSystemProperty("java.version"));
+			System.out.println("APP class path="
+					+ getSystemProperty("java.class.path"));
+			System.out.println("APP library path="
+					+ getSystemProperty("java.library.path"));
 		}
-		String[] files = getSystemProperty("java.class.path").split(File.pathSeparator);
+		String[] files = getSystemProperty("java.class.path").split(
+				File.pathSeparator);
 		for (int i = 0; i < files.length; i++)
 		{
 			File f = new File(files[i]);
@@ -964,7 +1030,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 	{
 		ArrayList result = new ArrayList();
 		ArrayList keys = new ArrayList();
-		for (Iterator it = config.getKeys("wrapper.app.parameter"); it.hasNext();)
+		for (Iterator it = config.getKeys("wrapper.app.parameter"); it
+				.hasNext();)
 		{
 			keys.add(it.next());
 		}
@@ -973,7 +1040,11 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 		{
 			String arg = config.getString((String) it.next());
 			if (arg != null)
-				result.add(arg);
+			{
+				arg = arg.trim();
+				if (arg.length() > 0)
+					result.add(arg);
+			}
 		}
 		String[] args = new String[result.size()];
 		int i = 0;
@@ -1025,46 +1096,72 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 				e1.printStackTrace();
 		}
 
-		connector = new ClientBootstrap(new OioClientSocketChannelFactory(
-		// executor,
-				executor));
-		// add logging
-		ChannelPipelineFactory pf;
+		connector = new Bootstrap();
+		EventLoopGroup workerGroup = new NioEventLoopGroup();
+		// workerGroup.setIoRatio(99);
+		connector.group(workerGroup);
+		connector.channel(NioSocketChannel.class);
+
+		connector.remoteAddress(new InetSocketAddress("127.0.0.1", _port));
+		connector.option(ChannelOption.SO_REUSEADDR, true);
+		connector.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10 * 1000);
+		connector.option(ChannelOption.TCP_NODELAY, true);
+
 		if (_debugComm)
-		{
-			pf = new ChannelPipelineFactory()
+			connector.handler(new ChannelInitializer<SocketChannel>()
 			{
-				public ChannelPipeline getPipeline() throws Exception
+
+				@Override
+				protected void initChannel(SocketChannel ch) throws Exception
 				{
-					return Channels.pipeline(new SystemOutLoggingFilter("WrapperManager"), new DelimiterBasedFrameDecoder(8192, true, Delimiters
-							.nulDelimiter()), new MessageEncoder(), new MessageDecoder(), new WrapperHandler());
+					ch.pipeline()
+							.addLast(
+									new io.netty.channel.ChannelHandler[] {
+											new SystemOutLoggingFilter(
+													"WrapperManager"),
+											new DelimiterBasedFrameDecoder(
+													8192, true, Delimiters
+															.nulDelimiter()),
+											new MessageEncoder(),
+											new MessageDecoder(),
+											new WrapperHandler() }
+
+							);
 				}
-			};
-		}
+
+			});
 		else
-		{
-			pf = new ChannelPipelineFactory()
+			connector.handler(new ChannelInitializer<SocketChannel>()
 			{
-				public ChannelPipeline getPipeline() throws Exception
+
+				@Override
+				protected void initChannel(SocketChannel ch) throws Exception
 				{
-					return Channels.pipeline(new DelimiterBasedFrameDecoder(8192, true, Delimiters.nulDelimiter()), new MessageEncoder(),
-							new MessageDecoder(), new WrapperHandler());
+					ch.pipeline().addLast(
+							new io.netty.channel.ChannelHandler[] {
+									new DelimiterBasedFrameDecoder(8192, true,
+											Delimiters.nulDelimiter()),
+									new MessageEncoder(), new MessageDecoder(),
+									new WrapperHandler() }
+
+					);
 				}
-			};
-		}
-		connector.setPipelineFactory(pf);
+
+			});
 
 		// pinger is a cycler with high priority threads
 		// sends ping messages within a ping interval
-		_pinger = new Cycler(getPingInterval(), 0, Executors.newCachedThreadPool(new DaemonThreadFactory("pinger", Thread.MAX_PRIORITY)),
-				new Runnable()
+		_pinger = new Cycler(getPingInterval(), 0,
+				Executors.newCachedThreadPool(new DaemonThreadFactory("pinger",
+						Thread.MAX_PRIORITY)), new Runnable()
 				{
-					long	start	= System.currentTimeMillis();
+					long start = System.currentTimeMillis();
 
 					public void run()
 					{
 						ChannelFuture future;
-						if (_session != null && _session.isConnected() && !_stopping && !_appearHanging)
+						if (_session != null && _session.isActive()
+								&& !_stopping && !_appearHanging)
 						{
 							synchronized (_heapDataLock)
 							{
@@ -1072,15 +1169,26 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 								{
 									if (minorGCDuration == -1)
 										getGCData();
-									future = _session.write(new Message(Constants.WRAPPER_MSG_PING, "" + currentPercentHeap + ";" + minorGCDuration
-											+ ";" + fullGCDuration + ";" + lastUsedHeap));
+									future = _session
+											.writeAndFlush(new Message(
+													Constants.WRAPPER_MSG_PING,
+													"" + currentPercentHeap
+															+ ";"
+															+ minorGCDuration
+															+ ";"
+															+ fullGCDuration
+															+ ";"
+															+ lastUsedHeap));
 									currentPercentHeap = -1;
 									minorGCDuration = -1;
 									fullGCDuration = -1;
 								}
 								else
 								{
-									future = _session.write(new Message(Constants.WRAPPER_MSG_PING, ""));
+									future = _session
+											.writeAndFlush(new Message(
+													Constants.WRAPPER_MSG_PING,
+													""));
 								}
 							}
 							try
@@ -1093,9 +1201,14 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 							}
 							start = System.currentTimeMillis();
 						}
-						else if ((_haltAppOnWrapper && (System.currentTimeMillis() - start) > _startupTimeout) && !_stopping)
+						else if ((_haltAppOnWrapper && (System
+								.currentTimeMillis() - start) > _startupTimeout)
+								&& !_stopping)
 						{
-							System.out.println("no connection to wrapper during " + (_startupTimeout / 1000) + "seconds -> System.exit(-1)");
+							System.out
+									.println("no connection to wrapper during "
+											+ (_startupTimeout / 1000)
+											+ " seconds -> System.exit(-1)");
 							System.out
 									.println("if this is due to server overload consider increasing yajsw configuration property wrapper.startup.timeout");
 							System.exit(-1);
@@ -1105,11 +1218,6 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 		_pinger.start();
 
 		// connect
-		connector.setOption("remoteAddress", new InetSocketAddress("127.0.0.1", _port));
-		connector.setOption("connectTimeoutMillis", 10 * 1000);
-		connector.setOption("reuseAddress", true);
-		connector.setOption("tcpNoDelay", true);
-
 		// handler should process messages in a separate thread
 
 		reconnect();
@@ -1171,15 +1279,18 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 			if (_started)
 			{
 				if (_debug)
-					System.out.println("WrapperManager: channel connected, sending key");
-				future1.getChannel().write(new Message(Constants.WRAPPER_MSG_KEY, _key));
+					System.out
+							.println("WrapperManager: channel connected, sending key");
+				future1.channel().writeAndFlush(
+						new Message(Constants.WRAPPER_MSG_KEY, _key));
 			}
 			else
 				try
 				{
 					if (_debug)
 						// log.fine("connection failed -> sleep then retry");
-						System.out.println("connection failed -> sleep then retry");
+						System.out
+								.println("connection failed -> sleep then retry");
 					_started = false;
 					Thread.sleep(5000);
 				}
@@ -1193,24 +1304,24 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 	/**
 	 * The Class WrapperHandler.
 	 */
-	class WrapperHandler extends SimpleChannelHandler
+	class WrapperHandler extends ChannelHandlerAdapter
 	{
 
 		@Override
-		public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception
+		public void channelInactive(ChannelHandlerContext ctx) throws Exception
 		{
 			if (_debug)
 				System.out.println("session closed");
 			_started = false;
 			if (_session != null)
-			try
-			{
-				_session.close();
-			}
-			catch (Throwable ex)
-			{
-				ex.printStackTrace();
-			}
+				try
+				{
+					_session.close();
+				}
+				catch (Throwable ex)
+				{
+					ex.printStackTrace();
+				}
 			_session = null;
 			if (!_stopping)
 			{
@@ -1235,12 +1346,12 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 		}
 
 		@Override
-		public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception
+		public void channelRead(ChannelHandlerContext ctx, Object message)
 		{
 			if (_stopping)
 				return;
-			Channel session = ctx.getChannel();
-			Message msg = (Message) e.getMessage();
+			Channel session = ctx.channel();
+			Message msg = (Message) message;
 			if (msg.getCode() == Constants.WRAPPER_MSG_STOP)
 				try
 				{
@@ -1250,7 +1361,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 					if (session != null)
 						session.close();
 					// Thread.sleep(100);
-					if (msg.getMessage() != null && msg.getMessage().length() > 0)
+					if (msg.getMessage() != null
+							&& msg.getMessage().length() > 0)
 						try
 						{
 							String[] txt = msg.getMessage().split(":");
@@ -1300,7 +1412,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 		}
 
 		@Override
-		public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception
+		public void exceptionCaught(ChannelHandlerContext ctx, Throwable e)
+				throws Exception
 		{
 			/*
 			 * if (_debug) // log.log(Level.FINE, "exceptionCaught",
@@ -1308,7 +1421,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 			 */
 			if (_debug)
 			{
-				Throwable th = e.getCause();
+				Throwable th = e;
 				if (th == null)
 					return;
 				String msg = th.getMessage();
@@ -1427,7 +1540,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 		if (_session != null)
 			while (_session != null && !_stopping)
 			{
-				_session.write(new Message(Constants.WRAPPER_MSG_STOP, null));
+				_session.writeAndFlush(new Message(Constants.WRAPPER_MSG_STOP,
+						null));
 				try
 				{
 					Thread.sleep(500);
@@ -1450,7 +1564,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 		if (_session != null)
 			while (_session != null && !_stopping)
 			{
-				_session.write(new Message(Constants.WRAPPER_MSG_STOP_TIMER, null));
+				_session.writeAndFlush(new Message(
+						Constants.WRAPPER_MSG_STOP_TIMER, null));
 				try
 				{
 					Thread.sleep(500);
@@ -1470,7 +1585,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 		if (_session != null)
 			while (_session != null && !_stopping)
 			{
-				_session.write(new Message(Constants.WRAPPER_MSG_RESTART, null));
+				_session.writeAndFlush(new Message(
+						Constants.WRAPPER_MSG_RESTART, null));
 				try
 				{
 					Thread.sleep(100);
@@ -1481,7 +1597,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 				}
 			}
 		else
-			System.out.println("not connected to wrapper -> cannot send restart command");
+			System.out
+					.println("not connected to wrapper -> cannot send restart command");
 	}
 
 	/**
@@ -1571,7 +1688,10 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 					if (file.isDirectory())
 					{
 						parent = file;
-						file = new File(parent, "dump" + "_" + new SimpleDateFormat("yyyy_MM_dd-hh_mm").format(new Date()) + ".hprof");
+						file = new File(parent, "dump"
+								+ "_"
+								+ new SimpleDateFormat("yyyy_MM_dd-hh_mm")
+										.format(new Date()) + ".hprof");
 					}
 					else
 						parent = file.getParentFile();
@@ -1581,11 +1701,15 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 
 					// com.sun.management.HotSpotDiagnosticMXBean mb =
 					// sun.management.ManagementFactory.getDiagnosticMXBean();
-					com.sun.management.HotSpotDiagnosticMXBean mb = ManagementFactory.newPlatformMXBeanProxy(ManagementFactory
-							.getPlatformMBeanServer(), HOTSPOT_BEAN_NAME, HotSpotDiagnosticMXBean.class);
+					com.sun.management.HotSpotDiagnosticMXBean mb = ManagementFactory
+							.newPlatformMXBeanProxy(
+									ManagementFactory.getPlatformMBeanServer(),
+									HOTSPOT_BEAN_NAME,
+									HotSpotDiagnosticMXBean.class);
 					File dumpFile = new File(parent, file.getName());
 					mb.dumpHeap(dumpFile.getAbsolutePath(), true);
-					System.out.println("yajsw: dumpHeap done " + dumpFile.getAbsolutePath());
+					System.out.println("yajsw: dumpHeap done "
+							+ dumpFile.getAbsolutePath());
 				}
 				catch (Throwable ex)
 				{
@@ -1601,7 +1725,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 
 	}
 
-	private static final String	HOTSPOT_BEAN_NAME	= "com.sun.management:type=HotSpotDiagnostic";
+	private static final String HOTSPOT_BEAN_NAME = "com.sun.management:type=HotSpotDiagnostic";
 
 	public static void main(String[] args) throws MalformedURLException
 	{
@@ -1631,7 +1755,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 		boolean reported = false;
 		while (!reported && !_stopping)
 		{
-			if (_session == null || !_session.isConnected())
+			if (_session == null || !_session.isActive())
 				try
 				{
 					Thread.sleep(500);
@@ -1642,7 +1766,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 				}
 			else
 			{
-				_session.write(new Message(Constants.WRAPPER_MSG_SERVICE_STARTUP, null));
+				_session.writeAndFlush(new Message(
+						Constants.WRAPPER_MSG_SERVICE_STARTUP, null));
 				reported = true;
 			}
 		}
@@ -1653,9 +1778,12 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 		if (shutdownScript != null & !"".equals(shutdownScript))
 		{
 			if (_debug)
-				System.out.println("executing shutdown script "+shutdownScript);
-			Script script = ScriptFactory.createScript(shutdownScript, "wrapper.app.shutdown.script", null, new String[0], log, 0, _config
-					.getString("wrapper.script.encoding"), _config.getBoolean("wrapper.script.reload", false), _debug);
+				System.out.println("executing shutdown script "
+						+ shutdownScript);
+			Script script = ScriptFactory.createScript(shutdownScript,
+					"wrapper.app.shutdown.script", null, new String[0], log, 0,
+					_config.getString("wrapper.script.encoding"),
+					_config.getBoolean("wrapper.script.reload", false), _debug);
 			// make sure it is invoked only once
 			// stop may be invoke multiple times
 			shutdownScript = null;
@@ -1663,27 +1791,33 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 			{
 				script.execute();
 				if (_debug)
-				System.out.println("terminated shutdown script ");
+					System.out.println("terminated shutdown script ");
 			}
 			else
-				System.out.println("Error "+shutdownScript + "not initialized");
+				System.out.println("Error " + shutdownScript
+						+ "not initialized");
 		}
 
 	}
 
-	public void executeScript(String scriptFileName, ClassLoader wrapperClassLoader)
+	public void executeScript(String scriptFileName,
+			ClassLoader wrapperClassLoader)
 	{
 		System.out.println("initializing script " + scriptFileName);
-		ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
+		ClassLoader currentClassLoader = Thread.currentThread()
+				.getContextClassLoader();
 		Thread.currentThread().setContextClassLoader(wrapperClassLoader);
 		try
 		{
-			Script script = ScriptFactory.createScript(scriptFileName, "", null, (String[]) getMainMethodArgs(), null, 0, _config
-					.getString("wrapper.script.encoding"), _config.getBoolean("wrapper.script.reload", false), _debug);
+			Script script = ScriptFactory.createScript(scriptFileName, "",
+					null, (String[]) getMainMethodArgs(), null, 0,
+					_config.getString("wrapper.script.encoding"),
+					_config.getBoolean("wrapper.script.reload", false), _debug);
 			if (script != null)
 				script.execute();
 			else
-				System.err.println("error opening script script: " + scriptFileName);
+				System.err.println("error opening script script: "
+						+ scriptFileName);
 		}
 		catch (Throwable ex)
 		{
@@ -1698,14 +1832,16 @@ public class WrapperManagerImpl implements WrapperManager, Constants, WrapperMan
 	{
 		try
 		{
-			if (_session == null || !_session.isConnected())
+			if (_session == null || !_session.isActive())
 			{
 				final ChannelFuture future1 = connector.connect();
 				future1.await();
 				future1.isSuccess();
-				_session = future1.getChannel();
+				_session = future1.channel();
 			}
-			ChannelFuture wFuture = _session.write(new Message(Constants.WRAPPER_MSG_STOP_PENDING, String.valueOf(timeoutHint)));
+			ChannelFuture wFuture = _session.writeAndFlush(new Message(
+					Constants.WRAPPER_MSG_STOP_PENDING, String
+							.valueOf(timeoutHint)));
 			wFuture.await();
 		}
 		catch (Exception e)

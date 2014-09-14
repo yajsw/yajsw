@@ -10,33 +10,30 @@
  */
 package org.rzo.yajsw.controller.jvm;
 
-import java.net.InetSocketAddress;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.oio.OioEventLoopGroup;
+import io.netty.channel.socket.oio.OioServerSocketChannel;
+
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.socket.oio.OioServerSocketChannelFactory;
 import org.rzo.yajsw.Constants;
 import org.rzo.yajsw.controller.AbstractController;
 import org.rzo.yajsw.controller.Message;
 import org.rzo.yajsw.util.Cycler;
 import org.rzo.yajsw.util.DaemonThreadFactory;
-import org.rzo.yajsw.util.Utils;
 import org.rzo.yajsw.wrapper.WrappedJavaProcess;
 import org.rzo.yajsw.wrapper.WrappedProcess;
-
-import com.sun.jna.Platform;
-import com.sun.jna.PlatformEx;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -123,8 +120,8 @@ public class JVMController extends AbstractController
 	volatile ScheduledFuture<?>							_timeoutHandle;
 
 	Cycler												_pingCheck;
-	ExecutorService										workerExecutor			= Executors.newCachedThreadPool(new DaemonThreadFactory(
-																						"controller-worker"));
+	//ExecutorService										workerExecutor			= Executors.newCachedThreadPool(new DaemonThreadFactory(
+	//																					"controller-worker"));
 
 	Runnable											_serviceStartupListener;
 
@@ -132,6 +129,9 @@ public class JVMController extends AbstractController
 	long												_minGC					= -1;
 	long												_fullGC					= -1;
 	long												_heapInBytes			= -1;
+    EventLoopGroup _bossGroup; 
+    EventLoopGroup _workerGroup;
+    volatile boolean _bound = false; 
 
 	/**
 	 * Instantiates a new controller.
@@ -142,6 +142,19 @@ public class JVMController extends AbstractController
 	public JVMController(WrappedProcess wrappedJavaProcess)
 	{
 		super(wrappedJavaProcess);
+		_bossGroup = new OioEventLoopGroup(); 
+	    _workerGroup = new OioEventLoopGroup();
+	    ControllerPipelineFactory pipelineFactory = new ControllerPipelineFactory(this); 
+
+		pipelineFactory.setDebug(_debug);
+        _acceptor = new ServerBootstrap() 
+        .group(_bossGroup, _workerGroup)
+         .channel(OioServerSocketChannel.class)
+         .childOption(ChannelOption.TCP_NODELAY, true)
+         //.option(ChannelOption.SO_BACKLOG, 128)
+         .childHandler(pipelineFactory);
+
+		
 	}
 
 	public void init()
@@ -177,14 +190,8 @@ public class JVMController extends AbstractController
 	 */
 	private void initInternal()
 	{
-		_acceptor = null;
-		_acceptor = new ServerBootstrap(new OioServerSocketChannelFactory(executor, executor));
-
+		
 		// ???do not allow multiple servers to bind on the same port
-		_acceptor.setOption("reuseAddress", false);
-		_acceptor.setOption("tcpNoDelay", true);
-		_acceptor.setPipelineFactory(new ControllerPipelineFactory(this, _debugComm));
-
 		_init = true;
 
 	}
@@ -194,6 +201,11 @@ public class JVMController extends AbstractController
 	 */
 	public boolean start()
 	{
+		if (_bound)
+		{
+			setState(STATE_WAITING);
+			return true;
+		}
 		int myPort = -1;
 
 		// in case of wrapper chaining: if we already have opened a port to our
@@ -213,7 +225,7 @@ public class JVMController extends AbstractController
 			initInternal();
 			setState(STATE_UNKNOWN);
 			// if we have kept the channel
-			if (_parentChannel != null && _parentChannel.isBound())
+			if (_parentChannel != null && _parentChannel.isActive()) //??
 			{
 				setState(STATE_WAITING);
 				// beginWaitForStartup();
@@ -232,12 +244,17 @@ public class JVMController extends AbstractController
 						_usedPorts.add(_port);
 						if (isDebug())
 							getLog().info("binding to port " + _port);
-						_parentChannel = _acceptor.bind(new InetSocketAddress(_port));
+						ChannelFuture f = _acceptor.bind(_port).sync();
+						if (f.isSuccess())
+						{
+						_parentChannel = f.channel();
 						setState(STATE_WAITING);
+						_bound = true;
 						// beginWaitForStartup();
 						if (isDebug())
 							getLog().info("binding successfull");
 						return true;
+						}
 					}
 					catch (Exception ex)
 					{
@@ -332,7 +349,7 @@ public class JVMController extends AbstractController
 		if (_parentChannel != null)
 		{
 			int i = 0;
-			while (_channel != null && _channel.isConnected() && i < 3)
+			while (_channel != null && _channel.isActive() && i < 3)
 			{
 				i++;
 				if (_debug)
@@ -342,7 +359,7 @@ public class JVMController extends AbstractController
 					String txt = null;
 					if (reason != null && reason.length() > 0)
 						txt = ":" + reason;
-					_channel.write(new Message(Constants.WRAPPER_MSG_STOP, txt));
+					_channel.writeAndFlush(new Message(Constants.WRAPPER_MSG_STOP, txt));
 				}
 				try
 				{
@@ -405,6 +422,7 @@ public class JVMController extends AbstractController
 		JVMController c = new JVMController(null);
 		c.setDebug(true);
 		c.setKey("123");
+		c.setMinPort(15003);
 		c.start();
 		c.stop(0, null);
 		JVMController c1 = new JVMController(null);
@@ -575,7 +593,7 @@ public class JVMController extends AbstractController
 	public void requestThreadDump()
 	{
 		if (_channel != null)
-			_channel.write(new Message(Constants.WRAPPER_MSG_THREAD_DUMP, null));
+			_channel.writeAndFlush(new Message(Constants.WRAPPER_MSG_THREAD_DUMP, null));
 	}
 
 	/**
@@ -584,7 +602,7 @@ public class JVMController extends AbstractController
 	public void requestGc()
 	{
 		if (_channel != null)
-			_channel.write(new Message(Constants.WRAPPER_MSG_GC, null));
+			_channel.writeAndFlush(new Message(Constants.WRAPPER_MSG_GC, null));
 	}
 
 	/**
@@ -593,7 +611,7 @@ public class JVMController extends AbstractController
 	public void requestDumpHeap(String fileName)
 	{
 		if (_channel != null)
-			_channel.write(new Message(Constants.WRAPPER_MSG_DUMP_HEAP, fileName));
+			_channel.writeAndFlush(new Message(Constants.WRAPPER_MSG_DUMP_HEAP, fileName));
 	}
 
 	public void reset()

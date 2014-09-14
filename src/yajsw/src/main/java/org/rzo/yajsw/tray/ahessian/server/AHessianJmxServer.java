@@ -1,50 +1,76 @@
 package org.rzo.yajsw.tray.ahessian.server;
 
+import io.netty.channel.Channel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.ipfilter.IpFilterRuleList;
+import io.netty.util.internal.logging.InternalLogger;
+
 import java.net.InetSocketAddress;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
+import javax.management.MBeanServerFactory;
 
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
-import org.jboss.netty.handler.ipfilter.IpFilterRuleHandler;
-import org.jboss.netty.handler.ipfilter.IpFilterRuleList;
+import org.rzo.netty.ahessian.application.jmx.remote.service.JmxSerializerFactory;
+import org.rzo.netty.ahessian.bootstrap.ChannelPipelineFactoryBuilder;
+import org.rzo.netty.ahessian.bootstrap.DefaultServer;
 import org.rzo.netty.mcast.discovery.DiscoveryServer;
 
 public class AHessianJmxServer
 {
-	public AHessianJmxServer(MBeanServer mbeanServer, String ipFilter, String serviceDiscoveryName, int port, Logger log) throws Exception
+	public AHessianJmxServer(MBeanServer mbeanServer, String ipFilter, String serviceDiscoveryName, int port, InternalLogger logger, boolean debug) throws Exception
 	{
-		Executor executor = Executors.newCachedThreadPool();
-
-		// Configure the server.
-		ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(executor, executor));
-
-		bootstrap
-				.setPipelineFactory(new AHessianServerPipelineFactory(executor, new IpFilterRuleHandler(new IpFilterRuleList(ipFilter)), mbeanServer, log));
 		
-		bootstrap.setOption("reuseAddress", true);
-		bootstrap.setOption("tcpNoDelay", true);
-
+		
+    	ChannelPipelineFactoryBuilder builder = new ChannelPipelineFactoryBuilder()
+    	.serializerFactory(new JmxSerializerFactory())
+    	.rpcServiceInterface(MBeanServerConnection.class)
+    	.rpcServerService(mbeanServer)
+    	.serviceThreads(10)
+    	.ipFilter(ipFilter);
+    	
+    	if (debug)
+    		builder.debug();
+    	
+    	Set<String> channelOptions = new HashSet();
+    	//channelOptions.add("SO_REUSE");
+    	channelOptions.add("TCP_NODELAY");
 
 		int serverPort = port;
-		// Bind and start to accept incoming connections.
-		Channel channel = bootstrap.bind(new InetSocketAddress(serverPort));
-		if (serverPort == 0)
-			serverPort = ((InetSocketAddress) channel.getLocalAddress()).getPort();
 
-		log.info("ahessian jmx service bound to port " + serverPort);
+    	DefaultServer server = new DefaultServer(NioServerSocketChannel.class, builder, channelOptions, serverPort);
+
+        server.start();
+        Channel channel = server.getChannel();
+
+		
+		Executor executor = Executors.newCachedThreadPool();
+
+		if (serverPort == 0)
+			serverPort = ((InetSocketAddress) channel.localAddress()).getPort();
+
+		if (debug && logger != null)
+			logger.info("ahessian jmx service bound to port " + serverPort);
 
 		DiscoveryServer discovery = new DiscoveryServer();
+		discovery.setDebug(debug);
+		discovery.setLogger(logger);
 		// allow discovery only from localhost. other computers will be ignored
 		discovery.setIpSet(new IpFilterRuleList("+n:localhost, -n:*"));
 		discovery.setName(serviceDiscoveryName);
 		discovery.setPort(serverPort);
 		discovery.init();
+
+	}
+	
+	public static void main(String[] args) throws Exception
+	{
+		MBeanServer _mbeanServer = MBeanServerFactory.createMBeanServer();
+		AHessianJmxServer _ahessianServer = new AHessianJmxServer(_mbeanServer, "+n:localhost, -n:*", "test", 15009, null, false);
 
 	}
 

@@ -1,14 +1,14 @@
 package org.rzo.netty.ahessian.serialization;
 
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPipeline;
+
+import java.io.IOException;
 import java.io.InputStream;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.rzo.netty.ahessian.Constants;
+import org.rzo.netty.ahessian.io.InputStreamConsumer;
+import org.rzo.netty.ahessian.io.PullInputStreamConsumer;
 
 import com.caucho.hessian4.io.HessianInput;
 
@@ -39,35 +39,64 @@ import com.caucho.hessian4.io.HessianInput;
  * </pre>
  */
 
-public class HessianDecoder extends SimpleChannelUpstreamHandler
+public class HessianDecoder extends PullInputStreamConsumer
 {
 
-	/* (non-Javadoc)
-	 * @see org.jboss.netty.channel.SimpleChannelUpstreamHandler#messageReceived(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.MessageEvent)
-	 */
-	@Override
-    public void messageReceived(
-            ChannelHandlerContext ctx, MessageEvent e) throws Exception 
-    {
-		InputStream in = (InputStream) e.getMessage();
-		try
+	public HessianDecoder()
+	{
+		super(new InputStreamConsumer()
 		{
-			HessianInput hin = new HessianInput(in);
-			while (true)
+			InputStream _in;
+
+			@Override
+			public void consume(ChannelHandlerContext ctx, InputStream in)
 			{
-				Object obj = hin.readObject(null);
-				Channels.fireMessageReceived(ctx, obj);
+				_in = in;
+				try
+				{
+					HessianInput hin = new HessianInput(_in);
+					while (true)
+					{
+						Object obj = hin.readObject(null);
+						if (obj != null)
+							ctx.fireChannelRead(obj);
+					}
+				}
+				catch (Exception ex)
+				{
+					if (ex.getMessage().startsWith("H expected got 0x0 ("))
+						Constants.ahessianLogger.info("Ping received");
+					else
+						Constants.ahessianLogger.debug("", ex);
+				}
 			}
-		}
-		catch (Exception ex)
-		{
-			if (ex.getMessage().startsWith("H expected got 0x0 ("))
-				Constants.ahessianLogger.info("Ping received");
-			else
-				Constants.ahessianLogger.debug("", ex);
-		}
-    }
-    
-	
+
+			@Override
+			public boolean isBufferEmpty()
+			{
+				if (_in == null)
+					return true;
+				try
+				{
+					return _in.available() == 0;
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+				return true;
+			}
+
+			@Override
+			public void setContext(ChannelHandlerContext ctx)
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+		// TODO Auto-generated constructor stub
+	}
+
 
 }

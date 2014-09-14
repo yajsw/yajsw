@@ -2,7 +2,6 @@ package org.rzo.yajsw.updater;
 
 import java.util.ArrayList;
 
-import org.rzo.yajsw.config.YajswConfigurationImpl;
 import org.rzo.yajsw.os.ms.win.w32.WindowsXPProcess;
 import org.rzo.yajsw.wrapper.WrappedService;
 

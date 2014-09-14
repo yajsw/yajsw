@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.rzo.yajsw.util.MyReentrantLock;
 
@@ -97,6 +96,7 @@ public class CircularBuffer extends Reader
 	 */
 	public void put(byte value)
 	{
+		//System.out.println("drain put "+1);
 		lock.lock(); // lock this object
 		// while no empty locations, place thread in waiting state
 		try
@@ -126,6 +126,7 @@ public class CircularBuffer extends Reader
 
 		notEmpty.signal(); // signal threads waiting to read from buffer
 		lock.unlock(); // unlock this object
+		//System.out.println("-drain put "+1);
 	} // end method put
 
 	private void writeFullIndicator()
@@ -146,11 +147,13 @@ public class CircularBuffer extends Reader
 	 */
 	public void put(byte[] buf, int off, int len)
 	{
+		//System.out.println("drain put "+len);
 		lock.lock(); // lock this object
 		for (int i = off; i < off + len - 1; i++)
 			putByte(buf[i]);
 		notEmpty.signal(); // signal threads waiting to read from buffer
 		lock.unlock(); // unlock this object
+		//System.out.println("-put "+len);
 
 	}
 
@@ -192,6 +195,8 @@ public class CircularBuffer extends Reader
 	 */
 	public byte get()
 	{
+		//System.out.println("drain get "+1);
+
 		byte result = 0; // initialize value read from buffer
 		lock.lock(); // lock this object
 
@@ -224,6 +229,7 @@ public class CircularBuffer extends Reader
 		{
 			lock.unlock(); // unlock this object
 		} // end finally
+		//System.out.println("-drain get "+1);
 
 		return result;
 	} // end method get
@@ -243,6 +249,7 @@ public class CircularBuffer extends Reader
 	 */
 	public int get(byte[] buf, int off, int len)
 	{
+		//System.out.println("drain get "+len);
 		lock.lock(); // lock this object
 		int i = 0;
 
@@ -268,6 +275,7 @@ public class CircularBuffer extends Reader
 		}
 		notFull.signal();
 		lock.unlock(); // unlock this object
+		//System.out.println("-drain get "+i);
 
 		return i;
 
@@ -361,6 +369,8 @@ public class CircularBuffer extends Reader
 	@Override
 	public int read(char[] cbuf, int off, int len) throws IOException
 	{
+		//System.out.println("drain read  "+len);
+
 		lock.lock(); // lock this object
 		int i = 0;
 
@@ -391,6 +401,7 @@ public class CircularBuffer extends Reader
 		}
 		notFull.signal();
 		lock.unlock(); // unlock this object
+		//System.out.println("-drain read  "+i);
 
 		return i;
 	}
@@ -407,11 +418,13 @@ public class CircularBuffer extends Reader
 	 */
 	public void write(char[] cbuf, int off, int len)
 	{
+		//System.out.println("drain write  "+len);
 		lock.lock(); // lock this object
 		for (int i = off; i < off + len - 1; i++)
 			putByte((byte) cbuf[i]);
 		notEmpty.signal(); // signal threads waiting to read from buffer
 		lock.unlock(); // unlock this object
+		//System.out.println("-drain write  "+len);
 	}
 
 	/**

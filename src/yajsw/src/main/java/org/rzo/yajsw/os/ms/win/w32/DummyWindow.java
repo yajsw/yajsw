@@ -10,8 +10,11 @@
  */
 package org.rzo.yajsw.os.ms.win.w32;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
@@ -19,8 +22,8 @@ import java.util.concurrent.Semaphore;
 import jnacontrib.jna.Options;
 
 import org.apache.commons.collections.BidiMap;
-import org.apache.commons.collections.MultiHashMap;
 import org.apache.commons.collections.bidimap.DualHashBidiMap;
+import org.apache.commons.collections.map.MultiValueMap;
 import org.rzo.yajsw.os.ms.win.w32.DummyWindow.MyUser32.MSG;
 import org.rzo.yajsw.os.ms.win.w32.DummyWindow.MyUser32.WNDCLASSEX;
 import org.rzo.yajsw.os.ms.win.w32.DummyWindow.MyUser32.WNDPROC;
@@ -216,6 +219,16 @@ public class DummyWindow
 
 			/** The h icon sm. */
 			public Pointer	hIconSm			= null;
+
+			@Override
+			protected List getFieldOrder()
+			{
+				return Arrays.asList(new String[]{
+				"cbSize", "style",
+				"lpfnWndProc", "cbClsExtra", "cbWndExtra", "hInstance", "hIcon",
+				"hCursor", "hbrBackground", "lpszMenuName", "lpszClassName", "hIconSm"
+				});
+			}
 		}
 
 		/*
@@ -418,6 +431,16 @@ public class DummyWindow
 
 			/** The pt. */
 			public POINT	pt;
+			
+			@Override
+			protected List getFieldOrder()
+			{
+				return Arrays.asList(new String[]{
+				"hwnd",
+				"message", "wParam", "lParam", "time", "pt"
+				});
+			}
+
 		}
 
 		/*
@@ -519,7 +542,7 @@ public class DummyWindow
 	static DummyWindow			_instance;
 
 	/** The _listners. */
-	static Map					_listners	= new MultiHashMap();
+	static Map					_listners	= new MultiValueMap();
 
 	/** The _wnd proc. */
 	WndProc						_wndProc	= new WndProc();
@@ -640,6 +663,12 @@ public class DummyWindow
 		{
 			super();
 			allocateMemory(4);
+		}
+
+		@Override
+		protected List getFieldOrder()
+		{
+			return new ArrayList();
 		}
 	}
 

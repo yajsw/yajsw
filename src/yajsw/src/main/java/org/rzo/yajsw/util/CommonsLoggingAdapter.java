@@ -1,7 +1,8 @@
 package org.rzo.yajsw.util;
 
+import io.netty.util.internal.logging.InternalLogger;
+
 import org.apache.commons.logging.Log;
-import org.jboss.netty.logging.InternalLogger;
 
 public class CommonsLoggingAdapter implements Log
 {

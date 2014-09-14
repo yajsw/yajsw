@@ -1,8 +1,5 @@
 package org.rzo.yajsw.wrapper;
 
-import java.util.Iterator;
-
-import org.rzo.yajsw.app.RuntimeJavaMain;
 import org.rzo.yajsw.boot.WrapperLoader;
 
 public class WrappedRuntimeJavaProcess extends WrappedJavaProcess

@@ -1,6 +1,5 @@
 package org.rzo.yajsw.app;
 
-import java.lang.reflect.Field;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 

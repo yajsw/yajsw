@@ -1,5 +1,7 @@
 package org.rzo.yajsw.condition;
 
+import io.netty.util.internal.logging.InternalLogger;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,7 +10,6 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.jboss.netty.logging.InternalLogger;
 import org.rzo.yajsw.config.YajswConfigurationImpl;
 import org.rzo.yajsw.script.Script;
 import org.rzo.yajsw.script.ScriptFactory;

@@ -1,9 +1,8 @@
 package org.rzo.yajsw.nettyutils;
 
-import org.jboss.netty.channel.ChannelEvent;
-import org.jboss.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelHandlerContext;
 
 public interface Condition
 {
-	public boolean isOk(ChannelHandlerContext ctx, ChannelEvent e);
+	public boolean isOk(ChannelHandlerContext ctx, Object msg);
 }

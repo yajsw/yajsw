@@ -10,9 +10,10 @@
  */
 package org.rzo.yajsw.script;
 
+import io.netty.util.internal.logging.InternalLogger;
+
 import java.util.List;
 
-import org.jboss.netty.logging.InternalLogger;
 import org.rzo.yajsw.wrapper.WrappedProcess;
 
 // TODO: Auto-generated Javadoc

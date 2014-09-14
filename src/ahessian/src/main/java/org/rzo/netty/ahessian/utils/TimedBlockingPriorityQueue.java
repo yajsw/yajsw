@@ -1,5 +1,9 @@
 package org.rzo.netty.ahessian.utils;
 
+import io.netty.util.Timeout;
+import io.netty.util.Timer;
+import io.netty.util.TimerTask;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,11 +15,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import org.jboss.netty.util.Timeout;
-import org.jboss.netty.util.Timer;
-import org.jboss.netty.util.TimerTask;
 import org.rzo.netty.ahessian.Constants;
 
 public class TimedBlockingPriorityQueue<T> implements MyBlockingQueue<T>
@@ -263,7 +263,10 @@ public class TimedBlockingPriorityQueue<T> implements MyBlockingQueue<T>
 
 	public Iterator iterator()
 	{
-		throw new RuntimeException("Unimplemented");
+		List result = new LinkedList();
+		for (LinkedList list : _queues)
+			if (list != null) result.addAll(list);
+		return result.iterator();
 	}
 
 	public boolean remove(Object o)

@@ -1,6 +1,7 @@
 package org.rzo.netty.ahessian.session;
 
-import org.jboss.netty.util.Timeout;
+import io.netty.util.Timeout;
+
 
 /**
  * A session object.

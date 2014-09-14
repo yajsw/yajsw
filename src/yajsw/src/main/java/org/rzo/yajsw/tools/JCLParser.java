@@ -128,6 +128,8 @@ public class JCLParser
 			boolean singleQuote = false;
 			for (String cc : cpArr)
 			{
+				if (cc.startsWith(" "))
+					break;
 				cc = cc.trim();
 				if (k == cpArr.length)
 				{
@@ -281,6 +283,7 @@ public class JCLParser
 	{
 		String[] wcmds = new String[]
 		{
+				"D:\\java\\jdk7\\bin\\java.exe -Xms256m -Xmx1024m -cp .\\lib\\msbase.jar;.\\lib\\mssqlserver.jar;..lib\\msutil.jar;.\\lib\\sqljdbc.jar;.\\lib\\ojdbc6.jar;.\\lib\\ojdbc5.jar;.\\lib\\ojdbc14.jar;.\\lib\\db2java.zip;.\\lib\\terajdbc4.jar;.\\lib\\log4j.jar;.\\lib\\teradata.jar;.\\lib\\tdgssjava.jar;.\\lib\\tdgssconfig.jar;.\\lib\\nzjdbc.jar;.\\lib\\bijdbc.jar;.\\lib\\ttjdbc6.jar;.\\lib\\orai18n.jar;.\\lib\\timestenjmsxla.jar;.\\lib\\jms.jar;.\\lib\\javax.jms.jar;;.\\DAWSystem.jar;.\\lib\\biacm.paramproducer.jar;;.\\lib\\oracle_common/modules/oracle.pki_11.1.1/oraclepki.jar;.\\lib\\oracle_common/webservices/wsclient_extended.jar;.\\lib\\oracle_common/modules/oracle.jmx_11.1.1/jmxspi.jar;.\\lib\\oracle_common/modules/oracle.odl_11.1.1/ojdl.jar;.\\lib\\oracle_common/modules/oracle.jps_11.1.1/jps-internal.jar;.\\lib\\oracle_common/modules/oracle.jps_11.1.1/jps-platform.jar;.\\lib\\oracle_common/modules/oracle.jps_11.1.1/jps-se.jar;.\\lib\\oracle_common/modules/oracle.idm_11.1.1/identitystore.jar;.\\lib\\oracle_common/modules/oracle.jps_11.1.1/jps-az-rt.jar;.\\lib\\oracle_common/modules/oracle.jps_11.1.1/jacc-spi.jar;.\\lib\\oracle_common/modules/oracle.iau_11.1.1/fmw_audit.jar;.\\lib\\oracle_common/modules/oracle.jmx_11.1.1/jmxframework.jar;.\\lib\\oracle_common/modules/oracle.igf_11.1.1/identitydirectory.jar;;.\\lib\\oracle_common/jlib/help-share.jar;.\\lib\\oracle_common/jlib/ohj.jar;.\\lib\\oracle_common/jlib/jewt4.jar;.\\lib\\oracle_common/jlib/share.jar;.\\lib\\oracle_common/jlib/oracle_ice.jar; com.siebel.etl.net.QServer arg1 arg2",
 				"\"java\" -cp \"C:\\test\\yajsw-stable-11.09\\x x\\bat\\/../wrapper.jar\";\"C:\\test\\yajsw-stable-11.09\\x x\\bat\\/../wrapperApp.jar\" test.HelloWorld",
 				"java -cp wrapper.jar -Xrs x.Test -c conf/wrapper.conf       ",
 				"java -cp test.jar test.Main",

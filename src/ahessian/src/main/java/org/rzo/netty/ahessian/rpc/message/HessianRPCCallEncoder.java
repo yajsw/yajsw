@@ -1,14 +1,14 @@
 package org.rzo.netty.ahessian.rpc.message;
 
-import java.io.OutputStream;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipelineCoverage;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
+import java.io.OutputStream;
+import java.util.concurrent.Executor;
+
 import org.rzo.netty.ahessian.Constants;
-import org.rzo.netty.ahessian.io.OutputStreamEncoder;
+import org.rzo.netty.ahessian.io.OutputProducer;
+import org.rzo.netty.ahessian.io.OutputStreamHandler;
 import org.rzo.netty.ahessian.rpc.io.Hessian2Output;
 import org.rzo.netty.ahessian.session.ClientSessionFilter;
 
@@ -18,85 +18,104 @@ import com.caucho.hessian4.io.SerializerFactory;
 /**
  * writes a call request to an output stream
  */
-@ChannelPipelineCoverage("all")
-public class HessianRPCCallEncoder extends SimpleChannelHandler
+public class HessianRPCCallEncoder extends OutputProducer
 {
 	SerializerFactory sFactory = new SerializerFactory();
 	Hessian2Output hOut = null;
 	boolean _hasSessionFilter = false;
 	boolean _inverseServer = false;
-	
-	public HessianRPCCallEncoder()
+
+	public HessianRPCCallEncoder(boolean inverseServer, Executor executor)
 	{
-		super();
-	}
-	
-	public HessianRPCCallEncoder(boolean inverseServer)
-	{
-		super();
-		_inverseServer = inverseServer;
-	}
-	
-	public HessianRPCCallEncoder(AbstractSerializerFactory serializerFactory)
-	{
-		super();
-		if (serializerFactory != null)
-			sFactory.addFactory(serializerFactory);
+		this(inverseServer, null, executor);
 	}
 
-	 /* (non-Javadoc)
- 	 * @see org.jboss.netty.channel.SimpleChannelDownstreamHandler#writeRequested(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.MessageEvent)
- 	 */
- 	public void writeRequested(ChannelHandlerContext ctx, MessageEvent e) throws Exception
+	public HessianRPCCallEncoder(AbstractSerializerFactory serializerFactory, Executor executor)
 	{
+		this(false, serializerFactory, executor);
+	}
+
+	public HessianRPCCallEncoder(Executor executor)
+	{
+		this(false, null, executor);
+	}
+
+	public HessianRPCCallEncoder(boolean inverseServer, AbstractSerializerFactory serializerFactory, Executor executor)
+	{
+		super(executor);
+		if (serializerFactory != null)
+			sFactory.addFactory(serializerFactory);
+		_inverseServer = inverseServer;
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.jboss.netty.channel.SimpleChannelDownstreamHandler#writeRequested
+	 * (org.jboss.netty.channel.ChannelHandlerContext,
+	 * org.jboss.netty.channel.MessageEvent)
+	 */
+	@Override
+	public void produceOutput(ChannelHandlerContext ctx, Object e, ChannelPromise promise) throws Exception
+	{
+		if (!ctx.channel().isActive())
+			throw new RuntimeException("channel not active");
  		try
  		{
-// 			if (e.getMessage() instanceof Integer)
-// 			{
-// 				hOut.flush();
-// 				return;
-// 			}
- 			Object msg = e.getMessage();
+ 			/*Object msg = e;
  			if (msg instanceof FlushRequestMessage)
  			{
- 				hOut.flush(e.getFuture());
- 				e.getFuture().await(5000);
+ 				ChannelPromise future = ctx.newPromise();
+ 				hOut.flush(future);
+ 				//future.sync();
  				return;
  			}
- 		HessianRPCCallMessage message = (HessianRPCCallMessage) e.getMessage();
+ 			no longer required
+ 			*/
+ 		HessianRPCCallMessage message = (HessianRPCCallMessage) e;
 		message.setHasSessionFilter(_hasSessionFilter);
 		hOut.resetReferences();
 		hOut.call(message);
 		if (_inverseServer)
-		hOut.flush(e.getFuture());
+			hOut.flush(promise);
  		}
 		catch (Exception ex)
 		{
 			Constants.ahessianLogger.warn("", ex);
-			e.getFuture().setFailure(ex);
+			promise.setFailure(ex);
 		}
-		//--Thread.yield();
+		
 	}
 
 	private OutputStream getOutputStream(ChannelHandlerContext ctx)
 	{
-		return (OutputStream) ctx.getPipeline().getContext(OutputStreamEncoder.class).getAttachment();
+		return (OutputStream) ctx.channel().attr(OutputStreamHandler.OUTSTREAM).get();
 	}
-	
+
 	@Override
-	 public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e)
+	public void channelActive(ChannelHandlerContext ctx) throws Exception
 	{
-		_hasSessionFilter = ctx.getPipeline().getContext(ClientSessionFilter.class) != null;
+		super.channelActive(ctx);
+		_hasSessionFilter = ctx.pipeline().context(ClientSessionFilter.class) != null;
 		if (hOut == null)
 		{
-		OutputStream out = (OutputStream) ctx.getPipeline().getContext(OutputStreamEncoder.class).getAttachment();
-		hOut = new Hessian2Output(out);
-	    hOut.getSerializerFactory().addFactory(sFactory);
+			OutputStream out = getOutputStream(ctx);
+			hOut = new Hessian2Output(out);
+			hOut.getSerializerFactory().addFactory(sFactory);
 		}
 		else
 			hOut.reset();
-		ctx.sendUpstream(e);
+		ctx.fireChannelActive();
 	}
-	
+
+	@Override
+	protected void flashOutput(ChannelHandlerContext ctx) throws Exception
+	{
+		if (!ctx.channel().isActive())
+			throw new RuntimeException("channel not active");
+		hOut.flush();
+	}
 
 }

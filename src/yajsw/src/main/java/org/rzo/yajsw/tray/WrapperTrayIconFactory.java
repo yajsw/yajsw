@@ -85,7 +85,9 @@ public class WrapperTrayIconFactory
 				if (!cmd.contains(opt))
 					cmd.add(opt);
 			}
-			String tmpDir = config.getString("wrapper.tmp.path", System.getProperty("jna_tmpdir", null));
+			String tmpDir = config.getString("wrapper.tmp.path", null);
+			if (tmpDir == null || tmpDir.startsWith("?"))
+				tmpDir = System.getProperty("jna_tmpdir", null);
 			if (tmpDir != null)
 			{
 				String opt = Utils.getDOption("jna_tmpdir", tmpDir);
@@ -94,7 +96,7 @@ public class WrapperTrayIconFactory
 			}
 			else 
 			{
-				tmpDir = config.getString("wrapper.tmp.path", System.getProperty("java.io.tmpdir", null));
+				tmpDir =  System.getProperty("java.io.tmpdir", null);
 				if (tmpDir != null)
 				{
 					String opt = Utils.getDOption("jna_tmpdir", tmpDir);
@@ -114,7 +116,7 @@ public class WrapperTrayIconFactory
 			osProcess.setPipeStreams(false, false);
 			osProcess.setVisible(false);
 			osProcess.setLogger(logger);
-			osProcess.setDebug(false);
+			osProcess.setDebug(config.getBoolean("wrapper.debug", false));
 			Runtime.getRuntime().addShutdownHook(new Thread()
 			{
 				public void run()

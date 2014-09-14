@@ -10,6 +10,8 @@
  */
 package org.rzo.yajsw.os.ms.win.w32;
 
+import io.netty.util.internal.logging.InternalLogger;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -21,7 +23,6 @@ import jnacontrib.win32.Registry.REGISTRY_ROOT_KEY;
 
 import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.commons.configuration.Configuration;
-import org.jboss.netty.logging.InternalLogger;
 import org.rzo.yajsw.boot.WrapperLoader;
 import org.rzo.yajsw.os.JavaHome;
 

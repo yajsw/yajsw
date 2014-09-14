@@ -1,14 +1,14 @@
 package org.rzo.netty.ahessian.io;
 
+import io.netty.buffer.ByteBuf;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import org.jboss.netty.buffer.ChannelBuffer;
 import org.rzo.netty.ahessian.Constants;
 import org.rzo.netty.ahessian.utils.MyReentrantLock;
 
@@ -19,8 +19,8 @@ public class InputStreamBuffer extends InputStream
 {
 
 	/** Buffer for storing incoming bytes */
-	// private ChannelBuffer _buf = dynamicBuffer();
-	final LinkedList<ChannelBuffer>	_bufs			= new LinkedList<ChannelBuffer>();
+	// private ByteBuf _buf = dynamicBuffer();
+	final LinkedList<ByteBuf>	_bufs			= new LinkedList<ByteBuf>();
 
 	/** Indicates if the stream has been closed */
 	private volatile boolean		_closed			= false;
@@ -88,7 +88,8 @@ public class InputStreamBuffer extends InputStream
 	{
 		if (!_bufs.isEmpty() && _bufs.getFirst().readableBytes() == 0)
 		{
-			_bufs.removeFirst();
+			ByteBuf buf = _bufs.removeFirst();
+			buf.release(buf.refCnt());
 		}
 	}
 
@@ -100,6 +101,7 @@ public class InputStreamBuffer extends InputStream
 	@Override
 	public void close() throws IOException
 	{
+		//System.out.println("close input stream buffer");
 		_lock.lock();
 		try
 		{
@@ -126,17 +128,16 @@ public class InputStreamBuffer extends InputStream
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
-	public void write(ChannelBuffer buf) throws IOException
+	public void write(ByteBuf buf) throws IOException
 	{
 		if (_closed)
 			throw new IOException("stream closed");
 		_lock.lock();
-		// if (_available == 0)
-		// System.out.println("input not empty");
 		try
 		{
 			if (_bufs.isEmpty() || buf != _bufs.getLast())
 			{
+				buf.retain();
 				_bufs.addLast(buf);
 			}
 			_available += buf.readableBytes();
@@ -173,7 +174,7 @@ public class InputStreamBuffer extends InputStream
 	public int read(byte[] b, int off, int len) throws IOException
 	{
 		int result = -1;
-		if (_closed)
+		if (_closed && available() == 0)
 			return -1;
 		_lock.lock();
 		try
@@ -184,7 +185,7 @@ public class InputStreamBuffer extends InputStream
 				if (_readTimeout > 0)
 				{
 					if (!_notEmpty.await(_readTimeout, TimeUnit.MILLISECONDS))
-						throw new IOException("read timeout");
+						throw new IOException("read timeout: "+_readTimeout + " ms");
 				}
 				else
 					_notEmpty.awaitUninterruptibly();
@@ -192,7 +193,8 @@ public class InputStreamBuffer extends InputStream
 			if (!_closed)
 			{
 				int length = Math.min(len, _bufs.getFirst().readableBytes());
-				_bufs.getFirst().readBytes(b, off, length);
+				ByteBuf buf = _bufs.getFirst();
+				buf.readBytes(b, off, length);
 				result = length;
 				_available -= length;
 				checkBufs();
@@ -202,6 +204,7 @@ public class InputStreamBuffer extends InputStream
 		}
 		catch (Exception ex)
 		{
+			ex.printStackTrace();
 			throw new IOException(ex.getMessage());
 		}
 		finally

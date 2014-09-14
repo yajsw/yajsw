@@ -1,26 +1,32 @@
 package org.rzo.yajsw.srvmgr.hub;
 
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.socket.oio.OioServerSocketChannelFactory;
+import org.rzo.netty.ahessian.bootstrap.ChannelPipelineFactoryBuilder;
+import org.rzo.netty.ahessian.bootstrap.DefaultClient;
+import org.rzo.netty.ahessian.bootstrap.DefaultServer;
 import org.rzo.netty.ahessian.rpc.server.HessianRPCServiceHandler;
 import org.rzo.netty.ahessian.rpc.server.ImmediateInvokeService;
 import org.rzo.yajsw.os.ServiceInfo;
 import org.rzo.yajsw.srvmgr.client.AsyncServiceManagerServer;
 import org.rzo.yajsw.srvmgr.client.Host;
+import org.rzo.yajsw.srvmgr.server.ServiceManagerServer;
 
 public class HubServiceServer implements HubService
 {
-	HashMap<String, AsyncServiceManagerServer> _proxies;
+	Map<String, DefaultClient> _proxies;
 	
 	Comparator<Host> hostsComparator = new Comparator<Host>()
 	{
@@ -38,27 +44,42 @@ public class HubServiceServer implements HubService
 		}		
 	};
 
-	HubServiceServer(int port, String acl, HashMap<String, AsyncServiceManagerServer>proxies)
+	HubServiceServer(int port, String acl, Map<String, DefaultClient>proxies) throws Exception
 	{
 		_proxies = proxies;
-        Executor executor = Executors.newFixedThreadPool(200);
+		
+    	ChannelPipelineFactoryBuilder builder = new ChannelPipelineFactoryBuilder()
+    	.rpcServiceInterface(HubService.class)
+    	.rpcServerService(this)
+    	.serviceThreads(10);
+    	
+    	//if (debug)
+    		builder.debug();
+    	
+    	Set<String> channelOptions = new HashSet();
+    	channelOptions.add("TCP_NODELAY");
 
-        // Configure the server.
-        ServerBootstrap bootstrap = new ServerBootstrap(
-                new OioServerSocketChannelFactory(
-                		executor,
-                		executor));
+    	DefaultServer server = new DefaultServer(NioServerSocketChannel.class, builder, channelOptions, port);
 
-        HessianRPCServiceHandler factory =  new HessianRPCServiceHandler(executor);
-        factory.addService("default", new ImmediateInvokeService(this, HubService.class, factory));
-
-        
-        bootstrap.setPipelineFactory(
-               new RPCServerPipelineFactory(executor, factory, acl));
-
-        // Bind and start to accept incoming connections.
-        Channel channel =	bootstrap.bind(new InetSocketAddress(port));
+        server.start();
 	}
+	
+	private  AsyncServiceManagerServer getProxy(String name)
+	{
+		DefaultClient client = _proxies.get(name);
+		if (client == null)
+			return null;
+		try
+		{
+			return (AsyncServiceManagerServer) client.proxy();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 
 	public List<Host> getHosts()
 	{
@@ -95,14 +116,14 @@ public class HubServiceServer implements HubService
 
 	public void start(String serviceName, String hostName)
 	{
-		AsyncServiceManagerServer proxy = _proxies.get(hostName);
+		AsyncServiceManagerServer proxy = getProxy(hostName);
 		if (proxy != null)
 			proxy.start(serviceName);
 	}
 
 	public void stop(String serviceName, String hostName)
 	{
-		AsyncServiceManagerServer proxy = _proxies.get(hostName);
+		AsyncServiceManagerServer proxy = getProxy(hostName);
 		if (proxy != null)
 			proxy.stop(serviceName);
 	}

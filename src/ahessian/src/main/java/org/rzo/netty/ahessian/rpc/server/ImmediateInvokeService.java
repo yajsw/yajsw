@@ -2,17 +2,11 @@ package org.rzo.netty.ahessian.rpc.server;
 
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import org.rzo.netty.ahessian.Constants;
 import org.rzo.netty.ahessian.rpc.callback.ClientCallback;
 import org.rzo.netty.ahessian.rpc.callback.ServerCallbackProxy;
 import org.rzo.netty.ahessian.rpc.message.HessianRPCCallMessage;
-import org.rzo.netty.ahessian.rpc.message.HessianRPCReplyMessage;
-import org.rzo.netty.ahessian.rpc.stream.ServerInputStreamManager;
 
 /**
  * Wraps an object as a {@link Service}. Methods are invoked as soon as they are received.
@@ -45,6 +39,10 @@ public class ImmediateInvokeService extends HessianSkeleton implements Constants
 	 * @param apiClass the api of the service exposed to the client
 	 * @param factory the netty handler
 	 */
+	
+	
+
+	
 	public ImmediateInvokeService(Object service, Class apiClass, HessianRPCServiceHandler factory)
 	{
 		super(service, apiClass, factory);
@@ -58,7 +56,9 @@ public class ImmediateInvokeService extends HessianSkeleton implements Constants
 	{
 		ServiceSessionProvider.set(message.getSession());
 		ServiceSessionProvider.setHandler(message.getHandler());
+		threadLocalChannel.set(message.getChannel());
 		invoke(message);
+		threadLocalChannel.remove();
 		ServiceSessionProvider.remove();
 		ServiceSessionProvider.removeHandler();
 	}

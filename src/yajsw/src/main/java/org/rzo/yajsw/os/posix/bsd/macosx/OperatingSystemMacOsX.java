@@ -9,7 +9,6 @@ import org.rzo.yajsw.os.ProcessManager;
 import org.rzo.yajsw.os.ServiceManager;
 import org.rzo.yajsw.os.SystemInformation;
 import org.rzo.yajsw.os.posix.OperatingSystemPosix;
-import org.rzo.yajsw.os.posix.PosixProcess;
 
 public class OperatingSystemMacOsX extends OperatingSystemPosix
 {

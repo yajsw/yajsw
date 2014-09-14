@@ -21,8 +21,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
@@ -41,7 +41,6 @@ import org.rzo.yajsw.os.OperatingSystem;
 import org.rzo.yajsw.util.Utils;
 
 import com.sun.jna.Platform;
-import com.sun.jna.PlatformEx;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -51,20 +50,21 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 {
 
 	/** The _key. */
-	String		_key;
+	String _key;
 
 	/** The _tee name. */
-	String		_teeName;
+	String _teeName;
 
 	/** The _java pid file. */
-	File		_javaPidFile;
+	File _javaPidFile;
 
-	boolean		_initController			= false;
+	boolean _initController = false;
 
-	Runnable	_serviceStartupListener	= null;
-	
+	Runnable _serviceStartupListener = null;
+
 	final private static Random RANDOM = new Random();
-	final private static AtomicLong FILE_COUNTER = new AtomicLong(System.currentTimeMillis()); 
+	final private static AtomicLong FILE_COUNTER = new AtomicLong(
+			System.currentTimeMillis());
 
 	public void init()
 	{
@@ -118,15 +118,19 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 			_osProcess.setTeeName(null);
 
 			if (!_haltAppOnWrapper)
-				getWrapperLogger().log(Level.WARNING,
-						"WARNING: application streams are piped, but wrapper.control setting may cause zombie processes. Please set to TIGHT");
+				getWrapperLogger()
+						.log(Level.WARNING,
+								"WARNING: application streams are piped, but wrapper.control setting may cause zombie processes. Please set to TIGHT");
 		}
 
 		JavaHome javaHome = OperatingSystem.instance().getJavaHome(_config);
 		javaHome.setLogger(getInternalWrapperLogger());
-		String java = javaHome.findJava(_config.getString("wrapper.java.command"), _config.getString("wrapper.java.customProcName"));
+		String java = javaHome.findJava(
+				_config.getString("wrapper.java.command"),
+				_config.getString("wrapper.java.customProcName"));
 		if (java == null)
-			getWrapperLogger().log(Level.SEVERE, "ERROR: could not get java command");
+			getWrapperLogger().log(Level.SEVERE,
+					"ERROR: could not get java command");
 		List jvmOptions = jvmOptions();
 		List wrapperOptions = wrapperOptions();
 		String mainClass = getMainClass();
@@ -145,9 +149,9 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 
 	protected String getMainClass()
 	{
-		return _config.getString("wrapper.java.mainclass", "org.rzo.yajsw.app.WrapperJVMMain");
+		return _config.getString("wrapper.java.mainclass",
+				"org.rzo.yajsw.app.WrapperJVMMain");
 	}
-
 
 	/**
 	 * Wrapper options.
@@ -166,18 +170,23 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		result.add(Utils.getDOption("wrapper.tmp.path", _tmpPath));
 		result.add(Utils.getDOption("jna_tmpdir", _tmpPath));
 
-		for (Iterator it = _config.getSystemConfiguration().getKeys("wrapper"); it.hasNext();)
+		for (Iterator it = _config.getSystemConfiguration().getKeys("wrapper"); it
+				.hasNext();)
 		{
 			String key = (String) it.next();
-			if (("wrapper.service".equals(key) || "wrapper.console.visible".equals(key)) && _config.getBoolean("wrapper.service", false))
+			if (("wrapper.service".equals(key) || "wrapper.console.visible"
+					.equals(key))
+					&& _config.getBoolean("wrapper.service", false))
 				continue;
 			if ("wrapper.config".equals(key))
 			{
-				result.add(checkValue(Utils.getDOption(key, _config.getCachedPath())));
+				result.add(checkValue(Utils.getDOption(key,
+						_config.getCachedPath())));
 			}
 			else
 			{
-				String opt = Utils.getDOption(key, _config.getProperty(key).toString());
+				String opt = Utils.getDOption(key, _config.getProperty(key)
+						.toString());
 				if (!result.contains(opt))
 					result.add(checkValue(opt));
 			}
@@ -196,16 +205,19 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 			{
 				File f = new File(preScript);
 				if (!f.exists())
-					getWrapperLogger().warning("app.pre.script not found: " + preScript);
+					getWrapperLogger().warning(
+							"app.pre.script not found: " + preScript);
 				else
 				{
 					preScript = checkValue(f.getCanonicalPath());
-					result.add(Utils.getDOption("wrapper.app.pre.script", preScript));
+					result.add(Utils.getDOption("wrapper.app.pre.script",
+							preScript));
 				}
 			}
 			catch (Exception ex)
 			{
-				getWrapperLogger().log(Level.SEVERE, "WrappedJavaProcess wrapperOptions", ex);
+				getWrapperLogger().log(Level.SEVERE,
+						"WrappedJavaProcess wrapperOptions", ex);
 			}
 
 		return result;
@@ -222,7 +234,9 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		result.add("-classpath");
 		StringBuffer sb = new StringBuffer();
 		sb.append(WrapperLoader.getWrapperAppJar().trim());
-		StringBuilder appCp = getAppClassPath(_config.getString("wrapper.working.dir", "."), _config.getKeys("wrapper.java.classpath"));
+		StringBuilder appCp = getAppClassPath(
+				_config.getString("wrapper.working.dir", "."),
+				_config.getKeys("wrapper.java.classpath"));
 		if (appCp != null && appCp.length() > 0)
 		{
 			sb.append(PATHSEP);
@@ -235,7 +249,8 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		boolean hasXrs = false;
 		boolean hasXmx = false;
 		boolean hasXms = false;
-		for (Iterator it = _config.getKeys("wrapper.java.additional"); it.hasNext();)
+		for (Iterator it = _config.getKeys("wrapper.java.additional"); it
+				.hasNext();)
 		{
 			String key = (String) it.next();
 			String value = _config.getString(key);
@@ -249,7 +264,8 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		sb = new StringBuffer();
 		if (_config.getKeys("wrapper.java.library.path").hasNext())
 		{
-			for (Iterator it = _config.getKeys("wrapper.java.library.path"); it.hasNext();)
+			for (Iterator it = _config.getKeys("wrapper.java.library.path"); it
+					.hasNext();)
 			{
 				String key = (String) it.next();
 				if (_config.getString(key) == null)
@@ -261,7 +277,8 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 			result.add(Utils.getDOption("java.library.path", sb.toString()));
 		}
 
-		if (_config.getBoolean("wrapper.service", false) && !hasXrs && _config.getBoolean("wrapper.ntservice.reduce_signals", true))
+		if (_config.getBoolean("wrapper.service", false) && !hasXrs
+				&& _config.getBoolean("wrapper.ntservice.reduce_signals", true))
 		{
 			result.add("-Xrs");
 		}
@@ -270,31 +287,39 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 			result.add("-Dwrapper.service=true");
 			result.add("-Dwrapper.console.visible=false");
 		}
-		else if (_config.getBoolean("wrapper.console.visible", Constants.DEFAULT_CONSOLE_VISIBLE))
+		else if (_config.getBoolean("wrapper.console.visible",
+				Constants.DEFAULT_CONSOLE_VISIBLE))
 			result.add("-Dwrapper.console.visible=true");
 
-		if (_config.containsKey("wrapper.java.initmemory") || _config.containsKey("wrapper.java.initmemory.relative")
-				|| _config.containsKey("wrapper.java.maxmemory") || _config.containsKey("wrapper.java.maxmemory.relative"))
+		if (_config.containsKey("wrapper.java.initmemory")
+				|| _config.containsKey("wrapper.java.initmemory.relative")
+				|| _config.containsKey("wrapper.java.maxmemory")
+				|| _config.containsKey("wrapper.java.maxmemory.relative"))
 		{
 			long xmx = 0;
 			long xmxr = 0;
 			long xms = 0;
 			long xmsr = 0;
-			OperatingSystem.instance().systemInformation().setLogger(this.getWrapperLogger());
+			OperatingSystem.instance().systemInformation()
+					.setLogger(this.getWrapperLogger());
 			long totalRAM = 0;
 			if (!hasXms)
 			{
 				try
 				{
 					xms = _config.getLong("wrapper.java.initmemory", 0);
-					xmsr = _config.getLong("wrapper.java.initmemory.relative", 0);
+					xmsr = _config.getLong("wrapper.java.initmemory.relative",
+							0);
 				}
 				catch (Exception ex)
 				{
-					getWrapperLogger().info("error in wrapper.java.initmemory " + ex.getMessage());
+					getWrapperLogger().info(
+							"error in wrapper.java.initmemory "
+									+ ex.getMessage());
 				}
 				if (xmsr > 0)
-					totalRAM = OperatingSystem.instance().systemInformation().totalRAM();
+					totalRAM = OperatingSystem.instance().systemInformation()
+							.totalRAM();
 				if (xmsr > 0 && totalRAM > 0)
 					xms = (totalRAM * xmsr) / 100 / (1024 * 1024);
 				if (xms > 0)
@@ -307,14 +332,18 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 				try
 				{
 					xmx = _config.getLong("wrapper.java.maxmemory", 0);
-					xmxr = _config.getLong("wrapper.java.maxmemory.relative", 0);
+					xmxr = _config
+							.getLong("wrapper.java.maxmemory.relative", 0);
 				}
 				catch (Exception ex)
 				{
-					getWrapperLogger().info("error in wrapper.java.maxmemory " + ex.getMessage());
+					getWrapperLogger().info(
+							"error in wrapper.java.maxmemory "
+									+ ex.getMessage());
 				}
 				if (xmxr > 0 && totalRAM == 0)
-					totalRAM = OperatingSystem.instance().systemInformation().totalRAM();
+					totalRAM = OperatingSystem.instance().systemInformation()
+							.totalRAM();
 				if (xmxr > 0 && totalRAM > 0)
 					xmx = (totalRAM * xmxr) / 100 / (1024 * 1024);
 				if (xmx > 0)
@@ -331,17 +360,23 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		if (port != -1)
 		{
 			result.add("-Xdebug");
-			result.add("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=" + port);
+			result.add("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address="
+					+ port);
 		}
-		String preMainScript = _config.getString("wrapper.app.pre_main.script", null);
+		String preMainScript = _config.getString("wrapper.app.pre_main.script",
+				null);
 		if (preMainScript != null && preMainScript.length() > 0)
-			result.add(Utils.getDOption("wrapper.app.pre_main.script",preMainScript));
+			result.add(Utils.getDOption("wrapper.app.pre_main.script",
+					preMainScript));
 		// if we are running as service "remember" the system properties and env
 		// vars we have used
-		if (_config.getBoolean("wrapper.service", false) || _config.getBoolean("wrapper.console.use_interpolated", true))
+		if (_config.getBoolean("wrapper.service", false)
+				|| _config.getBoolean("wrapper.console.use_interpolated", true))
 		{
 			for (Entry<String, String> e : _config.getEnvLookupSet().entrySet())
 			{
+				if (e.getKey().contains("password"))
+					continue;
 				String opt = Utils.getDOption(e.getKey(), e.getValue());
 				if (opt != null && !result.contains(opt))
 					result.add(opt);
@@ -496,7 +531,8 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 
 		if (_config.getBoolean("wrapper.java.monitor.heap.restart", false))
 		{
-			long max = _config.getLong("wrapper.java.monitor.heap.threshold.percent", -1);
+			long max = _config.getLong(
+					"wrapper.java.monitor.heap.threshold.percent", -1);
 			controller.setMaxHeapRestart(max);
 		}
 
@@ -509,21 +545,27 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		}
 		else
 		{
-			controller.setMinPort(_config.getInt("wrapper.port.min", Constants.DEFAULT_PORT));
+			controller.setMinPort(_config.getInt("wrapper.port.min",
+					Constants.DEFAULT_PORT));
 			controller.setMaxPort(_config.getInt("wrapper.port.max", 65535));
 		}
 
-		controller.setStartupTimeout(_config.getInt("wrapper.startup.timeout", DEFAULT_STARTUP_TIMEOUT) * 1000);
-		controller.setPingTimeout(_config.getInt("wrapper.ping.timeout", DEFAULT_PING_TIMEOUT) * 1000);
+		controller.setStartupTimeout(_config.getInt("wrapper.startup.timeout",
+				DEFAULT_STARTUP_TIMEOUT) * 1000);
+		controller.setPingTimeout(_config.getInt("wrapper.ping.timeout",
+				DEFAULT_PING_TIMEOUT) * 1000);
 		if (!_initController)
 		{
 			ControllerListener restartHandler = new ControllerListener()
 			{
 				public void fire()
 				{
-					if (_state == STATE_RESTART_STOP || _state == STATE_RESTART || _state == STATE_RESTART_START || _state == STATE_RESTART_WAIT)
+					if (_state == STATE_RESTART_STOP || _state == STATE_RESTART
+							|| _state == STATE_RESTART_START
+							|| _state == STATE_RESTART_WAIT)
 						return;
-					if (allowRestart() && exitCodeRestart() && !exitCodeShutdown() && !exitCodeStop())
+					if (allowRestart() && exitCodeRestart()
+							&& !exitCodeShutdown() && !exitCodeStop())
 					{
 						restartInternal();
 					}
@@ -531,7 +573,9 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 					{
 						if (_debug)
 						{
-							getWrapperLogger().info("giving up after " + _restartCount + " retries");
+							getWrapperLogger().info(
+									"giving up after " + _restartCount
+											+ " retries");
 						}
 						if (_state != STATE_USER_STOP)
 							setState(STATE_ABORT);
@@ -550,9 +594,11 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 			{
 				public void fire()
 				{
-					if (_state == STATE_RESTART_STOP || _state == STATE_RESTART || _state == STATE_RESTART_WAIT)
+					if (_state == STATE_RESTART_STOP || _state == STATE_RESTART
+							|| _state == STATE_RESTART_WAIT)
 						return;
-					if (allowRestart() && exitCodeRestart() && !exitCodeShutdown() && !exitCodeStop())
+					if (allowRestart() && exitCodeRestart()
+							&& !exitCodeShutdown() && !exitCodeStop())
 					{
 						restartInternal();
 					}
@@ -560,7 +606,9 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 					{
 						if (_debug)
 						{
-							getWrapperLogger().info("giving up after " + _restartCount + " retries");
+							getWrapperLogger().info(
+									"giving up after " + _restartCount
+											+ " retries");
 						}
 						if (_state != STATE_USER_STOP)
 							setState(STATE_ABORT);
@@ -575,19 +623,25 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 				}
 
 			};
-			controller.addListener(JVMController.STATE_STARTUP_TIMEOUT, restartHandler);
-			controller.addListener(JVMController.STATE_THRESHOLD, restartHandler);
-			controller.addListener(JVMController.STATE_PING_TIMEOUT, restartHandler);
-			controller.addListener(JVMController.STATE_PROCESS_KILLED, killedRestartHandler);
+			controller.addListener(JVMController.STATE_STARTUP_TIMEOUT,
+					restartHandler);
+			controller.addListener(JVMController.STATE_THRESHOLD,
+					restartHandler);
+			controller.addListener(JVMController.STATE_PING_TIMEOUT,
+					restartHandler);
+			controller.addListener(JVMController.STATE_PROCESS_KILLED,
+					killedRestartHandler);
 
-			if (!_config.getBoolean("wrapper.ntservice.autoreport.startup", true))
+			if (!_config.getBoolean("wrapper.ntservice.autoreport.startup",
+					true))
 				if (getService() instanceof WrapperMainServiceWin)
 					setServiceStartupListener(new Runnable()
 					{
 
 						public void run()
 						{
-							((WrapperMainServiceWin) getService()).notifyStartup();
+							((WrapperMainServiceWin) getService())
+									.notifyStartup();
 						}
 
 					});
@@ -618,7 +672,8 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		for (int i = 0; i < w.length; i++)
 		{
 			w[i] = new WrappedJavaProcess();
-			w[i].getLocalConfiguration().setProperty("wrapper.config", "conf/wrapper.helloworld.conf");
+			w[i].getLocalConfiguration().setProperty("wrapper.config",
+					"conf/wrapper.helloworld.conf");
 			w[i].getLocalConfiguration().setProperty("wrapper.debug", "true");
 			w[i].setUseSystemProperties(false);
 			w[i].init();
@@ -676,7 +731,9 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 				out.flush();
 				out.close();
 				if (_debug)
-					getWrapperLogger().info("created jva.pid file " + _javaPidFile.getAbsolutePath());
+					getWrapperLogger().info(
+							"created jva.pid file "
+									+ _javaPidFile.getAbsolutePath());
 			}
 			catch (Exception e)
 			{
@@ -698,7 +755,9 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 				_javaPidFile.delete();
 
 				if (_debug)
-					getWrapperLogger().info("removed java.pid file " + _javaPidFile.getAbsolutePath());
+					getWrapperLogger().info(
+							"removed java.pid file "
+									+ _javaPidFile.getAbsolutePath());
 				_javaPidFile = null;
 			}
 			catch (Exception e)
@@ -720,27 +779,64 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 	public boolean reconnect(int pid)
 	{
 		if (_state != STATE_IDLE)
+		{
+			getWrapperLogger().log(
+					Level.INFO,
+					"process not in IDLE state: " + getStringState()
+							+ ", reconnect failed");
 			return false;
+		}
 
-		_osProcess = OperatingSystem.instance().processManagerInstance().getProcess(pid);
+		_osProcess = OperatingSystem.instance().processManagerInstance()
+				.getProcess(pid);
 		if (_osProcess == null)
+		{
+			getWrapperLogger().log(
+					Level.INFO,
+					"osProcess with PID " + pid
+							+ "can not be found, reconnect failed");
 			return false;
+		}
 		String cmd = _osProcess.getCommand();
 		if (cmd == null)
+		{
+			getWrapperLogger().log(
+					Level.INFO,
+					"commandline for process with PID " + pid
+							+ " is missing, reconnect failed");
 			return false;
+		}
 		String key = getPropertyFromCommandLine("wrapper.key=[^ \"]*", cmd);
 		if (key == null)
+		{
+			getWrapperLogger().log(
+					Level.INFO,
+					"commandline of process with pid=" + pid
+							+ " does not contain warpper.key property: " + cmd
+							+ ", reconnect failed");
 			return false;
+		}
 		String port = getPropertyFromCommandLine("wrapper.port=[^ \"]*", cmd);
 		if (port == null)
+		{
+			getWrapperLogger().log(
+					Level.INFO,
+					"commandline of process with pid=" + pid
+							+ " does not contain warpper.port property: " + cmd
+							+ ", reconnect failed");
 			return false;
-		String configFile = getPropertyFromCommandLine("wrapper.config=[^ \"]*", cmd);
-		String teeName = getPropertyFromCommandLine("wrapper.teeName=[^ \"]*", cmd);
-		String tmpPath = getPropertyFromCommandLine("wrapper.tmpPath=[^ \"]*", cmd);
+		}
+		String configFile = getPropertyFromCommandLine(
+				"wrapper.config=[^ \"]*", cmd);
+		String teeName = getPropertyFromCommandLine("wrapper.teeName=[^ \"]*",
+				cmd);
+		String tmpPath = getPropertyFromCommandLine("wrapper.tmpPath=[^ \"]*",
+				cmd);
 
 		if (tmpPath == null)
 		{
-			tmpPath = getPropertyFromCommandLine("wrapper.tmp.path=[^ \"]*", cmd);
+			tmpPath = getPropertyFromCommandLine("wrapper.tmp.path=[^ \"]*",
+					cmd);
 		}
 
 		_localConfiguration.setProperty("wrapper.key", key);
@@ -748,7 +844,9 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		if (teeName != null)
 			_localConfiguration.setProperty("wrapper.teeName", teeName);
 		_localConfiguration.setProperty("wrapper.tmpPath", tmpPath);
-		if (configFile != null)
+		// if we have already set the config file do not overwrite it.
+		if (configFile != null
+				&& !_localConfiguration.containsKey("wrapper.config"))
 			_localConfiguration.setProperty("wrapper.config", configFile);
 
 		setReconnecting(true);
@@ -773,7 +871,8 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		controller.processStarted();
 		setState(STATE_RUNNING);
 
-		boolean result = controller.waitFor(_config.getInt("wrapper.ping.timeout", DEFAULT_PING_TIMEOUT) * 1000);
+		boolean result = controller.waitFor(_config.getInt(
+				"wrapper.ping.timeout", DEFAULT_PING_TIMEOUT) * 1000);
 		if (result)
 		{
 			// wait for stream to be available
@@ -792,10 +891,14 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 			Map missingTriggerActions = getMissingTriggerActions();
 			Map missingRegexTriggerActions = getMissingRegexTriggerActions();
 
-			_gobler_in = new Gobler(_osProcess.getInputStream(), getAppLogger(), triggerActions, regexTriggerActions, missingTriggerActions,
-					missingRegexTriggerActions, "OUTPUT " + _osProcess.getPid(), _osProcess.getPid());
-			_gobler_err = new Gobler(_osProcess.getErrorStream(), getAppLogger(), triggerActions, regexTriggerActions, missingTriggerActions,
-					missingRegexTriggerActions, "ERROR " + _osProcess.getPid(), _osProcess.getPid());
+			_gobler_in = new Gobler(_osProcess.getInputStream(),
+					getAppLogger(), triggerActions, regexTriggerActions,
+					missingTriggerActions, missingRegexTriggerActions,
+					"OUTPUT " + _osProcess.getPid(), _osProcess.getPid());
+			_gobler_err = new Gobler(_osProcess.getErrorStream(),
+					getAppLogger(), triggerActions, regexTriggerActions,
+					missingTriggerActions, missingRegexTriggerActions, "ERROR "
+							+ _osProcess.getPid(), _osProcess.getPid());
 			executor.execute(_gobler_err);
 			executor.execute(_gobler_in);
 			setState(STATE_RUNNING);
@@ -823,7 +926,8 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		if (m.find())
 			result = m.group();
 		if (result != null && result.length() > 0)
-			return result.substring(result.indexOf("=") + 1).replaceAll("'", "");
+			return result.substring(result.indexOf("=") + 1)
+					.replaceAll("'", "");
 		return null;
 	}
 
@@ -874,10 +978,12 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 	{
 		JVMController controller = (JVMController) _controller;
 		controller.stop(JVMController.STATE_USER_STOP, reason);
-		String shutdownScript = _config.getString("wrapper.app.shutdown.script", null);
+		String shutdownScript = _config.getString(
+				"wrapper.app.shutdown.script", null);
 		if (shutdownScript != null && !"".equals(shutdownScript))
 		{
-			getWrapperLogger().log(Level.FINEST, "waiting for shutdownScript to terminate process");
+			getWrapperLogger().log(Level.FINEST,
+					"waiting for shutdownScript to terminate process");
 			_osProcess.waitFor(timeout);
 		}
 	}

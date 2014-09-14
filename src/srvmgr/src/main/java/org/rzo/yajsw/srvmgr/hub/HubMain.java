@@ -1,10 +1,16 @@
 package org.rzo.yajsw.srvmgr.hub;
 
 
+import org.rzo.netty.ahessian.bootstrap.ChannelPipelineFactoryBuilder;
+import org.rzo.netty.ahessian.bootstrap.DefaultClient;
 import org.rzo.netty.ahessian.rpc.client.HessianProxyFactory;
+import org.rzo.netty.ahessian.rpc.server.HessianRPCServiceHandler.ConnectListener;
 import org.rzo.netty.mcast.discovery.DiscoveryClient;
 import org.rzo.netty.mcast.discovery.DiscoveryListener;
 import org.rzo.netty.mcast.discovery.DiscoveryServer;
+
+import io.netty.channel.Channel;
+import io.netty.channel.socket.nio.NioSocketChannel;
 
 import java.awt.BorderLayout;
 import java.awt.Dialog.ModalityType;
@@ -21,6 +27,7 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,6 +46,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.management.MBeanServerConnection;
 import javax.swing.AbstractAction;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
@@ -46,25 +54,18 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
-import org.jboss.netty.bootstrap.ClientBootstrap;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
-import org.jboss.netty.channel.socket.oio.OioClientSocketChannelFactory;
-
 import org.rzo.yajsw.os.ServiceInfo;
 import org.rzo.yajsw.os.ServiceInfoImpl;
 import org.rzo.yajsw.srvmgr.client.AsyncServiceManagerServer;
 import org.rzo.yajsw.srvmgr.client.Host;
-import org.rzo.yajsw.srvmgr.client.RPCClientPipelineFactory;
 import org.rzo.yajsw.srvmgr.server.ServiceManagerServer;
 
 public class HubMain
 {
 	static List<ServiceInfo> servicesList = new ArrayList<ServiceInfo>();
-	static Map<String, Host> hostsList = new HashMap<String, Host>();
+	static Map<String, Host> hostsList = Collections.synchronizedMap(new HashMap<String, Host>());
 	static Set<String> hiddenList = new HashSet();
-	static HashMap<String, AsyncServiceManagerServer>proxies = new HashMap<String, AsyncServiceManagerServer>();
+	static Map<String, DefaultClient>proxies = Collections.synchronizedMap( new HashMap<String, DefaultClient>() );
 	static Set<String> configurations =  new HashSet<String>();
 	static ExecutorService executor = Executors.newCachedThreadPool();
     static DiscoveryClient discovery = new DiscoveryClient();
@@ -226,7 +227,7 @@ public class HubMain
 		servicesList.clear();
 		for (String host : hostsList.keySet())
 		{
-			AsyncServiceManagerServer proxy = proxies.get(host);
+			AsyncServiceManagerServer proxy = getProxy(host);
 			Collection<ServiceInfo> services = null;
 			try
 			{
@@ -254,26 +255,45 @@ public class HubMain
 		}
 		System.out.println("update services: #"+servicesList.size());
 	}
+	
+	private static AsyncServiceManagerServer getProxy(String name)
+	{
+		DefaultClient client = proxies.get(name);
+		if (client == null)
+			return null;
+		try
+		{
+			return (AsyncServiceManagerServer) client.proxy();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+
 
 
 	private static void updateHosts() 
 	{
 		boolean changed = false;
+		
+		Collection<Host> list;
 		synchronized(hostsList)
 		{
-		for (Host host : hostsList.values())
+			list = new ArrayList(hostsList.values());
+		}
 		{
-			AsyncServiceManagerServer proxy = null;
-			synchronized(proxies)
-			{
-			 proxy = proxies.get(host.getName());
-			}
+		for (Host host :list)
+		{
+			AsyncServiceManagerServer proxy = getProxy(host.getName());
 			boolean connected = false;
 			if (proxy != null)
 			{
 				try
 				{
-					connected = ((Boolean)proxy.isServiceManager()).booleanValue();
+					connected = ((Boolean)((Future)proxy.isServiceManager()).get(10, TimeUnit.SECONDS)).booleanValue();
 				}
 				catch (Exception e)
 				{
@@ -281,68 +301,105 @@ public class HubMain
 					e.printStackTrace();
 				}
 			}
-			else
+			if (!connected)
 			{
-			    ClientBootstrap bootstrap = new ClientBootstrap(
-			            new NioClientSocketChannelFactory(
-			            		executor,
-			            		executor));
-			    
-			    HessianProxyFactory factory = new HessianProxyFactory(executor, host.getName()+":"+host.getPort());
-			    bootstrap.setPipelineFactory(
-			            new RPCClientPipelineFactory(executor, factory));
-			    
-			     // Start the connection attempt.
-			    ChannelFuture future = bootstrap.connect(new InetSocketAddress(host.getName(), host.getPort()));
-			    try
+				
+				final ChannelPipelineFactoryBuilder<MBeanServerConnection> builder = new ChannelPipelineFactoryBuilder<MBeanServerConnection>()
+						.serviceThreads(10) //.reconnect(10)
+						.rpcServiceInterface(AsyncServiceManagerServer.class)
+						//.serviceOptions(options)
+						;
+				
+				builder.debug();
+
+				final Set<String> channelOptions = new HashSet();
+				channelOptions.add("SO_REUSE");
+				channelOptions.add("TCP_NODELAY");
+				final DefaultClient client = new DefaultClient<MBeanServerConnection>(
+						NioSocketChannel.class, builder, channelOptions);
+				client.setRemoteAddress(host.getName(), host.getPort());
+				final Host mHost = host;
+				proxies.put(mHost.getName(), client);
+				
+				client.connectedListener(new ConnectListener()
 				{
-					future.await(10000);
-					connected = future.isSuccess();
-
-
-					if (connected)
+					
+					@Override
+					public void run()
 					{
-					    Map options = new HashMap();
-					    options.put("sync", true);
-					    options.put("timeout", new Long(10000));
-						proxy = (AsyncServiceManagerServer) factory.create(AsyncServiceManagerServer.class, HubMain.class.getClassLoader(), options);
-						connected = ((Boolean)proxy.isServiceManager()).booleanValue();
-						if (connected)
+						executor.execute(new Runnable()
 						{
-							synchronized(proxies)
+							
+							@Override
+							public void run()
 							{
-						proxies.put(host.getName(), proxy);
+								try
+								{
+								AsyncServiceManagerServer proxy = (AsyncServiceManagerServer) client.proxy();
+								boolean connected = ((Boolean)((Future)proxy.isServiceManager()).get(10, TimeUnit.SECONDS)).booleanValue();
+								if (connected)
+								{
+								Host newHost = new Host(mHost.getName(), mHost.getPort());
+								newHost.setIncluded(mHost.isIncluded());
+								newHost.setState("CONNECTED");
+								hostsList.remove(mHost.getName());
+								hostsList.put(newHost.getName(), newHost);
+								//if (mHost.isIncluded())
+								//	servicesTable.addService(mHost.getName(), proxy);
+								}
+								else
+									client.close();
+								}
+								catch (Exception ex)
+								{
+									ex.printStackTrace();
+								}
 							}
-						Host newHost = new Host(host.getName(), host.getPort());
-						newHost.setIncluded(true);
-						newHost.setState("CONNECTED");
-						hostsList.remove(host.getName());
-						hostsList.put(newHost.getName(), newHost);
-						//if (host.isIncluded())
-						// TODO	servicesList.addService(host.getName(), proxy);
-						}
-						else
-							future.getChannel().close();
+						});
 					}
+
+					@Override
+					public void run(Channel channel)
+					{
+						// TODO Auto-generated method stub
+						
+					}
+				});
+				
+				client.disconnectedListener(new ConnectListener()
+				{
+					
+					@Override
+					public void run()
+					{
+						disconnect(mHost, client);
+					}
+
+					@Override
+					public void run(Channel channel)
+					{
+						// TODO Auto-generated method stub
+						
+					}
+				});
+				
+				try
+				{
+					System.out.println("start client: "+host.getName()+":"+host.getPort());
+					client.start();
+					connected = true;
 				}
 				catch (Exception e)
 				{
-					System.out.println("error accessing "+host.getName());
+					// TODO Auto-generated catch block
 					e.printStackTrace();
-					
-					connected = false;
-					if (future != null)
-						future.getChannel().close();
 				}
-				
 			}
+
 				
 			if (!connected)
 			{
-				synchronized(proxies)
-				{
 				disconnect(host, proxies.remove(host.getName()));
-				}
 				changed = true;
 			}
 			else if (proxy == null && !"DISCONNECTED".equals(host.getState()))
@@ -354,6 +411,8 @@ public class HubMain
 			}
 		}
 		}
+
+		
 	}
 	
 	private static void removeServices(String host)
@@ -361,10 +420,13 @@ public class HubMain
 		
 	}
 	
-	private static void disconnect(Host host, AsyncServiceManagerServer proxy)
+	private static void disconnect(Host host, DefaultClient client)
 	{
-		if (proxy != null)
+		if (client != null)
+		{
+			client.close();
 			removeServices(host.getName());
+		}
 		host.setState("DISCONNECTED");
 		try
 		{

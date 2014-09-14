@@ -1,5 +1,8 @@
 package org.rzo.netty.ahessian.rpc.client;
 
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.Timeout;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,10 +14,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.util.Timeout;
 import org.rzo.netty.ahessian.Constants;
 import org.rzo.netty.ahessian.rpc.callback.Callback;
 import org.rzo.netty.ahessian.rpc.callback.CallbackReplyMessage;

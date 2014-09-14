@@ -1,17 +1,16 @@
 package org.rzo.yajsw.controller.jvm;
 
-import static org.jboss.netty.channel.Channels.pipeline;
+
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import io.netty.handler.codec.Delimiters;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import org.jboss.netty.channel.ChannelEvent;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
-import org.jboss.netty.handler.codec.frame.Delimiters;
 import org.rzo.yajsw.Constants;
 import org.rzo.yajsw.controller.Message;
 import org.rzo.yajsw.nettyutils.ChannelGroupFilter;
@@ -20,22 +19,26 @@ import org.rzo.yajsw.nettyutils.ConditionFilter;
 import org.rzo.yajsw.nettyutils.LoggingFilter;
 import org.rzo.yajsw.nettyutils.WhitelistFilter;
 
-class ControllerPipelineFactory implements ChannelPipelineFactory
+class ControllerPipelineFactory extends ChannelInitializer<SocketChannel>
 {
 
 	JVMController	_controller;
 	boolean			_debug	= false;
 
-	ControllerPipelineFactory(JVMController controller, boolean debug)
+	ControllerPipelineFactory(JVMController controller)
 	{
 		_controller = controller;
+	}
+	
+	public void setDebug(boolean debug)
+	{
 		_debug = debug;
 	}
 
-	public ChannelPipeline getPipeline() throws Exception
+	@Override
+	protected void initChannel(SocketChannel ch) throws Exception
 	{
-
-		ChannelPipeline pipeline = pipeline(); // Note the static import.
+		ChannelPipeline pipeline = ch.pipeline(); // Note the static import.
 		if (_debug)
 			pipeline.addLast("logging1", new LoggingFilter(_controller.getLog(), "controller"));
 
@@ -43,7 +46,7 @@ class ControllerPipelineFactory implements ChannelPipelineFactory
 		// and only if state != PROCESS_KILLED
 		pipeline.addLast("checkWaiting", new ConditionFilter(new Condition()
 		{
-			public boolean isOk(ChannelHandlerContext ctx, ChannelEvent e)
+			public boolean isOk(ChannelHandlerContext ctx, Object msg)
 			{
 				boolean result = true;
 				int currentState = _controller.getState();
@@ -90,12 +93,12 @@ class ControllerPipelineFactory implements ChannelPipelineFactory
 		// if we found our partner close all other open connections
 		pipeline.addLast("removeConnected", new ChannelGroupFilter(new Condition()
 		{
-			public boolean isOk(ChannelHandlerContext ctx, ChannelEvent e)
+			public boolean isOk(ChannelHandlerContext ctx, Object msg)
 			{
 				boolean result = false;
-				if (e instanceof MessageEvent)
+				if (msg instanceof Message)
 				{
-					Message m = (Message) ((MessageEvent) e).getMessage();
+					Message m = (Message) msg;
 					result = m.getCode() == Constants.WRAPPER_MSG_OKKEY;
 				}
 				return result;
@@ -105,7 +108,6 @@ class ControllerPipelineFactory implements ChannelPipelineFactory
 		// at last add the message handler
 		pipeline.addLast("handler", new ControllerHandler(_controller));
 
-		return pipeline;
 	}
 
 }

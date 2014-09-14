@@ -23,3 +23,8 @@ Network loading in general
 Network loading per webdav
 	* vfs-webdav
 
+Groovy support in configuration files or wrapping groovy
+	* groovy
+	
+Trigger with regular expressions
+	* regex

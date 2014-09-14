@@ -1,9 +1,16 @@
 package org.rzo.yajsw.srvmgr.server;
 
+import org.rzo.netty.ahessian.application.jmx.remote.service.JmxSerializerFactory;
+import org.rzo.netty.ahessian.bootstrap.ChannelPipelineFactoryBuilder;
+import org.rzo.netty.ahessian.bootstrap.DefaultServer;
 import org.rzo.netty.ahessian.rpc.server.ContinuationService;
 import org.rzo.netty.ahessian.rpc.server.HessianRPCServiceHandler;
 import org.rzo.netty.ahessian.rpc.server.ImmediateInvokeService;
 import org.rzo.netty.mcast.discovery.DiscoveryServer;
+
+import io.netty.channel.Channel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.util.internal.logging.SimpleLogger;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,15 +18,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
-import org.jboss.netty.channel.socket.oio.OioServerSocketChannelFactory;
+import javax.management.MBeanServerConnection;
+
 import org.rzo.yajsw.srvmgr.server.ms.win.WinServiceManagerServer;
 
 public class ServerMain
@@ -51,32 +59,32 @@ public class ServerMain
 			in.close();
 		}
 		
+    	ChannelPipelineFactoryBuilder builder = new ChannelPipelineFactoryBuilder()
+    	.rpcServiceInterface(ServiceManagerServer.class)
+    	.rpcServerService(getServiceManagerServer())
+    	.serviceThreads(10);
+    	
+    	//if (debug)
+    		builder.debug();
+    	
+    	Set<String> channelOptions = new HashSet();
+    	channelOptions.add("TCP_NODELAY");
+
+    	DefaultServer server = new DefaultServer(NioServerSocketChannel.class, builder, channelOptions, serverPort);
+
+        server.start();
+       Channel channel = server.getChannel();
+       
+       InetSocketAddress addr = (InetSocketAddress) channel.localAddress();
+       serverPort = addr.getPort();
+
 		
-        Executor executor = Executors.newFixedThreadPool(200);
-
-        // Configure the server.
-        ServerBootstrap bootstrap = new ServerBootstrap(
-                new OioServerSocketChannelFactory(
-                		executor,
-                		executor));
-
-        HessianRPCServiceHandler factory =  new HessianRPCServiceHandler(executor);
-        factory.addService("default", new ImmediateInvokeService(getServiceManagerServer(), ServiceManagerServer.class, factory));
-
-        
-        bootstrap.setPipelineFactory(
-               new RPCServerPipelineFactory(executor, factory, acl));
-
-        // Bind and start to accept incoming connections.
-        Channel channel =	bootstrap.bind(new InetSocketAddress(serverPort));
-        if (serverPort == 0)
-        	serverPort = ((InetSocketAddress)channel.getLocalAddress()).getPort();
-        
-        System.out.println("bound to port "+serverPort);
-        
+		
         DiscoveryServer discovery = new DiscoveryServer();
         discovery.setName("serviceManagerServer");
         discovery.setPort(serverPort);
+        discovery.setDebug(true);
+        discovery.setLogger(new SimpleLogger());
         discovery.init();
 	}
 

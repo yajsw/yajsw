@@ -1,19 +1,17 @@
 package org.rzo.netty.ahessian.io;
 
-import static org.jboss.netty.buffer.ChannelBuffers.dynamicBuffer;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.DownstreamMessageEvent;
-import org.rzo.netty.ahessian.Constants;
-import org.rzo.netty.ahessian.utils.MyReentrantLock;
 
 import com.caucho.hessian4.io.FlushableOutput;
 
@@ -29,14 +27,17 @@ public class OutputStreamBuffer extends OutputStream implements FlushableOutput
 	
 	/** Indicates if the stream has been closed */
 	private volatile boolean _closed = false;
-	private Lock			_lock				= new MyReentrantLock();
+	private Lock			_lock				= new ReentrantLock();
 	
 	/** If written bytes > watermark, the bytes are sent downstream */
 	int _watermark = 1024*1024;
 	int _initialBuffSize = 1024;
 
 	/** The buffer for storing outgoing bytes. Once the bytes have been sent downstream a new buffer is created */
-	private ChannelBuffer _buf = dynamicBuffer(_initialBuffSize);
+	private volatile ByteBuf _buf = null;
+	ExecutorService _executor = Executors.newSingleThreadExecutor();
+
+	private boolean _immediateFlush = true;
 	
 	
 	/**
@@ -62,6 +63,7 @@ public class OutputStreamBuffer extends OutputStream implements FlushableOutput
 		try
 		{
 		//System.out.println("write "+_buf.readableBytes());
+			checkBuf();
 		_buf.writeByte((byte)b);
 		if (_buf.writerIndex() >= _watermark)
 			sendDownstream(null);
@@ -72,6 +74,15 @@ public class OutputStreamBuffer extends OutputStream implements FlushableOutput
 		}
 	}
 	
+	private void checkBuf()
+	{
+		if (_buf == null)
+		{
+			_buf = _ctx.alloc().buffer(1024);
+			_buf.retain();
+		}
+	}
+
 	/* (non-Javadoc)
 	 * @see java.io.OutputStream#write(byte[], int, int)
 	 */
@@ -83,6 +94,8 @@ public class OutputStreamBuffer extends OutputStream implements FlushableOutput
 		_lock.lock();
 		try
 		{
+			checkBuf();
+
 		_buf.writeBytes(b, off, len);
 		//System.out.println("write "+len+" "+_buf.readableBytes());
 		if (_buf.writerIndex() >= _watermark)
@@ -105,24 +118,38 @@ public class OutputStreamBuffer extends OutputStream implements FlushableOutput
 	}
 
 	
-	public void flush(ChannelFuture future) throws IOException
+	public void flush(ChannelPromise future) throws IOException
 	{
+		//System.out.println(System.currentTimeMillis()+" +flush");
 		_lock.lock();
-		if (_buf.readableBytes() > 0)
 		try
 		{
 		super.flush();
+		if (_buf == null || _buf.readableBytes() == 0)
+		{
+			if (future != null)
+				future.setSuccess();
+		}
+		else
+			/*
 		if (future == null)
 		{
-			ChannelFuture f = sendDownstream(null);
-			f.await(20000);
-			//if (!f.await(10000))
-			//	throw new IOException("write longer than 10 secs");
+			sendDownstream(null);
+			_ctx.flush();
+			//f.await(20000);
+			//if (f != null && !f.await(10000))
+				//throw new IOException("write longer than 10 secs");
+			//	System.out.println("write took longer than 10 2");
 		}
 		else
 		{
 			sendDownstream(future);
+			_ctx.flush();
 		}
+		*/
+		   sendDownstream(future);
+		if (_immediateFlush )
+			_ctx.flush();
 		}
 		catch (Exception e)
 		{
@@ -132,28 +159,48 @@ public class OutputStreamBuffer extends OutputStream implements FlushableOutput
 		{
 		_lock.unlock();
 		}
+		//System.out.println(System.currentTimeMillis()+" -flush");
 	}
 	
-	private ChannelFuture sendDownstream(ChannelFuture future) throws IOException
+	
+	private void sendDownstream(ChannelPromise future) throws IOException
 	{
-		if (! _ctx.getChannel().isConnected())
+		sendDownstream(future, true);
+	}
+	
+	private void sendDownstream(final ChannelPromise future, boolean wait) throws IOException
+	{
+		if (future != null && future.isDone())
+			return;
+		if (! _ctx.channel().isActive())
 			throw new IOException("channel disconnected");
-		while (!_ctx.getChannel().isWritable())
-			try
+		_lock.lock();
+		ChannelFuture result = null;
+		try
 		{
-				Thread.sleep(100);
+		final ByteBuf toSend = _buf;
+		_buf = null;
+		if (toSend.refCnt() > 1)
+			toSend.release(toSend.refCnt()-1);
+		//System.out.println(System.currentTimeMillis()+" outputstream send downstream +");
+		if (future == null || future.isDone())
+			result = _ctx.write(toSend);
+		else
+					_ctx.write(toSend, future);
 		}
 		catch (Exception ex)
 		{
-			Constants.ahessianLogger.warn("",ex);
+			ex.printStackTrace();
 		}
-		if (future == null)
-		future = Channels.future(_ctx.getChannel());
-        _ctx.sendDownstream(new DownstreamMessageEvent(_ctx.getChannel(), future, _buf, _ctx.getChannel().getRemoteAddress()));
-		_buf = dynamicBuffer(1024);
-		_buf.clear();
-		return future;
+		finally
+		{
+			_lock.unlock();
+		}
+		//System.out.println(System.currentTimeMillis()+" outputstream send downstream -");
+		
 	}
+	
+	
 	
 	/* (non-Javadoc)
 	 * @see java.io.OutputStream#close()
@@ -163,7 +210,9 @@ public class OutputStreamBuffer extends OutputStream implements FlushableOutput
 	{
 		_lock.lock();
 		_closed = true;
+		_executor.shutdownNow();
 		_lock.unlock();
+		//System.out.println("buffer closed");
 	}
 
 	public void setContext(ChannelHandlerContext ctx)
@@ -180,9 +229,10 @@ public class OutputStreamBuffer extends OutputStream implements FlushableOutput
 	public void reset()
 	{
 		_lock.lock();
-		_buf = dynamicBuffer();
+		_buf = Unpooled.buffer(1024);
 		_closed = false;
 		_lock.unlock();
 	}
+
 
 }

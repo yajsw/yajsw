@@ -1132,7 +1132,8 @@ public abstract class AbstractConfiguration extends EventSource implements Confi
         return getList(key, new ArrayList<Object>());
     }
 
-    public List<Object> getList(String key, List<Object> defaultValue)
+    @Override
+    public List<Object> getList(String key, List<?> defaultValue)
     {
         Object value = getProperty(key);
         List<Object> list;
@@ -1155,7 +1156,7 @@ public abstract class AbstractConfiguration extends EventSource implements Confi
         }
         else if (value == null)
         {
-            list = defaultValue;
+            list = (List<Object>) defaultValue;
         }
         else if (value.getClass().isArray())
         {

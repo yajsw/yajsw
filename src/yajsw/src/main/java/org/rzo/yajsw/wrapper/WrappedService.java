@@ -1,5 +1,7 @@
 package org.rzo.yajsw.wrapper;
 
+import io.netty.util.internal.logging.SimpleLoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -9,8 +11,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -19,7 +21,6 @@ import java.util.logging.Logger;
 import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationUtils;
-import org.jboss.netty.logging.SimpleLoggerFactory;
 import org.rzo.yajsw.Constants;
 import org.rzo.yajsw.boot.WrapperServiceBooter;
 import org.rzo.yajsw.cache.Cache;
@@ -225,11 +226,14 @@ public class WrappedService
 		
 		for (Entry<String, String> e : _config.getEnvLookupSet().entrySet())
 		{
-			result.add(Utils.getDOption(e.getKey(), e.getValue()));
+			if (!e.getKey().contains("password"))
+				result.add(Utils.getDOption(e.getKey(), e.getValue()));
 		}
 		for (Iterator it = _config.getLookupSet().iterator(); it.hasNext();)
 		{
 			String key = (String) it.next();
+			if (key.contains("password"))
+				continue;
 			if (!"wrapper.working.dir".equals(key))
 			result.add(Utils.getDOption(key, _config.getString(key)));
 		}

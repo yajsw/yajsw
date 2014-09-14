@@ -1,6 +1,6 @@
 package org.rzo.yajsw.os;
 
-import org.jboss.netty.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLogger;
 
 public interface JavaHome
 {

@@ -1,13 +1,11 @@
 package org.rzo.netty.ahessian.auth;
 
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineCoverage;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.logging.InternalLogger;
-import org.jboss.netty.logging.InternalLoggerFactory;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 
 /**
  * Server side authentication handler.
@@ -28,8 +26,7 @@ import org.jboss.netty.logging.InternalLoggerFactory;
  * </pre>
  * 
  */
-@ChannelPipelineCoverage("one")
-public class ServerAuthFilter extends SimpleChannelUpstreamHandler
+public class ServerAuthFilter extends SimpleChannelInboundHandler
 {
 	private AuthToken	_token			= null;
 	private boolean		_authenticated	= false;
@@ -60,15 +57,15 @@ public class ServerAuthFilter extends SimpleChannelUpstreamHandler
 	 * @see org.jboss.netty.channel.SimpleChannelUpstreamHandler#messageReceived(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.MessageEvent)
 	 */
 	@Override
-	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception
+	public void messageReceived(ChannelHandlerContext ctx, Object e) throws Exception
 	{
 		if (!_authenticated)
 		{
-			int result = _token.authenticate(ctx, e);
+			int result = _token.authenticate(ctx, (ByteBuf) e);
 			if ( result == AuthToken.FAILED)
 			{
 				logger.warn("authentication failed -> close connection");
-				ctx.getChannel().close();
+				ctx.channel().close();
 			}
 			else if (result == AuthToken.PASSED)
 			{
@@ -76,15 +73,15 @@ public class ServerAuthFilter extends SimpleChannelUpstreamHandler
 			}
 		}
 		else
-			ctx.sendUpstream(e);
+			ctx.fireChannelRead(e);
 	}
 	
 	@Override
-    public void channelDisconnected(
-            ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception
+    public void channelInactive(
+            ChannelHandlerContext ctx) throws Exception
 	{
 		_token.disconnected();
-		ctx.sendUpstream(e);
+		ctx.fireChannelInactive();
 	}
 
 

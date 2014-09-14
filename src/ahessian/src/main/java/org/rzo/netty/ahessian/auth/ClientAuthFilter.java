@@ -1,10 +1,8 @@
 package org.rzo.netty.ahessian.auth;
 
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineCoverage;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.SimpleChannelInboundHandler;
 
 /**
  * Client side authentication handler.
@@ -25,8 +23,7 @@ import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
  * </pre>
  * 
  */
-@ChannelPipelineCoverage("one")
-public class ClientAuthFilter extends SimpleChannelUpstreamHandler
+public class ClientAuthFilter extends SimpleChannelInboundHandler
 {
 	
 	/** The authentication token. */
@@ -46,9 +43,16 @@ public class ClientAuthFilter extends SimpleChannelUpstreamHandler
 	 * @see org.jboss.netty.channel.SimpleChannelUpstreamHandler#channelConnected(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.ChannelStateEvent)
 	 */
 	@Override
-    public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		_token.sendPassword(ctx);
-		ctx.sendUpstream(e);
+		ctx.fireChannelActive();
     }
+
+	@Override
+	protected void messageReceived(ChannelHandlerContext ctx, Object msg)
+			throws Exception
+	{
+		ctx.fireChannelRead(msg);
+	}
 
 }

@@ -1,5 +1,12 @@
 package org.rzo.netty.ahessian.crypto;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerAdapter;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
+
 import java.io.ByteArrayOutputStream;
 import java.security.Key;
 import java.security.KeyFactory;
@@ -10,26 +17,15 @@ import java.util.Arrays;
 
 import javax.crypto.Cipher;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelEvent;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
 import org.rzo.netty.ahessian.log.OutLogger;
 
-public class ClientCryptoFilter extends SimpleChannelHandler implements CryptoConstants
+public class ClientCryptoFilter extends ChannelHandlerAdapter implements CryptoConstants
 {
 	private StreamCipher _encodeCipher;
 	private StreamCipher _decodeCipher;
 	private byte[] _encodedPublicKey;
 	private int _bytesRead;
 	private SecureRandom _secureRandom = new SecureRandom();
-	private ChannelEvent _connectedEvent;
 	private byte[] _password = new byte[PASSWORD_SIZE];
 	
 	public ClientCryptoFilter()
@@ -40,21 +36,20 @@ public class ClientCryptoFilter extends SimpleChannelHandler implements CryptoCo
 
 
 	
-	
-	public void messageReceived(
-            ChannelHandlerContext ctx, MessageEvent e) throws Exception
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object e) throws Exception
             {
 				// have we sent our secret key ?
 				if (_decodeCipher != null)
 				{
 					// decode and send upstream
-					MessageEvent m = Util.code(_decodeCipher, e, true);
-					ctx.sendUpstream(m);
+					ByteBuf m = Util.code(_decodeCipher, (ByteBuf) e, true);
+					ctx.fireChannelRead(e);
 				}
 				// we are still in the crypto protocol
 				else
 				{
-					ChannelBuffer b = (ChannelBuffer) e.getMessage();
+					ByteBuf b = (ByteBuf) e;
 					// is this our first message ?
 					if (_encodedPublicKey == null)
 					{
@@ -143,18 +138,14 @@ public class ClientCryptoFilter extends SimpleChannelHandler implements CryptoCo
 			// encode it using the server's public key
 	        Cipher asymCipher = getAsymCipher();
 	        byte[] encryptedIvSymKey = asymCipher.doFinal(b.toByteArray());
-	        ChannelBuffer cb = ChannelBuffers.dynamicBuffer();
+	        ByteBuf cb = Unpooled.buffer();
 	        cb.writeInt(encryptedIvSymKey.length);
 	        cb.writeBytes(encryptedIvSymKey);
 
 	        // send it to the server
-	        Channel channel = ctx.getChannel();
-			ChannelFuture future = Channels.future(ctx.getChannel());
-			
-			Channels.write(ctx, future, cb);
-		
-		// wait for the message transmission
-			future.await();
+	        Channel channel = ctx.channel();
+			// wait for the message transmission
+			ctx.write(cb).sync();
 		
 		// we can now accept in/out messages encrypted with our key
 		// first create symmetric ciphers
@@ -165,7 +156,7 @@ public class ClientCryptoFilter extends SimpleChannelHandler implements CryptoCo
 			_decodeCipher.engineInitDecrypt(symKeyEncoded, ivEncoded);
 
 		// inform others in the pipeline that a secure connection has been established
-		ctx.sendUpstream(_connectedEvent);
+		ctx.fireChannelActive();
 		
 		}
 		catch (Exception ex)
@@ -178,22 +169,14 @@ public class ClientCryptoFilter extends SimpleChannelHandler implements CryptoCo
 
 	
 	@Override
-    public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-		// remember this event, so that we can propagate it to the rest of the pipeline once we have 
-		// encryption and decryption ciphers in place
-		_connectedEvent = e;
-    }
-	
-	@Override
-	public void writeRequested(
-            ChannelHandlerContext ctx, MessageEvent e) throws Exception
+	public void write(ChannelHandlerContext ctx, Object e, ChannelPromise promise) throws Exception
             {
 		// if we can encode
 		if (_encodeCipher != null)
 		{
 			// encode the message and send it downstream
-			MessageEvent m = Util.code(_encodeCipher, e, false);
-			ctx.sendDownstream(m);
+			ByteBuf m = Util.code(_encodeCipher, (ByteBuf) e, false);
+			ctx.write(m, promise);
 		}
 		// else ignore. this should not happen, since we have not yet propagated the connected event.
 		

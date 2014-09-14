@@ -1,5 +1,15 @@
 package org.rzo.netty.ahessian.rpc.client;
 
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler.Sharable;
+import io.netty.channel.ChannelHandlerAdapter;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPipeline;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timeout;
+import io.netty.util.Timer;
+import io.netty.util.TimerTask;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationHandler;
@@ -14,20 +24,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineCoverage;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
-import org.jboss.netty.util.HashedWheelTimer;
-import org.jboss.netty.util.Timeout;
-import org.jboss.netty.util.Timer;
-import org.jboss.netty.util.TimerTask;
 import org.rzo.netty.ahessian.Constants;
 import org.rzo.netty.ahessian.rpc.io.Hessian2Input;
 import org.rzo.netty.ahessian.rpc.io.Hessian2Output;
@@ -86,10 +83,10 @@ import com.caucho.hessian4.io.HessianRemoteObject;
  * Object result = future.get();
  * </pre>
  */
-
-@ChannelPipelineCoverage("all")
-public class HessianProxyFactory extends SimpleChannelHandler implements Constants
+@Sharable
+public class HessianProxyFactory extends ChannelHandlerAdapter implements Constants
 {
+	private static final int MAX_OPEN_CALLS = 50000;
 	private volatile Map<Long, Future<Object>>						_openCalls				= Collections
 																									.synchronizedMap(new HashMap<Long, Future<Object>>());
 	private volatile int											_id						= 0;
@@ -109,10 +106,10 @@ public class HessianProxyFactory extends SimpleChannelHandler implements Constan
 	boolean															_stop					= false;
 	private String													_name;
 	private boolean													_sessionListenerAdded	= false;
-	private Runnable												_closedSessionListener;
-	private Runnable												_newSessionListener;
-	private Runnable												_disconnectedListener;
-	private Runnable												_connectedListener;
+	volatile private Runnable												_closedSessionListener;
+	volatile private Runnable												_newSessionListener;
+	volatile private Runnable												_disconnectedListener;
+	volatile private Runnable												_connectedListener;
 
 	Map<Object, InvocationHandler>									_proxies				= Collections
 																									.synchronizedMap(new HashMap<Object, InvocationHandler>());
@@ -259,6 +256,7 @@ public class HessianProxyFactory extends SimpleChannelHandler implements Constan
 	 */
 	synchronized Future<Object> sendRequest(String methodName, Object[] args, Map options) throws InterruptedException
 	{
+		long t = System.currentTimeMillis();
 		if (_blocked)
 			throw new RuntimeException("send blocked");
 		if (_stop)
@@ -270,6 +268,12 @@ public class HessianProxyFactory extends SimpleChannelHandler implements Constan
 		final HessianProxyFuture future = new HessianProxyFuture();
 		future.handleCallbacks(args);
 		final HessianRPCCallMessage message = new HessianRPCCallMessage(methodName, args, headers, null);
+		int i = 0;
+		while (_openCalls.size() > MAX_OPEN_CALLS && getChannel() != null)
+		{
+			//System.out.println("too many open calls -> wait "+i++);
+			Thread.sleep(10);
+		}
 		_openCalls.put(id, future);
 		Integer g = (Integer) options.get("group");
 		final Integer group = g == null ? 0 : g;
@@ -288,19 +292,31 @@ public class HessianProxyFactory extends SimpleChannelHandler implements Constan
 			};
 			future.setTimeout(_timer.newTimeout(task, timeout, TimeUnit.MILLISECONDS));
 		}
-		while (getChannel() == null)
+		Channel channel = null;
+		/*
+		while ((channel = getChannel()) == null)
 		{
 			_lock.lock();
 			try
 			{
-			_connected.await(1000, TimeUnit.MILLISECONDS);
+			_connected.await(100, TimeUnit.MILLISECONDS);
 			}
 			finally
 			{
 			_lock.unlock();
 			}
 		}
-		getChannel().write(message);
+		*/
+		channel = getChannel();
+		if (channel == null)
+			throw new RuntimeException("channel closed");
+		while (!channel.isWritable() && channel.isActive())
+		{
+			//System.out.println("channel wait call "+Thread.currentThread().getName());
+			Thread.sleep(100);
+		}
+		channel.write(message);
+		//System.out.println("sendRequest "+(System.currentTimeMillis()-t));
 	
 		return future;
 	}
@@ -314,11 +330,11 @@ public class HessianProxyFactory extends SimpleChannelHandler implements Constan
 	 * org.jboss.netty.channel.MessageEvent)
 	 */
 	@Override
-	public void messageReceived(final ChannelHandlerContext ctx, MessageEvent e) throws Exception
+	public void channelRead(final ChannelHandlerContext ctx, Object e) throws Exception
 	{
-		if (e.getMessage() instanceof HessianRPCReplyMessage)
+		if (e instanceof HessianRPCReplyMessage)
 		{
-			final HessianRPCReplyMessage message = (HessianRPCReplyMessage) e.getMessage();
+			final HessianRPCReplyMessage message = (HessianRPCReplyMessage) e;
 			{
 				final Long id = message.getCallId();
 				if (id != null)
@@ -375,11 +391,12 @@ public class HessianProxyFactory extends SimpleChannelHandler implements Constan
 
 			}
 		}
-		else if (e.getMessage() instanceof InputStreamReplyMessage)
+		else if (e instanceof InputStreamReplyMessage)
 		{
-			_clientStreamManager.messageReceived((InputStreamReplyMessage)e.getMessage());
+			_clientStreamManager.messageReceived((InputStreamReplyMessage)e);
 		}
-		ctx.sendUpstream(e);
+		//ctx.fireChannelRead(e);
+		ctx.fireChannelReadComplete();
 	}
 
 	/**
@@ -399,7 +416,8 @@ public class HessianProxyFactory extends SimpleChannelHandler implements Constan
 		if (api == null)
 			throw new NullPointerException("api must not be null for HessianProxyFactory.create()");
 		InvocationHandler handler = null;
-
+		if (options == null)
+			options = new HashMap();
 		handler = new AsyncHessianProxy(this, api, options);
 		if (options.get("sync") != null)
 			handler = new SyncHessianProxy(handler);
@@ -427,6 +445,8 @@ public class HessianProxyFactory extends SimpleChannelHandler implements Constan
 	 */
 	public Channel getChannel()
 	{
+		if (_channel == null || !_channel.isActive() || !_channel.isWritable())
+			return null;
 		return _channel;
 	}
 
@@ -438,25 +458,34 @@ public class HessianProxyFactory extends SimpleChannelHandler implements Constan
 	 * .netty.channel.ChannelHandlerContext,
 	 * org.jboss.netty.channel.ChannelStateEvent)
 	 */
-	public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception
+	@Override
+	public void channelActive(ChannelHandlerContext ctx) throws Exception
 	{
+		_channel = ctx.channel();
 		if (_connectedListener != null)
-			try
-			{
-				_connectedListener.run();
-			}
-			catch (Throwable ex)
-			{
-				Constants.ahessianLogger.warn("", ex);
-			}
+			_executor.execute(new Runnable()
+			{				
+				@Override
+				public void run()
+				{
+					try
+					{
+						_connectedListener.run();
+					}
+					catch (Throwable ex)
+					{
+						Constants.ahessianLogger.warn("", ex);
+					}
+				}
+			});
 		_lock.lock();
 		try
 		{
 		if (!_sessionListenerAdded)
 		{
-			if (ctx.getPipeline().getContext(ClientSessionFilter.class) != null)
+			if (ctx.pipeline().get(ClientSessionFilter.class) != null)
 			{
-				ClientSessionFilter sessionHandler = (ClientSessionFilter) ctx.getPipeline().getContext(ClientSessionFilter.class).getHandler();
+				ClientSessionFilter sessionHandler = (ClientSessionFilter) ctx.pipeline().get(ClientSessionFilter.class);
 				sessionHandler.addSessionClosedListener(new Runnable()
 				{
 					public void run()
@@ -502,13 +531,12 @@ public class HessianProxyFactory extends SimpleChannelHandler implements Constan
 				_sessionListenerAdded = true;
 			}
 		}
-		_channel = ctx.getChannel();
-		super.channelConnected(ctx, e);
-		_connected.signal();
 		}
 		finally
 		{
+		_connected.signal();
 		_lock.unlock();
+		super.channelActive(ctx);
 		}
 	}
 
@@ -520,7 +548,7 @@ public class HessianProxyFactory extends SimpleChannelHandler implements Constan
 	 * jboss.netty.channel.ChannelHandlerContext,
 	 * org.jboss.netty.channel.ChannelStateEvent)
 	 */
-	public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception
+	public void channelInactive(ChannelHandlerContext ctx) throws Exception
 	{
 		_channel = null;
 		// _stop = true;
@@ -536,16 +564,24 @@ public class HessianProxyFactory extends SimpleChannelHandler implements Constan
 		// put something in the queue in case the worker thread hangs in
 		// _pendingCalls.take()
 		_pendingCalls.offer(new HessianRPCCallMessage(null, null, null, null));
-		super.channelDisconnected(ctx, e);
 		if (_disconnectedListener != null)
-			try
-			{
-				_disconnectedListener.run();
-			}
-			catch (Throwable ex)
-			{
-				Constants.ahessianLogger.warn("", ex);
-			}
+			_executor.execute(new Runnable()
+			{				
+				@Override
+				public void run()
+				{
+					try
+					{
+						_disconnectedListener.run();
+					}
+					catch (Throwable ex)
+					{
+						Constants.ahessianLogger.warn("", ex);
+					}					
+				}
+			});
+
+		super.channelInactive(ctx);
 
 	}
 
@@ -562,11 +598,11 @@ public class HessianProxyFactory extends SimpleChannelHandler implements Constan
 	}
 
 	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable e)
 	{
-		ahessianLogger.warn("error accessing service " + _name + " Exception " + e.getCause().getClass() + " " + e.getCause().getMessage());
-		ctx.getChannel().disconnect();
-		ctx.getChannel().close();
+		ahessianLogger.warn("error accessing service " + _name + " Exception " + e.getClass() + " " + e.getCause().getMessage());
+		ctx.channel().disconnect();
+		ctx.channel().close();
 		if (!_stop)
 		{
 			_channel = null;

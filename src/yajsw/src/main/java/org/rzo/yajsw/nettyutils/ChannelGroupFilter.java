@@ -1,17 +1,15 @@
 package org.rzo.yajsw.nettyutils;
 
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipelineCoverage;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
-import org.jboss.netty.channel.group.ChannelGroup;
-import org.jboss.netty.channel.group.DefaultChannelGroup;
+import io.netty.channel.ChannelHandlerAdapter;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
+import io.netty.channel.DefaultEventLoop;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
 
-@ChannelPipelineCoverage("all")
-public class ChannelGroupFilter extends SimpleChannelHandler
+public class ChannelGroupFilter extends ChannelHandlerAdapter
 {
-	ChannelGroup	_channels	= new DefaultChannelGroup();
+	ChannelGroup	_channels	= new DefaultChannelGroup(new DefaultEventLoop());
 	Condition		_condition;
 
 	public ChannelGroupFilter(Condition condition)
@@ -20,20 +18,21 @@ public class ChannelGroupFilter extends SimpleChannelHandler
 	}
 
 	@Override
-	public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception
+	public void channelActive(ChannelHandlerContext ctx) throws Exception
 	{
-		_channels.add(ctx.getChannel());
+		_channels.add(ctx.channel());
+		super.channelWritabilityChanged(ctx);
 	}
 
 	@Override
-	public void writeRequested(ChannelHandlerContext ctx, MessageEvent e) throws Exception
+	public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception
 	{
-		if (_condition.isOk(ctx, e))
+		if (_condition.isOk(ctx, msg))
 		{
-			_channels.remove(ctx.getChannel());
+			_channels.remove(ctx.channel());
 			_channels.close();
 		}
-		ctx.sendDownstream(e);
+		ctx.write(msg, promise);
 	}
 
 }

@@ -1,22 +1,28 @@
 package org.rzo.netty.mcast;
 
 
-import java.net.*;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.oio.OioEventLoopGroup;
+import io.netty.channel.socket.DatagramChannel;
+import io.netty.channel.socket.DatagramPacket;
+import io.netty.channel.socket.oio.OioDatagramChannel;
+import io.netty.util.internal.logging.InternalLogger;
+
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.Random;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.socket.DatagramChannel;
-import org.jboss.netty.channel.socket.DatagramChannelFactory;
-import org.jboss.netty.channel.socket.oio.OioDatagramChannelFactory;
+import org.rzo.netty.ahessian.bootstrap.ChannelPipelineFactory;
+
 
 public class MulticastEndpoint
 {
@@ -26,30 +32,36 @@ public class MulticastEndpoint
     private String bindAddress = "192.168.0.10";
     
     private DatagramChannel datagramChannel;
-    private ConnectionlessBootstrap connectionlessBootstrap;
+    private Bootstrap connectionlessBootstrap;
     private InetSocketAddress multicastAddress;
     private static Executor executor = Executors.newCachedThreadPool();
     byte[] id;
     boolean init = false;
+    EventLoopGroup group;
+     public boolean debug = false;
+     public InternalLogger logger;
+
     
 	public void  init(ChannelPipelineFactory factory) throws Exception
 	{
 			id = String.format("%1$020d", Math.abs(new Random(System.currentTimeMillis()).nextLong())).getBytes();
-			DatagramChannelFactory datagramChannelFactory = new
-	        OioDatagramChannelFactory(executor);
 
-	         connectionlessBootstrap = new
-	        ConnectionlessBootstrap(datagramChannelFactory);
-	        connectionlessBootstrap.setOption("broadcast", true);
-	        connectionlessBootstrap.setPipelineFactory(factory);
+			group = new OioEventLoopGroup();
+	       connectionlessBootstrap = new Bootstrap();
+	       connectionlessBootstrap.group(group);
+	        connectionlessBootstrap.option(ChannelOption.SO_BROADCAST, true);
+	        connectionlessBootstrap.handler(factory);
+	        connectionlessBootstrap.channel(OioDatagramChannel.class);;
 	        datagramChannel = (DatagramChannel)
-	        connectionlessBootstrap.bind(new InetSocketAddress(mcastGroupPort));
+	        connectionlessBootstrap.bind(new InetSocketAddress(mcastGroupPort)).sync().channel();
 	        multicastAddress = new InetSocketAddress(mcastGroupIp, mcastGroupPort);
 	        NetworkInterface networkInterface =
 	        NetworkInterface.getByInetAddress(InetAddress.getByName(bindAddress));
 	        //for (Enumeration nifs = NetworkInterface.getNetworkInterfaces(); nifs.hasMoreElements(); )
 	        datagramChannel.joinGroup(multicastAddress, null);//(NetworkInterface) nifs.nextElement());
 	        init = true;
+	        if (debug)
+	        	factory.debug();
 	}
 	
 	public boolean isInit()
@@ -57,10 +69,37 @@ public class MulticastEndpoint
 		return init;
 	}
 	
-	public void send(ChannelBuffer msg) throws Exception
+	public void setDebug(boolean debug)
 	{
-		ChannelBuffer idbuf = ChannelBuffers.wrappedBuffer(id);
-		datagramChannel.write(ChannelBuffers.wrappedBuffer(idbuf, msg), multicastAddress);
+		this.debug = debug;
+	}
+
+	public void setLogger(InternalLogger logger)
+	{
+		this.logger = logger;
+	}
+
+
+	
+	public void send(ByteBuf msg) throws Exception
+	{
+		
+		
+		byte[] arr = msg.array();
+		byte[] buf = new byte[arr.length+id.length];
+		System.arraycopy(id, 0, buf, 0, id.length);
+		System.arraycopy(arr, 0, buf, id.length, arr.length);
+		
+		ByteBuf bbuf = Unpooled.wrappedBuffer(buf);
+		
+		if (debug && logger != null)
+			logger.info("discovery send "+new String(bbuf.array()));
+
+		datagramChannel.writeAndFlush(new DatagramPacket(
+                bbuf, 
+                 multicastAddress)).sync();
+                 
+		//datagramChannel.writeAndFlush(buf, multicastAddress);
 	}
 
 	public String getMcastGroupIp()
@@ -96,31 +135,37 @@ public class MulticastEndpoint
 	public void close()
 	{
 		datagramChannel.close();
-		connectionlessBootstrap.releaseExternalResources();
+		try
+		{
+			group.shutdownGracefully().sync();
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
-	public ChannelBuffer getMessage(MessageEvent e)
+	public ByteBuf getMessage(ByteBuf e)
 	{
 		if (checkMessage(e))
 		{
-			ChannelBuffer m = (ChannelBuffer) e.getMessage();
-			return m.slice(id.length, m.readableBytes()-id.length);
+			return e.slice(id.length, e.readableBytes()-id.length);
 		}
 		return null;
 	}
 	
-	public String getStringMessage(MessageEvent e)
+	public String getStringMessage(ByteBuf e)
 	{
-		ChannelBuffer m = getMessage(e);
+		ByteBuf m = getMessage(e);
 		if (m == null)
 			return null;
 		return m.toString(Charset.defaultCharset());
 	}
 	
-	public boolean checkMessage(MessageEvent e)
+	public boolean checkMessage(ByteBuf e)
 	{
 		byte[] eId = new byte[id.length];
-		((ChannelBuffer) e.getMessage()).getBytes(0, eId, 0, eId.length); 
+		e.getBytes(0, eId, 0, eId.length); 
 		return (! Arrays.equals(id, eId));
 	}
 	

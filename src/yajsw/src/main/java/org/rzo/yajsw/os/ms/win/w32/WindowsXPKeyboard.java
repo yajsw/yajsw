@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.commons.collections.MultiHashMap;
+import org.apache.commons.collections.map.MultiValueMap;
 import org.rzo.yajsw.os.Keyboard;
 import org.rzo.yajsw.os.ms.win.w32.DummyWindow.HotKey;
 import org.rzo.yajsw.os.ms.win.w32.DummyWindow.WndListner;
@@ -199,7 +199,7 @@ public class WindowsXPKeyboard implements Keyboard
 	DummyWindow				_dummyWindow			= DummyWindow.instance();
 
 	/** The _keys. */
-	MultiHashMap			_keys					= new MultiHashMap();
+	MultiValueMap			_keys					= new MultiValueMap();
 
 	/** The _listners. */
 	Map						_listners				= new HashMap();

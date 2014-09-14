@@ -1,19 +1,17 @@
 package org.rzo.netty.ahessian.io;
 
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
+
 import java.io.InputStream;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.rzo.netty.ahessian.Constants;
 import org.rzo.netty.ahessian.utils.MyReentrantLock;
 
-public class PushInputStreamConsumer extends SimpleChannelUpstreamHandler
+public class PushInputStreamConsumer extends SimpleChannelInboundHandler
 {
 
 	volatile Lock _lock = new MyReentrantLock();
@@ -29,7 +27,7 @@ public class PushInputStreamConsumer extends SimpleChannelUpstreamHandler
 	}
 	
 	@Override
-	public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent evt) throws Exception
+	public void messageReceived(final ChannelHandlerContext ctx, final Object evt) throws Exception
 	{
 		// input stream is consumed within a separate thread
 		// we return the current worker thread to netty, so that it may continue feeding the input stream
@@ -52,7 +50,7 @@ public class PushInputStreamConsumer extends SimpleChannelUpstreamHandler
 
 	}
 	
-	private void run(ChannelHandlerContext ctx, MessageEvent evt)
+	private void run(ChannelHandlerContext ctx, Object evt)
 	{
 		if (_consumer.isBufferEmpty())
 		{
@@ -74,7 +72,7 @@ public class PushInputStreamConsumer extends SimpleChannelUpstreamHandler
 		_lock.lock();
 		try
 		{
-			_consumer.consume(ctx, (InputStream)evt.getMessage());
+			_consumer.consume(ctx, (InputStream)evt);
 		}
 		catch (Exception ex)
 		{
@@ -87,9 +85,9 @@ public class PushInputStreamConsumer extends SimpleChannelUpstreamHandler
 		}
 	
 }
-	
-    public void channelConnected(
-            ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception 
+	@Override
+    public void channelActive(
+            ChannelHandlerContext ctx) throws Exception 
             {
     	_lock.lock();
     	try
@@ -100,7 +98,7 @@ public class PushInputStreamConsumer extends SimpleChannelUpstreamHandler
     	{
     	_lock.unlock();
     	}
-        ctx.sendUpstream(e);
+        ctx.fireChannelActive();
     }
 
 

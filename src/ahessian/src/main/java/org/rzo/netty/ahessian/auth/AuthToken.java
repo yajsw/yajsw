@@ -1,7 +1,8 @@
 package org.rzo.netty.ahessian.auth;
 
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.MessageEvent;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+
 
 /**
  * The Interface AuthToken.
@@ -26,7 +27,7 @@ public interface AuthToken
 	 * 
 	 * @return the state: NOT_COMPLETE, PASSED, FAILED
 	 */
-	public int authenticate(ChannelHandlerContext ctx, MessageEvent e);
+	public int authenticate(ChannelHandlerContext ctx, ByteBuf e);
 	
 	/**
 	 * Send the password to the server

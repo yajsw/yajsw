@@ -16,11 +16,13 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import jnacontrib.jna.Advapi32;
-import jnacontrib.jna.WINBASE;
 import jnacontrib.jna.WINERROR;
-import jnacontrib.jna.WINNT;
-import jnacontrib.jna.WINREG;
 
+import com.sun.jna.platform.win32.WinBase;
+import com.sun.jna.platform.win32.WinNT;
+import com.sun.jna.platform.win32.WinReg;
+import com.sun.jna.platform.win32.WinReg.HKEY;
+import com.sun.jna.platform.win32.WinReg.HKEYByReference;
 import com.sun.jna.ptr.IntByReference;
 
 /**
@@ -29,19 +31,25 @@ import com.sun.jna.ptr.IntByReference;
  */
 public class Registry
 {
+	
+	public final static int	HKEY_CLASSES_ROOT	= 0x80000000;
+	public final static int	HKEY_CURRENT_USER	= 0x80000001;
+	public final static int	HKEY_LOCAL_MACHINE	= 0x80000002;
+	public final static int	HKEY_USERS			= 0x80000003;
+
 	public static enum REGISTRY_ROOT_KEY
 	{
 		CLASSES_ROOT, CURRENT_USER, LOCAL_MACHINE, USERS
 	};
 
-	private final static HashMap<REGISTRY_ROOT_KEY, Integer>	rootKeyMap	= new HashMap<REGISTRY_ROOT_KEY, Integer>();
+	private final static HashMap<REGISTRY_ROOT_KEY, HKEY>	rootKeyMap	= new HashMap<REGISTRY_ROOT_KEY, HKEY>();
 
 	static
 	{
-		rootKeyMap.put(REGISTRY_ROOT_KEY.CLASSES_ROOT, WINREG.HKEY_CLASSES_ROOT);
-		rootKeyMap.put(REGISTRY_ROOT_KEY.CURRENT_USER, WINREG.HKEY_CURRENT_USER);
-		rootKeyMap.put(REGISTRY_ROOT_KEY.LOCAL_MACHINE, WINREG.HKEY_LOCAL_MACHINE);
-		rootKeyMap.put(REGISTRY_ROOT_KEY.USERS, WINREG.HKEY_USERS);
+		rootKeyMap.put(REGISTRY_ROOT_KEY.CLASSES_ROOT, new HKEY(HKEY_CLASSES_ROOT));
+		rootKeyMap.put(REGISTRY_ROOT_KEY.CURRENT_USER, new HKEY(HKEY_CURRENT_USER));
+		rootKeyMap.put(REGISTRY_ROOT_KEY.LOCAL_MACHINE, new HKEY(HKEY_LOCAL_MACHINE));
+		rootKeyMap.put(REGISTRY_ROOT_KEY.USERS, new HKEY(HKEY_USERS));
 	}
 
 	/**
@@ -63,14 +71,14 @@ public class Registry
 	 *            key type
 	 * @return root key
 	 */
-	private static int getRegistryRootKey(REGISTRY_ROOT_KEY key)
+	private static HKEY getRegistryRootKey(REGISTRY_ROOT_KEY key)
 	{
 		Advapi32 advapi32;
-		IntByReference pHandle;
-		int handle = 0;
+		HKEYByReference pHandle;
+		HKEY handle = null;
 
 		advapi32 = Advapi32.INSTANCE;
-		pHandle = new IntByReference();
+		pHandle = new WinReg.HKEYByReference();
 
 		if (advapi32.RegOpenKeyEx(rootKeyMap.get(key), null, 0, 0, pHandle) == WINERROR.ERROR_SUCCESS)
 		{
@@ -90,15 +98,15 @@ public class Registry
 	 *            access mode
 	 * @return handle to the key or 0
 	 */
-	private static int openKey(REGISTRY_ROOT_KEY rootKey, String subKeyName, int access)
+	private static HKEY openKey(REGISTRY_ROOT_KEY rootKey, String subKeyName, int access)
 	{
 		Advapi32 advapi32;
-		IntByReference pHandle;
-		int rootKeyHandle;
+		HKEYByReference pHandle;
+		HKEY rootKeyHandle;
 
 		advapi32 = Advapi32.INSTANCE;
 		rootKeyHandle = getRegistryRootKey(rootKey);
-		pHandle = new IntByReference();
+		pHandle = new HKEYByReference();
 
 		if (advapi32.RegOpenKeyEx(rootKeyHandle, subKeyName, 0, access, pHandle) == WINERROR.ERROR_SUCCESS)
 		{
@@ -107,7 +115,7 @@ public class Registry
 		}
 		else
 		{
-			return (0);
+			return (null);
 		}
 	}
 
@@ -155,22 +163,22 @@ public class Registry
 		Advapi32 advapi32;
 		IntByReference pType, lpcbData;
 		byte[] lpData = new byte[1];
-		int handle = 0;
+		HKEY handle = null;
 		String ret = null;
 
 		advapi32 = Advapi32.INSTANCE;
 		pType = new IntByReference();
 		lpcbData = new IntByReference();
-		handle = openKey(rootKey, subKeyName, WINNT.KEY_READ);
+		handle = openKey(rootKey, subKeyName, WinNT.KEY_READ);
 
-		if (handle != 0)
+		if (handle != null)
 		{
 
-			if (advapi32.RegQueryValueEx(handle, name, null, pType, lpData, lpcbData) == WINERROR.ERROR_MORE_DATA)
+			if (advapi32.RegQueryValueEx(handle, name, 0, pType, lpData, lpcbData) == WINERROR.ERROR_MORE_DATA)
 			{
 				lpData = new byte[lpcbData.getValue()];
 
-				if (advapi32.RegQueryValueEx(handle, name, null, pType, lpData, lpcbData) == WINERROR.ERROR_SUCCESS)
+				if (advapi32.RegQueryValueEx(handle, name, 0, pType, lpData, lpcbData) == WINERROR.ERROR_SUCCESS)
 				{
 					ret = convertBufferToString(lpData);
 				}
@@ -197,22 +205,22 @@ public class Registry
 		Advapi32 advapi32;
 		IntByReference pType, lpcbData;
 		byte[] lpData = new byte[1];
-		int handle = 0;
+		HKEY handle = null;
 		int ret = 0;
 
 		advapi32 = Advapi32.INSTANCE;
 		pType = new IntByReference();
 		lpcbData = new IntByReference();
-		handle = openKey(rootKey, subKeyName, WINNT.KEY_READ);
+		handle = openKey(rootKey, subKeyName, WinNT.KEY_READ);
 
-		if (handle != 0)
+		if (handle != null)
 		{
 
-			if (advapi32.RegQueryValueEx(handle, name, null, pType, lpData, lpcbData) == WINERROR.ERROR_MORE_DATA)
+			if (advapi32.RegQueryValueEx(handle, name, 0, pType, lpData, lpcbData) == WINERROR.ERROR_MORE_DATA)
 			{
 				lpData = new byte[lpcbData.getValue()];
 
-				if (advapi32.RegQueryValueEx(handle, name, null, pType, lpData, lpcbData) == WINERROR.ERROR_SUCCESS)
+				if (advapi32.RegQueryValueEx(handle, name, 0, pType, lpData, lpcbData) == WINERROR.ERROR_SUCCESS)
 				{
 					ret = convertBufferToInt(lpData);
 				}
@@ -236,14 +244,14 @@ public class Registry
 	public static boolean deleteValue(REGISTRY_ROOT_KEY rootKey, String subKeyName, String name)
 	{
 		Advapi32 advapi32;
-		int handle;
+		HKEY handle;
 		boolean ret = true;
 
 		advapi32 = Advapi32.INSTANCE;
 
-		handle = openKey(rootKey, subKeyName, WINNT.KEY_READ | WINNT.KEY_WRITE);
+		handle = openKey(rootKey, subKeyName, WinNT.KEY_READ | WinNT.KEY_WRITE);
 
-		if (handle != 0)
+		if (handle != null)
 		{
 			if (advapi32.RegDeleteValue(handle, name) == WINERROR.ERROR_SUCCESS)
 			{
@@ -272,17 +280,17 @@ public class Registry
 	public static boolean setStringValue(REGISTRY_ROOT_KEY rootKey, String subKeyName, String name, String value) throws UnsupportedEncodingException
 	{
 		Advapi32 advapi32;
-		int handle;
+		HKEY handle;
 		byte[] data;
 		boolean ret = false;
 
 		data = Arrays.copyOf(value.getBytes("UTF-16LE"), value.length() * 2 + 2);
 		advapi32 = Advapi32.INSTANCE;
-		handle = openKey(rootKey, subKeyName, WINNT.KEY_READ | WINNT.KEY_WRITE);
+		handle = openKey(rootKey, subKeyName, WinNT.KEY_READ | WinNT.KEY_WRITE);
 
-		if (handle != 0)
+		if (handle != null)
 		{
-			if (advapi32.RegSetValueEx(handle, name, 0, WINNT.REG_SZ, data, data.length) == WINERROR.ERROR_SUCCESS)
+			if (advapi32.RegSetValueEx(handle, name, 0, WinNT.REG_SZ, data, data.length) == WINERROR.ERROR_SUCCESS)
 			{
 				ret = true;
 			}
@@ -308,7 +316,7 @@ public class Registry
 	public static boolean setIntValue(REGISTRY_ROOT_KEY rootKey, String subKeyName, String name, int value)
 	{
 		Advapi32 advapi32;
-		int handle;
+		HKEY handle;
 		byte[] data;
 		boolean ret = false;
 
@@ -318,12 +326,12 @@ public class Registry
 		data[2] = (byte) ((value >> 16) & 0xff);
 		data[3] = (byte) ((value >> 24) & 0xff);
 		advapi32 = Advapi32.INSTANCE;
-		handle = openKey(rootKey, subKeyName, WINNT.KEY_READ | WINNT.KEY_WRITE);
+		handle = openKey(rootKey, subKeyName, WinNT.KEY_READ | WinNT.KEY_WRITE);
 
-		if (handle != 0)
+		if (handle != null)
 		{
 
-			if (advapi32.RegSetValueEx(handle, name, 0, WINNT.REG_DWORD, data, data.length) == WINERROR.ERROR_SUCCESS)
+			if (advapi32.RegSetValueEx(handle, name, 0, WinNT.REG_DWORD, data, data.length) == WINERROR.ERROR_SUCCESS)
 			{
 				ret = true;
 			}
@@ -348,18 +356,18 @@ public class Registry
 		Advapi32 advapi32;
 		IntByReference pType, lpcbData;
 		byte[] lpData = new byte[1];
-		int handle = 0;
+		HKEY handle = null;
 		boolean ret = false;
 
 		advapi32 = Advapi32.INSTANCE;
 		pType = new IntByReference();
 		lpcbData = new IntByReference();
-		handle = openKey(rootKey, subKeyName, WINNT.KEY_READ);
+		handle = openKey(rootKey, subKeyName, WinNT.KEY_READ);
 
-		if (handle != 0)
+		if (handle != null)
 		{
 
-			if (advapi32.RegQueryValueEx(handle, name, null, pType, lpData, lpcbData) != WINERROR.ERROR_FILE_NOT_FOUND)
+			if (advapi32.RegQueryValueEx(handle, name, 0, pType, lpData, lpcbData) != WINERROR.ERROR_FILE_NOT_FOUND)
 			{
 				ret = true;
 
@@ -387,19 +395,20 @@ public class Registry
 	public static boolean createKey(REGISTRY_ROOT_KEY rootKey, String parent, String name)
 	{
 		Advapi32 advapi32;
-		IntByReference hkResult, dwDisposition;
-		int handle = 0;
+		HKEYByReference hkResult;
+		IntByReference dwDisposition;
+		HKEY handle = null;
 		boolean ret = false;
 
 		advapi32 = Advapi32.INSTANCE;
-		hkResult = new IntByReference();
+		hkResult = new HKEYByReference();
 		dwDisposition = new IntByReference();
-		handle = openKey(rootKey, parent, WINNT.KEY_READ);
+		handle = openKey(rootKey, parent, WinNT.KEY_READ);
 
-		if (handle != 0)
+		if (handle != null)
 		{
 
-			if (advapi32.RegCreateKeyEx(handle, name, 0, null, WINNT.REG_OPTION_NON_VOLATILE, WINNT.KEY_READ, null, hkResult, dwDisposition) == WINERROR.ERROR_SUCCESS)
+			if (advapi32.RegCreateKeyEx(handle, name, 0, null, WinNT.REG_OPTION_NON_VOLATILE, WinNT.KEY_READ, null, hkResult, dwDisposition) == WINERROR.ERROR_SUCCESS)
 			{
 				ret = true;
 				advapi32.RegCloseKey(hkResult.getValue());
@@ -428,13 +437,13 @@ public class Registry
 	public static boolean deleteKey(REGISTRY_ROOT_KEY rootKey, String parent, String name)
 	{
 		Advapi32 advapi32;
-		int handle = 0;
+		HKEY handle = null;
 		boolean ret = false;
 
 		advapi32 = Advapi32.INSTANCE;
-		handle = openKey(rootKey, parent, WINNT.KEY_READ);
+		handle = openKey(rootKey, parent, WinNT.KEY_READ);
 
-		if (handle != 0)
+		if (handle != null)
 		{
 
 			if (advapi32.RegDeleteKey(handle, name) == WINERROR.ERROR_SUCCESS)
@@ -463,19 +472,20 @@ public class Registry
 	public static String[] getSubKeys(REGISTRY_ROOT_KEY rootKey, String parent)
 	{
 		Advapi32 advapi32;
-		int handle = 0, dwIndex;
+		HKEY handle = null;
+		int dwIndex;
 		char[] lpName;
 		IntByReference lpcName;
-		WINBASE.FILETIME lpftLastWriteTime;
+		WinBase.FILETIME lpftLastWriteTime;
 		TreeSet<String> subKeys = new TreeSet<String>();
 
 		advapi32 = Advapi32.INSTANCE;
-		handle = openKey(rootKey, parent, WINNT.KEY_READ);
+		handle = openKey(rootKey, parent, WinNT.KEY_READ);
 		lpName = new char[256];
 		lpcName = new IntByReference(256);
-		lpftLastWriteTime = new WINBASE.FILETIME();
+		lpftLastWriteTime = new WinNT.FILETIME();
 
-		if (handle != 0)
+		if (handle != null)
 		{
 			dwIndex = 0;
 
@@ -506,7 +516,8 @@ public class Registry
 	public static TreeMap<String, Object> getValues(REGISTRY_ROOT_KEY rootKey, String key) throws UnsupportedEncodingException
 	{
 		Advapi32 advapi32;
-		int handle = 0, dwIndex, result = 0;
+		HKEY handle = null;
+		int dwIndex, result = 0;
 		char[] lpValueName;
 		byte[] lpData;
 		IntByReference lpcchValueName, lpType, lpcbData;
@@ -514,14 +525,14 @@ public class Registry
 		TreeMap<String, Object> values = new TreeMap<String, Object>(String.CASE_INSENSITIVE_ORDER);
 
 		advapi32 = Advapi32.INSTANCE;
-		handle = openKey(rootKey, key, WINNT.KEY_READ);
+		handle = openKey(rootKey, key, WinNT.KEY_READ);
 		lpValueName = new char[16384];
 		lpcchValueName = new IntByReference(16384);
 		lpType = new IntByReference();
 		lpData = new byte[1];
 		lpcbData = new IntByReference();
 
-		if (handle != 0)
+		if (handle != null)
 		{
 			dwIndex = 0;
 
@@ -542,10 +553,10 @@ public class Registry
 
 						switch (lpType.getValue())
 						{
-						case WINNT.REG_SZ:
+						case WinNT.REG_SZ:
 							values.put(name, convertBufferToString(lpData));
 							break;
-						case WINNT.REG_DWORD:
+						case WinNT.REG_DWORD:
 							values.put(name, convertBufferToInt(lpData));
 							break;
 						default:

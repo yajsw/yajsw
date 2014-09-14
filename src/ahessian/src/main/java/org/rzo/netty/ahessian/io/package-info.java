@@ -1,6 +1,6 @@
 /**
  * Encoder, decoder which
- * transforms a {@link ChannelBuffer} into a Stream and
+ * transforms a {@link ByteBuf} into a Stream and
  * vice versa.
  * <br>
  * Legacy frameworks which require InputStream and OutputStream, such as xml parsers,

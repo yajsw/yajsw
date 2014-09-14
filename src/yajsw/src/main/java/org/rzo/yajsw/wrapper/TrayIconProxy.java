@@ -55,12 +55,12 @@ public class TrayIconProxy
 		if (_inquireResponse != null)
 		{
 			result = _inquireResponse;
-			System.out.println("got response for inquire ");
+			//System.out.println("got response for inquire ");
 			_inquireResponse = null;
 		}
 		else
 		{
-			System.out.println("waiting for inquire " + message);
+			//System.out.println("waiting for inquire " + message);
 			_inquireMessage = message;
 			result = null;
 		}

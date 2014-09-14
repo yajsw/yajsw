@@ -1,5 +1,7 @@
 package org.rzo.netty.ahessian.rpc.server;
 
+import io.netty.channel.Channel;
+
 import java.io.InputStream;
 import java.lang.reflect.Method;
 
@@ -20,13 +22,14 @@ public abstract class HessianSkeleton extends com.caucho.hessian4.server.Hessian
 {
 	
 	/** The _service. */
-	Object _service;
+	volatile Object _service;
 	
 	/** The _factory. */
 	HessianRPCServiceHandler _factory;
 	
 	ServerInputStreamManager _serverInputStreamManager;
 	
+	public static ThreadLocal<Channel> threadLocalChannel = new ThreadLocal<Channel>();
 	/**
 	 * Instantiates a new hessian skeleton.
 	 * 

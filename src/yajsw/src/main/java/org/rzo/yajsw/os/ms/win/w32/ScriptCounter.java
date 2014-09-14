@@ -1,9 +1,10 @@
 package org.rzo.yajsw.os.ms.win.w32;
 
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs2.FileSystemException;
-import org.jboss.netty.logging.InternalLogger;
-import org.jboss.netty.logging.InternalLoggerFactory;
 import org.rzo.yajsw.script.Script;
 import org.rzo.yajsw.script.ScriptFactory;
 import org.rzo.yajsw.util.VFSUtils;

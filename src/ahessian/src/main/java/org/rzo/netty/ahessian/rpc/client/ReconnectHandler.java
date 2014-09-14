@@ -1,20 +1,20 @@
 package org.rzo.netty.ahessian.rpc.client;
 
+import io.netty.bootstrap.AbstractBootstrap;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerAdapter;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.Timeout;
+import io.netty.util.Timer;
+import io.netty.util.TimerTask;
+
 import java.net.ConnectException;
 import java.util.concurrent.TimeUnit;
 
-import org.jboss.netty.bootstrap.ClientBootstrap;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.util.Timeout;
-import org.jboss.netty.util.Timer;
-import org.jboss.netty.util.TimerTask;
 import org.rzo.netty.ahessian.Constants;
 
-public class ReconnectHandler extends SimpleChannelUpstreamHandler
+public class ReconnectHandler extends ChannelHandlerAdapter
 {
 	private  Timer _timer;
 	private  long RECONNECT_DELAY = 10000;
@@ -37,8 +37,13 @@ public class ReconnectHandler extends SimpleChannelUpstreamHandler
 	}
 	
 		@Override
-	    public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) {
-			ctx.sendUpstream(e);
+	    public void channelInactive(ChannelHandlerContext ctx) {
+			ctx.fireChannelInactive();
+			scheduleReconnect();
+	    }
+		
+		private synchronized void scheduleReconnect()
+		{
 			if (_stop)
 				return;
 			if (_timeout != null)
@@ -54,20 +59,21 @@ public class ReconnectHandler extends SimpleChannelUpstreamHandler
 	               
 				}
 	        }, retryIntervall, TimeUnit.MILLISECONDS);
-	    }
-		
+		}
+
 		@Override
-	    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
+	    public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) {
 			// if we get an exception : close the channel
-	        Throwable cause = e.getCause();
+	        Throwable cause = e;
 	        cause.printStackTrace();
 	        if (cause instanceof ConnectException) 
 	        {
 	        	Constants.ahessianLogger.warn("conection lost");
+	        	scheduleReconnect();
 	        }
 	        try
 	        {
-	        ctx.getChannel().close();
+	        ctx.channel().close();
 	        }
 	        catch (Exception ex)
 	        {
@@ -83,29 +89,31 @@ public class ReconnectHandler extends SimpleChannelUpstreamHandler
 			timeout.cancel();
 		}
 		
-		protected void connect(ClientBootstrap bootstrap)
+		protected void connect(AbstractBootstrap bootstrap)
 		{
+			Channel channel = null;
 			Constants.ahessianLogger.warn("reconnecting...");
-            ChannelFuture f = _bootstrap.getBootstrap().connect();
-            try
-		{
-			f.awaitUninterruptibly();
-		}
-		catch (Exception e)
-		{
-			// TODO Auto-generated catch block
-			Constants.ahessianLogger.warn("", e);
+			while (channel == null && !_stop)
+				try
+				{
+					channel = ((Bootstrap)bootstrap).connect().sync().channel();
 				}
-        if (f.isSuccess())
-        {
-      	  Constants.ahessianLogger.warn("connected");
-      	  _retryCounter = 0;
-        }
-        else
-        {
-      	  Constants.ahessianLogger.warn("not connected");
-        }
-			
+				catch (Exception ex)
+				{
+					if (ex instanceof ConnectException)
+					{
+						System.out.println(ex);
+						try
+						{
+							Thread.sleep(RECONNECT_DELAY);
+						}
+						catch (InterruptedException e)
+						{
+							e.printStackTrace();
+						}
+					}
+				}
+
 		}
     
 	

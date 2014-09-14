@@ -133,7 +133,7 @@ public class WrapperLoader
 	public static URL[] getWrapperClasspath(String type, boolean logErrors)
 	{
 		String wrapperJar;
-		if ("App".equals(type))
+		if (type.contains("App"))
 			 wrapperJar = getWrapperAppJar();
 		else
 			wrapperJar = getWrapperJar();
@@ -165,9 +165,19 @@ public class WrapperLoader
 			try
 			{
 				myFile = new File(parent, file);
-				if (!myFile.exists() && logErrors)
-					System.out.println("WARNING: lib not found: " + myFile.getCanonicalPath());
-				classpath.add(myFile);
+				if (!myFile.exists())
+				{
+					if (logErrors)
+					{
+						System.out.println("WARNING: lib not found: " + myFile.getCanonicalPath());
+					}
+					else
+						{
+							System.out.println("INFO: lib not found: " + myFile.getCanonicalPath());
+						}
+				}
+				else
+					classpath.add(myFile);
 			}
 			catch (Exception e)
 			{

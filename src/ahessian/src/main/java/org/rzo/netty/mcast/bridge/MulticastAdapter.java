@@ -1,25 +1,21 @@
 package org.rzo.netty.mcast.bridge;
 
+import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.oio.OioEventLoopGroup;
+import io.netty.channel.socket.oio.OioDatagramChannel;
+
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Executors;
 
-import org.jboss.netty.bootstrap.ClientBootstrap;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFactory;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
+import org.rzo.netty.ahessian.bootstrap.ChannelPipelineFactory;
 import org.rzo.netty.mcast.MulticastEndpoint;
 
 public class MulticastAdapter
@@ -28,35 +24,34 @@ public class MulticastAdapter
 	private static MulticastEndpoint mcast = new MulticastEndpoint();
 	private static long RECONNECT_DELAY = 5000; 
 	private static Timer timer = new Timer();
-	private static ClientBootstrap bootstrap;
+	private static Bootstrap bootstrap;
 	
 	public static void main(String[] args) throws Exception
 	{
 		String host = args[0];
 		int port = Integer.parseInt(args[1]);
 		
-		ChannelFactory factory =
-            new NioClientSocketChannelFactory(
-                    Executors.newCachedThreadPool(),
-                    Executors.newCachedThreadPool());
 
-        bootstrap = new ClientBootstrap(factory);
-        bootstrap.setOption(
-                "remoteAddress", new InetSocketAddress(host, port));
+        bootstrap = new Bootstrap();
+		EventLoopGroup group = new OioEventLoopGroup();
+		bootstrap.group(group);
+		bootstrap.channel(OioDatagramChannel.class);
 
-        bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
-            public ChannelPipeline getPipeline() {
-                return Channels.pipeline(new SimpleChannelUpstreamHandler()
+        bootstrap.remoteAddress(new InetSocketAddress(host, port));
+
+        bootstrap.handler(new ChannelPipelineFactory() {
+            public HandlerList getPipeline() {
+                return ChannelPipelineFactory.handlerList(new SimpleChannelInboundHandler()
                 {
     				@Override
-    				public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception
+    				public void messageReceived(ChannelHandlerContext ctx, Object e) throws Exception
     				{
     					if (mcast != null && mcast.isInit())
-    						mcast.send((ChannelBuffer) e.getMessage());
+    						mcast.send((ByteBuf) e);
     				}
     				
     				@Override
-    			    public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) {
+    			    public void channelActive(ChannelHandlerContext ctx) {
     			        timer.schedule(new TimerTask() {
     			            public void run() {
      			                bootstrap.connect();
@@ -65,13 +60,13 @@ public class MulticastAdapter
     			    }
     				
     				@Override
-    			    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
+    			    public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) {
     			        Throwable cause = e.getCause();
     			        if (cause instanceof ConnectException) 
     			        {
     			        	System.out.println("conection lost: reconnecting...");
     			        }
-    			        ctx.getChannel().close();
+    			        ctx.channel().close();
     			    }
 
 
@@ -81,19 +76,19 @@ public class MulticastAdapter
         });
         
         ChannelFuture f = bootstrap.connect();
-        channel = f.getChannel();
+        channel = f.sync().channel();
         
         mcast.init(new ChannelPipelineFactory() {
-            public ChannelPipeline getPipeline() {
-                return Channels.pipeline(new SimpleChannelUpstreamHandler()
+            public HandlerList getPipeline() {
+                return ChannelPipelineFactory.handlerList(new SimpleChannelInboundHandler()
                 {
     				@Override
-    				public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception
+    				public void messageReceived(ChannelHandlerContext ctx, Object e) throws Exception
     				{
-    					ChannelBuffer b = mcast.getMessage(e);
+    					ByteBuf b = mcast.getMessage((ByteBuf) e);
     					if (b == null)
     						return;
-    					if (channel != null && channel.isConnected())
+    					if (channel != null && channel.isActive())
     						channel.write(b);
     				}
                 	

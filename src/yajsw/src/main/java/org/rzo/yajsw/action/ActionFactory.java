@@ -1,8 +1,9 @@
 package org.rzo.yajsw.action;
 
+import io.netty.channel.Channel;
+
 import java.io.PrintStream;
 
-import org.jboss.netty.channel.Channel;
 import org.rzo.yajsw.Constants;
 import org.rzo.yajsw.controller.Message;
 

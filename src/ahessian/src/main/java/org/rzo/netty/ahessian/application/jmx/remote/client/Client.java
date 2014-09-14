@@ -1,5 +1,13 @@
 package org.rzo.netty.ahessian.application.jmx.remote.client;
 
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioSocketChannel;
+
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,10 +17,6 @@ import java.util.concurrent.Executors;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
-import org.jboss.netty.bootstrap.ClientBootstrap;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.rzo.netty.ahessian.application.jmx.remote.service.AsyncMBeanServerConnection;
 import org.rzo.netty.ahessian.application.jmx.remote.service.MBeanServerConnectionAsyncAdapter;
 import org.rzo.netty.ahessian.rpc.client.HessianProxyFactory;
@@ -28,21 +32,18 @@ public class Client
 	
     final ExecutorService executor = Executors.newCachedThreadPool();
 
-    // Configure the client.
-    ClientBootstrap bootstrap = new ClientBootstrap(
-            new NioClientSocketChannelFactory(
-            		executor,
-            		executor));
+	Bootstrap bootstrap = new Bootstrap();
+	EventLoopGroup workerGroup = new NioEventLoopGroup();
+	//workerGroup.setIoRatio(99);
+	bootstrap.group(workerGroup);
+	bootstrap.channel(NioSocketChannel.class);
 
-    bootstrap.setOption(
-            "remoteAddress", new InetSocketAddress("localhost", 8080));
-
-    bootstrap.setOption("reuseAddress", true);
-
+    bootstrap.remoteAddress(new InetSocketAddress("localhost", 15009));
+    bootstrap.option(ChannelOption.SO_REUSEADDR, true);
     
-    final HessianProxyFactory factory = new HessianProxyFactory(executor, "localhost:8080");
-    bootstrap.setPipelineFactory(
-            new RPCClientSessionPipelineFactory(new RPCClientMixinPipelineFactory(executor, factory), bootstrap));
+    final HessianProxyFactory factory = new HessianProxyFactory(executor, "localhost:15009");
+    bootstrap.handler(
+            new RPCClientSessionPipelineFactory(new RPCClientMixinPipelineFactory(executor, factory, workerGroup), bootstrap));
     
 
     factory.setDisconnectedListener(new Runnable()
@@ -98,9 +99,9 @@ factory.setNewSessionListener(new Runnable()
 });
     
      // Start the connection attempt.
-    ChannelFuture future = bootstrap.connect(new InetSocketAddress("localhost", 8080));
+    ChannelFuture future = bootstrap.connect(new InetSocketAddress("localhost", 15009));
     // Wait until the connection attempt succeeds or fails.
-    Channel channel = future.awaitUninterruptibly().getChannel();
+    Channel channel = future.awaitUninterruptibly().channel();
     if (future.isSuccess())
     	System.out.println("connected");
     

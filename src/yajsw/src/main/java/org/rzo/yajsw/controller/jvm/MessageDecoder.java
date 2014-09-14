@@ -1,28 +1,28 @@
 package org.rzo.yajsw.controller.jvm;
 
-import java.nio.charset.Charset;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.ByteToMessageDecoder;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipelineCoverage;
-import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
+import java.nio.charset.Charset;
+import java.util.List;
+
 import org.rzo.yajsw.controller.Message;
 
-@ChannelPipelineCoverage("one")
-public class MessageDecoder extends OneToOneDecoder
+public class MessageDecoder extends ByteToMessageDecoder
 {
 	@Override
-	protected Object decode(ChannelHandlerContext ctx, Channel channel, Object message) throws Exception
+	protected void decode(ChannelHandlerContext paramChannelHandlerContext,
+			ByteBuf b, List<Object> out) throws Exception
 	{
-		ChannelBuffer b = (ChannelBuffer) message;
-
+		if (!b.isReadable())
+			return;
 		byte code = b.readByte();
-		// TODO remove the nul
 		b.writerIndex(b.writerIndex());
-		String msg = b.toString(Charset.defaultCharset().displayName());
+		String msg = b.toString(Charset.defaultCharset());
 		Message result = new Message(code, msg);
-		return result;
+		out.add(result);
+		
 	}
 
 }

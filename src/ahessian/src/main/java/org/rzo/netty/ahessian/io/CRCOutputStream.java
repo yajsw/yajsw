@@ -1,8 +1,9 @@
 package org.rzo.netty.ahessian.io;
 
+import io.netty.channel.ChannelHandlerContext;
+
 import java.io.IOException;
 
-import org.jboss.netty.channel.ChannelHandlerContext;
 
 public class CRCOutputStream extends OutputStreamBuffer
 {

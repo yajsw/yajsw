@@ -1,6 +1,6 @@
 package org.rzo.netty.ahessian.rpc.server;
 
-import org.rzo.netty.ahessian.io.InputStreamDecoder;
+import org.rzo.netty.ahessian.io.InputStreamHandler;
 import org.rzo.netty.ahessian.session.ServiceSession;
 import org.rzo.netty.ahessian.session.Session;
 
@@ -8,7 +8,7 @@ public class ServiceSessionProvider
 {
 	private static ThreadLocal<ServiceSession> threadLocalSession = new ThreadLocal<ServiceSession>();
 
-	private static ThreadLocal<InputStreamDecoder> hessianRPCServiceHandler = new ThreadLocal<InputStreamDecoder>();
+	private static ThreadLocal<InputStreamHandler> hessianRPCServiceHandler = new ThreadLocal<InputStreamHandler>();
 
 	public static ServiceSession getSession()
 	{
@@ -28,13 +28,13 @@ public class ServiceSessionProvider
 		threadLocalSession.remove();
 	}
 
-	public static InputStreamDecoder getHandler()
+	public static InputStreamHandler getHandler()
 	{
 		//System.out.println("hessianRPCServiceHandler get ");
 		return hessianRPCServiceHandler.get();
 	}
 	
-	protected static void setHandler(InputStreamDecoder handler)
+	protected static void setHandler(InputStreamHandler handler)
 	{
 		//System.out.println("hessianRPCServiceHandler set "+handler);
 		hessianRPCServiceHandler.set(handler);

@@ -1,25 +1,26 @@
 package org.rzo.netty.ahessian.session;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler.Sharable;
+import io.netty.channel.ChannelHandlerAdapter;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPipeline;
+import io.netty.util.AttributeKey;
+import io.netty.util.Timeout;
+import io.netty.util.Timer;
+import io.netty.util.TimerTask;
+
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.util.Timeout;
-import org.jboss.netty.util.Timer;
-import org.jboss.netty.util.TimerTask;
 import org.rzo.netty.ahessian.Constants;
+import org.rzo.netty.ahessian.bootstrap.ChannelPipelineFactory;
+import org.rzo.netty.ahessian.bootstrap.ChannelPipelineFactory.HandlerList;
 
 /**
  * Handles sessions on the server side. A typical setup for a
@@ -32,7 +33,8 @@ import org.rzo.netty.ahessian.Constants;
  * pipeline.addLast(&quot;sessionFilter&quot;, new ServerSessionFilter(_mixinFactory));
  * </pre>
  */
-public class ServerSessionFilter extends SimpleChannelUpstreamHandler
+@Sharable
+public class ServerSessionFilter extends ChannelHandlerAdapter
 {
 	
 	/** Indicates if session has been assigned to the current channel */
@@ -44,14 +46,11 @@ public class ServerSessionFilter extends SimpleChannelUpstreamHandler
 	/** Factory for creating new session objects */
 	private SessionFactory						_factory			= new SessionFactory();
 	
-	/** Connected event is intercepted. It is sent upstream only after a session has been established*/
-	private ChannelStateEvent					_connectedEvent;
-	
 	/** A pipeline factory which returns a MixinPipeline */
 	private ChannelPipelineFactory				_mixinFactory;
 	
 	/** Assignment of session-id to the associated MixinPipeline */
-	private static Map<String, MixinPipeline>	_sessionPipelines	= Collections.synchronizedMap(new HashMap<String, MixinPipeline>());
+	private static Map<String, HandlerList>	_sessionPipelines	= Collections.synchronizedMap(new HashMap<String, HandlerList>());
 	
 	private long _sessionTimeout = -1;
 	
@@ -60,6 +59,8 @@ public class ServerSessionFilter extends SimpleChannelUpstreamHandler
 	private volatile Channel _channel = null;
 	
 	private volatile boolean _valid = true;
+	
+	public static final AttributeKey<Session> SESSION = AttributeKey.valueOf("SESSION");
 
 	/**
 	 * Instantiates a new server session filter.
@@ -81,19 +82,20 @@ public class ServerSessionFilter extends SimpleChannelUpstreamHandler
 	/* (non-Javadoc)
 	 * @see org.jboss.netty.channel.SimpleChannelUpstreamHandler#messageReceived(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.MessageEvent)
 	 */
-	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception
+	public void channelRead(ChannelHandlerContext ctx, Object e) throws Exception
 	{
 		// if session established forward all messages
 		if (_hasSession)
 		{
-			Session session = ((Session)ctx.getAttachment());
+			Session session = ctx.channel().attr(SESSION).get();
 			session.onMessage();
-			ctx.sendUpstream(e);
+			ctx.fireChannelRead(e);
 		}
 		else
 		{
-			ChannelBuffer b = (ChannelBuffer) e.getMessage();
-			_sessionId += b.toString("UTF-8");
+			ByteBuf b = (ByteBuf) e;
+			_sessionId += b.toString(Charset.forName("UTF-8"));
+			b.release(b.refCnt());
 			if (_sessionId.equals("?"))
 				newSession(ctx);
 			else
@@ -117,11 +119,11 @@ public class ServerSessionFilter extends SimpleChannelUpstreamHandler
 	private void newSession(ChannelHandlerContext ctx)
 	{
 		Session session = _factory.createSession(null);
-		Constants.ahessianLogger.info(ctx.getChannel()+" new session #"+session.getId());
-		MixinPipeline pipeline = null;
+		Constants.ahessianLogger.info(ctx.channel()+" new session #"+session.getId());
+		HandlerList pipeline = null;
 		try
 		{
-			pipeline = (MixinPipeline) _mixinFactory.getPipeline();
+			pipeline = (HandlerList) _mixinFactory.getPipeline();
 			_sessionPipelines.put(session.getId(), pipeline);
 		}
 		catch (Exception e)
@@ -134,12 +136,12 @@ public class ServerSessionFilter extends SimpleChannelUpstreamHandler
 	private void confirmSession(ChannelHandlerContext ctx)
 	{
 		Session session = _factory.getSession(_sessionId);
-		Constants.ahessianLogger.info(ctx.getChannel()+" reuse session #"+session.getId());
-		MixinPipeline pipeline = _sessionPipelines.get(_sessionId);
+		Constants.ahessianLogger.info(ctx.channel()+" reuse session #"+session.getId());
+		HandlerList pipeline = _sessionPipelines.get(_sessionId);
 		handleSession(ctx, session, pipeline);
 	}
 
-	private void handleSession(ChannelHandlerContext ctx, Session session, MixinPipeline pipeline)
+	private void handleSession(ChannelHandlerContext ctx, Session session, HandlerList pipeline)
 	{
 		_hasSession = true;
 		session.setClosed(false);
@@ -149,33 +151,20 @@ public class ServerSessionFilter extends SimpleChannelUpstreamHandler
 		if (timeOut != null)
 			timeOut.cancel();
 		
-		// check if the session is already connected to a channel
-		Channel c = pipeline.getChannel();
-		if (c != null && c.isOpen())
+		if (pipeline.hasChannel())
 		{
-			Constants.ahessianLogger.warn(ctx.getChannel()+" session already attached -> close connection");
-			c.close();
+			Constants.ahessianLogger.warn(ctx.channel()+" session already attached -> close connection");
+			pipeline.close();
 		}
 		
 		// now that we have a session extend the pipeline
-		ChannelPipeline currentPipeline = ctx.getPipeline();
-		pipeline.mixin(currentPipeline);
-		ctx.setAttachment(session);
-		_channel = ctx.getChannel();
+		pipeline.mixin(ctx);
+		ctx.channel().attr(SESSION).set(session);
+		_channel = ctx.channel();
 		// first send session and wait until it has been transmitted
-		ChannelFuture future = Channels.future(ctx.getChannel());
-		Channels.write(ctx, future, ChannelBuffers.wrappedBuffer(session.getId().getBytes()));
-		try
-		{
-			future.await();
-		}
-		catch (InterruptedException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// only then inform the mixin pipeline
-		ctx.sendUpstream(_connectedEvent);
+		ctx.writeAndFlush(Unpooled.wrappedBuffer(session.getId().getBytes())).awaitUninterruptibly();
+		// only then inform the mixin pipeline that we are connected
+		ctx.fireChannelActive();
 	}
 
 	/**
@@ -187,37 +176,23 @@ public class ServerSessionFilter extends SimpleChannelUpstreamHandler
 	 */
 	public static Session getSession(ChannelHandlerContext ctx)
 	{
-		ChannelHandlerContext handler = ctx.getPipeline().getContext(ServerSessionFilter.class);
-		if (handler == null)
-			return null;
-		return (Session) handler.getAttachment();
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jboss.netty.channel.SimpleChannelUpstreamHandler#channelConnected(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.ChannelStateEvent)
-	 */
-	@Override
-	public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception
-	{
-		// remeber the event. it will be sent upstream when session has been
-		// created
-		_connectedEvent = e;
+		return (Session) ctx.channel().attr(SESSION).get();
 	}
 
 	/* (non-Javadoc)
 	 * @see org.jboss.netty.channel.SimpleChannelUpstreamHandler#channelDisconnected(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.ChannelStateEvent)
 	 */
 	@Override
-	public void channelDisconnected(final ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception
+	public void channelInactive(final ChannelHandlerContext ctx) throws Exception
 	{
 		
 		_hasSession = false;
-		((Session)ctx.getAttachment()).close();
-		final String sessionId = ((Session)ctx.getAttachment()).getId();
+		ctx.channel().attr(SESSION).get().close();
+		final String sessionId = ctx.channel().attr(SESSION).get().getId();
 		Constants.ahessianLogger.info("Session disconnected: "+ sessionId);
 		_sessionId = "";
-		_connectedEvent = null;
 		_channel = null;
+		// remove the session if the client does not reconnect within timeout
 		if (_sessionTimeout > 0)
 		{
 			Timeout timeOut = _timer.newTimeout(new TimerTask()
@@ -225,17 +200,17 @@ public class ServerSessionFilter extends SimpleChannelUpstreamHandler
 
 				public void run(Timeout arg0) throws Exception
 				{
-					((Session)ctx.getAttachment()).invalidate();
+					ctx.channel().attr(SESSION).get().invalidate();
 					_factory.removeSession(sessionId);
 					_sessionPipelines.remove(sessionId);
 					_valid = false;
-					Constants.ahessianLogger.warn(ctx.getChannel()+" session timed out: "+sessionId);
+					Constants.ahessianLogger.warn(ctx.channel()+" session timed out: "+sessionId);
 				}
 				
 			}, _sessionTimeout, TimeUnit.MILLISECONDS);
-			((Session)ctx.getAttachment()).setTimeOut(timeOut);
+			ctx.channel().attr(SESSION).get().setTimeOut(timeOut);
 		}
-		ctx.sendUpstream(e);		
+		ctx.fireChannelInactive();
 	}
 	
 	public long getSessionTimeout()
@@ -260,7 +235,7 @@ public class ServerSessionFilter extends SimpleChannelUpstreamHandler
 	
 	public static ServerSessionFilter getServerSessionFilter(ChannelHandlerContext ctx)
 	{
-		return (ServerSessionFilter) ctx.getPipeline().getContext(ServerSessionFilter.class).getHandler();
+		return (ServerSessionFilter) ctx.pipeline().context(ServerSessionFilter.class).handler();
 	}
 	
 

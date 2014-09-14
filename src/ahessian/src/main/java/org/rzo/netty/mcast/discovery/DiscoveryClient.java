@@ -1,9 +1,17 @@
 package org.rzo.netty.mcast.discovery;
 
-import static org.jboss.netty.channel.Channels.pipeline;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.socket.DatagramPacket;
+import io.netty.handler.ipfilter.IpFilterRule;
+import io.netty.handler.ipfilter.IpFilterRuleList;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -11,15 +19,8 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.handler.ipfilter.IpFilterRule;
-import org.jboss.netty.handler.ipfilter.IpFilterRuleList;
 import org.rzo.netty.ahessian.Constants;
+import org.rzo.netty.ahessian.bootstrap.ChannelPipelineFactory;
 import org.rzo.netty.mcast.MulticastEndpoint;
 
 public class DiscoveryClient extends MulticastEndpoint
@@ -35,22 +36,27 @@ private IpFilterRuleList   firewall;
 
 
 
+
 public void init() throws Exception
 {
 	ChannelPipelineFactory factory = new ChannelPipelineFactory()
 	{
-		public ChannelPipeline getPipeline() throws Exception
+		public HandlerList getPipeline() throws Exception
 		{
-			ChannelPipeline pipeline = pipeline();
-			pipeline.addLast("discoveryClient", new SimpleChannelUpstreamHandler()
+			HandlerList pipeline = new HandlerList();
+			pipeline.addLast("discoveryClient", new SimpleChannelInboundHandler()
 			{
 
 				@Override
-				public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception
+				public void messageReceived(ChannelHandlerContext ctx, Object e) throws Exception
 				{
 					try
 					{
-					String response = getStringMessage(e);
+					String response = getStringMessage(((DatagramPacket)e).content());
+					InetSocketAddress remoteAddress = ((DatagramPacket)e).sender();
+					if (debug && logger != null)
+						logger.info("discoveryClient messageReceived "+response+"/"+remoteAddress);
+					
 					if (response == null)
 						return;
 					String[] resp = response.split("&");
@@ -59,7 +65,7 @@ public void init() throws Exception
 						String remoteName = resp[0];
 						if (!name.equals(remoteName))
 							return;
-						if (!validate(e))
+						if (!validate(((DatagramPacket)e).content(), remoteAddress))
 							return;
 						String host = resp[1];
 						// check the name. if not valid will cause an exception
@@ -109,7 +115,7 @@ private void discoverServices() throws Exception
 			{
 				try
 				{
-					send(ChannelBuffers.wrappedBuffer((name).getBytes()));
+					send(Unpooled.copiedBuffer(name.getBytes()));
 				}
 				catch (Exception e)
 				{
@@ -156,17 +162,19 @@ public void removeHost(String host)
 	hosts.remove(host);
 }
 
-private boolean validate(MessageEvent e)
+
+private boolean validate(ByteBuf e, SocketAddress socketAddress)
 {
 	if (firewall == null)
 		return true;
 	else
 	{
-		InetAddress inetAddress = ((InetSocketAddress)e.getRemoteAddress()).getAddress();
+		
 	      Iterator<IpFilterRule> iterator = firewall.iterator();
 	      IpFilterRule ipFilterRule = null;
 	      while (iterator.hasNext())
 	      {
+	    	  InetAddress inetAddress = ((InetSocketAddress)socketAddress).getAddress();
 	         ipFilterRule = iterator.next();
 	         if (ipFilterRule.contains(inetAddress))
 	         {
@@ -182,6 +190,24 @@ private boolean validate(MessageEvent e)
 public void setIpSet(IpFilterRuleList ipSet)
 {
 	this.firewall = ipSet;
+}
+
+public static void main(String[] args) throws Exception
+{
+	final DiscoveryClient client = new DiscoveryClient();
+	client.setName("testService");
+	client.addListener(new DiscoveryListener()
+	{
+		
+		@Override
+		public void newHost(String name, String host)
+		{
+			System.out.println("found service "+host + " "+name);
+			client.stop();
+		}
+	});
+	client.init();
+	client.start();
 }
 
 

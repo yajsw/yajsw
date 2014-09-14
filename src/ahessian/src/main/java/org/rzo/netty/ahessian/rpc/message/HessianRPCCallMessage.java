@@ -1,12 +1,12 @@
 package org.rzo.netty.ahessian.rpc.message;
 
+import io.netty.channel.Channel;
+
 import java.util.Map;
 
-import org.jboss.netty.channel.Channel;
 import org.rzo.netty.ahessian.Constants;
-import org.rzo.netty.ahessian.io.InputStreamDecoder;
-import org.rzo.netty.ahessian.io.OutputStreamEncoder;
-import org.rzo.netty.ahessian.rpc.server.HessianRPCServiceHandler;
+import org.rzo.netty.ahessian.io.InputStreamHandler;
+import org.rzo.netty.ahessian.io.OutputStreamHandler;
 import org.rzo.netty.ahessian.session.ServerSessionFilter;
 import org.rzo.netty.ahessian.session.Session;
 
@@ -25,11 +25,11 @@ public class HessianRPCCallMessage implements Constants, GroupedMessage
 	
 	/** The _headers. */
 	Map<Object, Object> _headers;
-	transient OutputStreamEncoder _outputStreamEncoder;
+	transient OutputStreamHandler _outputStreamEncoder;
 	boolean _hasSessionFilter = false;
 	transient boolean _isServer = false;
 	transient Session _session;
-	transient InputStreamDecoder _handler;
+	transient InputStreamHandler _handler;
 	
 	/**
 	 * Gets the headers.
@@ -49,7 +49,7 @@ public class HessianRPCCallMessage implements Constants, GroupedMessage
 	 * @param args the args
 	 * @param headers the headers
 	 */
-	public HessianRPCCallMessage(String method, Object[] args, Map<Object, Object> headers, OutputStreamEncoder outputStreamEncoder)
+	public HessianRPCCallMessage(String method, Object[] args, Map<Object, Object> headers, OutputStreamHandler outputStreamEncoder)
 	{
 		_method = method;
 		_args = args;
@@ -108,7 +108,7 @@ public class HessianRPCCallMessage implements Constants, GroupedMessage
 	{
 		boolean result = false;
 		if (!_hasSessionFilter || !_isServer)
-			result = (_outputStreamEncoder != null && _outputStreamEncoder.getBuffer() != null && _outputStreamEncoder.getBuffer().getContext() != null && _outputStreamEncoder.getBuffer().getContext().getChannel().isConnected());
+			result = (_outputStreamEncoder != null && _outputStreamEncoder.getBuffer() != null && _outputStreamEncoder.getBuffer().getContext() != null && _outputStreamEncoder.getBuffer().getContext().channel().isActive());
 		else if (_outputStreamEncoder != null && _outputStreamEncoder.getBuffer() != null && _outputStreamEncoder.getBuffer().getContext() != null)
 			{
 				ServerSessionFilter session = ServerSessionFilter.getServerSessionFilter(_outputStreamEncoder.getBuffer().getContext());
@@ -120,7 +120,7 @@ public class HessianRPCCallMessage implements Constants, GroupedMessage
 	public Channel getChannel()
 	{
 		if (_outputStreamEncoder != null && _outputStreamEncoder.getBuffer() != null && _outputStreamEncoder.getBuffer().getContext() != null)
-			return _outputStreamEncoder.getBuffer().getContext().getChannel();
+			return _outputStreamEncoder.getBuffer().getContext().channel();
 		return null;
 	}
 
@@ -155,12 +155,12 @@ public class HessianRPCCallMessage implements Constants, GroupedMessage
 		return _session;
 	}
 
-	public void setHandler(InputStreamDecoder handler)
+	public void setHandler(InputStreamHandler handler)
 	{
 		_handler = handler;
 	}
 	
-	public InputStreamDecoder getHandler()
+	public InputStreamHandler getHandler()
 	{
 		return _handler;
 	}

@@ -93,7 +93,12 @@ public class WrapperManagerProxy
 		URL[] urlsArr = WrapperLoader.getWrapperClasspath("App", true);
 		if (urlsArr == null)
 			return Thread.currentThread().getContextClassLoader();
-		return new WrapperClassLoader(urlsArr, ClassLoader.getSystemClassLoader());
+		URL[] extended = WrapperLoader.getWrapperClasspath("App-Extended", false);
+		URL[] urls = new URL[urlsArr.length+ extended.length];
+		System.arraycopy(urlsArr, 0, urls, 0, urlsArr.length);
+		System.arraycopy(extended, 0, urls, urlsArr.length, extended.length);
+
+		return new WrapperClassLoader(urls, ClassLoader.getSystemClassLoader());
 	}
 
 }

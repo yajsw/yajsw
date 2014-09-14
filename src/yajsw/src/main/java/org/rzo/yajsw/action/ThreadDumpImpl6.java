@@ -1,5 +1,7 @@
 package org.rzo.yajsw.action;
 
+import io.netty.channel.Channel;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
@@ -10,7 +12,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.jboss.netty.channel.Channel;
 import org.rzo.yajsw.controller.Message;
 
 public class ThreadDumpImpl6 implements Action

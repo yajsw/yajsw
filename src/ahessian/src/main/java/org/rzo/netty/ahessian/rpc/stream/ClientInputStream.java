@@ -1,11 +1,9 @@
 package org.rzo.netty.ahessian.rpc.stream;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.Buffer;
+import io.netty.buffer.Unpooled;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
+import java.io.IOException;
+
 import org.rzo.netty.ahessian.io.InputStreamBuffer;
 
 public class ClientInputStream extends InputStreamBuffer
@@ -31,7 +29,7 @@ public class ClientInputStream extends InputStreamBuffer
 		else
 			try
 			{
-				this.write(ChannelBuffers.wrappedBuffer(msg.getData()));
+				this.write(Unpooled.wrappedBuffer(msg.getData()));
 			}
 			catch (IOException e)
 			{

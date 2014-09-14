@@ -50,12 +50,14 @@ package com.caucho.hessian4.io;
 
 import com.caucho.hessian4.util.IdentityIntMap;
 
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelPromise;
+
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 
-import org.jboss.netty.channel.ChannelFuture;
 
 import com.caucho.hessian4.util.IdentityIntMap;
 
@@ -1642,7 +1644,7 @@ public class Hessian2Output
       _os.flush();
   }
 
-  public final void flush(ChannelFuture future)
+  public final void flush(ChannelPromise future)
   throws IOException
 {
   flushBuffer();

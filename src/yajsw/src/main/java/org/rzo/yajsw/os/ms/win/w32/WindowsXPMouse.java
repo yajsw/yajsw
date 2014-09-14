@@ -10,6 +10,8 @@
  */
 package org.rzo.yajsw.os.ms.win.w32;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 import org.rzo.yajsw.os.Mouse;
@@ -17,16 +19,16 @@ import org.rzo.yajsw.os.Mouse;
 import com.sun.jna.Native;
 import com.sun.jna.Platform;
 import com.sun.jna.Structure;
+import com.sun.jna.platform.win32.BaseTSD.ULONG_PTR;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.User32;
-import com.sun.jna.platform.win32.BaseTSD.ULONG_PTR;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.LRESULT;
+import com.sun.jna.platform.win32.WinDef.POINT;
 import com.sun.jna.platform.win32.WinDef.WPARAM;
 import com.sun.jna.platform.win32.WinUser.HHOOK;
 import com.sun.jna.platform.win32.WinUser.HOOKPROC;
 import com.sun.jna.platform.win32.WinUser.MSG;
-import com.sun.jna.platform.win32.WinUser.POINT;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -34,8 +36,6 @@ import com.sun.jna.platform.win32.WinUser.POINT;
  */
 public class WindowsXPMouse implements Mouse
 {
-	
-	
 	public final User32 USER32INST;
 	public final Kernel32 KERNEL32INST;
 	public WindowsXPMouse()
@@ -186,6 +186,14 @@ public class WindowsXPMouse implements Mouse
 	    public HWND hwnd;
 	    public int wHitTestCode;
 	    public ULONG_PTR dwExtraInfo;
+	    
+	    @Override
+	    protected List getFieldOrder() {
+	      return Arrays.asList(new String[] {
+"pt", "hwnd", "wHitTestCode", "dwExtraInfo"
+	      });
+	    }
+
 	}
 	
 	public static void main(String[] args)

@@ -53,116 +53,118 @@ import org.rzo.yajsw.util.DaemonThreadFactory;
 import org.rzo.yajsw.wrapper.AbstractWrappedProcessMBean;
 import org.rzo.yajsw.wrapper.WrappedProcess;
 
-
 // TODO: Auto-generated Javadoc
 /**
  * The Class WrapperTrayIconImpl.
  */
 public class WrapperTrayIconImpl implements WrapperTrayIcon
 {
-	volatile boolean						_dialogDisplayed;
+	volatile boolean _dialogDisplayed;
 
 	/** The icon running. */
-	Image									iconRunning;
+	Image iconRunning;
 
 	/** The icon idle. */
-	Image									iconIdle;
+	Image iconIdle;
 
-	Image									iconWaitForApp;
+	Image iconWaitForApp;
 	/** The icon else. */
-	Image									iconElse;
+	Image iconElse;
 
 	/** The icon offline. */
-	Image									iconOffline;
+	Image iconOffline;
 
 	/** The ti. */
-	TrayIcon								ti;
-	Image 									tiImage;
-	
+	TrayIcon ti;
+	Image tiImage;
+
 	final JPopupMenu popup = new JPopupMenu();
 
-
 	/** The current image. */
-	Image									currentImage			= iconIdle;
+	Image currentImage = iconIdle;
 
 	/** The tool tip prefix. */
-	String									toolTipPrefix;
+	String toolTipPrefix;
 
 	/** The current tool tip. */
-	String									currentToolTip;
+	String currentToolTip;
 
 	/** The tray. */
-	final SystemTray						tray					= SystemTray.getSystemTray();
+	final SystemTray tray = SystemTray.getSystemTray();
 
 	/** The init. */
-	boolean									init					= false;
+	boolean init = false;
 
 	/** The _console. */
-	Console									_console				= null;
+	Console _console = null;
 
 	/** The _process. */
-	volatile AbstractWrappedProcessMBean	_process;
-	protected static final Executor			executor				= Executors.newCachedThreadPool(new DaemonThreadFactory("console"));
+	volatile AbstractWrappedProcessMBean _process;
+	protected static final Executor executor = Executors
+			.newCachedThreadPool(new DaemonThreadFactory("console"));
 
 	/** The stop. */
-	volatile boolean						stop					= false;
+	volatile boolean stop = false;
 
 	/** The _current state. */
-	int										_currentState			= WrappedProcess.STATE_IDLE;
+	int _currentState = WrappedProcess.STATE_IDLE;
 
 	/** The _stop item. */
-	JMenuItem								_stopItem				= new JMenuItem();
+	JMenuItem _stopItem = new JMenuItem();
 
 	/** The _close item. */
-	JMenuItem								_closeItem				= new JMenuItem();
+	JMenuItem _closeItem = new JMenuItem();
 
 	/** The _start item. */
-	JMenuItem								_startItem				= new JMenuItem();
+	JMenuItem _startItem = new JMenuItem();
 
 	/** The _restart item. */
-	JMenuItem								_restartItem			= new JMenuItem();
+	JMenuItem _restartItem = new JMenuItem();
 
 	/** The _console item. */
-	JMenuItem								_consoleItem			= new JMenuItem();
+	JMenuItem _consoleItem = new JMenuItem();
 
 	/** The _stop timer item. */
-	JMenuItem								_stopTimerItem			= new JMenuItem();
+	JMenuItem _stopTimerItem = new JMenuItem();
 
 	/** The _thread dump item. */
-	JMenuItem								_threadDumpItem			= new JMenuItem();
-	JMenuItem								_gcItem					= new JMenuItem();
-	JMenuItem								_dumpHeapItem					= new JMenuItem();
+	JMenuItem _threadDumpItem = new JMenuItem();
+	JMenuItem _gcItem = new JMenuItem();
+	JMenuItem _dumpHeapItem = new JMenuItem();
 
 	/** The _exit item. */
-	JMenuItem								_exitItem				= new JMenuItem();
+	JMenuItem _exitItem = new JMenuItem();
 
 	/** The _exit wrapper item. */
-	JMenuItem								_exitWrapperItem		= new JMenuItem();
+	JMenuItem _exitWrapperItem = new JMenuItem();
 
 	/** The _thread dump wrapper item. */
-	JMenuItem								_threadDumpWrapperItem	= new JMenuItem();
+	JMenuItem _threadDumpWrapperItem = new JMenuItem();
 
 	/** The _close console item. */
-	JMenuItem								_closeConsoleItem		= new JMenuItem();
+	JMenuItem _closeConsoleItem = new JMenuItem();
 
 	/** The _start service item. */
-	JMenuItem								_startServiceItem		= new JMenuItem();
+	JMenuItem _startServiceItem = new JMenuItem();
 
 	/** The _response item. */
-	JMenuItem								_responseItem			= new JMenuItem();
+	JMenuItem _responseItem = new JMenuItem();
 
-	JMenuItem								_updateItem			= new JMenuItem();
+	JMenuItem _updateItem = new JMenuItem();
 
 	/** The _inquire message. */
-	String									_inquireMessage			= null;
+	String _inquireMessage = null;
 
-	boolean									_waitForAppReady		= false;
-	
-	volatile boolean						_trayDialog				= false;
+	boolean _waitForAppReady = false;
 
-	private YajswConfigurationImpl			_config;
-	
+	volatile boolean _trayDialog = false;
+
+	private YajswConfigurationImpl _config;
+
 	static Mouse m = OperatingSystem.instance().mouseInstance();
+
+	JMenuItem _stopServiceItem = new JMenuItem();
+	JMenuItem _restartServiceItem = new JMenuItem();
 
 	/**
 	 * Instantiates a new wrapper tray icon impl.
@@ -172,51 +174,58 @@ public class WrapperTrayIconImpl implements WrapperTrayIcon
 	 * @param icon
 	 *            the icon
 	 */
-	public WrapperTrayIconImpl(String name, String icon, YajswConfigurationImpl	config)
+	public WrapperTrayIconImpl(String name, String icon,
+			YajswConfigurationImpl config)
 	{
 		try
 		{
-			Class cl = this.getClass().getClassLoader().loadClass("java.awt.GraphicsEnvironment");
+			Class cl = this.getClass().getClassLoader()
+					.loadClass("java.awt.GraphicsEnvironment");
 			Method m = cl.getMethod("isHeadless", null);
 			Boolean b = (Boolean) m.invoke(null, null);
 			if (b)
 			{
-				System.out.println("SystemTray not supported on this platform: headless");
+				System.out
+						.println("SystemTray not supported on this platform: headless");
 				return;
 			}
 		}
 		catch (Exception ex)
 		{
-			System.out.println("SystemTray not supported on this platform: "+ex.getMessage() + " error getting java.awt.GraphicsEnvironment");
-			return;			
+			System.out.println("SystemTray not supported on this platform: "
+					+ ex.getMessage()
+					+ " error getting java.awt.GraphicsEnvironment");
+			return;
 		}
 		if (!SystemTray.isSupported())
 		{
 			System.out.println("SystemTray not supported on this platform");
 			return;
 		}
-		
+
 		_config = config;
 		if (_config != null)
 		{
-		_waitForAppReady = _config.getBoolean("wrapper.ntservice.autoreport.waitready", false);
-		_trayDialog = _config.getBoolean("wrapper.tray.dialog", true);
-		String lookAndFeel = _config.getString("wrapper.tray.look_and_feel", null);
-		try
-		{
-		if (lookAndFeel != null && lookAndFeel.length() > 0)
-		{
-			UIManager.setLookAndFeel(lookAndFeel);
+			_waitForAppReady = _config.getBoolean(
+					"wrapper.ntservice.autoreport.waitready", false);
+			_trayDialog = _config.getBoolean("wrapper.tray.dialog", true);
+			String lookAndFeel = _config.getString(
+					"wrapper.tray.look_and_feel", null);
+			try
+			{
+				if (lookAndFeel != null && lookAndFeel.length() > 0)
+				{
+					UIManager.setLookAndFeel(lookAndFeel);
+				}
+			}
+			catch (Throwable ex)
+			{
+				ex.printStackTrace();
+			}
 		}
-		}
-		catch (Throwable ex)
-		{
-			ex.printStackTrace();
-		}
-		}
-		
+
 		_dialogDisplayed = new Boolean(false);
-		
+
 		toolTipPrefix = name + " - ";
 
 		InputStream f = null;
@@ -244,7 +253,7 @@ public class WrapperTrayIconImpl implements WrapperTrayIcon
 			return;
 		}
 
-		ti = new TrayIcon(iconIdle);
+		ti = new TrayIcon(iconOffline);
 		/*
 		 * process.addStateChangeListener(new StateChangeListener() { public
 		 * void stateChange(int newState, int oldState) { if (newState ==
@@ -256,102 +265,112 @@ public class WrapperTrayIconImpl implements WrapperTrayIcon
 		 */
 		ti.setImageAutoSize(true);
 
-		
 		try
 		{
-			SwingUtilities.windowForComponent(popup.getInvoker()).setAlwaysOnTop(true); 
-		}catch(Throwable tr){
-			
+			SwingUtilities.windowForComponent(popup.getInvoker())
+					.setAlwaysOnTop(true);
 		}
-		
-		_exitItem.setAction(new AbstractAction("Stop Tray", createImageIcon("/resources/exit.png"))
+		catch (Throwable tr)
+		{
+
+		}
+
+		_exitItem.setAction(new AbstractAction("Stop Tray",
+				createImageIcon("/resources/exit.png"))
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-					try
+				try
+				{
+					_dialogDisplayed = true;
+					closePopup();
+					int userChoice = JOptionPane.OK_OPTION;
+					if (_trayDialog)
+						userChoice = JOptionPane.showConfirmDialog(null,
+								_config.getString(
+										"wrapper.tray.text.dialog_exit_tray",
+										"Terminate wrapper Tray ?"), UIManager
+										.getString("OptionPane.titleText"),
+								JOptionPane.YES_NO_OPTION);
+
+					if (JOptionPane.OK_OPTION == userChoice)
 					{
-						_dialogDisplayed = true;
 						closePopup();
-						int userChoice = JOptionPane.OK_OPTION;
-						if (_trayDialog)
-						userChoice = JOptionPane.showConfirmDialog(null, _config.getString("wrapper.tray.text.dialog_exit_tray", "Terminate wrapper Tray ?"),
-                                UIManager.getString("OptionPane.titleText"),
-                                JOptionPane.YES_NO_OPTION);
-				
-						if(JOptionPane.OK_OPTION == userChoice)
+						stop = true;
+						synchronized (tray)
 						{
-							closePopup();
-							stop = true;
-							synchronized (tray)
-							{
-								tray.remove(ti);
-							}
-							System.exit(0);
+							tray.remove(ti);
 						}
+						System.exit(0);
 					}
-					finally
-					{
-						_dialogDisplayed = false;
-					}
-					
-				
+				}
+				finally
+				{
+					_dialogDisplayed = false;
+				}
+
 			}
 
 		});
-		_stopItem.setAction(new AbstractAction("Stop", createImageIcon("/resources/stop.png"))
+		_stopItem.setAction(new AbstractAction("Stop",
+				createImageIcon("/resources/stop.png"))
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				if (_process != null)
 				{
-					SwingUtilities.invokeLater(new Runnable() 
+					SwingUtilities.invokeLater(new Runnable()
 					{
-						public void run() 
+						public void run()
 						{
-								try
+							try
+							{
+								_dialogDisplayed = true;
+								closePopup();
+								int userChoice = JOptionPane.OK_OPTION;
+								if (_trayDialog)
+									userChoice = JOptionPane.showConfirmDialog(
+											null,
+											_config.getString(
+													"wrapper.tray.text.dialog_stop",
+													"Stop the application ?"),
+											UIManager
+													.getString("OptionPane.titleText"),
+											JOptionPane.YES_NO_OPTION);
+								if (JOptionPane.OK_OPTION == userChoice)
 								{
-									_dialogDisplayed = true;
-									closePopup();
-									int userChoice = JOptionPane.OK_OPTION;
-									if (_trayDialog)
-									userChoice = JOptionPane.showConfirmDialog(null, 
-											_config.getString("wrapper.tray.text.dialog_stop", "Stop the application ?"),
-											UIManager.getString("OptionPane.titleText"),
-			                                JOptionPane.YES_NO_OPTION);
-									if(JOptionPane.OK_OPTION == userChoice)
+									executor.execute(new Runnable()
 									{
-										executor.execute(new Runnable()
+										public void run()
 										{
-											public void run()
+											try
 											{
-												try
-												{
-													_process.stop("TRAY");	
-												}
-												catch (Throwable ex)
-												{
-													ex.printStackTrace();
-												}
-												
+												_process.stop("TRAY");
 											}
-										});
-									}
-								}
-								finally
-								{
-									
-									_dialogDisplayed = false;
+											catch (Throwable ex)
+											{
+												ex.printStackTrace();
+											}
+
+										}
+									});
 								}
 							}
-					});
+							finally
+							{
 
+								_dialogDisplayed = false;
+							}
+						}
+					});
 
 				}
 
 			}
 
 		});
-		_closeItem.setAction(new AbstractAction("Close Popup", createImageIcon("/resources/close.png"))
+		_closeItem.setAction(new AbstractAction("Close Popup",
+				createImageIcon("/resources/close.png"))
 		{
 			public void actionPerformed(ActionEvent e)
 			{
@@ -359,11 +378,12 @@ public class WrapperTrayIconImpl implements WrapperTrayIcon
 			}
 		});
 
-		_startItem.setAction(new AbstractAction("Start", createImageIcon("/resources/start.png"))
+		_startItem.setAction(new AbstractAction("Start",
+				createImageIcon("/resources/start.png"))
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				System.out.println("start");
+				// System.out.println("start");
 				if (_process != null)
 					try
 					{
@@ -373,65 +393,70 @@ public class WrapperTrayIconImpl implements WrapperTrayIcon
 					{
 						ex.printStackTrace();
 					}
-					closePopup();
+				closePopup();
 			}
 		});
-		
-		_restartItem.setAction(new AbstractAction("Restart", createImageIcon("/resources/restart.png"))
+
+		_restartItem.setAction(new AbstractAction("Restart",
+				createImageIcon("/resources/restart.png"))
 		{
 
 			public void actionPerformed(ActionEvent e)
 			{
 				if (_process != null)
 				{
-					SwingUtilities.invokeLater(new Runnable() 
+					SwingUtilities.invokeLater(new Runnable()
 					{
-						public void run() 
+						public void run()
 						{
-								try
+							try
+							{
+								_dialogDisplayed = true;
+								closePopup();
+								int userChoice = JOptionPane.OK_OPTION;
+								if (_trayDialog)
+									userChoice = JOptionPane.showConfirmDialog(
+											null,
+											_config.getString(
+													"wrapper.tray.text.dialog_restart",
+													"Restart the application ?"),
+											UIManager
+													.getString("OptionPane.titleText"),
+											JOptionPane.YES_NO_OPTION);
+								if (JOptionPane.OK_OPTION == userChoice)
 								{
-									_dialogDisplayed = true;
-									closePopup();
-									int userChoice = JOptionPane.OK_OPTION;
-									if (_trayDialog)
-									userChoice = JOptionPane.showConfirmDialog(null, 
-											_config.getString("wrapper.tray.text.dialog_restart", "Restart the application ?"),
-											UIManager.getString("OptionPane.titleText"),
-			                                JOptionPane.YES_NO_OPTION);
-									if(JOptionPane.OK_OPTION == userChoice)
+									executor.execute(new Runnable()
 									{
-										executor.execute(new Runnable()
+										public void run()
 										{
-											public void run()
+											try
 											{
-												try
-												{
-													_process.restart();	
-												}
-												catch (Throwable ex)
-												{
-													ex.printStackTrace();
-												}
-												
+												_process.restart();
 											}
-										});
-									}
-								}
-								finally
-								{
-									
-									_dialogDisplayed = false;
+											catch (Throwable ex)
+											{
+												ex.printStackTrace();
+											}
+
+										}
+									});
 								}
 							}
-					});
+							finally
+							{
 
+								_dialogDisplayed = false;
+							}
+						}
+					});
 
 				}
 			}
 
-});
+		});
 
-_consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources/console.png"))
+		_consoleItem.setAction(new AbstractAction("Console",
+				createImageIcon("/resources/console.png"))
 		{
 			public void actionPerformed(ActionEvent e)
 			{
@@ -441,7 +466,8 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 			}
 
 		});
-		_threadDumpItem.setAction(new AbstractAction("Thread Dump", createImageIcon("/resources/lightning.png"))
+		_threadDumpItem.setAction(new AbstractAction("Thread Dump",
+				createImageIcon("/resources/lightning.png"))
 		{
 			public void actionPerformed(ActionEvent e)
 			{
@@ -455,11 +481,12 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 						ex.printStackTrace();
 					}
 
-					closePopup();
+				closePopup();
 			}
 		});
 
-		_gcItem.setAction(new AbstractAction("GC", createImageIcon("/resources/recycle.png"))
+		_gcItem.setAction(new AbstractAction("GC",
+				createImageIcon("/resources/recycle.png"))
 		{
 			public void actionPerformed(ActionEvent e)
 			{
@@ -473,18 +500,20 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 						ex.printStackTrace();
 					}
 
-					closePopup();
+				closePopup();
 			}
 		});
 
-		_dumpHeapItem.setAction(new AbstractAction("Dump Heap", createImageIcon("/resources/document-save.png"))
+		_dumpHeapItem.setAction(new AbstractAction("Dump Heap",
+				createImageIcon("/resources/document-save.png"))
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				if (_process != null)
 					try
 					{
-						String s = (String) JOptionPane.showInputDialog("Dump File Name (Empty == default) ?", "");
+						String s = (String) JOptionPane.showInputDialog(
+								"Dump File Name (Empty == default) ?", "");
 						_process.dumpHeap(s);
 					}
 					catch (Throwable ex)
@@ -492,12 +521,12 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 						ex.printStackTrace();
 					}
 
-					closePopup();
+				closePopup();
 			}
 		});
 
-
-		_stopTimerItem.setAction(new AbstractAction("Stop Timer/Condition", createImageIcon("/resources/clock_stop.png"))
+		_stopTimerItem.setAction(new AbstractAction("Stop Timer/Condition",
+				createImageIcon("/resources/clock_stop.png"))
 		{
 			public void actionPerformed(ActionEvent e)
 			{
@@ -521,53 +550,57 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 				closePopup();
 			}
 		});
-		_exitWrapperItem.setAction(new AbstractAction("Stop Wrapper", createImageIcon("/resources/exitWrapper.png"))
+		_exitWrapperItem.setAction(new AbstractAction("Stop Wrapper",
+				createImageIcon("/resources/exitWrapper.png"))
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				if (_process != null)
 				{
-					SwingUtilities.invokeLater(new Runnable() 
+					SwingUtilities.invokeLater(new Runnable()
 					{
-						public void run() 
+						public void run()
 						{
-								try
+							try
+							{
+								_dialogDisplayed = true;
+								closePopup();
+								int userChoice = JOptionPane.OK_OPTION;
+								if (_trayDialog)
+									userChoice = JOptionPane.showConfirmDialog(
+											null,
+											_config.getString(
+													"wrapper.tray.text.dialog_exit_wrapper",
+													"Stop the wrapper ?"),
+											UIManager
+													.getString("OptionPane.titleText"),
+											JOptionPane.YES_NO_OPTION);
+								if (JOptionPane.OK_OPTION == userChoice)
 								{
-									_dialogDisplayed = true;
-									closePopup();
-									int userChoice = JOptionPane.OK_OPTION;
-									if (_trayDialog)
-									userChoice = JOptionPane.showConfirmDialog(null, 
-											_config.getString("wrapper.tray.text.dialog_exit_wrapper", "Stop the wrapper ?"),
-											UIManager.getString("OptionPane.titleText"),
-			                                JOptionPane.YES_NO_OPTION);
-									if(JOptionPane.OK_OPTION == userChoice)
+									executor.execute(new Runnable()
 									{
-										executor.execute(new Runnable()
+										public void run()
 										{
-											public void run()
+											try
 											{
-												try
-												{
-													_process.stopWrapper();	
-												}
-												catch (Throwable ex)
-												{
-													ex.printStackTrace();
-												}
-												
+												_process.stopWrapper();
 											}
-										});
-									}
-								}
-								finally
-								{
-									
-									_dialogDisplayed = false;
+											catch (Throwable ex)
+											{
+												ex.printStackTrace();
+											}
+
+										}
+									});
 								}
 							}
-					});
+							finally
+							{
 
+								_dialogDisplayed = false;
+							}
+						}
+					});
 
 				}
 
@@ -575,7 +608,8 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 
 		});
 
-		_threadDumpWrapperItem.setAction(new AbstractAction("TDump Wrapper", createImageIcon("/resources/lightning.png"))
+		_threadDumpWrapperItem.setAction(new AbstractAction("TDump Wrapper",
+				createImageIcon("/resources/lightning.png"))
 		{
 			public void actionPerformed(ActionEvent e)
 			{
@@ -589,7 +623,7 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 						ex.printStackTrace();
 					}
 
-					closePopup();
+				closePopup();
 			}
 
 		});
@@ -604,7 +638,8 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 
 		});
 
-		_startServiceItem.setAction(new AbstractAction("Start Service", createImageIcon("/resources/startService.png"))
+		_startServiceItem.setAction(new AbstractAction("Start Service",
+				createImageIcon("/resources/startService.png"))
 		{
 			public void actionPerformed(ActionEvent e)
 			{
@@ -617,14 +652,16 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 
 		});
 
-		_responseItem.setAction(new AbstractAction("Response", createImageIcon("/resources/Help16.gif"))
+		_responseItem.setAction(new AbstractAction("Response",
+				createImageIcon("/resources/Help16.gif"))
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				if (_process != null && _inquireMessage != null)
 				{
 					String message = _inquireMessage;
-					String s = (String) JOptionPane.showInputDialog(message, "");
+					String s = (String) JOptionPane
+							.showInputDialog(message, "");
 					if (s != null && _process != null)
 					{
 						try
@@ -644,14 +681,16 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 			}
 
 		});
-		
-		_updateItem.setAction(new AbstractAction("Update", createImageIcon("/resources/update.png"))
+
+		_updateItem.setAction(new AbstractAction("Update",
+				createImageIcon("/resources/update.png"))
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				if (_process != null)
 				{
-					String s = (String) JOptionPane.showInputDialog("Update configuration file", "");
+					String s = (String) JOptionPane.showInputDialog(
+							"Update configuration file", "");
 					if (s != null && _process != null)
 					{
 						try
@@ -670,9 +709,100 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 			}
 
 		});
-		
-		
-		List menueList = _config == null ? Arrays.asList("start", "stop") : _config.getList("wrapper.tray.commands", Arrays.asList(new Object[]{"close", "start", "stop", "restart", "console", "response", "exitWrapper", "startService", "updateService", "exitTray"}));
+		_stopServiceItem.setAction(new AbstractAction("Stop Service",
+				createImageIcon("/resources/stopService.png"))
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				SwingUtilities.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						try
+						{
+							_dialogDisplayed = true;
+							closePopup();
+
+							int userChoice = JOptionPane.OK_OPTION;
+
+							if (_trayDialog)
+							{
+								userChoice = JOptionPane.showConfirmDialog(
+										null,
+										_config.getString(
+												"wrapper.tray.text.dialog_restart_service",
+												"Stop the service ?"),
+										UIManager
+												.getString("OptionPane.titleText"),
+										JOptionPane.YES_NO_OPTION);
+							}
+
+							if (JOptionPane.OK_OPTION == userChoice)
+							{
+								stopService();
+							}
+						}
+						finally
+						{
+							_dialogDisplayed = false;
+						}
+					}
+				});
+			}
+		});
+
+		_restartServiceItem.setAction(new AbstractAction("Restart Service",
+				createImageIcon("/resources/restartService.png"))
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				SwingUtilities.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						try
+						{
+							_dialogDisplayed = true;
+							closePopup();
+
+							int userChoice = JOptionPane.OK_OPTION;
+
+							if (_trayDialog)
+							{
+								userChoice = JOptionPane.showConfirmDialog(
+										null,
+										_config.getString(
+												"wrapper.tray.text.dialog_restart_service",
+												"Restart the service ?"),
+										UIManager
+												.getString("OptionPane.titleText"),
+										JOptionPane.YES_NO_OPTION);
+							}
+
+							if (JOptionPane.OK_OPTION == userChoice)
+							{
+								restartService();
+							}
+						}
+						finally
+						{
+							_dialogDisplayed = false;
+						}
+					}
+				});
+			}
+		});
+
+		List menueList = _config == null ? Arrays.asList("start", "stop")
+				: _config
+						.getList(
+								"wrapper.tray.commands",
+								Arrays.asList(new Object[] { "close", "start",
+										"stop", "restart", "console",
+										"response", "exitWrapper",
+										"startService", "stopService",
+										"restartService", "updateService",
+										"exitTray" }));
 
 		if (menueList.contains("start"))
 			popup.add(_startItem);
@@ -689,60 +819,71 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 			popup.add(_exitWrapperItem);
 		if (menueList.contains("startService"))
 			popup.add(_startServiceItem);
+		if (menueList.contains("stopService"))
+			popup.add(_stopServiceItem);
+		if (menueList.contains("restartService"))
+			popup.add(_restartServiceItem);
 		if (menueList.contains("exitTray"))
 			popup.add(_exitItem);
 		if (menueList.contains("updateService"))
 			popup.add(_updateItem);
 		popup.add(_closeItem);
 		popup.validate();
-			ti.addMouseListener(new MouseListener()
+		ti.addMouseListener(new MouseListener()
 		{
 
 			public void mouseClicked(MouseEvent e)
 			{
-				System.out.println("mouse clicked");
+				// System.out.println("mouse clicked");
 			}
 
 			public void mouseEntered(MouseEvent e)
 			{
-				System.out.println("mouse entered");
+				// System.out.println("mouse entered");
 
 			}
 
 			public void mouseExited(MouseEvent e)
 			{
-				System.out.println("mouse exited");
+				// System.out.println("mouse exited");
 			}
 
 			public void mousePressed(MouseEvent e)
 			{
 
-				if (!OperatingSystem.instance().getOperatingSystemName().toLowerCase().contains("mac"))
+				if (!OperatingSystem.instance().getOperatingSystemName()
+						.toLowerCase().contains("mac"))
 					return;
-				System.out.println("mouse rleased");
-				if(_dialogDisplayed == true)
+				// System.out.println("mouse rleased");
+				if (_dialogDisplayed == true)
 				{
 
 				}
 				else
 				{
-					if(!_dialogDisplayed)
+					if (!_dialogDisplayed)
 					{
-						System.out.println("X"+e.getXOnScreen()+"/"+ popup.getWidth());
-						System.out.println("Y"+e.getYOnScreen()+"/"+ popup.getHeight());
-						int xPos = e.getXOnScreen() > popup.getWidth() ? e.getXOnScreen() - popup.getWidth() : e.getXOnScreen();
-						int yPos = e.getYOnScreen() > popup.getHeight() ? e.getYOnScreen() - popup.getHeight() : e.getYOnScreen();
-					popup.show(e.getComponent(), xPos, yPos);
-					if (m != null)
-					m.registerMouseUpListner(new Runnable()
-					{
+						// System.out.println("X"+e.getXOnScreen()+"/"+
+						// popup.getWidth());
+						// System.out.println("Y"+e.getYOnScreen()+"/"+
+						// popup.getHeight());
+						int xPos = e.getXOnScreen() > popup.getWidth() ? e
+								.getXOnScreen() - popup.getWidth() : e
+								.getXOnScreen();
+						int yPos = e.getYOnScreen() > popup.getHeight() ? e
+								.getYOnScreen() - popup.getHeight() : e
+								.getYOnScreen();
+						popup.show(e.getComponent(), xPos, yPos);
+						if (m != null)
+							m.registerMouseUpListner(new Runnable()
+							{
 
-						public void run()
-						{
-							closePopup();
-						}
-						
-					}, executor);
+								public void run()
+								{
+									closePopup();
+								}
+
+							}, executor);
 					}
 				}
 
@@ -750,37 +891,42 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 
 			public void mouseReleased(MouseEvent e)
 			{
-				System.out.println("mouse rleased");
-				if(_dialogDisplayed == true)
+				// System.out.println("mouse rleased");
+				if (_dialogDisplayed == true)
 				{
 
 				}
 				else
 				{
-					if(!_dialogDisplayed)
+					if (!_dialogDisplayed)
 					{
-						System.out.println("X"+e.getXOnScreen()+"/"+ popup.getWidth());
-						System.out.println("Y"+e.getYOnScreen()+"/"+ popup.getHeight());
-						int xPos = e.getXOnScreen() > popup.getWidth() ? e.getXOnScreen() - popup.getWidth() : e.getXOnScreen();
-						int yPos = e.getYOnScreen() > popup.getHeight() ? e.getYOnScreen() - popup.getHeight() : e.getYOnScreen();
-					popup.show(e.getComponent(), xPos, yPos);
-					if (m != null)
-					m.registerMouseUpListner(new Runnable()
-					{
+						// System.out.println("X"+e.getXOnScreen()+"/"+
+						// popup.getWidth());
+						// System.out.println("Y"+e.getYOnScreen()+"/"+
+						// popup.getHeight());
+						int xPos = e.getXOnScreen() > popup.getWidth() ? e
+								.getXOnScreen() - popup.getWidth() : e
+								.getXOnScreen();
+						int yPos = e.getYOnScreen() > popup.getHeight() ? e
+								.getYOnScreen() - popup.getHeight() : e
+								.getYOnScreen();
+						popup.show(e.getComponent(), xPos, yPos);
+						if (m != null)
+							m.registerMouseUpListner(new Runnable()
+							{
 
-						public void run()
-						{
-							closePopup();
-						}
-						
-					}, executor);
+								public void run()
+								{
+									closePopup();
+								}
+
+							}, executor);
 					}
 				}
 
 			}
 
 		});
-		
 
 		Runtime.getRuntime().addShutdownHook(new Thread()
 		{
@@ -808,37 +954,36 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 		init = true;
 
 	}
-	
+
 	private void startService()
 	{
 		try
 		{
-			
+
 			/*
-		WrappedService w = new WrappedService();
-			if((!w.isRunning())&&(!w.isStarting()))
-			{
-				w.init();
-				w.start();
-			}
-			else
-			{
-				System.out.println("Already in Running || starting state.");
-			}
-			*/
-			// start in a separate process so that we can handle windows uac elevation if necessary
-			int myPid = OperatingSystem.instance().processManagerInstance().currentProcessId(); 
-			Process me = OperatingSystem.instance().processManagerInstance().getProcess(myPid);
+			 * WrappedService w = new WrappedService();
+			 * if((!w.isRunning())&&(!w.isStarting())) { w.init(); w.start(); }
+			 * else {
+			 * System.out.println("Already in Running || starting state."); }
+			 */
+			// start in a separate process so that we can handle windows uac
+			// elevation if necessary
+			int myPid = OperatingSystem.instance().processManagerInstance()
+					.currentProcessId();
+			Process me = OperatingSystem.instance().processManagerInstance()
+					.getProcess(myPid);
 			String cmd = me.getCommand();
 			me.destroy();
 			JCLParser parser = JCLParser.parse(cmd);
 			String[] startCmd = new String[5];
 			startCmd[0] = parser.getJava();
 			startCmd[1] = "-jar";
-			startCmd[2] = new File(WrapperLoader.getWrapperJar()).getCanonicalPath();
-			startCmd[3] = "-t"; 
+			startCmd[2] = new File(WrapperLoader.getWrapperJar())
+					.getCanonicalPath();
+			startCmd[3] = "-t";
 			startCmd[4] = parser.getArgs().get(1);
-			Process startProcess = OperatingSystem.instance().processManagerInstance().createProcess();
+			Process startProcess = OperatingSystem.instance()
+					.processManagerInstance().createProcess();
 			startProcess.setCommand(startCmd);
 			startProcess.setDebug(false);
 			startProcess.start();
@@ -850,9 +995,45 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 			ex.printStackTrace();
 		}
 
-
 	}
 	
+	    private void stopService() {
+		        try {
+					int myPid = OperatingSystem.instance().processManagerInstance()
+							.currentProcessId();
+					Process me = OperatingSystem.instance().processManagerInstance()
+							.getProcess(myPid);
+					String cmd = me.getCommand();
+					me.destroy();
+					JCLParser parser = JCLParser.parse(cmd);
+					String[] startCmd = new String[5];
+					startCmd[0] = parser.getJava();
+					startCmd[1] = "-jar";
+					startCmd[2] = new File(WrapperLoader.getWrapperJar())
+							.getCanonicalPath();
+					startCmd[3] = "-p";
+					startCmd[4] = parser.getArgs().get(1);
+					Process startProcess = OperatingSystem.instance()
+							.processManagerInstance().createProcess();
+					startProcess.setCommand(startCmd);
+					startProcess.setDebug(false);
+					startProcess.start();
+					startProcess.waitFor();
+					startProcess.destroy();
+		        } catch (Throwable ex) {
+		            ex.printStackTrace();
+		        }
+		    }
+		 
+		    private void restartService() {
+		        try {
+		        	stopService();
+		        	startService();
+		        } catch (Throwable ex) {
+		            ex.printStackTrace();
+		        }
+		    }
+
 	private void closePopup()
 	{
 		executor.execute(new Runnable()
@@ -870,13 +1051,13 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				SwingUtilities.invokeLater(new Runnable() 
+				SwingUtilities.invokeLater(new Runnable()
 				{
 					public void run()
 					{
-					popup.setVisible(false);
-					if (m != null)
-					m.unregisterMouseUpListner();
+						popup.setVisible(false);
+						if (m != null)
+							m.unregisterMouseUpListner();
 					}
 				});
 			}
@@ -896,7 +1077,9 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 			{
 				try
 				{
-					System.out.println("System Tray: " + new File(icon).getCanonicalPath() + " not found -> default icon");
+					System.out.println("System Tray: "
+							+ new File(icon).getCanonicalPath()
+							+ " not found -> default icon");
 				}
 				catch (IOException e)
 				{
@@ -935,9 +1118,10 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 			return iconElse;
 		}
 	}
-	
+
 	Color _currentUserColor = null;
 	Image _baseImage;
+
 	public Image getColorImage(Color color)
 	{
 		if (_currentUserColor == null || !_currentUserColor.equals(color))
@@ -994,7 +1178,8 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 	{
 		int oldState = _currentState;
 
-		if (_waitForAppReady && state == WrappedProcess.STATE_RUNNING && (!_process.isAppReportedReady()))
+		if (_waitForAppReady && state == WrappedProcess.STATE_RUNNING
+				&& (!_process.isAppReportedReady()))
 		{
 			state = WrappedProcess.STATE_APP_WAIT;
 		}
@@ -1002,18 +1187,25 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 		_currentState = state;
 		String strState = getStateToolTip(state);
 		if (oldState != _currentState)
-			this.message("STATE CHANGED", getStateToolTip(oldState) + " -> " + getStateToolTip(_currentState));
+			this.message("STATE CHANGED", getStateToolTip(oldState) + " -> "
+					+ getStateToolTip(_currentState));
 		if (_console != null && _process != null)
-		{
-			_console.setState(strState);
-			_console.setAppRestartCount(_process.getTotalRestartCount(), _process.getRestartCount());
-			_console.setAppPid(_process.getAppPid());
-			_console.setAppStarted(_process.getAppStarted());
-			_console.setAppStopped(_process.getAppStopped());
-			_console.setExitCode(_process.getExitCode());
-			_console.setTimer(_process.isTimerActive());
-			_console.setCondition(_process.isConditionActive());
-		}
+			try
+			{
+				_console.setState(strState);
+				_console.setAppRestartCount(_process.getTotalRestartCount(),
+						_process.getRestartCount());
+				_console.setAppPid(_process.getAppPid());
+				_console.setAppStarted(_process.getAppStarted());
+				_console.setAppStopped(_process.getAppStopped());
+				_console.setExitCode(_process.getExitCode());
+				_console.setTimer(_process.isTimerActive());
+				_console.setCondition(_process.isConditionActive());
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
 
 		Image image = getStateImage(state);
 		if (image != currentImage)
@@ -1024,7 +1216,7 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 		}
 
 	}
-	
+
 	private void showImage(Image image)
 	{
 		if (image != currentImage)
@@ -1036,13 +1228,13 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 		}
 
 	}
-	
+
 	public void showColor(Color color)
 	{
 		Image image = getColorImage(color);
 		if (image != null)
 			showImage(image);
-		
+
 	}
 
 	/**
@@ -1105,14 +1297,16 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 		return null;
 
 	}
-	
+
 	private Image createColorImage(Image image, Color color, Dimension d)
 	{
 		if (d != null)
 		{
-			BufferedImage bufferedResizedImage = new BufferedImage(d.width, d.height, BufferedImage.TYPE_INT_RGB);
+			BufferedImage bufferedResizedImage = new BufferedImage(d.width,
+					d.height, BufferedImage.TYPE_INT_RGB);
 			Graphics2D g2d = bufferedResizedImage.createGraphics();
-			g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+			g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+					RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 			g2d.drawImage(image, 0, 0, d.width, d.height, null);
 			g2d.dispose();
 			image = bufferedResizedImage;
@@ -1125,20 +1319,21 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 			int h = image.getHeight(null);
 			int rw = w / 2;
 			int rh = h / 2;
-			Color c = new Color(color.getRed(), color.getGreen(), color.getBlue(), 200);
+			Color c = new Color(color.getRed(), color.getGreen(),
+					color.getBlue(), 200);
 			g.setColor(c);
 			g.fillRoundRect(0, h - rh, rw, rh, rw, rh);
 		}
-		
+
 		return image;
-		
+
 	}
 
-	private Image createColorImage(InputStream imageFile, Color color, Dimension d) throws Exception
+	private Image createColorImage(InputStream imageFile, Color color,
+			Dimension d) throws Exception
 	{
 		BufferedImage image = ImageIO.read(imageFile);
 		imageFile.close();
-
 
 		return createColorImage(image, color, d);
 	}
@@ -1155,7 +1350,7 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 	public static void main(String[] args) throws InterruptedException
 	{
 		WrapperTrayIconImpl t = new WrapperTrayIconImpl("test", null, null);// "tomcat.gif");
-		//while (true)
+		// while (true)
 		{
 			Thread.sleep(2000);
 			t.showState(WrappedProcess.STATE_RUNNING);
@@ -1211,7 +1406,8 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 	 */
 	public void error(String caption, String message)
 	{
-		ti.displayMessage(toolTipPrefix + caption, message, TrayIcon.MessageType.ERROR);
+		ti.displayMessage(toolTipPrefix + caption, message,
+				TrayIcon.MessageType.ERROR);
 	}
 
 	/*
@@ -1222,7 +1418,8 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 	 */
 	public void info(String caption, String message)
 	{
-		ti.displayMessage(toolTipPrefix + caption, message, TrayIcon.MessageType.INFO);
+		ti.displayMessage(toolTipPrefix + caption, message,
+				TrayIcon.MessageType.INFO);
 	}
 
 	/*
@@ -1233,7 +1430,8 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 	 */
 	public void message(String caption, String message)
 	{
-		ti.displayMessage(toolTipPrefix + caption, message, TrayIcon.MessageType.NONE);
+		ti.displayMessage(toolTipPrefix + caption, message,
+				TrayIcon.MessageType.NONE);
 	}
 
 	/*
@@ -1244,7 +1442,8 @@ _consoleItem.setAction(new AbstractAction("Console", createImageIcon("/resources
 	 */
 	public void warning(String caption, String message)
 	{
-		ti.displayMessage(toolTipPrefix + caption, message, TrayIcon.MessageType.WARNING);
+		ti.displayMessage(toolTipPrefix + caption, message,
+				TrayIcon.MessageType.WARNING);
 	}
 
 	/*

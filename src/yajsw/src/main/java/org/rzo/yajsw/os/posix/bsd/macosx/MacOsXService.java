@@ -107,7 +107,7 @@ public class MacOsXService extends AbstractService implements Constants
 			e.printStackTrace();
 		}
 		JavaHome javaHome = OperatingSystem.instance().getJavaHome(_config);
-		String java = System.clearProperty("java.home") + "/bin/java";
+		String java = System.getProperty("java.home") + "/bin/java";
 		try
 		{
 			java = new File(java).getCanonicalPath();

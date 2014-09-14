@@ -1,68 +1,132 @@
 package org.rzo.yajsw.tray.ahessian.client;
 
-import java.net.InetSocketAddress;
+import io.netty.channel.Channel;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.internal.logging.InternalLogger;
+
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.management.MBeanServerConnection;
+import javax.management.MBeanServerDelegateMBean;
+import javax.management.MBeanServerInvocationHandler;
+import javax.management.ObjectName;
 
-import org.jboss.netty.bootstrap.ClientBootstrap;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
-import org.jboss.netty.util.HashedWheelTimer;
-import org.rzo.netty.ahessian.application.jmx.remote.service.AsyncMBeanServerConnection;
-import org.rzo.netty.ahessian.application.jmx.remote.service.MBeanServerConnectionAsyncAdapter;
-import org.rzo.netty.ahessian.rpc.client.BootstrapProvider;
-import org.rzo.netty.ahessian.rpc.client.HessianProxyFactory;
+import org.rzo.netty.ahessian.application.jmx.remote.service.JmxSerializerFactory;
+import org.rzo.netty.ahessian.bootstrap.ChannelPipelineFactoryBuilder;
+import org.rzo.netty.ahessian.bootstrap.DefaultClient;
+import org.rzo.netty.ahessian.rpc.server.HessianRPCServiceHandler.ConnectListener;
 import org.rzo.netty.ahessian.utils.MyReentrantLock;
 import org.rzo.netty.mcast.discovery.DiscoveryClient;
 import org.rzo.netty.mcast.discovery.DiscoveryListener;
 
-public class AHessianJmxClient implements BootstrapProvider
+public class AHessianJmxClient
 {
-	boolean					stop		= false;
-	DiscoveryClient			discovery	= null;
-	ExecutorService			executor	= Executors.newCachedThreadPool();
-	ClientBootstrap			bootstrap	= new ClientBootstrap(new NioClientSocketChannelFactory(executor, executor));
-	MBeanServerConnection	mbeanServer;
-	final Lock				lock		= new MyReentrantLock();
-	final Condition			connected	= lock.newCondition();
-	String					currentHost	= null;
-	HessianProxyFactory		factory;
-
-	public AHessianJmxClient(String discoveryName, int port) throws Exception
+	boolean stop = false;
+	DiscoveryClient discovery = null;
+	ExecutorService executor = Executors.newCachedThreadPool();
+	volatile MBeanServerConnection mbeanServer = null;
+	final Lock lock = new MyReentrantLock();
+	final Condition connected = lock.newCondition();
+	String currentHost = null;
+	DefaultClient<MBeanServerConnection> client;
+	Runnable _connectListener;
+	Runnable _disconnectListener;
+	String _discoveryName;
+	int _port;
+	boolean _debug = false;
+	InternalLogger _logger;
+	
+	
+	public AHessianJmxClient(String discoveryName, int port, boolean debug, InternalLogger logger) throws Exception
 	{
-		factory = new HessianProxyFactory(executor, "AHessianJMX", null);
+		_discoveryName = discoveryName;
+		_port = port;
+		_debug = debug;
+		_logger = logger;
+		Map options = new HashMap();
+		options.put("sync", true);
+		options.put("timeout", (long) 5000);
 
-		// in case we are disconnected: start the discovery
-		factory.setDisconnectedListener(new Runnable()
+		final ChannelPipelineFactoryBuilder<MBeanServerConnection> builder = new ChannelPipelineFactoryBuilder<MBeanServerConnection>()
+				.serviceThreads(10).reconnect(10)
+				.rpcServiceInterface(MBeanServerConnection.class)
+				.serviceOptions(options);
+		
+		builder.debug();
+		builder.serializerFactory(new JmxSerializerFactory());
+
+		final Set<String> channelOptions = new HashSet();
+		channelOptions.add("SO_REUSE");
+		channelOptions.add("TCP_NODELAY");
+		client = new DefaultClient<MBeanServerConnection>(
+				NioSocketChannel.class, builder, channelOptions);
+
+
+	}
+
+	private void doConnected()
+	{
+
+		// if we do not have a port: use discovery
+		lock.lock();
+		// we will be using a synchronous service
+		try
+		{
+			mbeanServer = client.proxy();
+			connected.signal();
+		}
+		catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		lock.unlock();
+		if (_connectListener != null)
+			_connectListener.run();
+	}
+	
+	public void start() throws Exception
+	{
+		client.disconnectedListener(new ConnectListener()
 		{
 			public void run()
 			{
 				try
 				{
+					System.out.println("disconnected listener");
 					close();
+					mbeanServer = null;
 					if (discovery != null)
 					{
 						if (currentHost != null)
 							discovery.removeHost(currentHost);
 						discovery.start();
 					}
+					if (_disconnectListener != null)
+						_disconnectListener.run();
 				}
 				catch (Exception e)
 				{
 					e.printStackTrace();
 				}
 			}
-		});
 
-		factory.setConnectedListener(new Runnable()
+			@Override
+			public void run(Channel channel)
+			{
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		client.connectedListener(new ConnectListener()
 		{
 
 			public void run()
@@ -71,18 +135,19 @@ public class AHessianJmxClient implements BootstrapProvider
 				doConnected();
 			}
 
+			@Override
+			public void run(Channel channel)
+			{
+				// TODO Auto-generated method stub
+				
+			}
+
 		});
-
-		bootstrap.setOption("reuseAddress", true);
-		bootstrap.setOption("tcpNoDelay", true);
-
-		// if we do not have a port: use discovery
-		if (port == 0)
+		if (_port == 0)
 		{
 			discovery = new DiscoveryClient();
-			bootstrap.setPipelineFactory(new AHessianClientPipelineFactory(executor, factory, null));
 
-			discovery.setName(discoveryName);
+			discovery.setName(_discoveryName);
 			discovery.addListener(new DiscoveryListener()
 			{
 				// we have discovered our mbean server
@@ -95,7 +160,8 @@ public class AHessianJmxClient implements BootstrapProvider
 						int port = Integer.parseInt(x[2]);
 						String hostName = x[1];
 						// try to connect
-						ChannelFuture future = bootstrap.connect(new InetSocketAddress(hostName, port));
+						client.setRemoteAddress(hostName, port);
+						client.start();
 						// future.await(10000);
 
 						// stop discovery
@@ -115,24 +181,10 @@ public class AHessianJmxClient implements BootstrapProvider
 		// if we have a port connect to that port
 		else
 		{
-			bootstrap.setOption("remoteAddress", new InetSocketAddress("localhost", port));
-			bootstrap.setPipelineFactory(new AHessianClientPipelineFactory(executor, factory, this, new HashedWheelTimer()));
-			bootstrap.connect();
+			client.setRemoteAddress("127.0.0.1", _port);
+			client.start();
 		}
-	}
 
-	private void doConnected()
-	{
-		lock.lock();
-		Map options = new HashMap();
-		options.put("sync", true);
-		options.put("timeout", (long) 2000);
-		// we will be using a synchronous service
-		AsyncMBeanServerConnection asyncService = (AsyncMBeanServerConnection) factory.create(AsyncMBeanServerConnection.class,
-				AHessianJmxClient.class.getClassLoader(), options);
-		mbeanServer = new MBeanServerConnectionAsyncAdapter(asyncService);
-		connected.signal();
-		lock.unlock();
 	}
 
 	public MBeanServerConnection getMBeanServer()
@@ -157,27 +209,50 @@ public class AHessianJmxClient implements BootstrapProvider
 
 	public void close()
 	{
-		factory.setBlocked(true);
-		factory.invalidateAllPendingCalls();
-		factory.invalidateProxies();
-		mbeanServer = null;
-		if (factory.getChannel() != null && factory.getChannel().isConnected())
-			factory.getChannel().close();
+		client.close();
 	}
 
 	public void open()
 	{
-		factory.setBlocked(false);
+		client.unblock();
 	}
 
 	public void stop()
 	{
 		stop = true;
 	}
-
-	public ClientBootstrap getBootstrap()
+	
+	public static void main(String[] args) throws Exception
 	{
-		return bootstrap;
+		AHessianJmxClient _ahessianClient = new AHessianJmxClient("test", 15010, false, null);
+		MBeanServerConnection jmxc = _ahessianClient.getMBeanServer();
+		MBeanServerDelegateMBean proxy = (MBeanServerDelegateMBean) MBeanServerInvocationHandler.newProxyInstance(jmxc, new ObjectName("JMImplementation:type=MBeanServerDelegate"),
+				MBeanServerDelegateMBean.class, false);
+		System.out.println(proxy.getMBeanServerId());
+/*		boolean ok = false;
+		while (true)
+		try
+		{
+		System.out.println(proxy.getMBeanServerId());
+		ok = true;
+		Thread.sleep(1000);
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+			Thread.sleep(1000);
+		}
+		*/
+	}
+
+	public void setConnectListener(Runnable connectListener)
+	{
+		_connectListener = connectListener;
+	}
+
+	public void setDisconnectListener(Runnable disconnectListener)
+	{
+		_disconnectListener = disconnectListener;
 	}
 
 }

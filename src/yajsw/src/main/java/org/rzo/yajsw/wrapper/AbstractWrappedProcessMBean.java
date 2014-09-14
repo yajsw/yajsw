@@ -2,6 +2,7 @@ package org.rzo.yajsw.wrapper;
 
 import java.awt.Color;
 import java.util.Date;
+import java.util.List;
 
 public interface AbstractWrappedProcessMBean
 {
@@ -78,7 +79,7 @@ public interface AbstractWrappedProcessMBean
 
 	public void startDrain();
 
-	public String readDrainLine();
+	public List<String> readDrainLine();
 
 	public void stopDrain();
 

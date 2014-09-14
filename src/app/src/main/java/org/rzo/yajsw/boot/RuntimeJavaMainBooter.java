@@ -3,8 +3,6 @@ package org.rzo.yajsw.boot;
 import java.lang.reflect.Method;
 import java.net.URLClassLoader;
 
-import org.rzo.yajsw.boot.WrapperLoader;
-
 public class RuntimeJavaMainBooter
 {
 	public static void main(String[] args)

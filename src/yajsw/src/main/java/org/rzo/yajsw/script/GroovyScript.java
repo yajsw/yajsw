@@ -13,6 +13,7 @@ package org.rzo.yajsw.script;
 import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
+import io.netty.util.internal.logging.InternalLogger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +29,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs2.FileName;
 import org.apache.commons.vfs2.FileObject;
 import org.codehaus.groovy.control.CompilationFailedException;
-import org.jboss.netty.logging.InternalLogger;
 import org.rzo.yajsw.boot.WrapperLoader;
 import org.rzo.yajsw.util.VFSUtils;
 import org.rzo.yajsw.wrapper.WrappedJavaProcess;

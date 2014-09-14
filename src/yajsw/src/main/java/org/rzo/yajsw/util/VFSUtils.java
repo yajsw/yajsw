@@ -1,13 +1,12 @@
 package org.rzo.yajsw.util;
 
+import io.netty.util.internal.logging.InternalLogger;
+
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-import org.apache.commons.vfs2.CacheStrategy;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSelectInfo;
 import org.apache.commons.vfs2.FileSelector;
@@ -19,7 +18,6 @@ import org.apache.commons.vfs2.cache.OnCallRefreshFileObject;
 import org.apache.commons.vfs2.impl.DefaultFileSystemManager;
 import org.apache.commons.vfs2.provider.http.HttpFileSystemConfigBuilder;
 import org.apache.commons.vfs2.provider.local.LocalFile;
-import org.jboss.netty.logging.InternalLogger;
 
 
 public class VFSUtils

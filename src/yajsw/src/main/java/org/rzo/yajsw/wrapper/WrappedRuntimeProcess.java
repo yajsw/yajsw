@@ -3,6 +3,7 @@ package org.rzo.yajsw.wrapper;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -29,17 +30,24 @@ public class WrappedRuntimeProcess extends AbstractWrappedProcess
 		}
 		// TODO check if c exists - search in PATH
 		command.add(c);
-		for (Iterator it = _config.getKeys("wrapper.app.parameter"); it
-				.hasNext();)
+		
+		ArrayList keys = new ArrayList();
+		for (Iterator it = _config.getKeys("wrapper.app.parameter"); it.hasNext();)
 		{
-			String p = _config.getString((String) it.next());
-			if (p != null)
+			keys.add(it.next());
+		}
+		Collections.sort(keys, new AlphanumComparator());
+		for (Iterator it = keys.listIterator(); it.hasNext();)
+		{
+			String arg = _config.getString((String) it.next());
+			if (arg != null)
 			{
-				p = p.trim();
-				if (p.length() > 0)
-					command.add(p);
+				arg = arg.trim();
+				if (arg.length() > 0)
+					command.add(arg);
 			}
 		}
+
 		String[] arrCmd = new String[command.size()];
 		for (int i = 0; i < arrCmd.length; i++)
 			arrCmd[i] = (String) command.get(i);

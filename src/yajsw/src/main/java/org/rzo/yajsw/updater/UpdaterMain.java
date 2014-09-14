@@ -1,24 +1,14 @@
 package org.rzo.yajsw.updater;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.apache.commons.configuration.FileOptionsProvider;
-import org.apache.commons.configuration.FileSystem;
-import org.apache.commons.configuration.VFSFileSystem;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSelectInfo;
 import org.apache.commons.vfs2.FileSelector;
-import org.apache.commons.vfs2.FileSystemException;
 import org.rzo.yajsw.boot.WrapperLoader;
 import org.rzo.yajsw.config.YajswConfigurationImpl;
-import org.rzo.yajsw.os.ms.win.w32.WindowsXPProcess;
-import org.rzo.yajsw.util.CommonsLoggingAdapter;
 import org.rzo.yajsw.util.VFSUtils;
 import org.rzo.yajsw.wrapper.WrappedService;
-
-import com.sun.jna.PlatformEx;
 
 public class UpdaterMain
 {

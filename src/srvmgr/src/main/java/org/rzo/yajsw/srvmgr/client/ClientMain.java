@@ -1,10 +1,20 @@
 package org.rzo.yajsw.srvmgr.client;
 
 
+import org.rzo.netty.ahessian.application.jmx.remote.service.JmxSerializerFactory;
+import org.rzo.netty.ahessian.bootstrap.ChannelPipelineFactoryBuilder;
+import org.rzo.netty.ahessian.bootstrap.DefaultClient;
 import org.rzo.netty.ahessian.rpc.client.HessianProxyFactory;
+import org.rzo.netty.ahessian.rpc.server.HessianRPCServiceHandler.ConnectListener;
 import org.rzo.netty.mcast.discovery.DiscoveryClient;
 import org.rzo.netty.mcast.discovery.DiscoveryListener;
 import org.rzo.netty.mcast.discovery.DiscoveryServer;
+
+import io.netty.channel.Channel;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.internal.logging.InternalLoggerFactory;
+import io.netty.util.internal.logging.SimpleLogger;
+import io.netty.util.internal.logging.SimpleLoggerFactory;
 
 import java.awt.BorderLayout;
 import java.awt.Dialog.ModalityType;
@@ -19,6 +29,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,18 +49,13 @@ import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.management.MBeanServerConnection;
 import javax.swing.AbstractAction;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
-
-import org.jboss.netty.bootstrap.ClientBootstrap;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
-import org.jboss.netty.channel.socket.oio.OioClientSocketChannelFactory;
 
 import org.rzo.yajsw.os.ServiceInfo;
 import org.rzo.yajsw.srvmgr.server.ServiceManagerServer;
@@ -59,7 +65,7 @@ public class ClientMain
 	static ServicesTable servicesTable;
 	static HostsTable hosts;
 	static HiddenTable hidden;
-	static HashMap<String, AsyncServiceManagerServer>proxies = new HashMap<String, AsyncServiceManagerServer>();
+	static HashMap<String, DefaultClient>proxies = new HashMap<String, DefaultClient>();
 	static final JFrame frame = new JFrame("Services Manager");
 	static Set<String> configurations =  new HashSet<String>();
 	static ExecutorService executor = Executors.newCachedThreadPool();
@@ -68,6 +74,7 @@ public class ClientMain
 
 	public static void main(String[] args) throws Exception
 	{
+		InternalLoggerFactory.setDefaultFactory(new SimpleLoggerFactory());
 	    ExecutorService executor = Executors.newCachedThreadPool();
 	    ServicesForm form = new ServicesForm();
 	    
@@ -117,7 +124,7 @@ public class ClientMain
 					newHost.setState(host.getState());
 					newHost.setIncluded(true);
 					hosts.updateObject(newHost);
-					servicesTable.addService(host.getName(), proxies.get(host.getName()));
+					servicesTable.addService(host.getName(), getProxy(host.getName()));
 				}
 				saveData();
 			}	    	
@@ -170,7 +177,7 @@ public class ClientMain
 			{
 				for (ServiceInfo service : servicesTable.getSelection())
 				try {
-					proxies.get(service.getHost()).start(service.getName());
+					getProxy(service.getHost()).start(service.getName());
 				}
 				catch (Exception ex)
 				{
@@ -185,7 +192,7 @@ public class ClientMain
 			{
 				for (ServiceInfo service : servicesTable.getSelection())
 				try {
-					proxies.get(service.getHost()).stop(service.getName());
+					getProxy(service.getHost()).stop(service.getName());
 				}
 				catch (Exception ex)
 				{
@@ -232,9 +239,9 @@ public class ClientMain
 			{
 				try
 				{
-					String[] x = host.split(":");
-				int port = Integer.parseInt(x[1]);
-				String name = InetAddress.getByName(x[0]).getHostName();
+					String[] x = host.split("&");
+				int port = Integer.parseInt(x[2]);
+				String name = InetAddress.getByName(x[1]).getHostName();
 				synchronized(hosts)
 				{
 					Host newHost = new Host(name, port);
@@ -259,6 +266,8 @@ public class ClientMain
         	
         });
         discovery.init();
+        discovery.setDebug(true);
+        discovery.setLogger(new SimpleLogger());
         discovery.start();
 
 
@@ -348,7 +357,7 @@ public class ClientMain
 				uninstall._SERVICES.setText("");
 	        	for (ServiceInfo info : selected)
 	        	{
-	    			AsyncServiceManagerServer proxy = proxies.get(info.getHost());
+	    			AsyncServiceManagerServer proxy = getProxy(info.getHost());
 	    			if (proxy != null)
 	    			{
 	    				boolean result = false;
@@ -409,7 +418,7 @@ public class ClientMain
 			public void actionPerformed(ActionEvent e)
 			{
 				reloadConsole._OK_BUTTON.setEnabled(false);
-    			AsyncServiceManagerServer proxy = proxies.get(selected.getHost());
+    			AsyncServiceManagerServer proxy = getProxy(selected.getHost());
 				boolean result = false;
 				try
 				{
@@ -480,7 +489,7 @@ public class ClientMain
 	    		for (int i : selInd)
 	    		{
 	    			install._MESSAGE.setText(install._MESSAGE.getText()+ " - " + listData.get(i) + ": ");
-	    			AsyncServiceManagerServer proxy = proxies.get(listData.get(i));
+	    			AsyncServiceManagerServer proxy = getProxy(listData.get(i));
 	    			if (proxy != null)
 	    			{
 	    				boolean result = false;
@@ -569,15 +578,35 @@ public class ClientMain
 		}	
 		
 	}
+	
+	private static AsyncServiceManagerServer getProxy(String name)
+	{
+		DefaultClient client = proxies.get(name);
+		if (client == null)
+			return null;
+		try
+		{
+			return (AsyncServiceManagerServer) client.proxy();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 	private static void updateHosts() 
 	{
 		boolean changed = false;
+		Collection<Host> list;
 		synchronized(hosts)
 		{
-		for (Host host : hosts.getObjectList())
+			list = new ArrayList(hosts.getObjectList());
+		}
 		{
-			AsyncServiceManagerServer proxy = proxies.get(host.getName());
+		for (Host host :list)
+		{
+			AsyncServiceManagerServer proxy = getProxy(host.getName());
 			boolean connected = false;
 			if (proxy != null)
 			{
@@ -591,53 +620,100 @@ public class ClientMain
 					e.printStackTrace();
 				}
 			}
-			else
+			if (!connected)
 			{
-			    ClientBootstrap bootstrap = new ClientBootstrap(
-			            new NioClientSocketChannelFactory(
-			            		executor,
-			            		executor));
-			    
-			    HessianProxyFactory factory = new HessianProxyFactory(executor, host.getName()+":"+host.getPort());
-			    bootstrap.setPipelineFactory(
-			            new RPCClientPipelineFactory(executor, factory));
-			    
-			     // Start the connection attempt.
-			    ChannelFuture future = bootstrap.connect(new InetSocketAddress(host.getName(), host.getPort()));
-			    try
+				
+				final ChannelPipelineFactoryBuilder<MBeanServerConnection> builder = new ChannelPipelineFactoryBuilder<MBeanServerConnection>()
+						.serviceThreads(10) //.reconnect(10)
+						.rpcServiceInterface(AsyncServiceManagerServer.class)
+						//.serviceOptions(options)
+						;
+				
+				builder.debug();
+
+				final Set<String> channelOptions = new HashSet();
+				channelOptions.add("SO_REUSE");
+				channelOptions.add("TCP_NODELAY");
+				final DefaultClient client = new DefaultClient<MBeanServerConnection>(
+						NioSocketChannel.class, builder, channelOptions);
+				client.setRemoteAddress(host.getName(), host.getPort());
+				final Host mHost = host;
+				proxies.put(mHost.getName(), client);
+				
+				client.connectedListener(new ConnectListener()
 				{
-					future.await(10000);
-					connected = future.isSuccess();
-
-
-					if (connected)
+					
+					@Override
+					public void run()
 					{
-					    Map options = new HashMap();
-						proxy = (AsyncServiceManagerServer) factory.create(AsyncServiceManagerServer.class, ClientMain.class.getClassLoader(), options);
-						connected = ((Boolean)((Future)proxy.isServiceManager()).get(10, TimeUnit.SECONDS)).booleanValue();
-						if (connected)
+						executor.execute(new Runnable()
 						{
-						proxies.put(host.getName(), proxy);
-						Host newHost = new Host(host.getName(), host.getPort());
-						newHost.setIncluded(host.isIncluded());
-						newHost.setState("CONNECTED");
-						hosts.updateObject(newHost);
-						if (host.isIncluded())
-							servicesTable.addService(host.getName(), proxy);
-						}
-						else
-							future.getChannel().close();
+							
+							@Override
+							public void run()
+							{
+								try
+								{
+								AsyncServiceManagerServer proxy = (AsyncServiceManagerServer) client.proxy();
+								boolean connected = ((Boolean)((Future)proxy.isServiceManager()).get(10, TimeUnit.SECONDS)).booleanValue();
+								if (connected)
+								{
+								Host newHost = new Host(mHost.getName(), mHost.getPort());
+								newHost.setIncluded(mHost.isIncluded());
+								newHost.setState("CONNECTED");
+								hosts.updateObject(newHost);
+								if (mHost.isIncluded())
+									servicesTable.addService(mHost.getName(), proxy);
+								}
+								else
+									client.close();
+								}
+								catch (Exception ex)
+								{
+									ex.printStackTrace();
+								}
+							}
+						});
 					}
+
+					@Override
+					public void run(Channel channel)
+					{
+						// TODO Auto-generated method stub
+						
+					}
+				});
+				
+				client.disconnectedListener(new ConnectListener()
+				{
+					
+					@Override
+					public void run()
+					{
+						disconnect(mHost, client);
+					}
+
+					@Override
+					public void run(Channel channel)
+					{
+						// TODO Auto-generated method stub
+						
+					}
+				});
+				
+				try
+				{
+					System.out.println("start client: "+host.getName()+":"+host.getPort());
+					client.start();
+					connected = true;
 				}
 				catch (Exception e)
 				{
-					System.out.println("error accessing "+host.getName());
-					connected = false;
-					if (future != null)
-						future.getChannel().close();
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-				
 			}
+
 				
 			if (!connected)
 			{
@@ -655,10 +731,13 @@ public class ClientMain
 		}
 	}
 	
-	private static void disconnect(Host host, AsyncServiceManagerServer proxy)
+	private static void disconnect(Host host, DefaultClient client)
 	{
-		if (proxy != null)
-			servicesTable.removeService(host.getName());
+		System.out.println("disconnect "+host.getName()+":"+host.getPort());
+		if (client != null)
+			client.close();
+		servicesTable.removeService(host.getName());
+		proxies.remove(host.getName());
 		Host newHost = new Host(host.getName(), host.getPort());
 		newHost.setIncluded(host.isIncluded());
 		newHost.setState("DISCONNECTED");

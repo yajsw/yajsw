@@ -1,5 +1,7 @@
 package org.rzo.netty.ahessian.rpc.stream;
 
+import io.netty.channel.Channel;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,7 +9,6 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.jboss.netty.channel.Channel;
 
 public class ServerInputStream
 {
@@ -49,7 +50,7 @@ public class ServerInputStream
 			}
 			try
 			{
-				Thread.sleep(500);
+				Thread.sleep(100);
 			}
 			catch (Exception ex)
 			{

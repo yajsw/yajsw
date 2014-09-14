@@ -1,13 +1,13 @@
 package org.rzo.netty.ahessian.serialization;
 
+import io.netty.channel.ChannelHandlerAdapter;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.ChannelPromise;
+
 import java.io.OutputStream;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelDownstreamHandler;
-import org.rzo.netty.ahessian.io.OutputStreamEncoder;
+import org.rzo.netty.ahessian.io.OutputStreamHandler;
 
 import com.caucho.hessian4.io.HessianOutput;
 
@@ -37,18 +37,16 @@ import com.caucho.hessian4.io.HessianOutput;
  * }
  * </pre>
  */
-public class HessianEncoder extends SimpleChannelDownstreamHandler
+public class HessianEncoder extends ChannelHandlerAdapter
 {
-
-    /* (non-Javadoc)
-     * @see org.jboss.netty.channel.SimpleChannelDownstreamHandler#writeRequested(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.MessageEvent)
-     */
-    public void writeRequested(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-		OutputStream out = OutputStreamEncoder.getOutputStream(ctx);
+	
+	@Override
+	public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise future) throws Exception
+	{
+	   	OutputStream out = OutputStreamHandler.getOutputStream(ctx);
 		HessianOutput hout = new HessianOutput(out);
-		hout.writeObject(e.getMessage());
-		hout.flush();
-    }
-
+		hout.writeObject(msg);
+		hout.flush(future);
+	}
 
 }

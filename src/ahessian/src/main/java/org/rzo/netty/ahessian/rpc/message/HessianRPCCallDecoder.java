@@ -1,23 +1,22 @@
 package org.rzo.netty.ahessian.rpc.message;
 
+import io.netty.channel.ChannelHandlerContext;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.Channels;
 import org.rzo.netty.ahessian.Constants;
 import org.rzo.netty.ahessian.io.InputStreamConsumer;
-import org.rzo.netty.ahessian.io.InputStreamDecoder;
-import org.rzo.netty.ahessian.io.OutputStreamEncoder;
+import org.rzo.netty.ahessian.io.InputStreamHandler;
+import org.rzo.netty.ahessian.io.OutputStreamHandler;
 import org.rzo.netty.ahessian.rpc.io.Hessian2Input;
 import org.rzo.netty.ahessian.rpc.server.HessianRPCServiceHandler;
 import org.rzo.netty.ahessian.session.ServerSessionFilter;
 
 import com.caucho.hessian4.io.AbstractSerializerFactory;
-import com.caucho.hessian4.io.HessianProtocolException;
 import com.caucho.hessian4.io.SerializerFactory;
 
 /**
@@ -54,7 +53,7 @@ public class HessianRPCCallDecoder implements InputStreamConsumer, Constants
 		in = new Hessian2Input(inx);
 		in.setSerializerFactory(sFactory);
 		}
-		while (ctx.getChannel().isConnected() && getNextMessage)
+		while (ctx.channel().isActive() && getNextMessage)
 		{
 		try
 		{
@@ -106,11 +105,11 @@ public class HessianRPCCallDecoder implements InputStreamConsumer, Constants
 	   in.completeEnvelope();
 
 	   in.resetReferences();
-	    result = new HessianRPCCallMessage(methodName, values.toArray(), headers, (OutputStreamEncoder) OutputStreamEncoder.getOutputEncoder(ctx));
+	    result = new HessianRPCCallMessage(methodName, values.toArray(), headers, (OutputStreamHandler) OutputStreamHandler.getOutputEncoder(ctx));
 	    result.setServer(true);
 	    result.setHasSessionFilter((Boolean) headers.get(HAS_SESSION_FILTER_HEADER_KEY));
 	    result.setSession(ServerSessionFilter.getSession(ctx));
-	    result.setHandler(InputStreamDecoder.getHandler(ctx));
+	    result.setHandler(InputStreamHandler.getHandler(ctx));
 		}
 		catch (Exception ex)
 		{
@@ -122,7 +121,10 @@ public class HessianRPCCallDecoder implements InputStreamConsumer, Constants
 			getNextMessage = false;
 		}
 			if (result != null)
-		    Channels.fireMessageReceived(ctx, result);
+			{
+				//System.out.println("got call "+result);
+		    	ctx.fireChannelRead(result);
+			}
 		}
     }
 
@@ -136,7 +138,7 @@ public class HessianRPCCallDecoder implements InputStreamConsumer, Constants
 	{
 		if (in == null)
 		{
-			in = new Hessian2Input(InputStreamDecoder.getInputStream(ctx));
+			in = new Hessian2Input(InputStreamHandler.getInputStream(ctx));
 			in.setSerializerFactory(sFactory);
 		}
 	}

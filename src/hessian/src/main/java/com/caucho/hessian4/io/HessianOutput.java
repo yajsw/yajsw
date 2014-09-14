@@ -48,9 +48,14 @@
 
 package com.caucho.hessian4.io;
 
+import io.netty.channel.ChannelPromise;
+import io.netty.util.concurrent.Future;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.IdentityHashMap;
+
+//import org.rzo.netty.ahessian.io.OutputStreamBuffer;
 
 /**
  * Output stream for Hessian requests, compatible with microedition
@@ -958,11 +963,18 @@ public class HessianOutput extends AbstractHessianOutput {
   }
 
   public void flush()
-    throws IOException
-  {
-    if (this.os != null)
-      this.os.flush();
-  }
+		    throws IOException
+		  {
+		    if (this.os != null)
+		      this.os.flush();
+		  }
+
+  public void flush(ChannelPromise future)
+		    throws IOException
+		  {
+		    if (this.os != null)
+		      ((FlushableOutput)this.os).flush(future);
+		  }
 
   public void close()
     throws IOException

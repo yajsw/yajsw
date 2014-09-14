@@ -1,25 +1,21 @@
 package org.rzo.netty.mcast.bridge;
 
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Executors;
 
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFactory;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.ChildChannelStateEvent;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.rzo.netty.ahessian.Constants;
+import org.rzo.netty.ahessian.bootstrap.ChannelPipelineFactory;
 import org.rzo.netty.mcast.MulticastEndpoint;
 
 public class MulticastAccessPoint
@@ -32,61 +28,73 @@ public class MulticastAccessPoint
 	{
 		int port = Integer.parseInt(args[0]);
 		
-		ChannelFactory factory =
-            new NioServerSocketChannelFactory(
-                    Executors.newCachedThreadPool(),
-                    Executors.newCachedThreadPool());
+        EventLoopGroup bossGroup = new NioEventLoopGroup();
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-        ServerBootstrap bootstrap = new ServerBootstrap(factory);
+        ServerBootstrap bootstrap = new ServerBootstrap();
+        bootstrap.group(bossGroup, workerGroup)
+        .channel(NioServerSocketChannel.class);
         
-        bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
-            public ChannelPipeline getPipeline() {
-                return Channels.pipeline(new SimpleChannelUpstreamHandler()
+        bootstrap.childHandler(new ChannelPipelineFactory() {
+            public HandlerList getPipeline() {
+                return ChannelPipelineFactory.handlerList(new SimpleChannelInboundHandler()
                 {
+
+                	
     				@Override
-    				public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception
+    				public void messageReceived(ChannelHandlerContext ctx, Object e) throws Exception
     				{
     					if (mcast != null && mcast.isInit())
-    						mcast.send((ChannelBuffer) e.getMessage());
+    						mcast.send((ByteBuf) e);
     				}
     				
     				@Override
-    			    public void childChannelOpen(ChannelHandlerContext ctx, ChildChannelStateEvent e) 
+    			    public void channelActive(ChannelHandlerContext ctx) throws Exception
     				{
-    					remoteChannels.add(ctx.getChannel());
+    					remoteChannels.add(ctx.channel());
     			    }
     				
     				@Override
-    			    public void childChannelClosed(ChannelHandlerContext ctx, ChildChannelStateEvent e) 
+    			    public void channelInactive(ChannelHandlerContext ctx)  throws Exception
     				{
-    					remoteChannels.add(ctx.getChannel());
+    					remoteChannels.add(ctx.channel());
     			    }
     				
     				@Override
-    			    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
+    			    public void exceptionCaught(ChannelHandlerContext paramChannelHandlerContext, Throwable e)
+    			    	    throws Exception
+    			    	{
     			        Throwable cause = e.getCause();
     			        System.out.println(e);    				
     			    }
+    			    
                 });
             }
         });
-        bootstrap.bind(new InetSocketAddress(port));
+        try
+		{
+			bootstrap.bind(new InetSocketAddress(port)).sync();
+		}
+		catch (InterruptedException e1)
+		{
+			e1.printStackTrace();
+		}
         
         try
 		{
 			mcast.init(new ChannelPipelineFactory() {
-			    public ChannelPipeline getPipeline() {
-			        return Channels.pipeline(new SimpleChannelUpstreamHandler()
+			    public HandlerList getPipeline() {
+			        return ChannelPipelineFactory.handlerList(new SimpleChannelInboundHandler()
 			        {
 						@Override
-						public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception
+						public void messageReceived(ChannelHandlerContext ctx, Object e) throws Exception
 						{
-							ChannelBuffer b = mcast.getMessage(e);
+							ByteBuf b = mcast.getMessage((ByteBuf)e);
 							if (b == null)
 								return;
 							for (Channel c : remoteChannels)
 							{
-								if (c.isConnected())
+								if (c.isActive())
 									c.write(b);
 							}
 						}

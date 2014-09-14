@@ -10,8 +10,12 @@
  */
 package org.rzo.yajsw.config;
 
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,33 +26,24 @@ import java.util.Set;
 
 import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.ConfigurationBinding;
 import org.apache.commons.configuration.ConfigurationConverter;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.FileOptionsProvider;
 import org.apache.commons.configuration.FileSystem;
-import org.apache.commons.configuration.GInterpolator;
 import org.apache.commons.configuration.Interpolator;
 import org.apache.commons.configuration.MapConfiguration;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.configuration.VFSFileSystem;
-import org.apache.commons.vfs2.CacheStrategy;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.VFS;
-import org.apache.commons.vfs2.cache.OnCallRefreshFileObject;
 import org.apache.commons.vfs2.impl.DefaultFileSystemManager;
-import org.apache.commons.vfs2.provider.local.LocalFile;
-import org.jboss.netty.logging.InternalLogger;
-import org.jboss.netty.logging.InternalLoggerFactory;
 import org.rzo.yajsw.config.jnlp.JnlpSupport;
 import org.rzo.yajsw.os.OperatingSystem;
 import org.rzo.yajsw.script.GroovyScript;
 import org.rzo.yajsw.util.CaseInsensitiveMap;
 import org.rzo.yajsw.util.CommonsLoggingAdapter;
 import org.rzo.yajsw.util.VFSUtils;
-
-import com.sun.jna.Platform;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -154,9 +149,10 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 		 */
 		if (_scriptUtils == null)
 			_scriptUtils = new HashMap();
-		_interpolator = new GInterpolator(this, true, null, _scriptUtils);
 		try
 		{
+			// use introspection, so that groovy can be removed from the classpath, if not required
+			_interpolator = createGInterpolatornew(this, true, null, _scriptUtils);
 			this.setInterpolator(_interpolator);
 		}
 		catch (Exception e1)
@@ -272,7 +268,7 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 					if (_interpolator != null)
 						try
 						{
-							_fileConfiguration.setInterpolator(new GInterpolator(_fileConfiguration, true, null, _scriptUtils));
+							_fileConfiguration.setInterpolator(createGInterpolatornew(_fileConfiguration, true, null, _scriptUtils));
 						}
 						catch (Exception e)
 						{
@@ -304,7 +300,7 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 						if (_interpolator != null)
 							try
 							{
-								_fileConfiguration.setInterpolator(new GInterpolator(_fileConfiguration, true, null, _scriptUtils));
+								_fileConfiguration.setInterpolator(createGInterpolatornew(_fileConfiguration, true, null, _scriptUtils));
 							}
 							catch (Exception e)
 							{
@@ -373,6 +369,24 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 		
 
 		_init = true;
+	}
+
+	private Interpolator createGInterpolatornew(
+			Configuration conf, boolean b,
+			String[] object, Map utils)
+	{
+		Interpolator result =  null;
+		try
+		{
+			Class clazz = conf.getClass().getClassLoader().loadClass("org.apache.commons.configuration.GInterpolator");
+			Constructor rc = clazz.getDeclaredConstructor(Configuration.class, boolean.class, String[].class, Map.class);
+			result = (Interpolator) rc.newInstance(conf, b, object, utils);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return result;
 	}
 
 	private boolean fileExists(String file)
@@ -477,8 +491,8 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 	{
 		if (_interpolator != null)
 		{
-			Map<String, String> result = ((ConfigurationBinding)((GInterpolator)_interpolator).getBinding()).getUsedEnvVars();
-			result.putAll(((GInterpolator)_interpolator).getFromBinding());
+			Map<String, String> result = _interpolator.getUsedEnvVars();
+			result.putAll(_interpolator.getFromBinding());
 		return result;
 		}
 		return new HashMap<String, String>();

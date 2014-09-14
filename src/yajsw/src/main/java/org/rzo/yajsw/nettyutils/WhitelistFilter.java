@@ -10,23 +10,20 @@
  */
 package org.rzo.yajsw.nettyutils;
 
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerAdapter;
+import io.netty.channel.ChannelHandlerContext;
+
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipelineCoverage;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-
 /**
  * The Class WhitelistFilter.
  */
-@ChannelPipelineCoverage("all")
-public class WhitelistFilter extends SimpleChannelUpstreamHandler
+public class WhitelistFilter extends ChannelHandlerAdapter
 {
 
 	/** The whitelist. */
@@ -106,17 +103,17 @@ public class WhitelistFilter extends SimpleChannelUpstreamHandler
 	}
 
 	@Override
-	public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception
+	public void channelActive(ChannelHandlerContext ctx) throws Exception
 	{
-		if (!isBlocked(ctx.getChannel()))
+		if (!isBlocked(ctx.channel()))
 		{
 			// forward if not blocked
-			ctx.sendUpstream(e);
+			ctx.fireChannelActive();
 		}
 		else
 		{
-			System.out.println("connection refused : " + ctx.getChannel().getRemoteAddress());
-			blockSession(ctx.getChannel());
+			System.out.println("connection refused : " + ctx.channel().remoteAddress());
+			blockSession(ctx.channel());
 		}
 	}
 
@@ -128,7 +125,7 @@ public class WhitelistFilter extends SimpleChannelUpstreamHandler
 	 */
 	private void blockSession(Channel session)
 	{
-		SocketAddress remoteAddress = session.getRemoteAddress();
+		SocketAddress remoteAddress = session.remoteAddress();
 		// logger.warn("Remote address " + remoteAddress +
 		// " not in the whitelist; closing.");
 		session.close();
@@ -144,7 +141,7 @@ public class WhitelistFilter extends SimpleChannelUpstreamHandler
 	 */
 	private boolean isBlocked(Channel session)
 	{
-		SocketAddress remoteAddress = session.getRemoteAddress();
+		SocketAddress remoteAddress = session.remoteAddress();
 		if (remoteAddress instanceof InetSocketAddress)
 		{
 			if (whitelist.contains(((InetSocketAddress) remoteAddress).getAddress()))
