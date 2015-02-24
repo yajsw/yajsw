@@ -259,7 +259,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 							+ preScript);
 				Script script = ScriptFactory.createScript(preScript,
 						"wrapper.app.pre.script", null, new String[0], log, 0,
-						"UTF-8", false, _debug);
+						"UTF-8", false, _debug, 1);
 				if (script != null)
 					script.execute();
 				else
@@ -1783,7 +1783,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 			Script script = ScriptFactory.createScript(shutdownScript,
 					"wrapper.app.shutdown.script", null, new String[0], log, 0,
 					_config.getString("wrapper.script.encoding"),
-					_config.getBoolean("wrapper.script.reload", false), _debug);
+					_config.getBoolean("wrapper.script.reload", false), _debug, 1);
 			// make sure it is invoked only once
 			// stop may be invoke multiple times
 			shutdownScript = null;
@@ -1812,7 +1812,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 			Script script = ScriptFactory.createScript(scriptFileName, "",
 					null, (String[]) getMainMethodArgs(), null, 0,
 					_config.getString("wrapper.script.encoding"),
-					_config.getBoolean("wrapper.script.reload", false), _debug);
+					_config.getBoolean("wrapper.script.reload", false), _debug, 1);
 			if (script != null)
 				script.execute();
 			else

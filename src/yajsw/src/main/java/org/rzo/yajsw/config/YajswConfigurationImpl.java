@@ -360,7 +360,7 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 			String key = (String) it.next();
 			String script = getString(key);
 			String bind = key.substring(key.lastIndexOf(".")+1);
-			_scriptUtils.put(bind, new GroovyScript(script, "", null, null, 0, log, null, false));
+			_scriptUtils.put(bind, new GroovyScript(script, "", null, null, 0, log, null, false, 1));
 		}
 		catch (Exception e)
 		{

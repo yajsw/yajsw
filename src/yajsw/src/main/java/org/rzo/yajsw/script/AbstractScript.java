@@ -21,6 +21,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.rzo.yajsw.util.DaemonThreadFactory;
 import org.rzo.yajsw.wrapper.WrappedProcess;
@@ -49,6 +50,8 @@ public abstract class AbstractScript implements Script
 			new SynchronousQueue<Runnable>(), new DaemonThreadFactory("scriptExecutorInternal"));
 	volatile Future _future;
 	volatile Timeout _timerTimeout;
+	
+	AtomicInteger _remainingConcInvocations;
 
 
 
@@ -59,7 +62,7 @@ public abstract class AbstractScript implements Script
 	 *            the script
 	 * @param timeout
 	 */
-	public AbstractScript(String script, String id, WrappedProcess process, String[] args, int timeout)
+	public AbstractScript(String script, String id, WrappedProcess process, String[] args, int timeout, int maxConcInvocations)
 	{
 		_name = script;
 		_process = process;
@@ -67,6 +70,7 @@ public abstract class AbstractScript implements Script
 		_args = args;
 		if (timeout > 0)
 			_timeout = timeout * 1000;
+		_remainingConcInvocations = new AtomicInteger(maxConcInvocations);
 	}
 
 	/*
@@ -82,6 +86,11 @@ public abstract class AbstractScript implements Script
 
 	synchronized public void executeWithTimeout(final String line)
 	{
+		if (!checkRemainConc())
+		{
+			log("script: "+_name+ " : too many concurrent invocations -> abort execution");
+			return;
+		}
 		Object result = null;
 		_timerTimeout = TIMER.newTimeout(new TimerTask()
 		{
@@ -109,9 +118,20 @@ public abstract class AbstractScript implements Script
 						if (_timerTimeout != null)
 							_timerTimeout.cancel();
 						_timerTimeout = null;
+						_remainingConcInvocations.decrementAndGet();
 						return result;
 					}
 				});
+	}
+
+	private boolean checkRemainConc()
+	{
+		if (_remainingConcInvocations.decrementAndGet() <= 0)
+		{
+			_remainingConcInvocations.incrementAndGet();
+			return false;
+		}
+		return true;
 	}
 
 	/*

@@ -138,5 +138,7 @@ public interface Constants
 
 	public static final boolean	DEFAULT_CONSOLE_MINIMIZED	= false;
 
+	public static final int MAX_CONC_INVOC = 5;
+
 
 }

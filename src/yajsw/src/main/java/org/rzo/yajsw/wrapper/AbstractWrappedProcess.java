@@ -434,7 +434,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			final Script script = ScriptFactory.createScript(clusterScript, "",
 					this, args, getInternalWrapperLogger(), timeout,
 					_config.getString("wrapper.script.encoding"),
-					_config.getBoolean("wrapper.script.reload", false), _debug);
+					_config.getBoolean("wrapper.script.reload", false), _debug, Constants.MAX_CONC_INVOC);
 			if (script == null)
 				return;
 			try
@@ -548,13 +548,14 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 				String value = _config.getString(key);
 				List args = _config.getList(key + ".args", new ArrayList());
 				int timeout = _config.getInt(key + ".timeout", 0);
+				int maxConcInvoc = _config.getInt(key + ".maxConcInvoc", Constants.MAX_CONC_INVOC);
 
 				String state = key.substring(key.lastIndexOf(".") + 1);
 				final Script script = ScriptFactory.createScript(value, state,
 						this, args, getInternalWrapperLogger(), timeout,
 						_config.getString("wrapper.script.encoding"),
 						_config.getBoolean("wrapper.script.reload", false),
-						_debug);
+						_debug, maxConcInvoc);
 				int iState = toIntState(state);
 				if (iState >= 0 && script != null)
 					addStateChangeListenerInternal(iState,
@@ -1722,6 +1723,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			String sValue = _config.getString(sKey, "");
 			List args = _config.getList(sKey + ".args", null);
 			int timeout = _config.getInt(sKey + ".timeout", 0);
+			int maxConcInvoc = _config.getInt(sKey + ".maxConcInvoc", Constants.MAX_CONC_INVOC);
 			String[] strArgs = null;
 			if (args != null && args.size() > 0)
 			{
@@ -1729,7 +1731,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 				for (int i = 0; i < strArgs.length; i++)
 					strArgs[i] = args.get(i).toString();
 			}
-			Object script = getTriggerScript(sValue, tName, strArgs, timeout);
+			Object script = getTriggerScript(sValue, tName, strArgs, timeout, maxConcInvoc);
 			if (action != null || script != null)
 			{
 				result.put(tValue, new MissingTriggerAction(tName, executor,
@@ -1794,6 +1796,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			String sValue = _config.getString(sKey, "");
 			List args = _config.getList(sKey + ".args", null);
 			int timeout = _config.getInt(sKey + ".timeout", 0);
+			int maxConcInv = _config.getInt(sKey + ".maxConcInv", Constants.MAX_CONC_INVOC);
 			String[] strArgs = null;
 			if (args != null && args.size() > 0)
 			{
@@ -1801,7 +1804,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 				for (int i = 0; i < strArgs.length; i++)
 					strArgs[i] = args.get(i).toString();
 			}
-			Object script = getTriggerScript(sValue, tName, strArgs, timeout);
+			Object script = getTriggerScript(sValue, tName, strArgs, timeout, maxConcInv);
 			if (action != null || script != null)
 			{
 				result.put(tValue, new MissingTriggerAction(tName, executor,
@@ -1853,6 +1856,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			String sValue = _config.getString(sKey, "");
 			List args = _config.getList(sKey + ".args", null);
 			int timeout = _config.getInt(sKey + ".timeout", 0);
+			int maxConcInvoc = _config.getInt(sKey + ".maxConcInvoc", 0);
 			String[] strArgs = null;
 			if (args != null && args.size() > 0)
 			{
@@ -1860,7 +1864,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 				for (int i = 0; i < strArgs.length; i++)
 					strArgs[i] = args.get(i).toString();
 			}
-			Object script = getTriggerScript(sValue, tName, strArgs, timeout);
+			Object script = getTriggerScript(sValue, tName, strArgs, timeout, maxConcInvoc);
 			if (action != null && script != null)
 			{
 				addToActionMap(result, tValue,
@@ -1937,6 +1941,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			String sValue = _config.getString(sKey, "");
 			List args = _config.getList(sKey + ".args", null);
 			int timeout = _config.getInt(sKey + ".timeout", 0);
+			int maxConcInvoc = _config.getInt(sKey + ".maxConcInvoc", Constants.MAX_CONC_INVOC);
 			String[] strArgs = null;
 			if (args != null && args.size() > 0)
 			{
@@ -1945,7 +1950,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 					strArgs[i] = args.get(i).toString();
 			}
 
-			Object script = getTriggerScript(sValue, tName, strArgs, timeout);
+			Object script = getTriggerScript(sValue, tName, strArgs, timeout, maxConcInvoc);
 			if (action != null && script != null)
 			{
 				addToActionMap(result, tValue,
@@ -1972,7 +1977,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	 * @return the trigger script
 	 */
 	private Object getTriggerScript(String script, final String key,
-			String[] args, int timeout)
+			String[] args, int timeout, int maxConcInvoc)
 	{
 		if (script == null || "".equals(script))
 			return null;
@@ -1981,7 +1986,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		final Script s = ScriptFactory.createScript(script, key, this, args,
 				getInternalWrapperLogger(), timeout,
 				_config.getString("wrapper.script.encoding"),
-				_config.getBoolean("wrapper.script.reload", false), _debug);
+				_config.getBoolean("wrapper.script.reload", false), _debug, maxConcInvoc);
 		if (s == null)
 		{
 			this.getWrapperLogger().info("error initializing script " + script);
@@ -2802,7 +2807,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			_restartDelayScript = ScriptFactory.createScript(script, "", this,
 					args, getInternalWrapperLogger(), 0,
 					_config.getString("wrapper.script.encoding"),
-					_config.getBoolean("wrapper.script.reload", false), _debug);
+					_config.getBoolean("wrapper.script.reload", false), _debug, Constants.MAX_CONC_INVOC);
 		}
 		return _restartDelayScript;
 	}

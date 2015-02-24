@@ -32,18 +32,18 @@ public class ScriptFactory
 	 * 
 	 * @return the script
 	 */
-	public static Script createScript(String script, String id, WrappedProcess process, String[] args, InternalLogger log, int timeout, String encoding, boolean reload, boolean debug)
+	public static Script createScript(String script, String id, WrappedProcess process, String[] args, InternalLogger log, int timeout, String encoding, boolean reload, boolean debug, int maxConcInvocations)
 	{
 		if (script == null || "".equals(script))
 			return null;
 		if (log != null && debug)
 			log.info("create script: " + script);
 		if (script.endsWith(".bat") || script.endsWith(".sh"))
-			return new ShellScript(script, id, process, args, timeout);
+			return new ShellScript(script, id, process, args, timeout, maxConcInvocations);
 		if (script.endsWith(".gv") || script.endsWith(".groovy"))
 			try
 			{
-				return new GroovyScript(script, id, process, args, timeout, log, encoding, reload);
+				return new GroovyScript(script, id, process, args, timeout, log, encoding, reload, maxConcInvocations);
 			}
 			catch (Throwable e)
 			{
@@ -53,7 +53,7 @@ public class ScriptFactory
 		return null;
 	}
 
-	public static Script createScript(String script, String id, WrappedProcess process, List args, InternalLogger log, int timeout, String encoding, boolean reload, boolean debug)
+	public static Script createScript(String script, String id, WrappedProcess process, List args, InternalLogger log, int timeout, String encoding, boolean reload, boolean debug, int maxConcInvocations)
 	{
 		String[] argsArr = new String[0];
 		if (args != null && args.size() > 0)
@@ -62,7 +62,7 @@ public class ScriptFactory
 			for (int i = 0; i < argsArr.length; i++)
 				argsArr[i] = args.get(i).toString();
 		}
-		return createScript(script, id, process, argsArr, log, timeout, encoding, reload, debug);
+		return createScript(script, id, process, argsArr, log, timeout, encoding, reload, debug, maxConcInvocations);
 	}
 
 }

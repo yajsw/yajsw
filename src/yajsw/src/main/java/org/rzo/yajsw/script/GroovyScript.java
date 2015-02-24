@@ -66,10 +66,10 @@ public class GroovyScript extends AbstractScript
 	 * @throws InstantiationException
 	 * @throws ClassNotFoundException 
 	 */
-	public GroovyScript(final String script, final String id, final WrappedProcess process, final String[] args, final int timeout, final InternalLogger logger, String encoding, boolean reload) throws CompilationFailedException, IOException,
+	public GroovyScript(final String script, final String id, final WrappedProcess process, final String[] args, final int timeout, final InternalLogger logger, String encoding, boolean reload, int maxConcInvocations) throws CompilationFailedException, IOException,
 			InstantiationException, IllegalAccessException, ClassNotFoundException
 	{
-		super(script, id, process, args, timeout);
+		super(script, id, process, args, timeout, maxConcInvocations);
 		_reload = reload;
 		_encoding = encoding;
 
@@ -211,15 +211,15 @@ public class GroovyScript extends AbstractScript
 		w.getLocalConfiguration().setProperty("wrapper.config", "conf/wrapper.helloworld.conf");
 		w.init();
 		GroovyScript script = new GroovyScript("./scripts/timeCondition.gv", "id", w, new String[]
-		{ "11", "12" }, 0, null, null, false);
+		{ "11", "12" }, 0, null, null, false, 1);
 		script.execute();
 		script.execute();
 		script = new GroovyScript("./scripts/fileCondition.gv", "id", w, new String[]
-		{ "anchor.lck" }, 0, null, null, false);
+		{ "anchor.lck" }, 0, null, null, false, 1);
 		script.execute();
 		script.execute();
 		script = new GroovyScript("./scripts/snmpTrap.gv", "id", w, new String[]
-		{ "192.168.0.1", "1", "msg" }, 0, null, null, false);
+		{ "192.168.0.1", "1", "msg" }, 0, null, null, false, 1);
 		script.execute();
 
 	}

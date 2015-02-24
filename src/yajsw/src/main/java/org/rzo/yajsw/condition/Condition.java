@@ -68,7 +68,7 @@ public class Condition
 		String[] argsArr = new String[args.size()];
 		for (int i = 0; i < argsArr.length; i++)
 			argsArr[i] = args.get(i).toString();
-		_script = ScriptFactory.createScript(fileName, "condition", _wp, argsArr, _log, 0, _config.getString("wrapper.script.encoding"), _config.getBoolean("wrapper.script.reload", false), _debug);
+		_script = ScriptFactory.createScript(fileName, "condition", _wp, argsArr, _log, 0, _config.getString("wrapper.script.encoding"), _config.getBoolean("wrapper.script.reload", false), _debug, 1);
 		_hasTrigger = _script != null;
 		_period = _config.getLong("wrapper.condition.cycle", -1) * 1000;
 	}

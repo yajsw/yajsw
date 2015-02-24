@@ -29,9 +29,9 @@ public class ShellScript extends AbstractScript
 	 *            the script
 	 * @param timeout
 	 */
-	public ShellScript(String script, String id, WrappedProcess process, String[] args, int timeout)
+	public ShellScript(String script, String id, WrappedProcess process, String[] args, int timeout, int maxConcInvocations)
 	{
-		super("scripts/" + script, id, process, args, timeout);
+		super("scripts/" + script, id, process, args, timeout, maxConcInvocations);
 	}
 
 	/*
