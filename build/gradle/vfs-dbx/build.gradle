@@ -1,0 +1,19 @@
+projectHome = '../../..'
+
+sourceSets.main.java.srcDirs = ["$projectHome/src/vfs-dbx/src/main/java"]
+
+dependencies {
+    compile group: 'commons-logging', 		name: 'commons-logging', 					version: "$commons_logging_version"
+    compile group: 'commons-vfs2', 				name: 'commons-vfs2', 						version: "$commons_vfs2_version"
+    compile group: 'dropbox-core-sdk', 		name: 'dropbox-core-sdk', 			  version: "$dropbox_core_sdk_version"
+    compile group: 'jackson-core', 				name: 'jackson-core', 						version: "$jackson_core_version"
+}
+
+println '---------------------------'
+println 'dependency jars:'
+println '---------------------------'
+configurations.compile.each { File file -> println file.absolutePath }
+println '---------------------------'
+
+jar.baseName = 'fvs-dbx'
+
