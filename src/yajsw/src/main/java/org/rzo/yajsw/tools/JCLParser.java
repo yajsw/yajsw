@@ -101,10 +101,24 @@ public class JCLParser
 		p = Pattern.compile("\"([^\"])+\"");
 		mr = p.matcher(commandLine);
 		int i = 0;
+		// find brackets
+		p = Pattern.compile(" \"([^ ])+\" ");
+		mr = p.matcher(commandLine);
 		while (mr.find(i))
 		{
 			bs.add(mr.start());
 			bs.add(mr.end()-1);
+			i = mr.end();
+		}
+
+		i = 0;
+		while (mr.find(i))
+		{
+			if (!inBrackets(mr.start()) && !inBrackets(mr.end()))
+			{
+			bs.add(mr.start());
+			bs.add(mr.end()-1);
+			}
 			int k = 0;
 			while (mr.end()+k < commandLine.length() && commandLine.charAt(mr.end()+k) == '"')
 				k++;
@@ -128,7 +142,7 @@ public class JCLParser
 			boolean singleQuote = false;
 			for (String cc : cpArr)
 			{
-				if (cc.startsWith(" "))
+				if (cc.startsWith(" ") || cc.startsWith("\" "))
 					break;
 				cc = cc.trim();
 				if (k == cpArr.length)
@@ -180,7 +194,7 @@ public class JCLParser
 			{
 				int s = mr.start();
 				String mc = mr.group();
-				if (!inBrackets(s) && !mc.trim().startsWith("-"))
+				if (!inBrackets(s) && !mc.trim().startsWith("-") && !mc.trim().startsWith("\""))
 				{
 					_mainClass = mc;
 					_mainClass = _mainClass.replaceAll("\"", "");
@@ -283,6 +297,7 @@ public class JCLParser
 	{
 		String[] wcmds = new String[]
 		{
+				"\"c:\\Progra~1\\java\\jdk1.6.0_81\\bin\\java.exe\" -Xms32m -Xmx256m \"-Doracle.security.jps.config=./jps-config.xml\" \"-DODI_MASTER_DRIVER=weblogic.jdbc.sqlserver.SQLServerDriver\" \"-DODI_MASTER_URL=\"jdbc:weblogic:sqlserver://apdevdb01:1433;instanceName=;databaseName=SNPS_REPO_MASTER;User=snpm;Password=xxxx\"\" \"-DODI_MASTER_USER=snpm\" \"-DODI_MASTER_ENCODED_PASS=aIyXrQyStVmYlckcmrMf\" \"-DODI_SECU_WORK_REP=FB_WORK_REPO\" \"-DODI_SUPERVISOR=SUPERVISOR\" \"-DODI_SUPERVISOR_ENCODED_PASS=fDyXHI.YXYujnZfsN7Dy\" \"-DODI_USER=SUPERVISOR\" \"-DODI_ENCODED_PASS=fDyXHI.YXYujnZfsN7Dy\" \"-DODI_JMX_PROTOCOL=rmi\" \"-Dorg.mortbay.log.class=oracle.odi.logging.AgentJettyLogger\" \"-Doracle.core.ojdl.logging.config.file=./ODI-logging-config.xml\" \"-Djava.util.logging.config.class=oracle.core.ojdl.logging.LoggingConfiguration\" -DLOG_FILE=odiagent.log -classpath \"D:\\oracle\\product\\11.1.1\\Oracle_ODI_1\\oracledi\\agent\\lib.;D:\\oracle\\product\\11.1.1\\Oracle_ODI_1\\oracledi\\agent\\drivers.;D:\\oracle\\product\\11.1.1\\Oracle_ODI_1\\oracledi\\agent....\\odi_misc*;D:\\oracle\\product\\11.1.1\\Oracle_ODI_1\\oracledi\\agent\\lib\\oracle.odi-agent-jse_11.1.1.jar;D:\\oracle\\product\\11.1.1\\Oracle_ODI_1\\oracledi\\agent....\\setup\\manual\\oracledi-sdk\\oracle.odi-sdk-jse_11.1.1.jar;D:\\oracle\\product\\11.1.1\\Oracle_ODI_1\\oracledi\\agent....\\modules\\oracle.jps_11.1.1\\jps-manifest.jar;D:\\oracle\\product\\11.1.1\\Oracle_ODI_1\\oracledi\\agent\\drivers*;D:\\oracle\\product\\11.1.1\\Oracle_ODI_1\\oracledi\\agent\\lib\\scripting*;\" oracle.odi.Agent \"-MASTER_DRIVER=weblogic.jdbc.sqlserver.SQLServerDriver\" \"-MASTER_URL=\"jdbc:weblogic:sqlserver://apdevdb01:1433;instanceName=;databaseName=SNPS_REPO_MASTER;User=snpm;Password=xxxx\"\" \"-MASTER_USER=snpm\" \"-MASTER_ENCODED_PASS=aIyXrQyStVmYlckcmrMf\" \"-WORK_REPOSITORY=FB_WORK_REPO\" \"-ODI_SUPERVISOR=SUPERVISOR\" \"-ODI_SUPERVISOR_ENCODED_PASS=fDyXHI.YXYujnZfsN7Dy\" \"-ODI_USER=SUPERVISOR\" \"-ODI_ENCODED_PASS=fDyXHI.YXYujnZfsN7Dy\" \"-ODI_CONNECTION_RETRY_COUNT=0\" \"-ODI_CONNECTION_RETRY_DELAY=7000\" \"-ODI_KEYSTORE_ENCODED_PASS=\" \"-ODI_KEY_ENCODED_PASS=\" \"-ODI_TRUST_STORE_ENCODED_PASS=\" -PORT=20910 -NAME=APPRDETL02",
 				"D:\\java\\jdk7\\bin\\java.exe -Xms256m -Xmx1024m -cp .\\lib\\msbase.jar;.\\lib\\mssqlserver.jar;..lib\\msutil.jar;.\\lib\\sqljdbc.jar;.\\lib\\ojdbc6.jar;.\\lib\\ojdbc5.jar;.\\lib\\ojdbc14.jar;.\\lib\\db2java.zip;.\\lib\\terajdbc4.jar;.\\lib\\log4j.jar;.\\lib\\teradata.jar;.\\lib\\tdgssjava.jar;.\\lib\\tdgssconfig.jar;.\\lib\\nzjdbc.jar;.\\lib\\bijdbc.jar;.\\lib\\ttjdbc6.jar;.\\lib\\orai18n.jar;.\\lib\\timestenjmsxla.jar;.\\lib\\jms.jar;.\\lib\\javax.jms.jar;;.\\DAWSystem.jar;.\\lib\\biacm.paramproducer.jar;;.\\lib\\oracle_common/modules/oracle.pki_11.1.1/oraclepki.jar;.\\lib\\oracle_common/webservices/wsclient_extended.jar;.\\lib\\oracle_common/modules/oracle.jmx_11.1.1/jmxspi.jar;.\\lib\\oracle_common/modules/oracle.odl_11.1.1/ojdl.jar;.\\lib\\oracle_common/modules/oracle.jps_11.1.1/jps-internal.jar;.\\lib\\oracle_common/modules/oracle.jps_11.1.1/jps-platform.jar;.\\lib\\oracle_common/modules/oracle.jps_11.1.1/jps-se.jar;.\\lib\\oracle_common/modules/oracle.idm_11.1.1/identitystore.jar;.\\lib\\oracle_common/modules/oracle.jps_11.1.1/jps-az-rt.jar;.\\lib\\oracle_common/modules/oracle.jps_11.1.1/jacc-spi.jar;.\\lib\\oracle_common/modules/oracle.iau_11.1.1/fmw_audit.jar;.\\lib\\oracle_common/modules/oracle.jmx_11.1.1/jmxframework.jar;.\\lib\\oracle_common/modules/oracle.igf_11.1.1/identitydirectory.jar;;.\\lib\\oracle_common/jlib/help-share.jar;.\\lib\\oracle_common/jlib/ohj.jar;.\\lib\\oracle_common/jlib/jewt4.jar;.\\lib\\oracle_common/jlib/share.jar;.\\lib\\oracle_common/jlib/oracle_ice.jar; com.siebel.etl.net.QServer arg1 arg2",
 				"\"java\" -cp \"C:\\test\\yajsw-stable-11.09\\x x\\bat\\/../wrapper.jar\";\"C:\\test\\yajsw-stable-11.09\\x x\\bat\\/../wrapperApp.jar\" test.HelloWorld",
 				"java -cp wrapper.jar -Xrs x.Test -c conf/wrapper.conf       ",
