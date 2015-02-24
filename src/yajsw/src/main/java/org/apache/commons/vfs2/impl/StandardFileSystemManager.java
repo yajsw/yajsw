@@ -295,6 +295,14 @@ public class StandardFileSystemManager extends DefaultFileSystemManager
 				false);
 		addProvider("org.apache.commons.vfs2.provider.ram.RamFileProvider",
 				new String[] { "ram" }, null, null, false);
+		
+		addProvider(
+				"org.rzo.cloud.vfs.dropbox.DropboxFileProvider",
+				new String[] { "dbx" },
+				new String[] { "com.dropbox.core.DbxClient",
+						"com.fasterxml.jackson.core.JsonParser"},
+				null, false);
+
 
 		if (findClass("org.apache.commons.vfs2.provider.smb.SmbFileProvider"))
 		{
