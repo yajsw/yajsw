@@ -34,8 +34,6 @@ forms_version 								= '1.2.0'
 velocity_version 							= '1.7'
 glazedlists_version 					= '1.8.0_java15'
 commons_beanutils_version 		= '1.8.2'
-dropbox_core_sdk_version			= '1.7.7'
-jackson_core_version					= '2.2.4'
 
 
 
@@ -56,9 +54,7 @@ repositories {
     "$extendedLibsDir/abeille",
     "$extendedLibsDir/jgoodies",
     "$extendedLibsDir/glazedlists",
-    "$extendedLibsDir/velocity",
-    "$extendedLibsDir/vfs-dbx"
-
+    "$extendedLibsDir/velocity"
     ]
     }
     
