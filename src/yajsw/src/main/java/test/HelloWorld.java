@@ -12,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -140,7 +141,25 @@ public class HelloWorld
 	// test for application main.
 	public static void main(final String[] args) throws Exception
 	{
+		//OperatingSystem.instance().setWorkingDir("..");
 		System.out.println("TESTENV :" +System.getenv("TESTENV"));
+		System.out.println("TESTPROP: "+System.getProperty("D_1"));
+		try
+		{
+			Class clazz = ClassLoader.getSystemClassLoader().loadClass("java.nio.file.Paths");
+			Method m = clazz.getDeclaredMethod("get", String.class, String[].class);
+			Object p = m.invoke(null, ".", new String[0]);
+			clazz = ClassLoader.getSystemClassLoader().loadClass("java.nio.file.Path");
+			m = clazz.getDeclaredMethod("toAbsolutePath", null);
+			
+			System.out.println(m);
+		System.out.println("working dir path: "+m.invoke(p));
+		}
+		catch (Exception ex)
+		{
+			// for jvm < 7
+			ex.printStackTrace();
+		}
 
 		final FileWriter fw = new FileWriter("test.txt");
 		Runtime.getRuntime().addShutdownHook(new Thread()
