@@ -322,7 +322,7 @@ final class PlatformDependent0 {
     }
 
     static void copyMemory(Object src, long srcOffset, Object dst, long dstOffset, long length) {
-        UNSAFE.copyMemory(src, srcOffset, dst, dstOffset, length);
+        //compiler error ?? we do not use usafe -> ok. UNSAFE.copyMemory(src, srcOffset, dst, dstOffset, length);
     }
     
     static ClassLoader getClassLoader(final Class<?> clazz) {

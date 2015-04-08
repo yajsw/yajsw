@@ -35,5 +35,12 @@ public class WindowsXPFileManager implements FileManager
 	{
 		return FileUtils.totalSpace(file);
 	}
+	
+	public boolean chmod(File file, int mode)
+	{
+		// posix only
+		return false;
+	}
+
 
 }

@@ -40,7 +40,7 @@ public class Cache
 			if (!reload && _loaded)
 				return true;
 			String workingDir = config.getString("wrapper.working.dir", ".");
-			String base = config.getString("wrapper.base", workingDir);
+			String base = config.getString("wrapper.codebase", workingDir);
 			String cache = config.getCache();
 
 			DefaultFileSystemManager fsManager = (DefaultFileSystemManager) VFS.getManager();
@@ -140,13 +140,17 @@ public class Cache
 			if (fileChanged(source, destination))
 			{
 				destination.copyFrom(source, new AllFileSelector());
-				destination.getContent().setLastModifiedTime(source.getContent().getLastModifiedTime());
+				if (source.getContent().getLastModifiedTime() != 0)
+					destination.getContent().setLastModifiedTime(source.getContent().getLastModifiedTime());
 				log("cache file loaded " + source.getName() + " -> " + destination.getName());
 			}
+			else
+				log("cache file up to date: "+destination.getName());
 			return destination;
 		}
 		catch (Exception ex)
 		{
+			log("error in cache.loadFile: "+(source == null ? "null" : source.getName()));
 			ex.printStackTrace();
 		}
 		return null;
@@ -156,7 +160,7 @@ public class Cache
 	{
 		try
 		{
-			return !destination.exists() || source.getContent().getLastModifiedTime() != destination.getContent().getLastModifiedTime();
+			return !destination.exists() || source.getContent().getLastModifiedTime() == 0 || source.getContent().getLastModifiedTime() != destination.getContent().getLastModifiedTime();
 		}
 		catch (FileSystemException e)
 		{

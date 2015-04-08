@@ -32,4 +32,11 @@ public class PosixFileManager implements FileManager
 		return -1;
 	}
 
+	@Override
+	public boolean chmod(File file, int mode)
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

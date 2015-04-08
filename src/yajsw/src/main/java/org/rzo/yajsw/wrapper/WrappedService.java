@@ -84,6 +84,10 @@ public class WrappedService
 		{
 			_config.setProperty("wrapperx.config", _confFilesList);			
 		}
+		
+		int umask = Utils.parseOctal(_config.getString("wrapper.umask", null));
+		if (umask != -1)
+			OperatingSystem.instance().processManagerInstance().umask(umask);
 
 		if (!_config.isLocalFile())
 			if (_cache == null)

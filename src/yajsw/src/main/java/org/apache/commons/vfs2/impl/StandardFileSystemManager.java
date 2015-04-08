@@ -266,6 +266,17 @@ public class StandardFileSystemManager extends DefaultFileSystemManager
 				new String[] { "ftp" },
 				new String[] { "org.apache.commons.net.ftp.FTPFile" }, null,
 				false);
+		try
+		{
+		addProvider("org.rzo.vfs.dropbox.DropboxFileProvider",
+				new String[] { "dbx" },
+				new String[] { "com.dropbox.core.DbxClient" }, null,
+				false);
+		}
+		catch (Exception ex)
+		{
+			getLogger().info("could not load vfs-dbx provider: " + ex.getMessage());
+		}
 		addProvider("org.apache.commons.vfs2.provider.ftps.FtpsFileProvider",
 				new String[] { "ftps" },
 				new String[] { "org.apache.commons.net.ftp.FTPFile" }, null,

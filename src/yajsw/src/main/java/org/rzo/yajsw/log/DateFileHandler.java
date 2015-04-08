@@ -61,6 +61,8 @@ public class DateFileHandler extends Handler
 	volatile LinkedList<String> _previousDates = new LinkedList<String>();
 	volatile String _currentDate = null;
 	volatile int _maxDays = -1;
+	volatile boolean _desc = false;
+	volatile int _umask = -1;
 
 	/**
 	 * Instantiates a new date file handler.
@@ -79,8 +81,10 @@ public class DateFileHandler extends Handler
 	 * @throws SecurityException
 	 *             the security exception
 	 */
-	public DateFileHandler(String pattern, int limit, int count, boolean append, boolean rollDate, PatternFormatter fileFormatter, Level logLevel, String encoding, int maxDays)
+	public DateFileHandler(String pattern, int limit, int count, boolean append, boolean rollDate, PatternFormatter fileFormatter, Level logLevel, String encoding, int maxDays, boolean desc, int umask)
 	{
+		_umask = umask;
+		_desc = desc;
 		_pattern = pattern;
 		_limit = limit;
 		_count = count;
@@ -194,7 +198,7 @@ public class DateFileHandler extends Handler
 
 		try
 		{
-			_handler = new MyFileHandler(pattern, _limit, _count, _append);
+			_handler = new MyFileHandler(pattern, _limit, _count, _append, _desc, _umask);
 			if (_init)
 			{
 				_handler.setEncoding(this.getEncoding());

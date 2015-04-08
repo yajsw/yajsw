@@ -306,4 +306,5 @@ public interface Process
 	
 	public void setDesktop(String desktop);
 
+	public void setUmask(int umask);
 }

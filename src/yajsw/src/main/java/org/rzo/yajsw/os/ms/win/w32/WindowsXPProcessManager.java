@@ -116,4 +116,11 @@ public class WindowsXPProcessManager implements ProcessManager
 
 	}
 
+	@Override
+	public int umask(int mode)
+	{
+		// linux only
+		return -1;
+	}
+
 }

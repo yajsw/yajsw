@@ -240,6 +240,9 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			return;
 
 		getConfiguration();
+		int umask = Utils.parseOctal(_config.getString("wrapper.umask", null));
+		if (umask != -1)
+			OperatingSystem.instance().processManagerInstance().umask(umask);
 
 		VFSUtils.setLogger(getInternalWrapperLogger());
 		getTmpPath();
@@ -1239,6 +1242,10 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			_osProcess.setUser(user);
 			_osProcess.setPassword(_config.getString("wrapper.app.password"));
 		}
+		
+		int appUmask = Utils.parseOctal(_config.getString("wrapper.java.umask", null));
+		if (appUmask != -1)
+			_osProcess.setUmask(appUmask);
 
 		_osProcess.setDebug(_debug);
 
@@ -1450,14 +1457,16 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			else if (count == 0)
 				count = 1;
 			boolean rollDate = "DATE".equals(rollMode);
+			boolean desc = _config.getBoolean("wrapper.logfile.desc", false);
+			int umask = Utils.parseOctal(_config.getString("wrapper.logfile.umask", null));
 			String encoding = _config.getString("wrapper.log.encoding");
 			int maxDays = _config.getInt("wrapper.logfile.maxdays", -1);
 			_fileHandler = fileName.contains("%d") ? new DateFileHandler(
 					fileName, limit, count, append, rollDate,
 					getFileFormatter(), getLogLevel(fileLogLevel), encoding,
-					maxDays) : new MyFileHandler(fileName, limit, count,
+					maxDays, desc, umask) : new MyFileHandler(fileName, limit, count,
 					append, getFileFormatter(), getLogLevel(fileLogLevel),
-					encoding);
+					encoding, desc, umask);
 		}
 		catch (Exception e)
 		{
@@ -2349,6 +2358,10 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	private void savePidFile()
 	{
 		String file = _config.getString("wrapper.pidfile");
+		int umask = Utils.parseOctal(_config.getString("wrapper.pidfile.umask", null));
+		int prevUmask = -1;
+		if (umask != -1)
+			prevUmask = OperatingSystem.instance().processManagerInstance().umask(umask);
 		if (file != null)
 		{
 			try
@@ -2381,6 +2394,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 				e.printStackTrace();
 			}
 		}
+		if (prevUmask != -1)
+			OperatingSystem.instance().processManagerInstance().umask(prevUmask);
 	}
 
 	/**

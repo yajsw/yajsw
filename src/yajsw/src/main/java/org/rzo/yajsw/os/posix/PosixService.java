@@ -83,7 +83,16 @@ public class PosixService extends AbstractService implements Constants
 			e1.printStackTrace();
 		}
 
-		String confFile = _config.getString("wrapper.config");
+		String confFile = null;
+		YajswConfigurationImpl conf = (YajswConfigurationImpl) _config;
+		if (!conf.isLocalFile())
+		{
+			confFile = conf.getCachedPath();
+		}
+		else
+			{
+			confFile = _config.getString("wrapper.config");
+			}
 		String confDir = null;
 		if (confFile != null)
 		{

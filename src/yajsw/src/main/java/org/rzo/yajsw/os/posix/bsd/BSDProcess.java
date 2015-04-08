@@ -74,6 +74,8 @@ public class BSDProcess extends PosixProcess
 			cmdList.add("-Dwrapperx.pipeStreams=true");
 		if (_user != null)
 			cmdList.add("-Dwrapperx.user=" + _user);
+		if (_umask != -1)
+			cmdList.add("-Dwrapperx.umask=" + _umask);
 		//if (_password != null)
 		//	cmdList.add("-Dwrapperx.password=" + _password);
 		String[] xenv = getXEnv();

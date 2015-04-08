@@ -68,5 +68,7 @@ public interface ProcessManager
 	public TaskList taskListInstance();
 
 	public List getProcessIds();
+	
+	public int umask(int mode);
 
 }

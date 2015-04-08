@@ -13,6 +13,7 @@ public class TimerFactory
 		}
 		catch (Throwable ex)
 		{
+			ex.printStackTrace();
 		}
 		return new DummyTimer();
 	}

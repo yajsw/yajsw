@@ -14,16 +14,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
-import org.quartz.CronExpression;
-import org.quartz.CronTrigger;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.SchedulerFactory;
-import org.quartz.SimpleTrigger;
-import org.quartz.Trigger;
+import org.rzo.yacron4j.Scheduler;
+import org.rzo.yacron4j.SchedulerOptions;
 import org.rzo.yajsw.config.YajswConfigurationImpl;
 import org.rzo.yajsw.wrapper.WrappedProcess;
 
@@ -34,6 +32,8 @@ import org.rzo.yajsw.wrapper.WrappedProcess;
 public class TimerImpl implements Timer
 {
 
+	private static final int REPEAT_INDEFINITELY = -1;
+
 	/** The _config. */
 	YajswConfigurationImpl	_config;
 
@@ -41,7 +41,8 @@ public class TimerImpl implements Timer
 	WrappedProcess			_wp;
 
 	/** The _scheduler. */
-	static Scheduler		_scheduler;
+	Scheduler		_cronScheduler;
+	ScheduledExecutorService _simpleScheduler; 
 
 	/** The _cron start. */
 	MyCronTrigger			_cronStart;
@@ -141,36 +142,28 @@ public class TimerImpl implements Timer
 	 */
 	private MySimpleTrigger getSimpleTrigger(String key)
 	{
-		JobDetail jobDetail = new JobDetail();
-		JobDataMap jobDataMap = new JobDataMap();
-		jobDataMap.put("process", _wp);
-		jobDetail.setJobDataMap(jobDataMap);
-
-		Class jobClass = getJobClass(key);
-		if (jobClass == null)
+		Job jobDetail = getJobDetail(key);
+		if (jobDetail == null)
 			return null;
-		jobDetail.setJobClass(jobClass);
-		jobDetail.setName(key);
-
-		MySimpleTrigger trigger = new MySimpleTrigger(jobDetail);
 		Date startTime = getStartTime(key);
-		if (startTime != null)
-		{
-			trigger.setStartTime(startTime);
-		}
 		int repeatCount = getRepeatCount(key);
-		if (repeatCount >= -1)
-			trigger.setRepeatCount(repeatCount);
 		int interval = getInterval(key);
-		if (interval > 0)
-			trigger.setRepeatInterval(interval * 1000);
-		_hasTrigger = true;
+		
+		MySimpleTrigger trigger;
+		try
+		{
+			trigger = new MySimpleTrigger(jobDetail, startTime, repeatCount, interval);
+		}
+		catch (Exception ex)
+		{
+			return null;
+		}
 
-		if (trigger != null)
-			trigger.setName(key);
+		
+		_hasTrigger = true;
 		_startImmediate = false; // getStartTime will always return a date.
 		// per default the current time.
-		trigger.setMisfireInstruction(SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
+		jobDetail.setTrigger(trigger);
 		return trigger;
 	}
 
@@ -184,7 +177,10 @@ public class TimerImpl implements Timer
 	 */
 	private int getInterval(String key)
 	{
-		return _config.getInt(key.substring(0, key.lastIndexOf(".")) + ".INTERVAL", SimpleTrigger.REPEAT_INDEFINITELY);
+		int x = _config.getInt(key.substring(0, key.lastIndexOf(".")) + ".INTERVAL", REPEAT_INDEFINITELY);
+		if (x > 0)
+			x = x*1000;
+		return x;
 	}
 
 	/**
@@ -197,7 +193,7 @@ public class TimerImpl implements Timer
 	 */
 	private int getRepeatCount(String key)
 	{
-		return _config.getInt(key.substring(0, key.lastIndexOf(".")) + ".COUNT", SimpleTrigger.REPEAT_INDEFINITELY);
+		return _config.getInt(key.substring(0, key.lastIndexOf(".")) + ".COUNT", REPEAT_INDEFINITELY);
 	}
 
 	/**
@@ -237,14 +233,14 @@ public class TimerImpl implements Timer
 	 * 
 	 * @return the job class
 	 */
-	private Class getJobClass(String key)
+	private Job getJobDetail(String key)
 	{
 		if (key.contains(".RESTART"))
-			return RestartJob.class;
+			return new RestartJob(_wp);
 		else if (key.contains(".STOP"))
-			return StopJob.class;
+			return new StopJob(_wp);
 		else if (key.contains(".START"))
-			return StartJob.class;
+			return new StartJob(_wp);
 		return null;
 	}
 
@@ -258,34 +254,20 @@ public class TimerImpl implements Timer
 	 */
 	private MyCronTrigger getCronTrigger(String key)
 	{
-		JobDetail jobDetail = new JobDetail();
-		JobDataMap jobDataMap = new JobDataMap();
-		jobDataMap.put("process", _wp);
-		jobDetail.setJobDataMap(jobDataMap);
-		jobDetail.setName(key);
-
-		Class jobClass = getJobClass(key);
-		if (jobClass == null)
+		Job job = getJobDetail(key);
+		if (job == null)
 			return null;
-		jobDetail.setJobClass(jobClass);
 
-		MyCronTrigger trigger = new MyCronTrigger(jobDetail);
-		CronExpression cronExpression = getCronExpression(key);
+		String cronExpression = getCronExpression(key);
 		if (cronExpression != null)
 		{
-			trigger.setCronExpression(cronExpression);
-			if (jobClass.equals(StartJob.class))
+			MyCronTrigger trigger = new MyCronTrigger(cronExpression, job);
+			if (job instanceof StartJob)
 				_startImmediate = false;
 			_hasTrigger = true;
+			return trigger;
 		}
-		else
-		{
 			return null;
-		}
-
-		trigger.setName(key);
-		trigger.setMisfireInstruction(trigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
-		return trigger;
 	}
 
 	/**
@@ -296,22 +278,14 @@ public class TimerImpl implements Timer
 	 * 
 	 * @return the cron expression
 	 */
-	private CronExpression getCronExpression(String key)
+	private String getCronExpression(String key)
 	{
 		String str = _config.getString(key);
 		if (str == null)
 		{
 			return null;
 		}
-		try
-		{
-			return new CronExpression(str);
-		}
-		catch (ParseException e)
-		{
-			e.printStackTrace();
-			return null;
-		}
+			return str;
 	}
 
 	/**
@@ -321,19 +295,6 @@ public class TimerImpl implements Timer
 	{
 		if (!_hasTrigger)
 			return;
-		if (getScheduler() == null)
-			return;
-		try
-		{
-			if (!_scheduler.isStarted())
-				_scheduler.start();
-		}
-		catch (SchedulerException e)
-		{
-			e.printStackTrace();
-			return;
-		}
-
 		if (_cronStart != null)
 			startTrigger(_cronStart, _cronStart.getJobDetail());
 		if (_cronStop != null)
@@ -349,27 +310,20 @@ public class TimerImpl implements Timer
 		_triggered = true;
 	}
 
+	static int tcount = 0;
+
 	/**
 	 * Gets the scheduler.
 	 * 
 	 * @return the scheduler
 	 */
-	private Scheduler getScheduler()
+	private ScheduledExecutorService getSimpleScheduler()
 	{
-		if (_scheduler == null)
+		if (_simpleScheduler == null)
 		{
-			SchedulerFactory schedFact = new org.quartz.impl.StdSchedulerFactory();
-			try
-			{
-				_scheduler = schedFact.getScheduler();
-			}
-			catch (SchedulerException e)
-			{
-				e.printStackTrace();
-				_scheduler = null;
-			}
+			_simpleScheduler = Executors.newSingleThreadScheduledExecutor();
 		}
-		return _scheduler;
+		return _simpleScheduler;
 	}
 
 	/**
@@ -380,17 +334,76 @@ public class TimerImpl implements Timer
 	 * @param jobDetail
 	 *            the job detail
 	 */
-	private void startTrigger(Trigger trigger, JobDetail jobDetail)
+	private void startTrigger(Trigger trigger, Job jobDetail)
 	{
-		if (trigger != null)
+		if (trigger == null || jobDetail == null)
+			return;
+		if (trigger instanceof MyCronTrigger)
 			try
 			{
-				_scheduler.scheduleJob(jobDetail, trigger);
+				getCronScheduler().schedule(jobDetail, ((MyCronTrigger) trigger)._cronExpression);
 			}
-			catch (SchedulerException e)
+			catch (Exception e)
 			{
 				e.printStackTrace();
 			}
+		else
+		{
+			MySimpleTrigger simpleTrigger = (MySimpleTrigger) trigger;
+			ScheduledExecutorService scheduler = getSimpleScheduler();
+			long initialDelay = 0;
+			ScheduledFuture future;
+			if (simpleTrigger._startTime != null)
+			{
+				initialDelay = simpleTrigger._startTime.getTime() -  System.currentTimeMillis();
+				if (initialDelay < 0)
+					initialDelay = 0;
+			}
+			if (simpleTrigger._interval > 0)
+			{
+				future = scheduler.scheduleWithFixedDelay(jobDetail, initialDelay, simpleTrigger._interval, TimeUnit.MILLISECONDS);
+				jobDetail.setFuture(future);
+				
+			}
+			else
+			{
+				future = scheduler.schedule(jobDetail, initialDelay, TimeUnit.MILLISECONDS);
+				jobDetail.setFuture(future);
+			}
+			
+		}
+	}
+
+	private Scheduler getCronScheduler()
+	{
+		if (_cronScheduler == null)
+		{
+			try
+			{
+				SchedulerOptions options = new SchedulerOptions();
+				options.setDebug(_config.getBoolean("wrapper.debug", false));
+				options.setMaxThreads(1);
+				options.setThreadFactory(new ThreadFactory()
+				{
+					
+					@Override
+					public Thread newThread(Runnable r)
+					{
+						Thread result = new Thread(r);
+						result.setDaemon(true);
+						result.setName("yajsw-timer-"+tcount++);
+						return result;
+					}
+				});
+				_cronScheduler = new Scheduler(options);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				_cronScheduler = null;
+			}
+		}
+		return _cronScheduler;
 	}
 
 	/**
@@ -419,9 +432,9 @@ public class TimerImpl implements Timer
 	{
 		try
 		{
-			_scheduler.pauseAll();
+			_cronScheduler.shutdown();
 		}
-		catch (SchedulerException e)
+		catch (Exception e)
 		{
 			e.printStackTrace();
 			return;
@@ -458,67 +471,73 @@ public class TimerImpl implements Timer
 	{
 		return _hasTrigger;
 	}
+	
+	interface Trigger
+	{
+		Runnable getJobDetail();
+	}
+	
+	class AbstractTrigger implements Trigger
+	{
+		final Job _job;
+		
+		AbstractTrigger(Job job)
+		{
+			_job = job;
+		}
+
+		@Override
+		public Job getJobDetail()
+		{
+			return _job;
+		}
+	}
 
 	/**
 	 * The Class MyCronTrigger.
 	 */
-	class MyCronTrigger extends CronTrigger
+	class MyCronTrigger extends AbstractTrigger
 	{
 
-		/** The _job detail. */
-		JobDetail	_jobDetail;
+		String _cronExpression;
 
-		/**
-		 * Instantiates a new my cron trigger.
-		 * 
-		 * @param jobDetail
-		 *            the job detail
-		 */
-		MyCronTrigger(JobDetail jobDetail)
+		MyCronTrigger(String cronExpression, Job job)
 		{
-			_jobDetail = jobDetail;
+			super(job);
+			_cronExpression = cronExpression;
 		}
+		
 
-		/**
-		 * Gets the job detail.
-		 * 
-		 * @return the job detail
-		 */
-		JobDetail getJobDetail()
-		{
-			return _jobDetail;
-		}
 	}
 
 	/**
 	 * The Class MySimpleTrigger.
 	 */
-	class MySimpleTrigger extends SimpleTrigger
+	class MySimpleTrigger extends AbstractTrigger
 	{
-
-		/** The _job detail. */
-		JobDetail	_jobDetail;
+		Date _startTime;
+		int _repeatCount;
+		int _interval;
 
 		/**
 		 * Instantiates a new my simple trigger.
+		 * @param interval 
+		 * @param repeatCount 
+		 * @param startTime 
 		 * 
 		 * @param jobDetail
 		 *            the job detail
 		 */
-		MySimpleTrigger(JobDetail jobDetail)
+		MySimpleTrigger(Job job, Date startTime, int repeatCount, int interval)
 		{
-			_jobDetail = jobDetail;
+			super(job);
+			if (startTime == null && repeatCount == REPEAT_INDEFINITELY && interval == REPEAT_INDEFINITELY)
+				throw new RuntimeException("simple trigger configuration error");
+			_startTime = startTime;
+			_repeatCount = repeatCount;
+			_interval = interval;
 		}
 
-		/**
-		 * Gets the job detail.
-		 * 
-		 * @return the job detail
-		 */
-		JobDetail getJobDetail()
-		{
-			return _jobDetail;
-		}
 	}
 
 }

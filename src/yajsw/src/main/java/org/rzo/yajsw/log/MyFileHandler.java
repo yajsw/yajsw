@@ -17,11 +17,14 @@ import java.nio.channels.FileLock;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.ErrorManager;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
+
+import org.rzo.yajsw.os.OperatingSystem;
 
 /**
  * Simple file logging <tt>Handler</tt>.
@@ -124,6 +127,12 @@ public class MyFileHandler extends StreamHandler {
     private static java.util.HashMap locks = new java.util.HashMap();
     
     private FileChangeListner _listener = null;
+	private boolean desc = false;
+    private AtomicInteger descCounter = new AtomicInteger(0);
+    private LinkedList<File> oldFiles = new LinkedList<File>();
+    private volatile int unique;
+    private int umask;
+
     
     interface FileChangeListner
     {
@@ -171,12 +180,17 @@ public class MyFileHandler extends StreamHandler {
 	if (append) {
 	    len = (int)fname.length();
 	}
+	int prevUmask = -1;
+	if (umask != -1)
+		prevUmask = OperatingSystem.instance().processManagerInstance().umask(umask);
 	if (!fname.getParentFile().exists())
 		fname.getParentFile().mkdirs();
 	FileOutputStream fout = new FileOutputStream(fname.toString(), append);
 	BufferedOutputStream bout = new BufferedOutputStream(fout);
 	meter = new MeteredStream(bout, len);
 	setOutputStream(meter);
+	if (prevUmask != -1)
+		OperatingSystem.instance().processManagerInstance().umask(prevUmask);
     }
 
     // Private method to configure a FileHandler from LogManager
@@ -354,23 +368,25 @@ public class MyFileHandler extends StreamHandler {
      * @exception  IllegalArgumentException if pattern is an empty string
      *
      */
-    public MyFileHandler(String pattern, int limit, int count, boolean append)
+    public MyFileHandler(String pattern, int limit, int count, boolean append, boolean desc, int umask)
 					throws IOException, SecurityException {
 	if (limit < 0 || count < 1 || pattern.length() < 1) {
 	    throw new IllegalArgumentException();
 	}
 	//checkAccess();
 	configure();
+	this.umask = umask;
 	this.pattern = pattern;
 	this.limit = limit;
 	this.count = count;
 	this.append = append;
+	this.desc  = desc;
 	openFiles();
     }
 
-    public MyFileHandler(String pattern, int limit, int count, boolean append, PatternFormatter fileFormatter, Level logLevel, String encoding) throws SecurityException, IOException
+    public MyFileHandler(String pattern, int limit, int count, boolean append, PatternFormatter fileFormatter, Level logLevel, String encoding, boolean desc, int umask) throws SecurityException, IOException
 	{
-		this(pattern, limit, count, append);
+		this(pattern, limit, count, append, desc, umask);
 		if (encoding != null)
 			setEncoding(encoding);
 		setFormatter(fileFormatter);
@@ -396,7 +412,12 @@ public class MyFileHandler extends StreamHandler {
 
 	// Create a lock file.  This grants us exclusive access
 	// to our set of output files, as long as we are alive.
-	int unique = -1;
+	int prevUmask = -1;
+	if (umask != -1)
+		prevUmask = OperatingSystem.instance().processManagerInstance().umask(umask);
+
+	
+	unique = -1;
 	for (;;) {
 	    unique++;
 	    if (unique > MAX_LOCKS) {
@@ -416,7 +437,7 @@ public class MyFileHandler extends StreamHandler {
 	        }
 		File f = new File(lockFileName);
 		if (!f.getParentFile().exists())
-			f.mkdirs();
+			f.getParentFile().mkdirs();
 		FileChannel fc;
 		try {
 		    lockStream = new FileOutputStream(lockFileName);
@@ -445,10 +466,30 @@ public class MyFileHandler extends StreamHandler {
 	    }
 	}
 
+	int k = 0;
 	files = new File[count];
+	if (desc)
+		for (int i = 0; i < count; i++) {
+			if (i == 0)
+		    files[i] = generate(pattern, i, unique, count);
+			else
+			{
+			    files[count-i] = generate(pattern, i+k, unique, count);
+			    while (files[count-i].exists())
+			    {
+			    	oldFiles.addLast(files[count-i]);
+			    	k++;
+				    files[count-i] = generate(pattern, i+k, unique, count);
+			    }
+			}
+				
+		}
+	else
 	for (int i = 0; i < count; i++) {
 	    files[i] = generate(pattern, i, unique, count);
 	}
+	
+	descCounter.set(count+k);
 
 	// Create the initial log file.
 	if (append) {
@@ -468,6 +509,10 @@ public class MyFileHandler extends StreamHandler {
 		throw new IOException("Exception: " + ex);
 	    }
 	}
+	
+	if (prevUmask != -1)
+		OperatingSystem.instance().processManagerInstance().umask(prevUmask);
+
 
 	// Install the normal default ErrorManager.
 	setErrorManager(new ErrorManager());
@@ -548,6 +593,7 @@ public class MyFileHandler extends StreamHandler {
 	}
 	return file;
     }
+    
 
     // Rotate the set of output files
     private synchronized void rotate() {
@@ -555,18 +601,10 @@ public class MyFileHandler extends StreamHandler {
 	setLevel(Level.OFF);
 
 	super.close();
-	for (int i = count-2; i >= 0; i--) {
-	    File f1 = files[i];
-	    File f2 = files[i+1];
-	    if (f1.exists()) {
-		if (f2.exists()) {
-		    f2.delete();
-		}
-		else if (_listener != null)
-	    		_listener.fileChange(f2, true);			
-		f1.renameTo(f2);
-	    }
-	}
+	if (desc)
+		rotateDesc();
+	else
+		rotateAsc();
 	try {
 	    open(files[0], false);
         } catch (IOException ix) {
@@ -576,6 +614,53 @@ public class MyFileHandler extends StreamHandler {
 
 	}
 	setLevel(oldLevel);
+    }
+    
+    private void rotateAsc()
+    {
+    	for (int i = count-2; i >= 0; i--) {
+    	    File f1 = files[i];
+    	    File f2 = files[i+1];
+    	    if (f1.exists()) {
+    		if (f2.exists()) {
+    		    f2.delete();
+    		}
+    		else if (_listener != null)
+    	    		_listener.fileChange(f2, true);			
+    		f1.renameTo(f2);
+    	    }
+    	}
+
+    }
+    
+    
+    private void rotateDesc()
+    {
+    	File f0 = files[0];
+    	files[0] = new File(f0.getParentFile(), f0.getName());
+    	File f1 = files[count-1];
+    	f0.renameTo(f1);
+    	oldFiles.addFirst(f1);
+    	for (int i = count-1; i > 1; i--) {
+    		files[i] = files[i-1];
+    		}
+    	try
+		{
+			files[1] = generate(pattern, descCounter.getAndIncrement(), unique, count);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+    	if (oldFiles.size() > count)
+    	{
+    		File f = oldFiles.removeLast();
+    		f.delete();
+    		if (_listener != null)
+	    		_listener.fileChange(f, true);	
+    	}
+
+    	
     }
 
     /**

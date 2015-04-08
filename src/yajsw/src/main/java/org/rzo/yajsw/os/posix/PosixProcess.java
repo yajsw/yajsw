@@ -101,7 +101,7 @@ public class PosixProcess extends AbstractProcess
 		/*
 		 * mode_t umask (mode_t mask)
 		 */
-		void umask(int mask);
+		int umask(int mask);
 
 		int setsid();
 
@@ -795,6 +795,8 @@ public class PosixProcess extends AbstractProcess
 		// fork a child process
 		if ((pid = CLibrary.INSTANCE.fork()) == 0)
 		{
+			if (_umask != -1)
+				umask(_umask);
 			System.out.println("fork 0");
 
 			// closeDescriptors();
@@ -1728,6 +1730,12 @@ public class PosixProcess extends AbstractProcess
 	{
 		super.setLogger(logger);
 		_utils.setLog(logger);
+	}
+
+	public static int umask(int mask)
+	{
+		int result = CLibrary.INSTANCE.umask(mask);
+		return result;
 	}
 
 }

@@ -32,7 +32,7 @@ public class AppStarter
 		// detach from parent
 		CLibrary.INSTANCE.umask(0);
 		CLibrary.INSTANCE.setsid();
-
+		
 		System.out.println("calling exec");
 		// close streams ?
 		if (!isPipeStreams())
@@ -51,6 +51,10 @@ public class AppStarter
 			System.out.close();
 			System.err.close();
 		}
+		
+		int umask = getUmask();
+		if (umask != -1)
+			PosixProcess.umask(umask);
 		
 		String[] env = null;//getEnv();
 
@@ -84,6 +88,12 @@ public class AppStarter
 	private static String getUser()
 	{
 		return System.getProperty("wrapperx.user");
+	}
+
+	private static int getUmask()
+	{
+		String u = System.getProperty("wrapperx.umask", "-1");
+		return Integer.parseInt(u);
 	}
 
 	private static String[] getEnv()

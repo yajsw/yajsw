@@ -10,5 +10,7 @@ public interface FileManager
 	long freeSpace(File file);
 
 	long totalSpace(File file);
+	
+	boolean chmod(File file, int mode);
 
 }

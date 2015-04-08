@@ -10,28 +10,25 @@
  */
 package org.rzo.yajsw.timer;
 
-import org.quartz.Job;
-import org.quartz.JobDataMap;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.rzo.yajsw.wrapper.WrappedProcess;
 
 // TODO: Auto-generated Javadoc
 /**
  * The Class StopJob.
  */
-public class StopJob implements Job
+public class StopJob extends Job
 {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
-	 */
-	public void execute(JobExecutionContext context) throws JobExecutionException
+	WrappedProcess process;
+	
+	StopJob(WrappedProcess process)
 	{
-		JobDataMap dataMap = context.getJobDetail().getJobDataMap();
-		WrappedProcess process = (WrappedProcess) dataMap.get("process");
+		this.process = process;
+	}
+	
+	
+	public void run() 
+	{
 		process.stop("TIMER");
 	}
 

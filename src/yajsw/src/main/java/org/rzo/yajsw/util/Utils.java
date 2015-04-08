@@ -73,6 +73,22 @@ public class Utils
 		else
 			return "-D" + key + "=\"" + value + "\"";
 	}
+	
+	public static int parseOctal(String txt)
+	{
+		int result = -1;
+		if (txt != null)
+		try
+		{
+			result = Integer.parseInt(txt, 8);
+		}
+		catch (Exception ex)
+		{
+			System.out.println(ex + " "+ex.getMessage());
+		}
+		return result;
+		
+	}
 
 
 

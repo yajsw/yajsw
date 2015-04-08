@@ -56,4 +56,10 @@ public class PosixProcessManager implements ProcessManager
 		return null;
 	}
 
+	@Override
+	public int umask(int mode)
+	{
+		return PosixProcess.umask(mode);
+	}
+
 }

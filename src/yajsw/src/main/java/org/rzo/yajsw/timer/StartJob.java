@@ -10,28 +10,27 @@
  */
 package org.rzo.yajsw.timer;
 
-import org.quartz.Job;
-import org.quartz.JobDataMap;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.rzo.yajsw.wrapper.WrappedProcess;
 
 // TODO: Auto-generated Javadoc
 /**
  * The Class StartJob.
  */
-public class StartJob implements Job
+public class StartJob extends Job
 {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
-	 */
-	public void execute(JobExecutionContext context) throws JobExecutionException
+	WrappedProcess process;
+	
+	
+	public StartJob(WrappedProcess wp)
 	{
-		JobDataMap dataMap = context.getJobDetail().getJobDataMap();
-		WrappedProcess process = (WrappedProcess) dataMap.get("process");
+		process = wp;
+	}
+
+
+	public void run() 
+	{
+		if (checkStart())
 		process.startByTimer();
 	}
 

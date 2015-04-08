@@ -90,6 +90,7 @@ public abstract class AbstractProcess implements Process
 	protected boolean 				_minimized				= false;
 	protected boolean 				_logonActiveSession		= false;
 	protected String				_desktop				= null;
+	protected int 					_umask					= -1;
 
 	/*
 	 * (non-Javadoc)
@@ -444,6 +445,16 @@ public abstract class AbstractProcess implements Process
 	public boolean isDebug()
 	{
 		return _debug;
+	}
+
+	public int getUmask()
+	{
+		return _umask;
+	}
+
+	public void setUmask(int umask)
+	{
+		_umask = umask;
 	}
 
 
