@@ -23,10 +23,11 @@ dependencies {
     compile group: 'jna', 								name: 'jna-platform', 						version: "$platform_version"
     compile group: 'netty', 							name: 'netty', 										version: "$netty_version"
     compile group: 'automaton', 					name: 'automaton', 								version: "$automaton_version"
-    compile group: 'quartz', 							name: 'quartz', 									version: "$quartz_version"
     compile group: 'abeille', 						name: 'formsrt', 									version: "$formsrt_version"
     compile group: 'forms', 							name: 'forms', 										version: "$forms_version"
     compile group: 'velocity', 						name: 'velocity', 								version: "$velocity_version"
+    compile group: 'yacron4j', 						name: 'yacron4j', 								version: "$yacron4j_version"
+    compile group: 'joda-time', 					name: 'joda-time', 								version: "$joda_time_version"
 }
 
 //println '---------------------------'
