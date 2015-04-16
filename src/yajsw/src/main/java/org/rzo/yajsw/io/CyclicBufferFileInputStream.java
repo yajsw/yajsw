@@ -113,6 +113,7 @@ public class CyclicBufferFileInputStream extends BufferedInputStream
 							//e.printStackTrace();
 							// Thread.currentThread().interrupt();
 							// may cause endless loop
+							System.out.println("CyclicBufferFileInputStream - sleep interrupted");
 							throw new IOException(e);
 						}
 				}

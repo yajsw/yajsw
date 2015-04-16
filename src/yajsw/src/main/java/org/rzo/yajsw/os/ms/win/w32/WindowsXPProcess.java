@@ -2343,8 +2343,7 @@ public class WindowsXPProcess extends AbstractProcess
 		}
 		catch (Exception ex)
 		{
-			log("exception in process start: " + ex);
-			throwing(getClass().toString(), "start", ex);
+			log("exception in process start: " + ex, ex);
 		}
 
 		return result;
@@ -2626,21 +2625,57 @@ public class WindowsXPProcess extends AbstractProcess
 		  if (MyKernel32.INSTANCE.AttachConsole(_pid))
 		  {
 		    //Disable Ctrl-C handling for our program
-			  MyKernel32.INSTANCE.SetConsoleCtrlHandler(null, true); 
-			  MyKernel32.INSTANCE.GenerateConsoleCtrlEvent(MyKernel32.CTRL_C_EVENT, 0);
+			  boolean removeConsoleCtrlHandlerOK =  MyKernel32.INSTANCE.SetConsoleCtrlHandler(null, true);
+			  if (!removeConsoleCtrlHandlerOK) {
+				  int err = MyKernel32.INSTANCE.GetLastError();
+				  log("sendCtnrlC [" + _pid +
+				  "] error executing removeConsoleCtrlHandler: " + err);
+				  log("sendCtnrlC [" + _pid + "] message: " +
+				   Kernel32Util.formatMessageFromLastErrorCode(err));
+				             }
+			  		  
+			  boolean createCtrlEventOK = MyKernel32.INSTANCE.GenerateConsoleCtrlEvent(MyKernel32.CTRL_C_EVENT, 0);
+			  if (!createCtrlEventOK) {
+				  int err = MyKernel32.INSTANCE.GetLastError();
+				  log("sendCtnrlC [" + _pid +
+				   "] error executing createCtrlEvent: " + err);
+				  log("sendCtnrlC [" + _pid + "] message: " +
+				  Kernel32Util.formatMessageFromLastErrorCode(err));
+				             }
 
 		    //Must wait here. If we don't and re-enable Ctrl-C
 		    //handling below too fast, we might terminate ourselves.
 		    waitFor(2000);
 
-		    MyKernel32.INSTANCE.FreeConsole();
+		    boolean freeConsoleOK = MyKernel32.INSTANCE.FreeConsole();
+		    if (!freeConsoleOK) {
+		    	int err = MyKernel32.INSTANCE.GetLastError();
+		    	log("sendCtnrlC [" + _pid + "] error executing freeConsole " +
+		    	                   err);
+		    	log("sendCtnrlC [" + _pid + "] message: " +
+		    	Kernel32Util.formatMessageFromLastErrorCode(err));
+		    	            }
 
 		    //Re-enable Ctrl-C handling or any subsequently started
 		    //programs will inherit the disabled state.
-		    MyKernel32.INSTANCE.SetConsoleCtrlHandler(null, false); 
+		    boolean setConsoleCtrlHandlerOK =  MyKernel32.INSTANCE.SetConsoleCtrlHandler(null, false); 
+		    if (!setConsoleCtrlHandlerOK) {
+		    	int err = MyKernel32.INSTANCE.GetLastError();
+		    	log("sendCtnrlC [" + _pid +
+		    	                    "] error executing setConsoleCtrlHandler: " + err);
+		    	log("sendCtnrlC [" + _pid + "] message: " +
+		    	                    Kernel32Util.formatMessageFromLastErrorCode(err));
+		    	            }
 		  }
 		  else
-			  log("error in send cntrl-c: AttachConsole failed: either run this with javaw or set visible to true for sub process");
+		  {
+			  int err = MyKernel32.INSTANCE.GetLastError();
+			  log("sendCtnrlC [" + _pid +
+			                  "] error in send cntrl-c: AttachConsole failed errorCode: " +
+			                  err);
+			  log("sendCtnrlC [" + _pid + "] message: " +
+			                  Kernel32Util.formatMessageFromLastErrorCode(err));
+		  }
 			  
 	}
 

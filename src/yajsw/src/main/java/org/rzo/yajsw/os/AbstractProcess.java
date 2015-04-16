@@ -10,6 +10,8 @@
  */
 package org.rzo.yajsw.os;
 
+import io.netty.handler.logging.LogLevel;
+
 import java.io.FileDescriptor;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -17,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 // TODO: Auto-generated Javadoc
@@ -404,12 +407,15 @@ public abstract class AbstractProcess implements Process
 			System.out.println(msg);
 	}
 
-	protected void throwing(String cls, String method, Throwable ex)
+	protected void log(String msg, Throwable ex)
 	{
 		if (_logger != null)
-			_logger.throwing(cls, method, ex);
+			_logger.log(Level.INFO, msg, ex);
 		else
+		{
+			System.out.println(msg);
 			ex.printStackTrace();
+		}
 	}
 
 	public void setDebug(boolean debug)

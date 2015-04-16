@@ -1028,6 +1028,7 @@ public class WrapperTrayIconImpl implements WrapperTrayIcon
 		    private void restartService() {
 		        try {
 		        	stopService();
+		        	Thread.sleep(15000L);
 		        	startService();
 		        } catch (Throwable ex) {
 		            ex.printStackTrace();
