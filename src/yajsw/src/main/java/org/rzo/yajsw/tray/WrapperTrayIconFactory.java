@@ -116,7 +116,7 @@ public class WrapperTrayIconFactory
 			osProcess.setPipeStreams(false, false);
 			osProcess.setVisible(false);
 			osProcess.setLogger(logger);
-			osProcess.setDebug(config.getBoolean("wrapper.debug", false));
+			osProcess.setDebug(config.getBoolean("wrapper.debug", false) ? false : config.getInt("wrapper.debug.level", 3) > 1);
 			Runtime.getRuntime().addShutdownHook(new Thread()
 			{
 				public void run()
@@ -126,6 +126,8 @@ public class WrapperTrayIconFactory
 				}
 			});
 			osProcess.start();
+			int debug = config.getBoolean("wrapper.debug", false) ? config.getInt("wrapper.debug.level", 3) : 0;
+			if (debug > 1)
 			logger.info("spawned system tray icon process with pid "+osProcess.getPid());
 			return osProcess;
 		}

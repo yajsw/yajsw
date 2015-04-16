@@ -57,6 +57,7 @@ class ControllerPipelineFactory extends ChannelInitializer<SocketChannel>
 				}
 				else if (currentState == JVMController.STATE_PROCESS_KILLED)
 				{
+					if (_debug)
 					_controller.getLog().info("app not running -> rejecting new connection");
 					result = false;
 				}
@@ -87,7 +88,7 @@ class ControllerPipelineFactory extends ChannelInitializer<SocketChannel>
 		if (_debug)
 		{
 			pipeline.addLast("logging", new LoggingFilter(_controller.getLog(), "controller"));
-			_controller.getLog().info("jvm controller set set netty logger");
+			_controller.getLog().info("jvm controller: netty logger set");
 		}
 
 		// if we found our partner close all other open connections

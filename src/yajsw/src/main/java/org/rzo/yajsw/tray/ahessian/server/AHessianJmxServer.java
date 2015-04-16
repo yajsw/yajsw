@@ -22,7 +22,7 @@ import org.rzo.netty.mcast.discovery.DiscoveryServer;
 
 public class AHessianJmxServer
 {
-	public AHessianJmxServer(MBeanServer mbeanServer, String ipFilter, String serviceDiscoveryName, int port, InternalLogger logger, boolean debug) throws Exception
+	public AHessianJmxServer(MBeanServer mbeanServer, String ipFilter, String serviceDiscoveryName, int port, InternalLogger logger, int debug) throws Exception
 	{
 		
 		
@@ -33,7 +33,7 @@ public class AHessianJmxServer
     	.serviceThreads(10)
     	.ipFilter(ipFilter);
     	
-    	if (debug)
+    	if (debug > 2)
     		builder.debug();
     	
     	Set<String> channelOptions = new HashSet();
@@ -53,11 +53,11 @@ public class AHessianJmxServer
 		if (serverPort == 0)
 			serverPort = ((InetSocketAddress) channel.localAddress()).getPort();
 
-		if (debug && logger != null)
+		if (debug > 2 && logger != null)
 			logger.info("ahessian jmx service bound to port " + serverPort);
 
 		DiscoveryServer discovery = new DiscoveryServer();
-		discovery.setDebug(debug);
+		discovery.setDebug(debug > 2);
 		discovery.setLogger(logger);
 		// allow discovery only from localhost. other computers will be ignored
 		discovery.setIpSet(new IpFilterRuleList("+n:localhost, -n:*"));
@@ -70,7 +70,7 @@ public class AHessianJmxServer
 	public static void main(String[] args) throws Exception
 	{
 		MBeanServer _mbeanServer = MBeanServerFactory.createMBeanServer();
-		AHessianJmxServer _ahessianServer = new AHessianJmxServer(_mbeanServer, "+n:localhost, -n:*", "test", 15009, null, false);
+		AHessianJmxServer _ahessianServer = new AHessianJmxServer(_mbeanServer, "+n:localhost, -n:*", "test", 15009, null, 0);
 
 	}
 

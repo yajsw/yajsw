@@ -5,6 +5,6 @@ import io.netty.util.internal.logging.InternalLogger;
 public interface JavaHome
 {
 	String findJava(String wrapperJava, String customProcessName);
-	void setLogger(InternalLogger logger);
+	void setLogger(InternalLogger logger, int level);
 
 }

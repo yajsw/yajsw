@@ -99,7 +99,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 	int _port = DEFAULT_PORT;
 
 	/** The _debug. */
-	boolean _debug = false;
+	int _debug = 3;
 	boolean _debugComm = false;
 
 	/** The log. */
@@ -254,7 +254,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 		if (preScript != null & !"".equals(preScript))
 			try
 			{
-				if (_debug)
+				if (_debug > 2)
 					System.out.println("wrapped process: executing pre script "
 							+ preScript);
 				Script script = ScriptFactory.createScript(preScript,
@@ -274,7 +274,9 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 		YajswConfigurationImpl config = new YajswConfigurationImpl();
 		// config.setDebug(false);
 		config.init();
-		_debug = config.getBoolean("wrapper.debug", false);
+		boolean dbg = config.getBoolean("wrapper.debug", false);
+		int debugLevel = config.getInt("wrapper.debug.level", 3);
+		_debug = dbg ? debugLevel : 0;
 		_debugComm = config.getBoolean("wrapper.debug.comm", false);
 		logJavaInfo(args);
 
@@ -297,7 +299,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 			if (mainClassName == null && jarName == null
 					&& groovyScript == null)
 				mainClassName = config.getString("wrapper.app.parameter.1");
-			if (_debug)
+			if (_debug > 1)
 				System.out.println("mainClass/jar/script: " + mainClassName
 						+ "/" + jarName + "/" + groovyScript);
 			if (jarName == null && mainClassName == null
@@ -337,7 +339,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 				File f = new File(stopConfig);
 				_externalStop = true;
 			}
-			if (_debug)
+			if (_debug > 1)
 				System.out.println("external stop " + _externalStop);
 
 			exitOnMainTerminate = config.getInt(
@@ -397,7 +399,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 			monitorHeap(config);
 			monitorGc(config);
 
-			if (_debug)
+			if (_debug > 1)
 				System.out.println("terminated WrapperManager.init()");
 			// if (commonsLog != null)
 			// System.setProperty("org.apache.commons.logging.Log", commonsLog);
@@ -422,7 +424,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 			final long cycle = config.getLong(
 					"wrapper.java.monitor.deadlock.interval", 30) * 1000;
 			final ThreadMXBean bean = ManagementFactory.getThreadMXBean();
-			if (_debug)
+			if (_debug > 2)
 				System.out.println("monitor deadlock: start");
 			executor.execute(new Runnable()
 			{
@@ -467,7 +469,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 					"wrapper.java.monitor.heap.interval", 30) * 1000;
 			final int thresholdPercent = config.getInt(
 					"wrapper.java.monitor.heap.threshold.percent", 95);
-			if (_debug)
+			if (_debug > 2)
 				System.out.println("monitor heap: start");
 			executor.execute(new Runnable()
 			{
@@ -549,14 +551,14 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 		if (mFormat != null || gcRestart)
 			try
 			{
-				if (_debug)
+				if (_debug > 2)
 					System.out.println("monitor GC: " + mFormat);
 				if (mFormat != null)
 					gcFormat = new MessageFormat(mFormat);
 				final long cycle = config.getLong(
 						"wrapper.java.monitor.gc.interval", 1) * 1000;
 
-				if (_debug)
+				if (_debug > 2)
 				{
 					System.out.println("monitor gc: minorGCBean/fullGCBean: "
 							+ minorGCBean.getName() + "/"
@@ -778,14 +780,14 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 	 */
 	public int getExitOnMainTerminate()
 	{
-		if (_debug)
+		if (_debug > 2)
 			System.out.println("exit on main terminate " + exitOnMainTerminate);
 		return exitOnMainTerminate;
 	}
 
 	public int getExitOnException()
 	{
-		if (_debug)
+		if (_debug > 2)
 			System.out.println("exit on main exception " + exitOnException);
 		return exitOnException;
 	}
@@ -981,7 +983,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 	 */
 	private void logJavaInfo(String[] args)
 	{
-		if (_debug)
+		if (_debug > 1)
 		{
 			System.out.println("APP user name="
 					+ getSystemProperty("user.name"));
@@ -1003,7 +1005,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 				System.err.println("Classpath File not found: " + files[i]);
 		}
 
-		if (_debug)
+		if (_debug > 1)
 		{
 			String argsStr = "Application args: ";
 			if (args != null && args.length > 0)
@@ -1052,7 +1054,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 		{
 			args[i] = (String) it.next();
 		}
-		if (_debug)
+		if (_debug > 1)
 		{
 			System.out.println("args: ");
 			for (String arg : args)
@@ -1092,7 +1094,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 		}
 		catch (Throwable e1)
 		{
-			if (_debug)
+			if (_debug > 1)
 				e1.printStackTrace();
 		}
 
@@ -1238,7 +1240,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 		// try connecting, if we could not sleep then retry
 		while (!_started)
 		{
-			if (_debug)
+			if (_debug > 1)
 				// log.fine("connecting to port " + _port);
 				System.out.println("connecting to port " + _port);
 			final ChannelFuture future1 = connector.connect();
@@ -1278,7 +1280,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 
 			if (_started)
 			{
-				if (_debug)
+				if (_debug > 2)
 					System.out
 							.println("WrapperManager: channel connected, sending key");
 				future1.channel().writeAndFlush(
@@ -1287,7 +1289,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 			else
 				try
 				{
-					if (_debug)
+					if (_debug > 0)
 						// log.fine("connection failed -> sleep then retry");
 						System.out
 								.println("connection failed -> sleep then retry");
@@ -1310,7 +1312,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 		@Override
 		public void channelInactive(ChannelHandlerContext ctx) throws Exception
 		{
-			if (_debug)
+			if (_debug > 1)
 				System.out.println("session closed");
 			_started = false;
 			if (_session != null)
@@ -1325,7 +1327,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 			_session = null;
 			if (!_stopping)
 			{
-				if (_debug)
+				if (_debug > 0)
 					System.out.println("try reconnect");
 				executor.execute(new Runnable()
 				{
@@ -1419,7 +1421,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 			 * if (_debug) // log.log(Level.FINE, "exceptionCaught",
 			 * e.getCause()); e.getCause().printStackTrace();
 			 */
-			if (_debug)
+			if (_debug > 1)
 			{
 				Throwable th = e;
 				if (th == null)
@@ -1462,7 +1464,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 	 * 
 	 * @return true, if is debug
 	 */
-	boolean isDebug()
+	int getDebug()
 	{
 		return _debug;
 	}
@@ -1473,7 +1475,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 	 * @param debug
 	 *            the new debug
 	 */
-	void setDebug(boolean debug)
+	void setDebug(int debug)
 	{
 		_debug = debug;
 	}
@@ -1777,7 +1779,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 	{
 		if (shutdownScript != null & !"".equals(shutdownScript))
 		{
-			if (_debug)
+			if (_debug > 1)
 				System.out.println("executing shutdown script "
 						+ shutdownScript);
 			Script script = ScriptFactory.createScript(shutdownScript,
@@ -1790,7 +1792,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 			if (script != null)
 			{
 				script.execute();
-				if (_debug)
+				if (_debug > 2)
 					System.out.println("terminated shutdown script ");
 			}
 			else

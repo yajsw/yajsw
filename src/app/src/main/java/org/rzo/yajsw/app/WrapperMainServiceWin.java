@@ -87,7 +87,8 @@ public class WrapperMainServiceWin extends Win32Service implements StopableServi
 		if (!OperatingSystem.instance().setWorkingDir(homeDir))
 			System.out.println("could not set working dir. pls check configuration or user rights :"+homeDir);
 		YajswConfigurationImpl _config = new YajswConfigurationImpl(false);
-		boolean debug = _config.getBoolean("wrapper.debug", false);
+		boolean dbg = _config.getBoolean("wrapper.debug", false);
+		int debug = dbg ?  _config.getInt("wrapper.debug.level", 3) : 0;
 		service = new WrapperMainServiceWin();
 		// set service shutdown timeout
 		service.setServiceName(_config.getString("wrapper.ntservice.name"));
@@ -176,7 +177,7 @@ public class WrapperMainServiceWin extends Win32Service implements StopableServi
 				}
 			}
 		});
-		if (debug)
+		if (debug > 2)
 		w.getWrapperLogger().info("Win service: before service init");
 		
 		service.setDebug(debug);
@@ -185,7 +186,7 @@ public class WrapperMainServiceWin extends Win32Service implements StopableServi
 		// here until service is stopped
 		service.init();
 		// service has terminated -> halt the wrapper jvm
-		if (debug)
+		if (debug > 0)
 		w.getWrapperLogger().info("Win service: terminated correctly");
 		try
 		{
@@ -209,7 +210,7 @@ public class WrapperMainServiceWin extends Win32Service implements StopableServi
 	@Override
 	public void onStart()
 	{
-		log("onstart");
+		log("onstart", 2);
 	}
 
 	/*
@@ -256,9 +257,9 @@ public class WrapperMainServiceWin extends Win32Service implements StopableServi
 
 	}
 	
-	public void log(String txt)
+	public void log(String txt, int level)
 	{
-		if (_debug && w != null && w.getWrapperLogger() != null)
+		if (_debug > level && w != null && w.getWrapperLogger() != null)
 			w.getWrapperLogger().info(txt);
 	}
 

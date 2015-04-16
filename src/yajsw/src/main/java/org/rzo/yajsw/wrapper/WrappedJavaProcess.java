@@ -124,7 +124,7 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		}
 
 		JavaHome javaHome = OperatingSystem.instance().getJavaHome(_config);
-		javaHome.setLogger(getInternalWrapperLogger());
+		javaHome.setLogger(getInternalWrapperLogger(), _debug);
 		String java = javaHome.findJava(
 				_config.getString("wrapper.java.command"),
 				_config.getString("wrapper.java.customProcName"));
@@ -571,7 +571,7 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 					}
 					else
 					{
-						if (_debug)
+						if (_debug > 1)
 						{
 							getWrapperLogger().info(
 									"giving up after " + _restartCount
@@ -604,7 +604,7 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 					}
 					else
 					{
-						if (_debug)
+						if (_debug > 1)
 						{
 							getWrapperLogger().info(
 									"giving up after " + _restartCount
@@ -730,7 +730,7 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 				out.write("" + getAppPid());
 				out.flush();
 				out.close();
-				if (_debug)
+				if (_debug > 2)
 					getWrapperLogger().info(
 							"created jva.pid file "
 									+ _javaPidFile.getAbsolutePath());
@@ -754,7 +754,7 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 			{
 				_javaPidFile.delete();
 
-				if (_debug)
+				if (_debug > 2)
 					getWrapperLogger().info(
 							"removed java.pid file "
 									+ _javaPidFile.getAbsolutePath());

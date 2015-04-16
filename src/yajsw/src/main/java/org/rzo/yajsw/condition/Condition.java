@@ -37,7 +37,7 @@ public class Condition
 
 	InternalLogger					_log;
 	
-	boolean _debug = false;
+	int _debug = 3;
 
 	public Condition(YajswConfigurationImpl config, WrappedProcess wrappedProcess, InternalLogger log)
 	{
@@ -63,7 +63,9 @@ public class Condition
 				e.printStackTrace();
 			}
 		}
-		_debug = _config.getBoolean("wrapper.debug", false);
+		int debugLevel = _config.getInt("wrapper.debug.level", 3);
+		String dbg = _config.getString("wrapper.debug", null);
+		_debug = (dbg != null && "true".equals(dbg)) ? debugLevel : 0;
 		List args = _config.getList("wrapper.condition.script.args", new ArrayList());
 		String[] argsArr = new String[args.size()];
 		for (int i = 0; i < argsArr.length; i++)

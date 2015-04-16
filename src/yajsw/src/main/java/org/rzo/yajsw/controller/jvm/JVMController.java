@@ -146,7 +146,7 @@ public class JVMController extends AbstractController
 	    _workerGroup = new OioEventLoopGroup();
 	    ControllerPipelineFactory pipelineFactory = new ControllerPipelineFactory(this); 
 
-		pipelineFactory.setDebug(_debug);
+		pipelineFactory.setDebug(_debug > 2);
         _acceptor = new ServerBootstrap() 
         .group(_bossGroup, _workerGroup)
          .channel(OioServerSocketChannel.class)
@@ -229,7 +229,7 @@ public class JVMController extends AbstractController
 			{
 				setState(STATE_WAITING);
 				// beginWaitForStartup();
-				if (isDebug())
+				if (getDebug() > 2)
 					getLog().info("binding successfull");
 				return true;
 			}
@@ -242,7 +242,7 @@ public class JVMController extends AbstractController
 					try
 					{
 						_usedPorts.add(_port);
-						if (isDebug())
+						if (getDebug() > 2)
 							getLog().info("binding to port " + _port);
 						ChannelFuture f = _acceptor.bind(_port).sync();
 						if (f.isSuccess())
@@ -251,14 +251,14 @@ public class JVMController extends AbstractController
 						setState(STATE_WAITING);
 						_bound = true;
 						// beginWaitForStartup();
-						if (isDebug())
+						if (getDebug() > 2)
 							getLog().info("binding successfull");
 						return true;
 						}
 					}
 					catch (Exception ex)
 					{
-						if (_debug)
+						if (_debug > 2)
 							getLog().info("binding error: " + ex.getMessage() + " -> retry with another port");
 
 						_usedPorts.remove(_port);
@@ -299,7 +299,7 @@ public class JVMController extends AbstractController
 
 			public void run()
 			{
-				if (isDebug())
+				if (getDebug() > 1)
 					getLog().severe("WrapperManger did not log on within timeout of " + _startupTimeout);
 				stop(STATE_STARTUP_TIMEOUT, "STARTUP_TIMEOUT");
 			}
@@ -352,7 +352,7 @@ public class JVMController extends AbstractController
 			while (_channel != null && _channel.isActive() && i < 3)
 			{
 				i++;
-				if (_debug)
+				if (_debug > 1)
 					getLog().info("controller sending a stop command");
 				if (_channel != null)
 				{
@@ -375,6 +375,7 @@ public class JVMController extends AbstractController
 				try
 				{
 					ChannelFuture cf = _channel.close();
+					if (getDebug() > 1)
 					getLog().info("controller close session");
 					cf.await(1000);
 				}
@@ -420,13 +421,13 @@ public class JVMController extends AbstractController
 	public static void main(String[] args)
 	{
 		JVMController c = new JVMController(null);
-		c.setDebug(true);
+		c.setDebug(3);
 		c.setKey("123");
 		c.setMinPort(15003);
 		c.start();
 		c.stop(0, null);
 		JVMController c1 = new JVMController(null);
-		c1.setDebug(true);
+		c1.setDebug(3);
 		c1.setKey("123");
 		c1.start();
 
@@ -474,20 +475,9 @@ public class JVMController extends AbstractController
 	 * 
 	 * @return true, if is debug
 	 */
-	boolean isDebug()
+	int getDebug()
 	{
 		return _debug;
-	}
-
-	/**
-	 * Sets the debug.
-	 * 
-	 * @param debug
-	 *            the new debug
-	 */
-	public void setDebug(boolean debug)
-	{
-		_debug = debug;
 	}
 
 	public void setDebugComm(boolean debug)
@@ -697,11 +687,11 @@ public class JVMController extends AbstractController
 				try
 				{
 					osProcess = ((WrappedJavaProcess) _wrappedProcess)._osProcess;
-					if (_debug)
+					if (_debug > 2)
 						getLog().info("waiting for termination of process");
 					if (osProcess != null)
 						osProcess.waitFor();
-					if (_debug)
+					if (_debug > 1)
 						getLog().info("process terminated");
 				}
 				finally

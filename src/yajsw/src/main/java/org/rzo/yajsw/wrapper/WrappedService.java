@@ -41,7 +41,7 @@ public class WrappedService
 	YajswConfigurationImpl	_config;
 
 	/** The _debug. */
-	boolean					_debug					= false;
+	int					_debug					= 3;
 
 	/** The Constant PATHSEP. */
 	static final String		PATHSEP					= System.getProperty("path.separator");
@@ -96,8 +96,8 @@ public class WrappedService
 				_cache.load(_config);
 			}
 
-		String dbg = _config.getString("wrapper.debug");
-		_debug = dbg == null ? false : dbg.equals("true");
+		
+		_debug = _config.getBoolean("wrapper.debug", false) ? _config.getInt("wrapper.debug.level", 3) : 0;
 		_osService = OperatingSystem.instance().serviceManagerInstance().createService();
 		_osService.setLogger(_log);
 		_osService.setName(_config.getString("wrapper.ntservice.name"));
@@ -401,7 +401,7 @@ public class WrappedService
 			}
 		}
 		JavaHome javaHome = OperatingSystem.instance().getJavaHome(_config);
-		javaHome.setLogger(SimpleLoggerFactory.getInstance(this.getClass().getName()));
+		javaHome.setLogger(SimpleLoggerFactory.getInstance(this.getClass().getName()), _debug);
 		String java = javaHome.findJava(_config.getString("wrapper.ntservice.java.command", _config.getString("wrapper.java.command")), _config.getString("wrapper.ntservice.java.customProcName"));
 		if (java == null)
 		{

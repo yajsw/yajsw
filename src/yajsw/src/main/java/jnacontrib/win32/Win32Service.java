@@ -64,7 +64,7 @@ abstract public class Win32Service
 	private volatile boolean _stopping = false;
 	public volatile String _stopReason = null;
 	private static int 			lastWinError = -1;
-	protected boolean _debug = false;
+	protected int _debug = 3;
 
 
 	/**
@@ -93,7 +93,7 @@ abstract public class Win32Service
 		return serviceName;
 	}
 	
-	public void setDebug(boolean value)
+	public void setDebug(int value)
 	{
 		_debug = value;
 	}
@@ -541,10 +541,10 @@ abstract public class Win32Service
 
 		if (!advapi32.StartServiceCtrlDispatcher(entry.toArray(2)))
 		{
-			log("error in StartServiceCtrlDispatcher");
+			log("error in StartServiceCtrlDispatcher", 0);
 			int err = Native.getLastError();
 			lastWinError = err;
-			log(err + ":" + Kernel32Util.formatMessageFromLastErrorCode(err));
+			log(err + ":" + Kernel32Util.formatMessageFromLastErrorCode(err), 0);
 		}
 	}
 
@@ -696,7 +696,7 @@ abstract public class Win32Service
 		serviceStatus.dwWaitHint = waitHint;
 		serviceStatus.dwCurrentState = status;
 		serviceStatus.dwCheckPoint = checkPoint;
-		log("reporting status " + checkPoint);
+		log("reporting status " + checkPoint, 2);
 
 		advapi32.SetServiceStatus(serviceStatusHandle, serviceStatus);
 	}
@@ -711,7 +711,7 @@ abstract public class Win32Service
 	 */
 	public abstract void onStop();
 
-	public abstract void log(String txt);
+	public abstract void log(String txt, int level);
 
 	/**
 	 * Implementation of the service main function.
@@ -733,7 +733,7 @@ abstract public class Win32Service
 
 			advapi32 = Advapi32.INSTANCE;
 
-			log("+ ServiceMain callback");
+			log("+ ServiceMain callback", 2);
 			serviceControl = new ServiceControl();
 			serviceStatusHandle = advapi32.RegisterServiceCtrlHandlerEx(serviceName, serviceControl, null);
 
@@ -747,7 +747,7 @@ abstract public class Win32Service
 					startupLock.lock();
 					if (!startupCondition.await(startupTimeout, TimeUnit.MILLISECONDS))
 					{
-						log("service startup timeout -> aborting");
+						log("service startup timeout -> aborting", 0);
 						System.exit(999);
 					}
 				}
@@ -786,7 +786,7 @@ abstract public class Win32Service
 		 */
 		public int callback(int dwControl, int dwEventType, Pointer lpEventData, Pointer lpContext)
 		{
-			log("received service control " + dwControl);
+			log("received service control " + dwControl, 2);
 			switch (dwControl)
 			{
 			case WINSVC.SERVICE_CONTROL_STOP:

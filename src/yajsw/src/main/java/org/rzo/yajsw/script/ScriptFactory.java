@@ -32,11 +32,11 @@ public class ScriptFactory
 	 * 
 	 * @return the script
 	 */
-	public static Script createScript(String script, String id, WrappedProcess process, String[] args, InternalLogger log, int timeout, String encoding, boolean reload, boolean debug, int maxConcInvocations)
+	public static Script createScript(String script, String id, WrappedProcess process, String[] args, InternalLogger log, int timeout, String encoding, boolean reload, int debug, int maxConcInvocations)
 	{
 		if (script == null || "".equals(script))
 			return null;
-		if (log != null && debug)
+		if (log != null && debug > 1)
 			log.info("create script: " + script);
 		if (script.endsWith(".bat") || script.endsWith(".sh"))
 			return new ShellScript(script, id, process, args, timeout, maxConcInvocations);
@@ -53,7 +53,7 @@ public class ScriptFactory
 		return null;
 	}
 
-	public static Script createScript(String script, String id, WrappedProcess process, List args, InternalLogger log, int timeout, String encoding, boolean reload, boolean debug, int maxConcInvocations)
+	public static Script createScript(String script, String id, WrappedProcess process, List args, InternalLogger log, int timeout, String encoding, boolean reload, int debug, int maxConcInvocations)
 	{
 		String[] argsArr = new String[0];
 		if (args != null && args.size() > 0)

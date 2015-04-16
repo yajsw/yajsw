@@ -7,7 +7,7 @@ import org.rzo.yajsw.controller.AbstractController.ControllerListener;
 public interface Controller
 {
 
-	void setDebug(boolean debug);
+	void setDebug(int debug);
 
 	void setLogger(Logger wrapperLogger);
 

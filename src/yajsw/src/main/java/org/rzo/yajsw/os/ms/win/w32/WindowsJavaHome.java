@@ -38,10 +38,12 @@ public class WindowsJavaHome implements JavaHome
 	/** The _config. */
 	Configuration	_config;
 	InternalLogger	_logger;
+	int _debug = 3;
 
-	public void setLogger(InternalLogger logger)
+	public void setLogger(InternalLogger logger, int debug)
 	{
 		_logger = logger;
+		_debug = debug;
 	}
 
 	/**
@@ -162,7 +164,7 @@ public class WindowsJavaHome implements JavaHome
 
 		if (_logger == null)
 			System.out.println("using java: " + java);
-		else
+		else if (_debug > 1)
 			_logger.info("using java: " + java);
 
 		return java;

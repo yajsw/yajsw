@@ -53,7 +53,7 @@ public class ScriptCounter implements PdhCounter
 		else
 		{
 			_lastModified = lastModified;
-			_script = ScriptFactory.createScript(_scriptFile, _counterString, null, _args, _log, 0, null, false, false, 1);
+			_script = ScriptFactory.createScript(_scriptFile, _counterString, null, _args, _log, 0, null, false, 0, 1);
 			if (_script == null)
 				throw new IllegalArgumentException("Cannot find script " + _scriptFile);
 		}

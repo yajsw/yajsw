@@ -27,7 +27,7 @@ public abstract class AbstractController implements Constants, Controller
 	/** The _state. */
 	public int						_state		= 0;
 	/** The _debug. */
-	protected boolean				_debug		= false;
+	protected int				_debug		= 0;
 	protected boolean				_debugComm		= false;
 
 	/**
@@ -54,7 +54,7 @@ public abstract class AbstractController implements Constants, Controller
 		_wrappedProcess = wrappedProcess;
 	}
 
-	public void setDebug(boolean debug)
+	public void setDebug(int debug)
 	{
 		_debug = debug;
 	}
@@ -138,7 +138,7 @@ public abstract class AbstractController implements Constants, Controller
 		{
 			if (_state == state)
 				return;
-			if (_debug)
+			if (_debug > 1)
 			_logger.info("Controller State: " + stateAsStr(_state) + " -> " + stateAsStr(state));
 			_state = state;
 		}

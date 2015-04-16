@@ -129,7 +129,7 @@ public class WrappedRuntimeProcess extends AbstractWrappedProcess
 			else
 			{
 				setState(STATE_IDLE);
-				if (_debug)
+				if (_debug > 1)
 				{
 					getWrapperLogger().info(
 							"giving up after " + _restartCount + " retries");
@@ -169,7 +169,7 @@ public class WrappedRuntimeProcess extends AbstractWrappedProcess
 				out.write("" + getAppPid());
 				out.flush();
 				out.close();
-				if (_debug)
+				if (_debug > 2)
 					getWrapperLogger().info(
 							"created jva.pid file "
 									+ _runtimePidFile.getAbsolutePath());
@@ -193,7 +193,7 @@ public class WrappedRuntimeProcess extends AbstractWrappedProcess
 			{
 				_runtimePidFile.delete();
 
-				if (_debug)
+				if (_debug > 2)
 					getWrapperLogger().info(
 							"removed java.pid file "
 									+ _runtimePidFile.getAbsolutePath());

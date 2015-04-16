@@ -47,7 +47,7 @@ public class RunScript
 		WrappedProcess process = WrappedProcessFactory.createProcess(config);
 		process.init();
 
-		Script s = ScriptFactory.createScript(script, "test", process, scriptArgs, null, 0, config.getString("wrapper.script.encoding"), config.getBoolean("wrapper.script.reload", false), true, 1);
+		Script s = ScriptFactory.createScript(script, "test", process, scriptArgs, null, 0, config.getString("wrapper.script.encoding"), config.getBoolean("wrapper.script.reload", false), 3, 1);
 		if (s == null)
 		{
 			System.out.println("error initializing script " + script);

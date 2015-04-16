@@ -19,15 +19,17 @@ public class Cache
 {
 	boolean	_loaded	= false;
 	Logger _logger;
+	int _debug;
 	
-	public Cache(Logger logger)
+	public Cache(Logger logger, int debug)
 	{
 		_logger = logger;
+		_debug = debug;
 	}
 	
 	public Cache()
 	{
-		this(null);
+		this(null, 0);
 	}
 
 	public boolean load(YajswConfigurationImpl config)
@@ -142,9 +144,10 @@ public class Cache
 				destination.copyFrom(source, new AllFileSelector());
 				if (source.getContent().getLastModifiedTime() != 0)
 					destination.getContent().setLastModifiedTime(source.getContent().getLastModifiedTime());
+				if (_debug > 1)
 				log("cache file loaded " + source.getName() + " -> " + destination.getName());
 			}
-			else
+			else if (_debug > 2)
 				log("cache file up to date: "+destination.getName());
 			return destination;
 		}

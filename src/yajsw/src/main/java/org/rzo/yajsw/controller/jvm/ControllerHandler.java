@@ -38,13 +38,13 @@ public class ControllerHandler extends ChannelHandlerAdapter implements Constant
 				_controller.setState(JVMController.STATE_LOGGED_ON);
 				_controller.startupOK();
 				ctx.channel().writeAndFlush(new Message(Constants.WRAPPER_MSG_OKKEY, "" + _controller._wrappedProcess.getAppPid()));
-				if (_controller.isDebug())
+				if (_controller.getDebug() > 2)
 					_controller.getLog().info("Correct key");
 			}
 			// if not: announce it and close session
 			else
 			{
-				if (_controller.isDebug())
+				if (_controller.getDebug() > 0)
 					_controller.getLog().info("Wrong key -> closing session");
 				ctx.channel().writeAndFlush(new Message(Constants.WRAPPER_MSG_BADKEY, null));
 				ctx.channel().close();
@@ -111,7 +111,7 @@ public class ControllerHandler extends ChannelHandlerAdapter implements Constant
 		// new session
 		if (_controller._channel != null && _controller._channel != ctx.channel())
 		{
-			if (_controller.isDebug())
+			if (_controller.getDebug() > 2)
 				_controller.getLog().info("session already established -> ignore further sessions");
 			ctx.channel().close();
 		}
@@ -142,7 +142,7 @@ public class ControllerHandler extends ChannelHandlerAdapter implements Constant
 			// stop the controller
 			_controller._channel = null;
 			_controller.setState(JVMController.STATE_WAITING_CLOSED);
-			if (_controller.isDebug())
+			if (_controller.getDebug() > 2)
 				_controller.getLog().info("session closed -> waiting");
 		}
 		
@@ -152,7 +152,7 @@ public class ControllerHandler extends ChannelHandlerAdapter implements Constant
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) throws Exception
 	{
-		if (_controller.isDebug())
+		if (_controller.getDebug() > 1)
 			_controller.getLog().info(e.getMessage());
 
 	}

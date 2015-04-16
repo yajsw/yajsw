@@ -38,9 +38,9 @@ public class WindowsXPService extends AbstractService
 		}
 
 		@Override
-		public void log(String txt)
+		public void log(String txt, int level)
 		{
-			if (_debug)
+			if (_debug > level)
 			System.out.println(txt);
 		}
 

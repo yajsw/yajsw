@@ -12,6 +12,7 @@ public class PosixJavaHome implements JavaHome
 {
 	Configuration	_config;
 	InternalLogger _logger;
+	int _debug = 3;
 
 	public PosixJavaHome(Configuration config)
 	{
@@ -139,9 +140,10 @@ public class PosixJavaHome implements JavaHome
     return null;
   }
 	
-	public void setLogger(InternalLogger logger)
+	public void setLogger(InternalLogger logger, int debug)
 	{
 		_logger = logger;
+		_debug = debug;
 	}
 
 }

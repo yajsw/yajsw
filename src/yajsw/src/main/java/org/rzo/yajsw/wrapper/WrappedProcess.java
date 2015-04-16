@@ -116,7 +116,7 @@ public interface WrappedProcess
 
 	public void restartByTimer();
 
-	public void setDebug(boolean b);
+	public void setDebug(int b);
 
 	public void addStateChangeListener(int state, StateChangeListener listener);
 

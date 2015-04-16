@@ -105,7 +105,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	/** The _controller. */
 	protected Controller _controller;
 	/** The _debug. */
-	protected boolean _debug = false;
+	protected int _debug = 3;
 	/** The _config. */
 	protected YajswConfigurationImpl _config;
 	/** The _restarts. */
@@ -259,8 +259,9 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			}
 
 		String dbg = _config.getString("wrapper.debug");
-		_debug = dbg == null ? false : dbg.equals("true");
-		if (_debug)
+		int dbgLevel = _config.getInt("wrapper.debug.level", 3);
+		_debug = (dbg != null && "true".equals(dbg))  ? dbgLevel : 0;
+		if (_debug > 0)
 			InternalLoggerFactory.setDefaultFactory(new SimpleLoggerFactory());
 		_successfulInvocationTime = _config.getLong(
 				"wrapper.successful_invocation_time",
@@ -885,7 +886,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		int oldState = _state;
 		if (_state != state)
 		{
-			if (_debug)
+			if (_debug > 0)
 				getWrapperLogger().info(
 						"set state " + getStringState(_state) + "->"
 								+ getStringState(state));
@@ -986,7 +987,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	{
 		if (!_init)
 			init();
-		if (_debug)
+		if (_debug > 1)
 			getWrapperLogger().info(
 					"start from Thread " + Thread.currentThread().getName());
 
@@ -1067,7 +1068,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			}
 		}
 
-		if (_debug)
+		if (_debug > 2)
 			getWrapperLogger().info("starting Process");
 
 		if (_wrapperStarted == null)
@@ -1080,7 +1081,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			configStateChangeListeners();
 		}
 
-		if (_debug)
+		if (_debug > 2)
 			getWrapperLogger().info("starting controller");
 		if (_controller != null)
 		{
@@ -1088,7 +1089,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			// start
 			// otherwise resources will be released by gc -> finalize
 			_controller.reset();
-			_controller.setDebug(isDebug());
+			_controller.setDebug(_debug);
 			_controller.setDebugComm(isDebugComm());
 			_controller.setLogger(getWrapperLogger());
 			configController();
@@ -1099,7 +1100,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 				setState(STATE_IDLE);
 				return;
 			}
-			else if (_debug)
+			else if (_debug > 2)
 				getWrapperLogger().info("controller started");
 
 			try
@@ -1121,7 +1122,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			// release resources if _osProcess was running before this call to
 			// start
 			// otherwise resources will be released by gc -> finalize
-			if (_debug)
+			if (_debug > 2)
 				getWrapperLogger().info("_osProcess destroyed");
 			_osProcess.destroy();
 		}
@@ -1135,7 +1136,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		Map missingRegexTriggerActions = getMissingRegexTriggerActions();
 		_osProcess.setLogger(getWrapperLogger());
 		_exitCode = -3;
-		if (_debug)
+		if (_debug > 2)
 			getWrapperLogger().info("spawning wrapped process");
 		_controller.beginWaitForStartup();
 		if (_osProcess.start())
@@ -1195,7 +1196,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 							.getBoolean("wrapper.restart.reload_cache", false))
 				;
 			{
-				_cache = new Cache(getWrapperLogger());
+				_cache = new Cache(getWrapperLogger(), _debug);
 				getWrapperLogger().info("reloading cache ");
 				_cache.load(_config);
 			}
@@ -1235,7 +1236,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			if (user.length() == 0)
 				user = null;
 		}
-		if (_debug && user != null)
+		if (_debug > 1 && user != null)
 			getWrapperLogger().info("setting app user to " + user);
 		if (user != null)
 		{
@@ -1247,7 +1248,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		if (appUmask != -1)
 			_osProcess.setUmask(appUmask);
 
-		_osProcess.setDebug(_debug);
+		_osProcess.setDebug(_debug > 1);
 
 		String workingDir = _config.getString("wrapper.working.dir", ".");
 		if (workingDir != null)
@@ -1258,6 +1259,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 						"working directory " + workingDir + " not found");
 			else
 				_osProcess.setWorkingDir(wd.getAbsolutePath());
+			if (_debug > 1)
 			getWrapperLogger().info("working dir " + wd.getAbsolutePath());
 		}
 		_osProcess.setEnvironment(getProcessEnvironment(_config));
@@ -1268,7 +1270,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 						false))
 		{
 			_osProcess.setLogonActiveSession(true);
-			if (_debug)
+			if (_debug > 1)
 				getWrapperLogger().info("setLogonActiveSession");
 			if (!_config.getBoolean("wrapper.ntservice.autoreport.startup",
 					true))
@@ -2001,7 +2003,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			this.getWrapperLogger().info("error initializing script " + script);
 			return null;
 		}
-		if (_debug)
+		if (_debug > 2)
 			this.getWrapperLogger().info("found script " + s.getScript());
 		// final String id = key;
 
@@ -2104,7 +2106,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 
 	public void stop(String reason)
 	{
-		if (_debug)
+		if (_debug > 1)
 			getWrapperLogger().info(
 					"stop from Thread " + Thread.currentThread().getName()
 							+ " reason: " + reason);
@@ -2112,6 +2114,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		_startRequested = false;
 		if (_state != STATE_RUNNING && _state != STATE_IDLE)
 		{
+			if (_debug > 1)
 			getWrapperLogger().info(
 					"process not in state RUNNING -> Delaying stop");
 			_stopRequested = true;
@@ -2214,7 +2217,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		long remainStopWait = getRemainStopWaitTime();
 		while (_osProcess.isRunning() && remainStopWait > 0)
 		{
-			if (_debug)
+			if (_debug > 1)
 				getAppLogger().info("extending wait time " + remainStopWait);
 
 			if (_service != null)
@@ -2245,6 +2248,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		}
 		_osProcess.destroy();
 
+		//if (_debug > 0)
 		getWrapperLogger().info(
 				"process exit code: " + _osProcess.getExitCode());
 	}
@@ -2308,7 +2312,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		}
 		catch (InterruptedException e)
 		{
-			if (_debug)
+			if (_debug > 1)
 				getWrapperLogger().log(Level.SEVERE,
 						this.getClass().getName() + " restart", e);
 			Thread.currentThread().interrupt();
@@ -2323,7 +2327,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	 * 
 	 * @return true, if is debug
 	 */
-	boolean isDebug()
+	int getDebug()
 	{
 		return _debug;
 	}
@@ -2334,7 +2338,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	 * @param debug
 	 *            the new debug
 	 */
-	public void setDebug(boolean debug)
+	public void setDebug(int debug)
 	{
 		_debug = debug;
 	}
@@ -2384,7 +2388,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 				};
 				Runtime.getRuntime().addShutdownHook(hook);
 				_shutdownHooks.add(hook);
-				if (_debug)
+				if (_debug > 1)
 					getWrapperLogger().info(
 							"created pid file " + _pidFile.getAbsolutePath());
 			}
@@ -2411,7 +2415,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 				if (_config.getBoolean("wrapper.service", false))
 					this.stop();
 
-				if (_debug)
+				if (_debug > 1)
 					getWrapperLogger().info(
 							"removed pid file " + _pidFile.getAbsolutePath());
 				_pidFile = null;
@@ -2460,7 +2464,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 											+ " already locked by another application -> abort");
 					return false;
 				}
-				if (_debug)
+				if (_debug > 2)
 					getWrapperLogger().info(
 							"created lock file " + _lockFile.getAbsolutePath());
 
@@ -2485,7 +2489,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			try
 			{
 				_lock.release();
-				if (_debug)
+				if (_debug > 2)
 					getWrapperLogger().info(
 							"removed lock file " + _lockFile.getAbsolutePath());
 				_lock = null;
@@ -2746,7 +2750,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		else
 			return;
 		_restartCount++;
-		if (_debug)
+		if (_debug > 0)
 		{
 			getWrapperLogger().info("restarting " + _restartCount + " time");
 		}
@@ -2766,7 +2770,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			}
 			catch (InterruptedException e)
 			{
-				if (_debug)
+				if (_debug > 1)
 					getWrapperLogger().log(Level.SEVERE,
 							this.getClass().getName() + " restart", e);
 				Thread.currentThread().interrupt();
@@ -2787,7 +2791,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		}
 		else
 		{
-			if (_debug)
+			if (_debug > 2)
 				getWrapperLogger().info(
 						" stop requested, setting IDLE in restart internal");
 			_stopRequested = false;
@@ -3037,7 +3041,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 							|| _pid == AbstractWrappedProcess.this._osProcess
 									.getPid())
 					{
-						if (_debug)
+						if (_debug > 2)
 							getWrapperLogger().info(
 									"process not running, terminating gobler "
 											+ _name);
@@ -3195,7 +3199,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 				// ioe.printStackTrace();
 				// _goblerLog.info("gobler execption " + _name + " " +
 				// ioe.getMessage());
-				if (_debug)
+				if (_debug > 2)
 					_goblerLog.log(Level.INFO, " gobler terminated " + _name
 							+ " " + ioe);
 			}
@@ -3218,7 +3222,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 					}
 				});
 
-			if (_debug)
+			if (_debug > 2)
 				_goblerLog.info("gobler terminated " + _name);
 			if (_missingActions != null)
 				for (Iterator it = _missingActions.values().iterator(); it
@@ -3508,7 +3512,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		if (_trayIconMessages == null)
 			return null;
 		String[][] result = _trayIconMessages.toArrayAndClear();
-		if (_debug && result != null)
+		if (_debug > 2 && result != null)
 			getWrapperLogger().info(
 					"sending tray icon messages: #" + result.length);
 		return result;
@@ -3677,7 +3681,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 
 	public void signalStopping(long waitHint)
 	{
-		if (_debug)
+		if (_debug > 2)
 			getAppLogger().info("received signalStopping hint " + waitHint);
 
 		if (_state == STATE_RUNNING)
