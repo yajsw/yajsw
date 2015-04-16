@@ -17,21 +17,21 @@ import org.rzo.yajsw.app.WrapperJVMMain;
 
 public class WrapperLoader
 {
-	
+
 	private static boolean checkPath(String path)
 	{
 		int ix = path.indexOf("!");
 		if (ix == -1)
 		{
-			System.out.println("<yajsw>/wrapper.jar not found, please check classpath. aborting wrapper !");
+			System.out
+					.println("<yajsw>/wrapper.jar not found, please check classpath. aborting wrapper !");
 			Runtime.getRuntime().halt(999);// -> groovy eclipse plugin crashes
 			return false;
 		}
 		return true;
-		
+
 	}
-	
-	
+
 	/**
 	 * Gets the wrapper jar.
 	 * 
@@ -39,9 +39,16 @@ public class WrapperLoader
 	 */
 	public static String getWrapperJar()
 	{
+		String wrapperJar = System.getProperty("wrapper.wrapperJar", null);
+
+		if ((wrapperJar != null) && new File(wrapperJar).exists())
+		{
+			return wrapperJar;
+		}
 		try
 		{
-			return getJarFile(WrapperLoader.class.getClassLoader().loadClass("org.rzo.yajsw.Constants"));
+			return getJarFile(WrapperLoader.class.getClassLoader().loadClass(
+					"org.rzo.yajsw.Constants"));
 		}
 		catch (ClassNotFoundException e)
 		{
@@ -49,12 +56,18 @@ public class WrapperLoader
 		}
 		return null;
 	}
-	
+
 	public static String getWrapperAppJar()
 	{
+		String appJar = System.getProperty("wrapper.appJar", null);
+
+		if ((appJar != null) && new File(appJar).exists())
+		{
+			return appJar;
+		}
 		return getJarFile(WrapperJVMMain.class);
 	}
-	
+
 	private static String getJarFile(Class clazz)
 	{
 		String cn = clazz.getCanonicalName();
@@ -68,8 +81,9 @@ public class WrapperLoader
 			path = path.substring(0, path.indexOf("!"));
 			File f;
 			if (path.startsWith("file:"))
-			 f = new File(new URI(path));
-			else f = new File(path);
+				f = new File(new URI(path));
+			else
+				f = new File(path);
 			return f.getCanonicalPath();
 		}
 		catch (Exception e1)
@@ -78,17 +92,18 @@ public class WrapperLoader
 			e1.printStackTrace();
 		}
 		return null;
-		
+
 	}
-	
+
 	public static ArrayList getGroovyClasspath()
 	{
 		ArrayList result = new ArrayList();
 		String wrapperHome = getWrapperHome();
 		File groovyLib = new File(wrapperHome, "lib");
-		if (! groovyLib.exists())
+		if (!groovyLib.exists())
 		{
-			System.out.println("<yajsw>/lib folder not found. Please check that relative the lib folder is in the same folder as <yajsw>/wrapper.jar");
+			System.out
+					.println("<yajsw>/lib folder not found. Please check that relative the lib folder is in the same folder as <yajsw>/wrapper.jar");
 			return result;
 		}
 		File[] groovyLibs = groovyLib.listFiles();
@@ -103,10 +118,11 @@ public class WrapperLoader
 				}
 				catch (MalformedURLException e)
 				{
-					System.out.println("Error in getGroovyClasspath: "+e.getMessage());
+					System.out.println("Error in getGroovyClasspath: "
+							+ e.getMessage());
 				}
 		}
-	    return result;
+		return result;
 	}
 
 	private static Collection getFiles(File parent)
@@ -117,15 +133,16 @@ public class WrapperLoader
 		{
 			if (file.isDirectory())
 				result.addAll(getFiles(file));
-			else 
+			else
 				try
-			{
-				result.add(file.toURI().toURL());
-			}
-			catch (MalformedURLException e)
-			{
-				System.out.println("Error in getGroovyClasspath: "+e.getMessage());
-			}
+				{
+					result.add(file.toURI().toURL());
+				}
+				catch (MalformedURLException e)
+				{
+					System.out.println("Error in getGroovyClasspath: "
+							+ e.getMessage());
+				}
 		}
 		return result;
 	}
@@ -134,7 +151,7 @@ public class WrapperLoader
 	{
 		String wrapperJar;
 		if (type.contains("App"))
-			 wrapperJar = getWrapperAppJar();
+			wrapperJar = getWrapperAppJar();
 		else
 			wrapperJar = getWrapperJar();
 		Manifest manifest;
@@ -169,12 +186,14 @@ public class WrapperLoader
 				{
 					if (logErrors)
 					{
-						System.out.println("WARNING: lib not found: " + myFile.getCanonicalPath());
+						System.out.println("WARNING: lib not found: "
+								+ myFile.getCanonicalPath());
 					}
 					else
-						{
-							System.out.println("INFO: lib not found: " + myFile.getCanonicalPath());
-						}
+					{
+						System.out.println("INFO: lib not found: "
+								+ myFile.getCanonicalPath());
+					}
 				}
 				else
 					classpath.add(myFile);
@@ -184,23 +203,22 @@ public class WrapperLoader
 				e.printStackTrace();
 			}
 		}
-		
+
 		// add rt.jar
 		if ("App".equals(type))
-		try
-		{
-			String rt = getRTJar();
-			File rtf = new File(rt);
-			if (!rtf.exists())
-				System.out.println("could not find rt.jar");
-			else
-				classpath.add(rtf);
-		}
-		catch (Exception ex)
-		{
-			ex.printStackTrace();
-		}
-
+			try
+			{
+				String rt = getRTJar();
+				File rtf = new File(rt);
+				if (!rtf.exists())
+					System.out.println("could not find rt.jar");
+				else
+					classpath.add(rtf);
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
 
 		URL[] urlsArr = new URL[classpath.size()];
 		int i = 0;
@@ -224,17 +242,18 @@ public class WrapperLoader
 	{
 		URL[] core = getWrapperClasspath("Wrapper-Core", true);
 		URL[] extended = getWrapperClasspath("Wrapper-Extended", false);
-		URL[] urls = new URL[core.length+ extended.length];
+		URL[] urls = new URL[core.length + extended.length];
 		System.arraycopy(core, 0, urls, 0, core.length);
 		System.arraycopy(extended, 0, urls, core.length, extended.length);
-		return new WrapperClassLoader(urls, Thread.currentThread().getContextClassLoader());
+		return new WrapperClassLoader(urls, Thread.currentThread()
+				.getContextClassLoader());
 	}
-	
+
 	public static String getWrapperHome()
 	{
 		return new File(getWrapperJar()).getParent();
 	}
-	
+
 	public static String getRTJar()
 	{
 		String cn = Object.class.getCanonicalName();
@@ -242,13 +261,14 @@ public class WrapperLoader
 		String path = ".";
 		try
 		{
-			path = WrapperJVMMain.class.getClassLoader().getResource(rn).getPath();
+			path = WrapperJVMMain.class.getClassLoader().getResource(rn)
+					.getPath();
 			if (!checkPath(path))
 				return null;
 			path = path.substring(0, path.indexOf("!"));
 			path = new URI(path).getPath();
 			path.replaceAll("%20", " ");
-			//System.out.println("wrapper jar "+path);
+			// System.out.println("wrapper jar "+path);
 			// if (path.startsWith("/"))
 			// path = path.substring(1);
 			return path;
@@ -259,12 +279,10 @@ public class WrapperLoader
 		}
 		return null;
 	}
-	
+
 	public static void main(String[] args)
 	{
 		System.out.println(getWrapperAppJar());
 	}
-	
-
 
 }
