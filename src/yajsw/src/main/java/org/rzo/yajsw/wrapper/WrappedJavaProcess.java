@@ -905,6 +905,12 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 			saveJavaPidFile();
 			saveLockFile();
 		}
+		else
+		{
+			getWrapperLogger()
+			.log(Level.INFO,
+			"error reconnecting to pid=" + pid);
+		}
 		return result;
 	}
 

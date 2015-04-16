@@ -1832,7 +1832,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 
 	private void setTriggerDebug(String tName)
 	{
-		if (_config.getBoolean("wrapper.filter.debug." + tName, false))
+		if (_config.getBoolean("wrapper.filter.debug." + tName, _config.getBoolean("wrapper.filter.debug.default", false)))
 			enabledTriggerDebug.add(tName);
 	}
 
