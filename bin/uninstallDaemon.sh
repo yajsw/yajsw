@@ -33,5 +33,4 @@ fi
 
 sudo "$PRGDIR"/"$EXECUTABLE"
 
-read -p "Press [Enter] ..."
  

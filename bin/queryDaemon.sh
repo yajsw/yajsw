@@ -33,5 +33,4 @@ fi
 
 exec "$PRGDIR"/"$EXECUTABLE" -q "$conf_file"
 
-read -p "Press [Enter] ..."
  

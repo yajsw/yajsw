@@ -4,4 +4,3 @@ rem start the program, note its pid (of the java app), call genConfig <pid>, cal
 cd %~dp0
 call setenv.bat
 %java_exe% -cp %wrapper_jar%;%wrapper_app_jar% test.HelloWorld
-pause

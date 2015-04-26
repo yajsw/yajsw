@@ -33,5 +33,3 @@ fi
 
 exec "$PRGDIR"/"$EXECUTABLE" -g $1 -d "$conf_default_file" "$conf_file"
 
-read -p "Press [Enter] ..."
- 
