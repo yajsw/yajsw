@@ -1,10 +1,17 @@
-yajsw-alpha-12.00
+yajsw-beta-12.01
 
-    * Bug: MacOsX - thanks for the patch
-    * Bug: WrappedRuntimeProcess: sort arguments according to configuration keys
-    * Change: update to latest jars: commons-collections-3.2.1, commons-configuration-1.10, jna-4.1.0, netty-all-5.0.0.Alpha2-SNAPSHOT, groovy-all-2.3.0-beta-2
-    * Change: move groovy dependency to lib/extended
-    * Change: do not add passwords to command line of processes or services
-    * Change: minor logging changes  and other minor changes.
-    * Change: license change - see documentation
-    * Change: regex in configuration files: switched from jrexx to dk.brics.automaton. moved jar to lib/extended. functionality is thus optional. NOTE: regex syntax may have changed
+    Bug: Quotes in java command line
+    Bug: multiple bugs in RuntimeJavaMain
+    Change: switched from quartz to yacron4j.
+    New: Configuration property: wrapper....script.<n>.maxConcInvoc
+    New: Support for vfs-dbx (dropbox). thus command files and automatic updates can be done from dropbox.
+    New: Configuration property: wrapper.debug.level
+    New: Configuration property: wrapper.filter.debug.default
+    New: Configuration properties: wrapper.wrapperJar, wrapper.appJar
+    Patch: Make the console output fill the window when resized 
+    Patch: Startup under AIX 7.1 fails due to StringIndexOutOfBoundsException
+    Patch: Fix "No such file or directory" error on Mac OSX with Java 1.7
+    Patch: Fix getPid() in MacOSXService
+    Patch: MacOSX: Make sure that install script works on vanila machines (when no custom services installed yet and directory is not exists)
+    Patch: made sure wrapper works on Mac when installed in directory with spaces
+    Patch: MacOsxService does not append configuration parameters to the execution command
