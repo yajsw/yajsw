@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Class-Path-Wrapper-Core: 
  ./wrapperApp.jar 
  ./lib/core/yajsw/ahessian.jar 
- ./lib/core/netty/netty-all-5.0.0.Alpha2-SNAPSHOT.jar 
+ ./lib/core/netty/netty-all-5.0.0.Alpha2.jar 
  ./lib/core/jna/jna-4.1.0.jar 
  ./lib/core/jna/jna-platform-4.1.0.jar 
  ./lib/core/commons/commons-configuration-1.10.jar 
@@ -15,7 +15,7 @@ Class-Path-Wrapper-Core:
   
 Class-Path-Wrapper-Extended: 
  ./lib/extended/groovy/groovy-patch.jar 
- ./lib/extended/groovy/groovy-all-2.3.0-beta-2.jar 
+ ./lib/extended/groovy/groovy-all-2.3.11.jar 
  ./lib/extended/commons/commons-httpclient-3.0.1.jar 
  ./lib/extended/regex/automaton-1.11.jar 
  ./lib/extended/yajsw/hessian4.jar 
@@ -23,7 +23,7 @@ Class-Path-Wrapper-Extended:
  ./lib/extended/glazedlists/glazedlists-1.8.0_java15.jar 
  ./lib/extended/glazedlists/commons-beanutils-1.8.2.jar 
  ./lib/extended/cron/joda-time-2.7.jar 
- ./lib/extended/cron/yacron4j-00.02.jar 
+ ./lib/extended/cron/yacron4j-00.03.jar 
  ./lib/extended/velocity/velocity-1.7.jar 
  ./lib/extended/jgoodies/forms-1.2.0.jar 
  ./lib/extended/vfs-webdav/jackrabbit-webdav-1.5.6.jar 
@@ -40,7 +40,7 @@ Class-Path-Wrapper-Extended:
 Class-Path-App: 
  ./wrapper.jar 
  ./lib/core/yajsw/ahessian.jar 
- ./lib/core/netty/netty-all-5.0.0.Alpha2-SNAPSHOT.jar 
+ ./lib/core/netty/netty-all-5.0.0.Alpha2.jar 
  ./lib/core/commons/commons-configuration-1.10.jar  
  ./lib/core/commons/commons-vfs2-2.0.jar 
  ./lib/core/commons/commons-collections-3.2.1.jar 
@@ -50,7 +50,7 @@ Class-Path-App:
   
 Class-Path-App-Extended: 
  ./lib/extended/groovy/groovy-patch.jar 
- ./lib/extended/groovy/groovy-all-2.3.0-beta-2.jar
+ ./lib/extended/groovy/groovy-all-2.3.11.jar
  
 Main-Class: org.rzo.yajsw.boot.WrapperExeBooter
 
