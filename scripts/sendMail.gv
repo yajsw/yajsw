@@ -24,6 +24,9 @@ mailUser=null                // set your user if you require authentication
 mailPassword=null            // set your password if you require authentication
 useSSL=false             		 // set to true to use SSL
   
+//port 465 for ssl
+if (useSSL)
+ port = 465
 
 if (this.args == null || this.args.length != 3)
 {
@@ -43,6 +46,9 @@ try
 props = new Properties()
 props.put('mail.smtp.host', mailHost)
 props.put('mail.smtp.port', port.toString())
+
+if (useSSL)
+	  props.put('mail.smtp.ssl.enable', 'true');
 
 if (mailPassword != null)
 {
@@ -68,10 +74,7 @@ msg.subject = subject
 msg.text = message
 
 // Send the message
-if (useSSL)
-	SMTPSSLTransport.send(msg)
-else
-	Transport.send(msg)
+Transport.send(msg)
 
 logger.info("mail sent " +mailTo)
 }
