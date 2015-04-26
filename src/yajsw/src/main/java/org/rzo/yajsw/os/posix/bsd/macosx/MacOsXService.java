@@ -1,23 +1,29 @@
 package org.rzo.yajsw.os.posix.bsd.macosx;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.rzo.yajsw.Constants;
 import org.rzo.yajsw.boot.WrapperLoader;
+import org.rzo.yajsw.config.YajswConfigurationImpl;
 import org.rzo.yajsw.os.AbstractService;
 import org.rzo.yajsw.os.JavaHome;
 import org.rzo.yajsw.os.OperatingSystem;
 import org.rzo.yajsw.os.posix.PosixUtils;
 import org.rzo.yajsw.os.posix.VelocityLog;
+import org.rzo.yajsw.util.Utils;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MacOsXService extends AbstractService implements Constants
 {
@@ -41,7 +47,12 @@ public class MacOsXService extends AbstractService implements Constants
 		}
 		_launchdDir = _config.getString("wrapper.launchd.dir", System.getProperty("user.home") + "/Library/LaunchAgents");
 		File daemonDir = new File(_launchdDir);
-		if (!daemonDir.exists() || !daemonDir.isDirectory())
+		if (!daemonDir.exists())
+		{
+			System.out.println("No LaunchAgents directory found yet. Creating");
+			daemonDir.mkdirs();
+		}
+		if (!daemonDir.isDirectory())
 		{
 			System.out.println("Error " + _launchdDir + " : is not a directory");
 			return;
@@ -117,7 +128,49 @@ public class MacOsXService extends AbstractService implements Constants
 			e.printStackTrace();
 		}
 
-		_execCmd = String.format("%1$s -Dwrapper.service=true -Dwrapper.visible=false -jar %2$s -c %3$s", java, wrapperJar, _confFile);
+
+		String tmpDir = _config.getString("wrapper.tmp.path", System.getProperty("jna_tmpdir", null));
+		ArrayList<String> result = new ArrayList<String>();
+		String opt = null;
+		if (tmpDir != null)
+		{
+			opt = Utils.getDOption("jna_tmpdir", tmpDir);
+			result.add(opt);
+		}
+		YajswConfigurationImpl config = (YajswConfigurationImpl) _config;
+		for (Iterator it=config.subset("wrapper").getKeys(); it.hasNext(); )
+			try
+			{
+				config.getProperty((String) it.next());
+			}
+			catch (Exception ex)
+			{
+
+			}
+		// first add lookup vars eg ${lookup}
+		if (_config.getBoolean("wrapper.save_interpolated", true))
+		{
+
+			for (Map.Entry<String, String> e : config.getEnvLookupSet().entrySet())
+			{
+				if (e.getKey().contains("password"))
+					continue;
+				opt = Utils.getDOption(e.getKey(), e.getValue());
+				if (!result.contains(opt))
+					result.add(opt);
+			}
+		}
+
+		for (Iterator it = _config.getKeys("wrapper.ntservice.additional"); it.hasNext();)
+		{
+			String key = (String) it.next();
+			String value = _config.getString(key);
+			result.add(value);
+		}
+
+		String properties = StringUtils.join(result, " ");
+
+		_execCmd = String.format("\"%1$s\" -Dwrapper.service=true -Dwrapper.visible=false %2$s -jar \"%3$s\" -c \"%4$s\"", java, properties, wrapperJar, _confFile);
 
 	}
 
@@ -139,7 +192,7 @@ public class MacOsXService extends AbstractService implements Constants
 			Template t = ve.getTemplate(daemonTemplate.getName());
 			VelocityContext context = new VelocityContext();
 			context.put("name", _plistName);
-			context.put("command", Arrays.asList(_execCmd.split(" ")));
+			context.put("command", splitCommandByWhitespace());
 			context.put("autoStart", "AUTOMATIC".equals(_config.getString("wrapper.ntservice.starttype", DEFAULT_SERVICE_START_TYPE)));
 			FileWriter writer = new FileWriter(_plistFile);
 
@@ -157,10 +210,20 @@ public class MacOsXService extends AbstractService implements Constants
 		return isInstalled();
 	}
 
+	private List<String> splitCommandByWhitespace() {
+		List<String> list = new ArrayList<String>();
+		Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(_execCmd);
+		while (m.find())
+			list.add(m.group(1).replace("\"", ""));
+		return list;
+	}
+
 	public boolean isInstalled()
 	{
-		String sp = String.format(".*\\d+.*%1$s.*", _plistName);
-		Pattern p = Pattern.compile(sp, Pattern.DOTALL);
+		//String sp = String.format(".*\\d+.*%1$s.*", _plistName);
+		//Pattern p = Pattern.compile(sp, Pattern.DOTALL);
+		String sp = String.format("^(\\d+).*\\s*%1$s$", _plistName);
+		Pattern p = Pattern.compile(sp, Pattern.MULTILINE);
 		String list = _utils.osCommand("launchctl list", 5000);
 		Matcher m = p.matcher(list);
 		return m.matches();
@@ -216,8 +279,8 @@ public class MacOsXService extends AbstractService implements Constants
 	{
 		try
 		{
-			String sp = String.format("(\\d+)\\s*\\-\\s*%1$s", _plistName);
-			Pattern p = Pattern.compile(sp, Pattern.DOTALL);
+            String sp = String.format("^(\\d+).*\\s*%1$s$", _plistName);
+			Pattern p = Pattern.compile(sp, Pattern.MULTILINE);
 			String list = _utils.osCommand("launchctl list", 5000);
 			Matcher m = p.matcher(list);
 			m.find();

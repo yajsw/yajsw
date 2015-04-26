@@ -257,8 +257,13 @@ public class BSDProcess extends PosixProcess
 		if (cmd.startsWith("\""))
 			jvm = cmd.substring(0, cmd.indexOf("\" ") + 1);
 		else
-			jvm = cmd.substring(0, cmd.indexOf(" "));
-
+		{
+			int firstSpace = cmd.indexOf(" ");
+			if (firstSpace > -1)
+				jvm = cmd.substring(0, firstSpace);
+			else
+				jvm = cmd;
+		}
 		return jvm;
 	}
 
