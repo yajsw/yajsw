@@ -3,11 +3,14 @@ yajsw-beta-12.01
     Bug: Quotes in java command line
     Bug: multiple bugs in RuntimeJavaMain
     Change: switched from quartz to yacron4j.
+    Change: removed pause from batch files.
+    Change: updated groovy and netty libs
     New: Configuration property: wrapper....script.<n>.maxConcInvoc
     New: Support for vfs-dbx (dropbox). thus command files and automatic updates can be done from dropbox.
     New: Configuration property: wrapper.debug.level
     New: Configuration property: wrapper.filter.debug.default
     New: Configuration properties: wrapper.wrapperJar, wrapper.appJar
+    New: Configuration property: wrapper.logfile.desc
     Patch: Make the console output fill the window when resized 
     Patch: Startup under AIX 7.1 fails due to StringIndexOutOfBoundsException
     Patch: Fix "No such file or directory" error on Mac OSX with Java 1.7
