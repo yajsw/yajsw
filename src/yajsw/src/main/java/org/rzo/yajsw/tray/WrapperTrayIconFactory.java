@@ -116,7 +116,7 @@ public class WrapperTrayIconFactory
 			osProcess.setPipeStreams(false, false);
 			osProcess.setVisible(false);
 			osProcess.setLogger(logger);
-			osProcess.setDebug(config.getBoolean("wrapper.debug", false) ? false : config.getInt("wrapper.debug.level", 3) > 1);
+			osProcess.setDebug(config.getBoolean("wrapper.debug", false) ? config.getInt("wrapper.debug.level", 3) > 1 : false);
 			Runtime.getRuntime().addShutdownHook(new Thread()
 			{
 				public void run()

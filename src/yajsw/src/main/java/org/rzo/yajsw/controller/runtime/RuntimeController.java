@@ -28,13 +28,13 @@ public class RuntimeController extends AbstractController
 
 	public void processStarted()
 	{
-		getLog().info("process started");
+		//getLog().info("process started");
 
 		executor.execute(new Runnable()
 		{
 			public void run()
 			{
-				getLog().info("process run started");
+				//getLog().info("process run started");
 				_wrappedProcess.setAppReportedReady(true);
 				setState(STATE_RUNNING);
 				((WrappedRuntimeProcess) _wrappedProcess)._osProcess.waitFor();
