@@ -2,6 +2,7 @@ package org.rzo.netty.ahessian.serialization;
 
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.ChannelPromise;
 
@@ -37,7 +38,7 @@ import com.caucho.hessian4.io.HessianOutput;
  * }
  * </pre>
  */
-public class HessianEncoder extends ChannelHandlerAdapter
+public class HessianEncoder extends ChannelOutboundHandlerAdapter
 {
 	
 	@Override

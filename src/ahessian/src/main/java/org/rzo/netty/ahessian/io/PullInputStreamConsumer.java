@@ -2,6 +2,7 @@ package org.rzo.netty.ahessian.io;
 
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 
 import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
@@ -15,7 +16,7 @@ import org.rzo.netty.ahessian.Constants;
 import org.rzo.netty.ahessian.stopable.StopableHandler;
 import org.rzo.netty.ahessian.utils.MyReentrantLock;
 
-public class PullInputStreamConsumer extends ChannelHandlerAdapter implements StopableHandler
+public class PullInputStreamConsumer extends ChannelInboundHandlerAdapter implements StopableHandler
 {
 	final InputStreamConsumer _consumer;
 	static ExecutorService _executor = Executors.newCachedThreadPool();

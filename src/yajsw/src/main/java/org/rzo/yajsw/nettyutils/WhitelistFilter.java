@@ -11,8 +11,8 @@
 package org.rzo.yajsw.nettyutils;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -23,7 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * The Class WhitelistFilter.
  */
-public class WhitelistFilter extends ChannelHandlerAdapter
+public class WhitelistFilter extends ChannelInboundHandlerAdapter
 {
 
 	/** The whitelist. */

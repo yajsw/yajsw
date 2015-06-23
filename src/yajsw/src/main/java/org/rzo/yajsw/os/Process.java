@@ -307,4 +307,9 @@ public interface Process
 	public void setDesktop(String desktop);
 
 	public void setUmask(int umask);
+	
+	public void setUseSpawn(boolean useSpawn);
+	
+	public void setLinuxUseVfork(boolean linuxUseVfork);
+
 }

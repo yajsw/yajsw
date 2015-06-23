@@ -3,6 +3,7 @@ package org.rzo.netty.ahessian.session;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
@@ -34,7 +35,7 @@ import org.rzo.netty.ahessian.bootstrap.ChannelPipelineFactory.HandlerList;
  * </pre>
  */
 @Sharable
-public class ClientSessionFilter extends SimpleChannelInboundHandler
+public class ClientSessionFilter extends ChannelInboundHandlerAdapter
 {
 	
 	/** The current session. */

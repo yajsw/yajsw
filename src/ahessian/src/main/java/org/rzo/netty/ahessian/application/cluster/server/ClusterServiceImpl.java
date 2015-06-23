@@ -46,7 +46,7 @@ public class ClusterServiceImpl implements SeedClusterService
 		Member newMember = createMember( clusterName,  clientName,  data,  false, host);
 		joinInternal(newMember);
 		_channels.put(clientName, channel);
-		_channel2member.put(channel.id().toString(), clientName);
+		_channel2member.put(""+channel.hashCode(), clientName);
 		if (listener != null)
 		_listners.put(clientName, listener);
 		System.out.println("-join "+clientName);
@@ -76,7 +76,7 @@ public class ClusterServiceImpl implements SeedClusterService
 			{
 			_joinedSeeds.put(member.getName(), member);
 			_channels.put(member.getName(), channel);
-			_channel2member.put(channel.id().toString(), member.getName());
+			_channel2member.put(""+channel.hashCode(), member.getName());
 			}
 			if (listener != null)
 				_listners.put(member.getName(), listener);			
@@ -87,7 +87,7 @@ public class ClusterServiceImpl implements SeedClusterService
 	
 	synchronized void channelClosed(Channel channel)
 	{
-		String name = _channel2member.remove(channel.id().toString());
+		String name = _channel2member.remove(""+channel.hashCode());
 		if (name == null)
 			return;
 		leave(name);
@@ -126,7 +126,7 @@ public class ClusterServiceImpl implements SeedClusterService
 		if (channel != null)
 		{
 			channel.close();
-			_channel2member.remove(channel.id().toString());
+			_channel2member.remove(""+channel.hashCode());
 		}
 		if (member.isSeed())
 			seedLeft(member);
@@ -196,7 +196,7 @@ public class ClusterServiceImpl implements SeedClusterService
 
 	public void disconnected(Channel channel)
 	{
-		String client = _channel2member.remove(channel.id().toString());
+		String client = _channel2member.remove(""+channel.hashCode());
 		if (client != null)
 			leave(client);
 	}

@@ -5,6 +5,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 
 import java.io.ByteArrayOutputStream;
@@ -19,19 +20,14 @@ import javax.crypto.Cipher;
 
 import org.rzo.netty.ahessian.log.OutLogger;
 
-public class ClientCryptoFilter extends ChannelHandlerAdapter implements CryptoConstants
+public class ClientCryptoFilterInbound extends ChannelInboundHandlerAdapter implements CryptoConstants
 {
-	private StreamCipher _encodeCipher;
-	private StreamCipher _decodeCipher;
-	private byte[] _encodedPublicKey;
-	private int _bytesRead;
-	private SecureRandom _secureRandom = new SecureRandom();
-	private byte[] _password = new byte[PASSWORD_SIZE];
 	
-	public ClientCryptoFilter()
+	ClientCryptoData _data;
+	
+	public ClientCryptoFilterInbound(ClientCryptoData data)
 	{
-		super();
-		Arrays.fill(_password, (byte)0);
+		_data = data;
 	}
 
 
@@ -40,10 +36,10 @@ public class ClientCryptoFilter extends ChannelHandlerAdapter implements CryptoC
     public void channelRead(ChannelHandlerContext ctx, Object e) throws Exception
             {
 				// have we sent our secret key ?
-				if (_decodeCipher != null)
+				if (_data._decodeCipher != null)
 				{
 					// decode and send upstream
-					ByteBuf m = Util.code(_decodeCipher, (ByteBuf) e, true);
+					ByteBuf m = Util.code(_data._decodeCipher, (ByteBuf) e, true);
 					ctx.fireChannelRead(e);
 				}
 				// we are still in the crypto protocol
@@ -51,19 +47,19 @@ public class ClientCryptoFilter extends ChannelHandlerAdapter implements CryptoC
 				{
 					ByteBuf b = (ByteBuf) e;
 					// is this our first message ?
-					if (_encodedPublicKey == null)
+					if (_data._encodedPublicKey == null)
 					{
 						int size = b.readInt();
-						_encodedPublicKey = new byte[size];
+						_data._encodedPublicKey = new byte[size];
 					}
 					// readin the server's public key
 					// it may come in multiple chunks
 					int available = b.readableBytes();
-					int toRead = Math.min(_encodedPublicKey.length - _bytesRead, available);
-					b.readBytes(_encodedPublicKey, _bytesRead, toRead);
-					_bytesRead += toRead;
+					int toRead = Math.min(_data._encodedPublicKey.length - _data._bytesRead, available);
+					b.readBytes(_data._encodedPublicKey, _data._bytesRead, toRead);
+					_data._bytesRead += toRead;
 					// we have completed reception of the public key ?
-					if (_bytesRead == _encodedPublicKey.length)
+					if (_data._bytesRead == _data._encodedPublicKey.length)
 					{
 						// generate our secret key and send it to the server
 						sendSecretKey(ctx);
@@ -77,7 +73,7 @@ public class ClientCryptoFilter extends ChannelHandlerAdapter implements CryptoC
 		{
 		// generate Cipher using the server's public key
         KeyFactory fact = KeyFactory.getInstance(ASYM_KEY_TYPE);
-        KeySpec ks = new X509EncodedKeySpec(_encodedPublicKey);
+        KeySpec ks = new X509EncodedKeySpec(_data._encodedPublicKey);
         Key pubKey = fact.generatePublic(ks);
 		String type = "".equals(ASYM_CIPHER_TYPE) ? ASYM_KEY_TYPE : ASYM_KEY_TYPE+"/"+ASYM_CIPHER_TYPE;
         Cipher result = Cipher.getInstance(type);
@@ -101,7 +97,7 @@ public class ClientCryptoFilter extends ChannelHandlerAdapter implements CryptoC
 //			keyGenerator.init(SYM_KEY_SIZE);
 //        return keyGenerator.generateKey();
 			byte[] key = new byte[SYM_KEY_SIZE];
-			_secureRandom.nextBytes(key);
+			_data._secureRandom.nextBytes(key);
 			return key;
 
 		}
@@ -115,7 +111,7 @@ public class ClientCryptoFilter extends ChannelHandlerAdapter implements CryptoC
 	private byte[] getIv()
 	{
 		byte[] iv = new byte[SYM_IV_SIZE];
-		_secureRandom.nextBytes(iv);
+		_data._secureRandom.nextBytes(iv);
 		return iv;		
 	}
 	
@@ -129,8 +125,8 @@ public class ClientCryptoFilter extends ChannelHandlerAdapter implements CryptoC
 			ByteArrayOutputStream b = new ByteArrayOutputStream();
 			b.write(ivEncoded);
 			b.write(symKeyEncoded);
-			if (_password != null)
-				b.write(_password);
+			if (_data._password != null)
+				b.write(_data._password);
 			b.flush();
 			
 			System.out.println("generated iv+key: "+OutLogger.asString(b.toByteArray()));
@@ -149,11 +145,11 @@ public class ClientCryptoFilter extends ChannelHandlerAdapter implements CryptoC
 		
 		// we can now accept in/out messages encrypted with our key
 		// first create symmetric ciphers
-			_encodeCipher = StreamCipherFactory.createCipher(SYM_KEY_TYPE);
-			_encodeCipher.engineInitEncrypt(symKeyEncoded, ivEncoded);
+			_data._encodeCipher = StreamCipherFactory.createCipher(SYM_KEY_TYPE);
+			_data._encodeCipher.engineInitEncrypt(symKeyEncoded, ivEncoded);
 			
-			_decodeCipher = StreamCipherFactory.createCipher(SYM_KEY_TYPE);
-			_decodeCipher.engineInitDecrypt(symKeyEncoded, ivEncoded);
+			_data._decodeCipher = StreamCipherFactory.createCipher(SYM_KEY_TYPE);
+			_data._decodeCipher.engineInitDecrypt(symKeyEncoded, ivEncoded);
 
 		// inform others in the pipeline that a secure connection has been established
 		ctx.fireChannelActive();
@@ -168,35 +164,22 @@ public class ClientCryptoFilter extends ChannelHandlerAdapter implements CryptoC
 
 
 	
-	@Override
-	public void write(ChannelHandlerContext ctx, Object e, ChannelPromise promise) throws Exception
-            {
-		// if we can encode
-		if (_encodeCipher != null)
-		{
-			// encode the message and send it downstream
-			ByteBuf m = Util.code(_encodeCipher, (ByteBuf) e, false);
-			ctx.write(m, promise);
-		}
-		// else ignore. this should not happen, since we have not yet propagated the connected event.
-		
-            }
 	
 	public void setPassword(byte[] password)
 	{
 		if (password == null || password.length == 0)
 			return;
 		int length = Math.min(PASSWORD_SIZE, password.length);
-		System.arraycopy(password, 0, _password, 0, length);
+		System.arraycopy(password, 0, _data._password, 0, length);
 	}
 
 
 	
 	public static void main(String[] args)
 	{
-		ServerCryptoFilter s = new ServerCryptoFilter();
-		ClientCryptoFilter c = new ClientCryptoFilter();
-		c._encodedPublicKey = s.getPublicKeyEncoded();
+		ServerCryptoFilterInbound s = new ServerCryptoFilterInbound(new ServerCryptoData());
+		ClientCryptoFilterInbound c = new ClientCryptoFilterInbound(new ClientCryptoData());
+		c._data._encodedPublicKey = s.getPublicKeyEncoded();
 		c.sendSecretKey(null);
 	}
     

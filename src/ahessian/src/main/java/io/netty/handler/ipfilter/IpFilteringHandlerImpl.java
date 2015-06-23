@@ -19,6 +19,7 @@ package io.netty.handler.ipfilter;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
@@ -31,7 +32,7 @@ import java.net.InetSocketAddress;
  * 
  * @author frederic bregier
  */
-public abstract class IpFilteringHandlerImpl extends ChannelHandlerAdapter implements IpFilteringHandler
+public abstract class IpFilteringHandlerImpl extends ChannelInboundHandlerAdapter implements IpFilteringHandler
 {
 
 	private static final AttributeKey<Object> BLOCKED = AttributeKey

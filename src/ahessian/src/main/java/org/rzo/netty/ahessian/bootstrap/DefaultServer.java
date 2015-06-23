@@ -2,11 +2,13 @@ package org.rzo.netty.ahessian.bootstrap;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.DefaultEventLoopGroup;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
+import io.netty.channel.local.LocalEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.oio.OioEventLoopGroup;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.EventExecutorGroup;
 
 import java.net.InetSocketAddress;
 import java.util.Set;
@@ -17,7 +19,7 @@ public class DefaultServer extends DefaultEndpoint
 	ServerBootstrap bootstrap;
     EventLoopGroup bossGroup;
     EventLoopGroup childGroup;
-    EventLoopGroup internalGroup;
+    EventExecutorGroup internalGroup;
     int _port;
     
     private static final int IPTOS_THROUGHPUT = 0x08;
@@ -32,7 +34,7 @@ public class DefaultServer extends DefaultEndpoint
 		// Configure the server.
         bootstrap = new ServerBootstrap();
         _port = port;
-    	internalGroup = new DefaultEventLoopGroup();
+    	internalGroup = new DefaultEventExecutorGroup(10);
         
         if (isNio(serverChannelClass))
         {
@@ -46,8 +48,8 @@ public class DefaultServer extends DefaultEndpoint
         }
         else
         {
-        	bossGroup = new DefaultEventLoopGroup();
-        	childGroup = new DefaultEventLoopGroup();
+        	bossGroup = new NioEventLoopGroup();
+        	childGroup = new NioEventLoopGroup();
         }
         bootstrap.group(bossGroup, childGroup);
         bootstrap.channel(serverChannelClass); 

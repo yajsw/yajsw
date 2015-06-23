@@ -2,6 +2,7 @@ package org.rzo.netty.ahessian.heartbeat;
 
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.Timeout;
 import io.netty.util.Timer;
 import io.netty.util.TimerTask;
@@ -10,14 +11,15 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.rzo.netty.ahessian.Constants;
 
-abstract class AbstractHeartbeatHandler extends ChannelHandlerAdapter
+public class HeartbeatHandlerInbound extends ChannelInboundHandlerAdapter
 {
 	volatile AtomicLong _lastCalled = new AtomicLong();
 	volatile ChannelHandlerContext _ctx;
 	final IntervalTimer _intervalTimer;
 	final String _name;
+	TimedOutAction _action;
 
-	public AbstractHeartbeatHandler(final String name, final Timer timer, final long timeout)
+	public HeartbeatHandlerInbound(final String name, final Timer timer, final long timeout)
 	{
 		_name = name;
 		final TimerTask task = new TimerTask()
@@ -27,7 +29,7 @@ abstract class AbstractHeartbeatHandler extends ChannelHandlerAdapter
 				if (((getLastCalled() + timeout) <= System.currentTimeMillis()) && isConnected())
 					try
 					{
-						timedOut(_ctx);
+						_action.timedOut(_ctx);
 					}
 					catch (Exception e)
 					{
@@ -38,8 +40,6 @@ abstract class AbstractHeartbeatHandler extends ChannelHandlerAdapter
 		};
 		_intervalTimer = new IntervalTimer(timer, task, timeout);
 	}
-	
-	abstract void timedOut(ChannelHandlerContext ctx);
 	
     long getLastCalled()
     {
@@ -70,12 +70,17 @@ abstract class AbstractHeartbeatHandler extends ChannelHandlerAdapter
             ChannelHandlerContext ctx) throws Exception {
 		ping();
 		_ctx = ctx;
-		_intervalTimer.setName(_name+":"+_ctx.channel().id());
+		_intervalTimer.setName(_name+":"+_ctx.channel().hashCode());
 		
 		Constants.ahessianLogger.info("AbstractHeartBeatHandler scheduler started: "+ _intervalTimer.getInterval());
 		_intervalTimer.start();
 		ctx.fireChannelActive();
     }
+
+	public void setAction(TimedOutAction action)
+	{
+		_action = action;
+	}
 
 
 

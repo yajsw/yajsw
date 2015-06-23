@@ -6,6 +6,7 @@ import io.netty.handler.ipfilter.IpFilterRuleHandler;
 import io.netty.handler.ipfilter.IpFilterRuleList;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
+import io.netty.util.concurrent.EventExecutorGroup;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -20,13 +21,18 @@ import org.rzo.netty.ahessian.auth.ClientAuthFilter;
 import org.rzo.netty.ahessian.auth.EncryptedAuthToken;
 import org.rzo.netty.ahessian.auth.ServerAuthFilter;
 import org.rzo.netty.ahessian.auth.SimpleAuthToken;
-import org.rzo.netty.ahessian.crypto.ClientCryptoFilter;
-import org.rzo.netty.ahessian.crypto.ServerCryptoFilter;
-import org.rzo.netty.ahessian.heartbeat.ClientHeartbeatHandler;
+import org.rzo.netty.ahessian.crypto.ClientCryptoData;
+import org.rzo.netty.ahessian.crypto.ClientCryptoFilterInbound;
+import org.rzo.netty.ahessian.crypto.ClientCryptoFilterOutbound;
+import org.rzo.netty.ahessian.crypto.ServerCryptoData;
+import org.rzo.netty.ahessian.crypto.ServerCryptoFilterInbound;
+import org.rzo.netty.ahessian.heartbeat.ClientHeartbeatHandlerOutbound;
+import org.rzo.netty.ahessian.heartbeat.HeartbeatHandlerInbound;
 import org.rzo.netty.ahessian.heartbeat.ServerHeartbeatHandler;
 import org.rzo.netty.ahessian.io.InputStreamHandler;
 import org.rzo.netty.ahessian.io.OutputStreamHandler;
 import org.rzo.netty.ahessian.io.PullInputStreamConsumer;
+import org.rzo.netty.ahessian.log.OutLogger;
 import org.rzo.netty.ahessian.rpc.client.BootstrapProvider;
 import org.rzo.netty.ahessian.rpc.client.HessianProxyFactory;
 import org.rzo.netty.ahessian.rpc.client.ReconnectHandler;
@@ -193,7 +199,7 @@ public class ChannelPipelineFactoryBuilder<T> implements ChannelPipelineFactoryF
 	}
 	
 	@Override
-	public ChannelPipelineFactory create(EventLoopGroup group,
+	public ChannelPipelineFactory create(EventExecutorGroup group,
 			AbstractBootstrap bootstrap)
 	{
 		ChannelPipelineFactory result;
@@ -250,13 +256,13 @@ public class ChannelPipelineFactoryBuilder<T> implements ChannelPipelineFactoryF
 		};
 	}
 
-	private ChannelPipelineFactory basePipelineFactory(EventLoopGroup group, AbstractBootstrap bootstrap)
+	private ChannelPipelineFactory basePipelineFactory(EventExecutorGroup group, AbstractBootstrap bootstrap)
 	{
 		return basePipelineFactory(null, group, bootstrap);
 	}
 
 	
-	private ChannelPipelineFactory basePipelineFactory(ChannelPipelineFactory mixinPipelineFactory, EventLoopGroup group, final AbstractBootstrap bootstrap)
+	private ChannelPipelineFactory basePipelineFactory(ChannelPipelineFactory mixinPipelineFactory, EventExecutorGroup group, final AbstractBootstrap bootstrap)
 	{
 		final ClientSessionFilter clientSessionFilter = mixinPipelineFactory != null ?
 				new ClientSessionFilter(mixinPipelineFactory)
@@ -284,13 +290,16 @@ public class ChannelPipelineFactoryBuilder<T> implements ChannelPipelineFactoryF
 					}
 					if (hasCrypto())
 					{
-						ServerCryptoFilter cryptoFilter = new ServerCryptoFilter();
+						ServerCryptoData data = new ServerCryptoData();
+						ServerCryptoFilterInbound cryptoFilterInbound = new ServerCryptoFilterInbound(data);
+						ServerCryptoFilterInbound cryptoFilterOutbound = new ServerCryptoFilterInbound(data);
 						if (_passwords != null && _passwords.length > 0)
 						for (String password : _passwords)
 						{
-							cryptoFilter.addPassword(password.getBytes());
+							cryptoFilterInbound.addPassword(password.getBytes());
 						}
-					    pipeline.addLast("cryptoFilter", cryptoFilter);
+					    pipeline.addLast("cryptoFilterIn", cryptoFilterInbound);
+					    pipeline.addLast("cryptoFilterOut", cryptoFilterOutbound);
 
 					}
 					else if (hasAuthentication())
@@ -319,11 +328,17 @@ public class ChannelPipelineFactoryBuilder<T> implements ChannelPipelineFactoryF
 					}
 					if (hasServerHeartbeat())
 					{
-						pipeline.addLast("server_heartbeat", new ServerHeartbeatHandler("server_heartbeat", TIMER, _serverHeartbeatTimeout));
+						HeartbeatHandlerInbound inboundHandeler = new HeartbeatHandlerInbound("client_heartbeat", TIMER, _clientHeartbeatTimeout);
+						ServerHeartbeatHandler outboundHandeler = new ServerHeartbeatHandler(inboundHandeler);
+						pipeline.addLast("server_heartbeat_in", inboundHandeler);
+						pipeline.addLast("server_heartbeat_out", outboundHandeler);
 					}
 					if (hasClientHeartbeat())
 					{
-						pipeline.addLast("client_heartbeat", new ClientHeartbeatHandler("client_heartbeat", TIMER, _clientHeartbeatTimeout));
+						HeartbeatHandlerInbound inboundHandeler = new HeartbeatHandlerInbound("client_heartbeat", TIMER, _clientHeartbeatTimeout);
+						ClientHeartbeatHandlerOutbound outboundHandeler = new ClientHeartbeatHandlerOutbound(inboundHandeler);
+						pipeline.addLast("client_heartbeat_in", inboundHandeler);
+						pipeline.addLast("client_heartbeat_out", outboundHandeler);
 					}
 
 					if (serverSessionFilter != null)
@@ -347,10 +362,13 @@ public class ChannelPipelineFactoryBuilder<T> implements ChannelPipelineFactoryF
 					}
 					if (hasCrypto())
 					{
-						ClientCryptoFilter cryptoFilter = new ClientCryptoFilter();
+						ClientCryptoData data = new ClientCryptoData();
+						ClientCryptoFilterInbound cryptoFilterIn = new ClientCryptoFilterInbound(data);
+						ClientCryptoFilterOutbound cryptoFilterOut = new ClientCryptoFilterOutbound(data);
 						if (_passwords != null && _passwords.length > 0)
-							cryptoFilter.setPassword(_passwords[0].getBytes());
-					    pipeline.addLast("cryptoFilter", cryptoFilter);
+							cryptoFilterIn.setPassword(_passwords[0].getBytes());
+					    pipeline.addLast("cryptoFilterIn", cryptoFilterIn);
+					    pipeline.addLast("cryptoFilterOut", cryptoFilterOut);
 
 					}
 					else if (hasAuthentication())
@@ -370,13 +388,19 @@ public class ChannelPipelineFactoryBuilder<T> implements ChannelPipelineFactoryF
 						if (token != null)
 						pipeline.addLast("authentication", new ClientAuthFilter(token));
 					}
-					if (hasClientHeartbeat())
-					{
-						pipeline.addLast("client_heartbeat", new ClientHeartbeatHandler("client_heartbeat", TIMER, _clientHeartbeatTimeout));
-					}
 					if (hasServerHeartbeat())
 					{
-						pipeline.addLast("server_heartbeat", new ServerHeartbeatHandler("server_heartbeat", TIMER, _serverHeartbeatTimeout));
+						HeartbeatHandlerInbound inboundHandeler = new HeartbeatHandlerInbound("client_heartbeat", TIMER, _clientHeartbeatTimeout);
+						ServerHeartbeatHandler outboundHandeler = new ServerHeartbeatHandler(inboundHandeler);
+						pipeline.addLast("server_heartbeat_in", inboundHandeler);
+						pipeline.addLast("server_heartbeat_out", outboundHandeler);
+					}
+					if (hasClientHeartbeat())
+					{
+						HeartbeatHandlerInbound inboundHandeler = new HeartbeatHandlerInbound("client_heartbeat", TIMER, _clientHeartbeatTimeout);
+						ClientHeartbeatHandlerOutbound outboundHandeler = new ClientHeartbeatHandlerOutbound(inboundHandeler);
+						pipeline.addLast("client_heartbeat_in", inboundHandeler);
+						pipeline.addLast("client_heartbeat_out", outboundHandeler);
 					}
 					if (clientSessionFilter != null)
 						pipeline.addLast("sessionFilter", clientSessionFilter);										
@@ -419,7 +443,7 @@ public class ChannelPipelineFactoryBuilder<T> implements ChannelPipelineFactoryF
 		return _ipFilter != null && _ipFilter.length() != 0;
 	}
 
-	private ChannelPipelineFactory mixinPipelineFactory(EventLoopGroup group, AbstractBootstrap bootstrap)
+	private ChannelPipelineFactory mixinPipelineFactory(EventExecutorGroup group, AbstractBootstrap bootstrap)
 	{
 		ChannelPipelineFactory result = new ChannelPipelineFactory(group)
 		{

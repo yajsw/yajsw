@@ -16,9 +16,9 @@ import org.rzo.netty.ahessian.log.OutLogger;
 public abstract class ChannelPipelineFactory<C extends Channel> extends ChannelInitializer<C>
 {
 	private volatile  boolean _debug = false;
-	EventLoopGroup _group;
+	EventExecutorGroup _group;
 	
-	public ChannelPipelineFactory(EventLoopGroup executor)
+	public ChannelPipelineFactory(EventExecutorGroup executor)
 	{
 		_group = executor;
 	}
@@ -27,7 +27,7 @@ public abstract class ChannelPipelineFactory<C extends Channel> extends ChannelI
 	{
 	}
 	
-	public EventLoopGroup getGroup()
+	public EventExecutorGroup getGroup()
 	{
 		return _group;
 	}
@@ -139,6 +139,7 @@ public abstract class ChannelPipelineFactory<C extends Channel> extends ChannelI
 	{
 		if (_debug)
 			ch.pipeline().addFirst("xlogger",new OutLogger("first"));
+		
 		List<HandlerEntry> list = getPipeline();
 		for(HandlerEntry entry : list)
 		{
@@ -147,6 +148,7 @@ public abstract class ChannelPipelineFactory<C extends Channel> extends ChannelI
 			else
 				ch.pipeline().addLast(entry.getGroup(), entry.getKey(), entry.getValue());
 		}
+		
 		//System.out.println("added "+list.size()+" handlers to pipeline "+ch);
 	}
 	

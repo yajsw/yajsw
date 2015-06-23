@@ -3,7 +3,7 @@ package org.rzo.netty.mcast.discovery;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.handler.ipfilter.IpFilterRule;
 import io.netty.handler.ipfilter.IpFilterRuleList;
@@ -37,13 +37,12 @@ public class DiscoveryServer extends MulticastEndpoint
 			{
 				HandlerList pipeline = new HandlerList();
 				pipeline.addLast("discoveryServer",
-						new SimpleChannelInboundHandler()
+						new ChannelInboundHandlerAdapter()
 						{
 
 							@Override
-							protected void messageReceived(
-									ChannelHandlerContext ctx,
-									Object e) throws Exception
+							public void channelRead(ChannelHandlerContext ctx, Object e)
+									throws Exception
 							{
 								//System.out.println("discovery server received "+e);
 								String request = getStringMessage(((DatagramPacket) e).content());

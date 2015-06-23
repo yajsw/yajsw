@@ -5,6 +5,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 
 import java.security.Key;
@@ -19,15 +20,20 @@ import javax.crypto.Cipher;
 
 import org.rzo.netty.ahessian.log.OutLogger;
 
-public class ServerCryptoFilter extends ChannelHandlerAdapter implements CryptoConstants
+public class ServerCryptoFilterInbound extends ChannelInboundHandlerAdapter implements CryptoConstants
 {
 	KeyPair _serverKeyPair;
 	Key		_clientKey;
-	private StreamCipher _encodeCipher;
 	private StreamCipher _decodeCipher;
 	private byte[] _cryptedIvKeyMessage;
 	private int _bytesRead;
 	private List<byte[]> _passwords = new ArrayList<byte[]>();
+	ServerCryptoData _data;
+	
+	public ServerCryptoFilterInbound(ServerCryptoData data)
+	{
+		_data = data;
+	}
 
 
 	@Override
@@ -149,8 +155,8 @@ public class ServerCryptoFilter extends ChannelHandlerAdapter implements CryptoC
         if (!checkPassword(password))
         	throw new RuntimeException("password mismatch");
         
-		_encodeCipher = StreamCipherFactory.createCipher(SYM_KEY_TYPE);
-		_encodeCipher.engineInitEncrypt(key, iv);
+		_data._encodeCipher = StreamCipherFactory.createCipher(SYM_KEY_TYPE);
+		_data._encodeCipher.engineInitEncrypt(key, iv);
 		
 		_decodeCipher = StreamCipherFactory.createCipher(SYM_KEY_TYPE);
 		_decodeCipher.engineInitDecrypt(key, iv);
@@ -178,22 +184,11 @@ public class ServerCryptoFilter extends ChannelHandlerAdapter implements CryptoC
 	}
 
 
-	@Override
-	public void write(ChannelHandlerContext ctx, Object e, ChannelPromise promise) throws Exception
-            {
-		if (_encodeCipher != null)
-		{
-			ByteBuf m = Util.code(_encodeCipher, (ByteBuf) e, false);
-			ctx.write(m);
-		}
-		
-            }
-
 
 	
 	public static void main(String[] args)
 	{
-		ServerCryptoFilter h = new ServerCryptoFilter();
+		ServerCryptoFilterInbound h = new ServerCryptoFilterInbound(new ServerCryptoData());
 		h.getPublicKeyEncoded();
 	}
 

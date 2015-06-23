@@ -4,6 +4,8 @@ import io.netty.channel.Channel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.ipfilter.IpFilterRuleList;
 import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
+import io.netty.util.internal.logging.SimpleLoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.HashSet;
@@ -25,6 +27,7 @@ public class AHessianJmxServer
 	public AHessianJmxServer(MBeanServer mbeanServer, String ipFilter, String serviceDiscoveryName, int port, InternalLogger logger, int debug) throws Exception
 	{
 		
+    	InternalLoggerFactory.setDefaultFactory(new SimpleLoggerFactory());
 		
     	ChannelPipelineFactoryBuilder builder = new ChannelPipelineFactoryBuilder()
     	.serializerFactory(new JmxSerializerFactory())
@@ -70,7 +73,7 @@ public class AHessianJmxServer
 	public static void main(String[] args) throws Exception
 	{
 		MBeanServer _mbeanServer = MBeanServerFactory.createMBeanServer();
-		AHessianJmxServer _ahessianServer = new AHessianJmxServer(_mbeanServer, "+n:localhost, -n:*", "test", 15009, null, 0);
+		AHessianJmxServer _ahessianServer = new AHessianJmxServer(_mbeanServer, "+n:localhost, -n:*", "test", 15009, null, 4);
 
 	}
 

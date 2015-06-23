@@ -15,6 +15,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -1306,7 +1307,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 	/**
 	 * The Class WrapperHandler.
 	 */
-	class WrapperHandler extends ChannelHandlerAdapter
+	class WrapperHandler extends ChannelInboundHandlerAdapter
 	{
 
 		@Override

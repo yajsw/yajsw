@@ -1,6 +1,7 @@
 package org.rzo.netty.ahessian.auth;
 
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -23,7 +24,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
  * </pre>
  * 
  */
-public class ClientAuthFilter extends SimpleChannelInboundHandler
+public class ClientAuthFilter extends ChannelInboundHandlerAdapter
 {
 	
 	/** The authentication token. */
@@ -49,7 +50,7 @@ public class ClientAuthFilter extends SimpleChannelInboundHandler
     }
 
 	@Override
-	protected void messageReceived(ChannelHandlerContext ctx, Object msg)
+	public void channelRead(ChannelHandlerContext ctx, Object msg)
 			throws Exception
 	{
 		ctx.fireChannelRead(msg);

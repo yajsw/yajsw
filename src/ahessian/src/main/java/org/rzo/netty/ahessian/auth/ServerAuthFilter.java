@@ -2,6 +2,7 @@ package org.rzo.netty.ahessian.auth;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.internal.logging.InternalLogger;
@@ -26,7 +27,7 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
  * </pre>
  * 
  */
-public class ServerAuthFilter extends SimpleChannelInboundHandler
+public class ServerAuthFilter extends ChannelInboundHandlerAdapter
 {
 	private AuthToken	_token			= null;
 	private boolean		_authenticated	= false;
@@ -57,7 +58,7 @@ public class ServerAuthFilter extends SimpleChannelInboundHandler
 	 * @see org.jboss.netty.channel.SimpleChannelUpstreamHandler#messageReceived(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.MessageEvent)
 	 */
 	@Override
-	public void messageReceived(ChannelHandlerContext ctx, Object e) throws Exception
+	public void channelRead(ChannelHandlerContext ctx, Object e) throws Exception
 	{
 		if (!_authenticated)
 		{

@@ -6,6 +6,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.util.AttributeKey;
 import io.netty.util.Timeout;
@@ -34,7 +35,7 @@ import org.rzo.netty.ahessian.bootstrap.ChannelPipelineFactory.HandlerList;
  * </pre>
  */
 @Sharable
-public class ServerSessionFilter extends ChannelHandlerAdapter
+public class ServerSessionFilter extends ChannelInboundHandlerAdapter
 {
 	
 	/** Indicates if session has been assigned to the current channel */

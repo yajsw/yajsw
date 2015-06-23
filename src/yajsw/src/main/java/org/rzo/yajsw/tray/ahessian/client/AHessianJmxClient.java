@@ -2,7 +2,10 @@ package org.rzo.yajsw.tray.ahessian.client;
 
 import io.netty.channel.Channel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.channel.socket.oio.OioSocketChannel;
 import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
+import io.netty.util.internal.logging.SimpleLoggerFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -224,12 +227,15 @@ public class AHessianJmxClient
 	
 	public static void main(String[] args) throws Exception
 	{
-		AHessianJmxClient _ahessianClient = new AHessianJmxClient("test", 15010, false, null);
+    	InternalLoggerFactory.setDefaultFactory(new SimpleLoggerFactory());
+
+    	AHessianJmxClient _ahessianClient = new AHessianJmxClient("test", 15009, false, null);
+    	_ahessianClient.start();
 		MBeanServerConnection jmxc = _ahessianClient.getMBeanServer();
 		MBeanServerDelegateMBean proxy = (MBeanServerDelegateMBean) MBeanServerInvocationHandler.newProxyInstance(jmxc, new ObjectName("JMImplementation:type=MBeanServerDelegate"),
 				MBeanServerDelegateMBean.class, false);
 		System.out.println(proxy.getMBeanServerId());
-/*		boolean ok = false;
+		boolean ok = false;
 		while (true)
 		try
 		{
@@ -242,7 +248,7 @@ public class AHessianJmxClient
 			ex.printStackTrace();
 			Thread.sleep(1000);
 		}
-		*/
+		
 	}
 
 	public void setConnectListener(Runnable connectListener)

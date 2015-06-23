@@ -4,6 +4,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
@@ -84,7 +85,7 @@ import com.caucho.hessian4.io.HessianRemoteObject;
  * </pre>
  */
 @Sharable
-public class HessianProxyFactory extends ChannelHandlerAdapter implements Constants
+public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements Constants
 {
 	private static final int MAX_OPEN_CALLS = 50000;
 	private volatile Map<Long, Future<Object>>						_openCalls				= Collections

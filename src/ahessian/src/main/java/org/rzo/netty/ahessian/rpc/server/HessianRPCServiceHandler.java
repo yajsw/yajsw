@@ -4,6 +4,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.util.Timer;
 
@@ -41,7 +42,7 @@ import org.rzo.netty.ahessian.utils.TimedBlockingPriorityQueue;
  * </pre>
  */
 @Sharable
-public class HessianRPCServiceHandler extends ChannelHandlerAdapter implements Constants
+public class HessianRPCServiceHandler extends ChannelInboundHandlerAdapter implements Constants
 {
 
 	/** maps service names to services. */

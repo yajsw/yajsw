@@ -3,6 +3,7 @@ package org.rzo.netty.ahessian.io;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
@@ -72,7 +73,7 @@ import org.rzo.netty.ahessian.stopable.StopableHandler;
  * }
  * </pre>
  */
-public class InputStreamHandler extends SimpleChannelInboundHandler<Object> implements StopableHandler
+public class InputStreamHandler extends ChannelInboundHandlerAdapter implements StopableHandler
 {
 
 	/** Thread pool for getting a thread for calling the next handler */
@@ -85,12 +86,10 @@ public class InputStreamHandler extends SimpleChannelInboundHandler<Object> impl
 	
 	public InputStreamHandler()
 	{
-		super(false);
 	}
 	
 	public InputStreamHandler (boolean crcCheck)
 	{
-		super(false);
 		_crcCheck = crcCheck;
 	}
 
@@ -109,7 +108,7 @@ public class InputStreamHandler extends SimpleChannelInboundHandler<Object> impl
 	 * org.jboss.netty.channel.MessageEvent)
 	 */
 	@Override
-	public void messageReceived(final ChannelHandlerContext ctx, final Object e) throws Exception
+	public void channelRead(final ChannelHandlerContext ctx, final Object e) throws Exception
 	{
 		//System.out.println(System.currentTimeMillis()+" InputStreamHanlder.messageReceived +");
 					_in.write(((ByteBuf) e));
@@ -130,7 +129,8 @@ public class InputStreamHandler extends SimpleChannelInboundHandler<Object> impl
 				_in = new InputStreamBuffer();
 			ctx.channel().attr(INSTREAM).set(_in);
 		}		
-		ctx.fireChannelActive();
+		//ctx.fireChannelActive();
+		super.channelActive(ctx);
 	}
 	
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception

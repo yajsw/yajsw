@@ -1,6 +1,7 @@
 package org.rzo.netty.ahessian.application.jmx.remote.server;
 
 import io.netty.channel.EventLoopGroup;
+import io.netty.util.concurrent.EventExecutorGroup;
 
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
@@ -27,7 +28,7 @@ public class RPCServerMixinPipelineFactory extends ChannelPipelineFactory
 	Executor _executor;
 	SerializerFactory _serializerFactory = new JmxSerializerFactory();
 
-	RPCServerMixinPipelineFactory(Executor executor, EventLoopGroup group)
+	RPCServerMixinPipelineFactory(Executor executor, EventExecutorGroup group)
 	{
 		super(group);
 		_executor = executor;

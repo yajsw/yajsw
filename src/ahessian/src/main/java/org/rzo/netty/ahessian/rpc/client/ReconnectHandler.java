@@ -5,6 +5,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.Timeout;
 import io.netty.util.Timer;
 import io.netty.util.TimerTask;
@@ -14,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.rzo.netty.ahessian.Constants;
 
-public class ReconnectHandler extends ChannelHandlerAdapter
+public class ReconnectHandler extends ChannelInboundHandlerAdapter
 {
 	private  Timer _timer;
 	private  long RECONNECT_DELAY = 10000;

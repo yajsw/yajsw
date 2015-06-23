@@ -62,7 +62,7 @@ public class OutLogger extends LoggingHandler
 		sb.append("/");
 		sb.append(Thread.currentThread().getName());
 		sb.append(" ");
-		sb.append(ctx.channel().id());
+		sb.append(ctx.channel().hashCode());
 		sb.append(" <in< ");
 		sb.append(']');
 		if (e instanceof ByteBuf)
@@ -95,7 +95,7 @@ public class OutLogger extends LoggingHandler
 		sb.append("/");
 		sb.append(Thread.currentThread().getName());
 		sb.append(" ");
-		sb.append(ctx.channel().id());
+		sb.append(ctx.channel().hashCode());
 		sb.append(" >out> ");
 		sb.append(']');
 		if (e instanceof ByteBuf)

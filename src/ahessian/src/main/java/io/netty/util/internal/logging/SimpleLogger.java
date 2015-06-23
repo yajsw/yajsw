@@ -127,12 +127,6 @@ public class SimpleLogger implements InternalLogger
 	}
 
 	@Override
-	public void trace(Throwable paramThrowable)
-	{
-		trace(paramThrowable);
-	}
-
-	@Override
 	public void debug(String paramString, Object paramObject)
 	{
 		info(paramString, paramObject);
@@ -149,12 +143,6 @@ public class SimpleLogger implements InternalLogger
 	public void debug(String paramString, Object... paramArrayOfObject)
 	{
 		info(paramString, paramArrayOfObject);
-	}
-
-	@Override
-	public void debug(Throwable paramThrowable)
-	{
-		info(paramThrowable);
 	}
 
 	@Override
@@ -182,12 +170,6 @@ public class SimpleLogger implements InternalLogger
 	}
 
 	@Override
-	public void info(Throwable paramThrowable)
-	{
-		paramThrowable.printStackTrace();
-	}
-
-	@Override
 	public void warn(String paramString, Object paramObject)
 	{
 		info(paramString, paramObject);
@@ -207,12 +189,6 @@ public class SimpleLogger implements InternalLogger
 	}
 
 	@Override
-	public void warn(Throwable paramThrowable)
-	{
-		info(paramThrowable);
-	}
-
-	@Override
 	public void error(String paramString, Object paramObject)
 	{
 		info(paramString, paramObject);
@@ -229,12 +205,6 @@ public class SimpleLogger implements InternalLogger
 	public void error(String paramString, Object... paramArrayOfObject)
 	{
 		info(paramString, paramArrayOfObject);
-	}
-
-	@Override
-	public void error(Throwable paramThrowable)
-	{
-		info(paramThrowable);
 	}
 
 	@Override
@@ -258,11 +228,5 @@ public class SimpleLogger implements InternalLogger
 		info(paramString, paramArrayOfObject);
 	}
 
-	@Override
-	public void log(InternalLogLevel paramInternalLogLevel,
-			Throwable paramThrowable)
-	{
-		info(paramThrowable);
-	}
 
 }

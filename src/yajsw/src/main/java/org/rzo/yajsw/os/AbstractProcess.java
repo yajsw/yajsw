@@ -94,6 +94,8 @@ public abstract class AbstractProcess implements Process
 	protected boolean 				_logonActiveSession		= false;
 	protected String				_desktop				= null;
 	protected int 					_umask					= -1;
+	protected boolean 				_useSpawn				= false;
+	protected boolean 				_linuxUseVfork		= false;
 
 	/*
 	 * (non-Javadoc)
@@ -461,6 +463,26 @@ public abstract class AbstractProcess implements Process
 	public void setUmask(int umask)
 	{
 		_umask = umask;
+	}
+
+	public boolean isUseSpawn()
+	{
+		return _useSpawn;
+	}
+
+	public void setUseSpawn(boolean useSpawn)
+	{
+		_useSpawn = useSpawn;
+	}
+
+	public boolean isLinuxUseVfork()
+	{
+		return _linuxUseVfork;
+	}
+
+	public void setLinuxUseVfork(boolean linuxUseVfork)
+	{
+		_linuxUseVfork = linuxUseVfork;
 	}
 
 

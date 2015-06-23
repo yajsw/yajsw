@@ -2,11 +2,12 @@ package org.rzo.yajsw.controller.jvm;
 
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 
 import org.rzo.yajsw.Constants;
 import org.rzo.yajsw.controller.Message;
 
-public class ControllerHandler extends ChannelHandlerAdapter implements Constants
+public class ControllerHandler extends ChannelInboundHandlerAdapter implements Constants
 {
 
 	JVMController	_controller;

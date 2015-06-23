@@ -5,7 +5,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
@@ -37,15 +38,16 @@ public class MulticastAccessPoint
         
         bootstrap.childHandler(new ChannelPipelineFactory() {
             public HandlerList getPipeline() {
-                return ChannelPipelineFactory.handlerList(new SimpleChannelInboundHandler()
+                return ChannelPipelineFactory.handlerList(new ChannelInboundHandlerAdapter()
                 {
 
                 	
     				@Override
-    				public void messageReceived(ChannelHandlerContext ctx, Object e) throws Exception
+    				public void channelRead(ChannelHandlerContext ctx, Object msg)
+    						throws Exception
     				{
     					if (mcast != null && mcast.isInit())
-    						mcast.send((ByteBuf) e);
+    						mcast.send((ByteBuf) msg);
     				}
     				
     				@Override
@@ -84,12 +86,13 @@ public class MulticastAccessPoint
 		{
 			mcast.init(new ChannelPipelineFactory() {
 			    public HandlerList getPipeline() {
-			        return ChannelPipelineFactory.handlerList(new SimpleChannelInboundHandler()
+			        return ChannelPipelineFactory.handlerList(new ChannelInboundHandlerAdapter()
 			        {
 						@Override
-						public void messageReceived(ChannelHandlerContext ctx, Object e) throws Exception
+						public void channelRead(ChannelHandlerContext ctx, Object msg)
+	    						throws Exception
 						{
-							ByteBuf b = mcast.getMessage((ByteBuf)e);
+							ByteBuf b = mcast.getMessage((ByteBuf)msg);
 							if (b == null)
 								return;
 							for (Channel c : remoteChannels)

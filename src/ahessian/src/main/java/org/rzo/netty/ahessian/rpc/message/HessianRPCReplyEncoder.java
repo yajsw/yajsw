@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 
 import java.io.OutputStream;
+import java.net.SocketAddress;
 import java.util.concurrent.Executor;
 
 import org.rzo.netty.ahessian.Constants;
@@ -70,10 +71,28 @@ public class HessianRPCReplyEncoder extends OutputProducer
 				promise.setFailure(ex);
 			}
 		}
-		
-		public void channelActive(ChannelHandlerContext ctx) throws Exception
-		{
+	
+	 @Override
+	    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+			if (hOut == null)
+			{
+				OutputStream out = OutputStreamHandler.getOutputStream(ctx);
+				hOut = new Hessian2Output(out);
+				if (_serializerFactory != null)
+					hOut.getSerializerFactory().addFactory(_serializerFactory);
+			}
+			else
+				hOut.reset();
 			super.channelActive(ctx);
+	    }
+
+
+		
+	@Override
+	public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise)
+			throws Exception
+		{
+			super.connect(ctx, remoteAddress, localAddress, promise);
 			if (hOut == null)
 			{
 				OutputStream out = OutputStreamHandler.getOutputStream(ctx);
@@ -92,6 +111,54 @@ public class HessianRPCReplyEncoder extends OutputProducer
 			if (!ctx.channel().isActive())
 				throw new RuntimeException("channel not active");
 			hOut.flush();
+		}
+
+		@Override
+		public void channelRegistered(ChannelHandlerContext ctx)
+				throws Exception
+		{
+			ctx.fireChannelRegistered();
+		}
+
+		@Override
+		public void channelUnregistered(ChannelHandlerContext ctx)
+				throws Exception
+		{
+			ctx.fireChannelUnregistered();
+		}
+
+		@Override
+		public void channelInactive(ChannelHandlerContext ctx) throws Exception
+		{
+			ctx.fireChannelInactive();
+		}
+
+		@Override
+		public void channelRead(ChannelHandlerContext ctx, Object msg)
+				throws Exception
+		{
+			ctx.fireChannelRead(msg);
+		}
+
+		@Override
+		public void channelReadComplete(ChannelHandlerContext ctx)
+				throws Exception
+		{
+			ctx.fireChannelReadComplete();
+		}
+
+		@Override
+		public void userEventTriggered(ChannelHandlerContext ctx, Object evt)
+				throws Exception
+		{
+			ctx.fireUserEventTriggered(evt);
+		}
+
+		@Override
+		public void channelWritabilityChanged(ChannelHandlerContext ctx)
+				throws Exception
+		{
+			ctx.fireChannelWritabilityChanged();
 		}
 
 

@@ -321,11 +321,11 @@ public class IpFilterRuleHandler extends IpFilteringHandlerImpl
       return true;
    }
    
-   @Override
+/*   @Override
    public void flush(ChannelHandlerContext ctx)
            throws Exception
            {
 	   		ctx.flush();
            }
-
+*/
 }

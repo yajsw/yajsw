@@ -2,8 +2,11 @@ package org.rzo.netty.ahessian.io;
 
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandler;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -18,7 +21,7 @@ import org.rzo.netty.ahessian.utils.MyReentrantLock;
 import org.rzo.netty.ahessian.utils.TimedBlockingPriorityQueue;
 
 
-abstract public class OutputProducer extends ChannelHandlerAdapter implements StopableHandler
+abstract public class OutputProducer extends ChannelOutboundHandlerAdapter implements StopableHandler, ChannelInboundHandler
 {
 	
 	class MessageEvent
@@ -84,7 +87,20 @@ abstract public class OutputProducer extends ChannelHandlerAdapter implements St
 		
 	}
 	@Override
-	public void channelActive(final ChannelHandlerContext ctx) throws Exception
+	public void connect(final ChannelHandlerContext ctx, SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise)
+		     throws Exception
+	{
+		doChannelActive(ctx);
+		super.connect(ctx, remoteAddress, localAddress, promise);
+	}
+	
+	 @Override
+	    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+		 doChannelActive(ctx);
+	        ctx.fireChannelActive();
+	    }
+
+	private void doChannelActive(final ChannelHandlerContext ctx)
 	{
 		_ctx = ctx;
 		_executor.execute(new Runnable()
@@ -215,6 +231,51 @@ abstract public class OutputProducer extends ChannelHandlerAdapter implements St
 			event.getFuture().cancel(true);
 		}
 	}
+	
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        ctx.fireChannelInactive();
+    }
+
+	@Override
+	public void channelRegistered(ChannelHandlerContext ctx) throws Exception
+	{
+		ctx.fireChannelRegistered();
+	}
+
+	@Override
+	public void channelUnregistered(ChannelHandlerContext ctx) throws Exception
+	{
+		ctx.fireChannelUnregistered();
+	}
+
+	@Override
+	public void channelRead(ChannelHandlerContext ctx, Object msg)
+			throws Exception
+	{
+		ctx.fireChannelRead(msg);
+	}
+
+	@Override
+	public void channelReadComplete(ChannelHandlerContext ctx) throws Exception
+	{
+		ctx.fireChannelReadComplete();
+	}
+
+	@Override
+	public void userEventTriggered(ChannelHandlerContext ctx, Object evt)
+			throws Exception
+	{
+		ctx.fireUserEventTriggered(evt);
+	}
+
+	@Override
+	public void channelWritabilityChanged(ChannelHandlerContext ctx)
+			throws Exception
+	{
+		ctx.fireChannelWritabilityChanged();
+	}
+
 
 
 }

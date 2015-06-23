@@ -1,9 +1,9 @@
 package org.rzo.yajsw.nettyutils;
 
-import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 
-public class ConditionFilter extends ChannelHandlerAdapter
+public class ConditionFilter extends ChannelInboundHandlerAdapter
 {
 
 	Condition	_condition;

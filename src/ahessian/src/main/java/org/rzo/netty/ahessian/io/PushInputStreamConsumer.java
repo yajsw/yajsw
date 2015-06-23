@@ -1,6 +1,7 @@
 package org.rzo.netty.ahessian.io;
 
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.io.InputStream;
@@ -11,7 +12,7 @@ import java.util.concurrent.locks.Lock;
 import org.rzo.netty.ahessian.Constants;
 import org.rzo.netty.ahessian.utils.MyReentrantLock;
 
-public class PushInputStreamConsumer extends SimpleChannelInboundHandler
+public class PushInputStreamConsumer extends ChannelInboundHandlerAdapter
 {
 
 	volatile Lock _lock = new MyReentrantLock();
@@ -27,7 +28,8 @@ public class PushInputStreamConsumer extends SimpleChannelInboundHandler
 	}
 	
 	@Override
-	public void messageReceived(final ChannelHandlerContext ctx, final Object evt) throws Exception
+	public void channelRead(final ChannelHandlerContext ctx, final Object msg)
+			 throws Exception
 	{
 		// input stream is consumed within a separate thread
 		// we return the current worker thread to netty, so that it may continue feeding the input stream
@@ -38,7 +40,7 @@ public class PushInputStreamConsumer extends SimpleChannelInboundHandler
 				String tName = Thread.currentThread().getName();
 				try
 				{
-				PushInputStreamConsumer.this.run(ctx, evt);
+				PushInputStreamConsumer.this.run(ctx, msg);
 				}
 				finally
 				{

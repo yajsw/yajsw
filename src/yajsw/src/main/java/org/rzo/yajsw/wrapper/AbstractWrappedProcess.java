@@ -1221,6 +1221,9 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		String title = _config.getString("wrapper.console.title");
 		if (title != null)
 			_osProcess.setTitle(title);
+		
+		_osProcess.setUseSpawn(_config.getBoolean("wrapper.posix_spawn", false));
+		_osProcess.setLinuxUseVfork(_config.getBoolean("wrapper.posix_vfork", false));
 
 		_osProcess.setVisible(_config.getBoolean("wrapper.console.visible",
 				Constants.DEFAULT_CONSOLE_VISIBLE)
@@ -1296,6 +1299,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 
 	private List<String[]> getProcessEnvironment(YajswConfigurationImpl config)
 	{
+		System.out.println("system.env "+System.getenv().size());
 		// if user did not set env properties: use default.
 		if (!config.getKeys("wrapper.app.env").hasNext())
 		{
@@ -1317,6 +1321,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		{
 			result.add(new String[] { entry.getKey(), entry.getValue() });
 		}
+		if (result != null)
+			System.out.println("env result "+result.size());
 		return result;
 	}
 

@@ -2,11 +2,17 @@ package org.rzo.netty.ahessian.io;
 
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandler;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelOutboundHandler;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.ChannelPromise;
 import io.netty.util.AttributeKey;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.SocketAddress;
 
 import org.rzo.netty.ahessian.stopable.StopableHandler;
 
@@ -65,7 +71,7 @@ import org.rzo.netty.ahessian.stopable.StopableHandler;
  * }
  * </pre>
  */
-public class OutputStreamHandler extends ChannelHandlerAdapter implements StopableHandler
+public class OutputStreamHandler extends ChannelInboundHandlerAdapter implements StopableHandler, ChannelOutboundHandler
 {
 	volatile OutputStreamBuffer _buffer = null;
 	private boolean	_stopEnabled = true;
@@ -83,38 +89,6 @@ public class OutputStreamHandler extends ChannelHandlerAdapter implements Stopab
 		_crcCheck = crcCheck;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.jboss.netty.channel.SimpleChannelHandler#channelConnected(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.ChannelStateEvent)
-	 */
-	@Override
-	public void channelActive(ChannelHandlerContext ctx) throws Exception
-	{
-		if (_buffer == null)
-		{
-			if (_crcCheck)
-				_buffer = new CRCOutputStream(ctx);
-			else
-				_buffer = new OutputStreamBuffer(ctx);
-			ctx.channel().attr(OUTSTREAM).set(_buffer);
-		}
-		else
-			_buffer.setContext(ctx);
-		ctx.channel().attr(OUTENCODER).set(this);
-		ctx.fireChannelActive();
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jboss.netty.channel.SimpleChannelHandler#channelDisconnected(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.ChannelStateEvent)
-	 */
-	@Override
-	public void channelInactive(ChannelHandlerContext ctx) throws Exception
-	{
-		if (_buffer != null)
-		{
-			_buffer.close();
-		}
-		ctx.fireChannelInactive();
-	}
 
 	/**
 	 * Helper method: Gets the output stream from the pipeline of a given context.
@@ -161,7 +135,101 @@ public class OutputStreamHandler extends ChannelHandlerAdapter implements Stopab
 		}
 		_buffer = null;
 	}
-	
+
+	@Override
+	public void channelActive(ChannelHandlerContext ctx) throws Exception
+	{
+		doChannelActive(ctx);
+		ctx.fireChannelActive();
+	}
+
+	private void doChannelActive(ChannelHandlerContext ctx)
+	{
+		if (_buffer == null)
+		{
+			if (_crcCheck)
+				_buffer = new CRCOutputStream(ctx);
+			else
+				_buffer = new OutputStreamBuffer(ctx);
+			ctx.channel().attr(OUTSTREAM).set(_buffer);
+		}
+		else
+			_buffer.setContext(ctx);
+		ctx.channel().attr(OUTENCODER).set(this);
+	}
+
+	@Override
+	public void channelInactive(ChannelHandlerContext ctx) throws Exception
+	{
+		doChannelInactive();
+		ctx.fireChannelInactive();
+	}
+
+	private void doChannelInactive() throws IOException
+	{
+		if (_buffer != null)
+		{
+			_buffer.close();
+		}
+	}
+
+	@Override
+	public void bind(ChannelHandlerContext ctx, SocketAddress localAddress,
+			ChannelPromise promise) throws Exception
+	{
+		ctx.bind(localAddress, promise);
+	}
+
+	@Override
+	public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress,
+			SocketAddress localAddress, ChannelPromise promise)
+			throws Exception
+	{
+		doChannelActive(ctx);
+		ctx.connect(remoteAddress, localAddress, promise);
+	}
+
+	@Override
+	public void disconnect(ChannelHandlerContext ctx, ChannelPromise promise)
+			throws Exception
+	{
+		doChannelInactive();
+		ctx.disconnect(promise);
+	}
+
+	@Override
+	public void close(ChannelHandlerContext ctx, ChannelPromise promise)
+			throws Exception
+	{
+		ctx.close(promise);
+	}
+
+	@Override
+	public void deregister(ChannelHandlerContext ctx, ChannelPromise promise)
+			throws Exception
+	{
+		ctx.deregister(promise);
+	}
+
+	@Override
+	public void read(ChannelHandlerContext ctx) throws Exception
+	{
+		ctx.read();
+	}
+
+	@Override
+	public void write(ChannelHandlerContext ctx, Object msg,
+			ChannelPromise promise) throws Exception
+	{
+		ctx.write(msg, promise);
+	}
+
+	@Override
+	public void flush(ChannelHandlerContext ctx) throws Exception
+	{
+		ctx.flush();
+	}
+
 
 
 

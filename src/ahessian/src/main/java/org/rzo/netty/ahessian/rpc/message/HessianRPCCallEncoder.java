@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 
 import java.io.OutputStream;
+import java.net.SocketAddress;
 import java.util.concurrent.Executor;
 
 import org.rzo.netty.ahessian.Constants;
@@ -95,9 +96,10 @@ public class HessianRPCCallEncoder extends OutputProducer
 	}
 
 	@Override
-	public void channelActive(ChannelHandlerContext ctx) throws Exception
+	public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise)
+			throws Exception
 	{
-		super.channelActive(ctx);
+		super.connect(ctx, remoteAddress, localAddress, promise);
 		_hasSessionFilter = ctx.pipeline().context(ClientSessionFilter.class) != null;
 		if (hOut == null)
 		{
@@ -107,7 +109,6 @@ public class HessianRPCCallEncoder extends OutputProducer
 		}
 		else
 			hOut.reset();
-		ctx.fireChannelActive();
 	}
 
 	@Override

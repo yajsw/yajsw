@@ -1,23 +1,30 @@
-package org.rzo.yajsw.os.posix.bsd;
+package org.rzo.yajsw.os.posix;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.rzo.yajsw.os.posix.PosixProcess;
 import org.rzo.yajsw.os.posix.PosixProcess.CLibrary;
 
-public class AppStarter
+public class PosixSpawnMain
 {
 	public static void main(String[] args)
 	{
-		// get pid and send it to parent
-		int pid = CLibrary.INSTANCE.getpid();
-		System.out.println("PID:" + pid);
-		System.out.flush();
+		// detach from parent
+		CLibrary.INSTANCE.umask(0);
+		CLibrary.INSTANCE.setsid();
 
 		// set priority
-		if (CLibrary.INSTANCE.nice(1) == -1)
+		int nice = getNice();
+		if (nice != 0)
+		if (CLibrary.INSTANCE.nice(nice) == -1)
 			System.out.println("could not set priority ");
+		// set umask
+		int umask = getUmask();
+		if (umask != 0)
+		if (CLibrary.INSTANCE.umask(umask) != 0)
+			System.out.println("could not set umask ");
+		
+		// set user
 		if (getUser() != null)
 			try
 		{
@@ -27,15 +34,16 @@ public class AppStarter
 		{
 			ex.printStackTrace();
 		}
-
-
-		// detach from parent
-		CLibrary.INSTANCE.umask(0);
-		CLibrary.INSTANCE.setsid();
 		
-		System.out.println("calling exec");
+		// set working dir
+		if (getWorkingdir() != null)
+			if (CLibrary.INSTANCE.chdir(getWorkingdir()) != 0)
+				System.out.println("could not set working dir");
+
+
+		
 		// close streams ?
-		if (!isPipeStreams())
+	//	if (!isPipeStreams())
 		{
 			/*
 			try
@@ -48,13 +56,9 @@ public class AppStarter
 			}
 			*/
 			
-			System.out.close();
-			System.err.close();
+			//System.out.close();
+			//System.err.close();
 		}
-		
-		int umask = getUmask();
-		if (umask != -1)
-			PosixProcess.umask(umask);
 		
 		String[] env = null;//getEnv();
 
@@ -90,9 +94,20 @@ public class AppStarter
 		return System.getProperty("wrapperx.user");
 	}
 
+	private static String getWorkingdir()
+	{
+		return System.getProperty("wrapperx.workingdir");
+	}
+
+	private static int getNice()
+	{
+		String x = System.getProperty("wrapperx.nice", "0");
+		return Integer.parseInt(x);
+	}
+
 	private static int getUmask()
 	{
-		String u = System.getProperty("wrapperx.umask", "-1");
+		String u = System.getProperty("wrapperx.umask", "0");
 		return Integer.parseInt(u);
 	}
 
@@ -115,6 +130,5 @@ public class AppStarter
 		}
 		return arr;
 	}
-
 
 }

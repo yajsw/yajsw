@@ -1,15 +1,17 @@
 package org.rzo.yajsw.nettyutils;
 
-import io.netty.channel.ChannelHandlerAdapter;
+import java.net.SocketAddress;
+
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
-import io.netty.channel.DefaultEventLoop;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.util.concurrent.GlobalEventExecutor;
 
-public class ChannelGroupFilter extends ChannelHandlerAdapter
+public class ChannelGroupFilter extends ChannelOutboundHandlerAdapter
 {
-	ChannelGroup	_channels	= new DefaultChannelGroup(new DefaultEventLoop());
+	ChannelGroup	_channels	= new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 	Condition		_condition;
 
 	public ChannelGroupFilter(Condition condition)
@@ -18,10 +20,11 @@ public class ChannelGroupFilter extends ChannelHandlerAdapter
 	}
 
 	@Override
-	public void channelActive(ChannelHandlerContext ctx) throws Exception
+	public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise)
+	throws Exception
 	{
 		_channels.add(ctx.channel());
-		super.channelWritabilityChanged(ctx);
+		ctx.fireChannelWritabilityChanged();
 	}
 
 	@Override

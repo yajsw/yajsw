@@ -210,40 +210,6 @@ class JdkLogger2 implements InternalLogger {
 	}
 
 	@Override
-	public void trace(Throwable paramThrowable)
-	{
-		info(paramThrowable);
-	}
-
-	@Override
-	public void debug(Throwable paramThrowable)
-	{
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void info(Throwable paramThrowable)
-	{
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void warn(Throwable paramThrowable)
-	{
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void error(Throwable paramThrowable)
-	{
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public boolean isEnabled(InternalLogLevel paramInternalLogLevel)
 	{
 		// TODO Auto-generated method stub
@@ -289,11 +255,4 @@ class JdkLogger2 implements InternalLogger {
 		
 	}
 
-	@Override
-	public void log(InternalLogLevel paramInternalLogLevel,
-			Throwable paramThrowable)
-	{
-		// TODO Auto-generated method stub
-		
-	}
 }
