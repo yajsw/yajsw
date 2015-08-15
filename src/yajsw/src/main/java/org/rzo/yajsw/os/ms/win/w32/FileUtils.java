@@ -238,6 +238,12 @@ public class FileUtils
 		}
 		FileFilter fileFilter = new WildcardFileFilter(file);
 		File[] thisFiles = fPath.listFiles(fileFilter);
+		if (thisFiles == null)
+		{
+			log.warning("error accessing " + path);
+			return result;
+		}
+
 		for (int i = 0; i < thisFiles.length; i++)
 		{
 			File f = thisFiles[i];
