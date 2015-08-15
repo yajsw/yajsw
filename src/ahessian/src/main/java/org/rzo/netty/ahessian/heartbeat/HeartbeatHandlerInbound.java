@@ -1,6 +1,5 @@
 package org.rzo.netty.ahessian.heartbeat;
 
-import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.Timeout;

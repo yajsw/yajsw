@@ -2,10 +2,7 @@ package org.rzo.yajsw.tray.ahessian.client;
 
 import io.netty.channel.Channel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.channel.socket.oio.OioSocketChannel;
 import io.netty.util.internal.logging.InternalLogger;
-import io.netty.util.internal.logging.InternalLoggerFactory;
-import io.netty.util.internal.logging.SimpleLoggerFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -227,7 +224,7 @@ public class AHessianJmxClient
 	
 	public static void main(String[] args) throws Exception
 	{
-    	InternalLoggerFactory.setDefaultFactory(new SimpleLoggerFactory());
+    	//InternalLoggerFactory.setDefaultFactory(new SimpleLoggerFactory());
 
     	AHessianJmxClient _ahessianClient = new AHessianJmxClient("test", 15009, false, null);
     	_ahessianClient.start();

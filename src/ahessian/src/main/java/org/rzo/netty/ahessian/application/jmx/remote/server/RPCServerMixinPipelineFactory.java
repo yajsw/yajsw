@@ -1,6 +1,5 @@
 package org.rzo.netty.ahessian.application.jmx.remote.server;
 
-import io.netty.channel.EventLoopGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 
 import java.util.ArrayList;

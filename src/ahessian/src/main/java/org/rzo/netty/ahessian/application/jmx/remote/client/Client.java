@@ -7,8 +7,6 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.util.internal.logging.InternalLoggerFactory;
-import io.netty.util.internal.logging.SimpleLoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -32,7 +30,7 @@ public class Client
     public static void main(String[] args) throws Exception
     {
 	
-    	InternalLoggerFactory.setDefaultFactory(new SimpleLoggerFactory());
+    //InternalLoggerFactory.setDefaultFactory(new SimpleLoggerFactory());
     final ExecutorService executor = Executors.newCachedThreadPool();
 
 	Bootstrap bootstrap = new Bootstrap();

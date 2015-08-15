@@ -11,6 +11,7 @@ import java.awt.image.MemoryImageSource;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -398,6 +399,8 @@ public class HelloWorld
 			simulateDeadlock();
 		if (args.length >= 1 && "tray".equals(args[0]))
 			startTray();
+		if (args.length >= 1 && "process".equals(args[0]))
+			startProcess();
 
 		while (true)
 		{
@@ -480,6 +483,51 @@ public class HelloWorld
 		frame.getContentPane().add(new JLabel("hellow world test"), BorderLayout.CENTER);
 		frame.pack();
 		frame.setVisible(true);
+	}
+	
+	private static void startProcess() throws IOException
+	{
+		Process p = Runtime.getRuntime().exec("ping localhost -t");
+		final BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+		final BufferedReader err = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+		
+		new Thread(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				try
+				{
+					String line;
+					while ((line = in.readLine()) != null)
+					System.out.println(line);
+				}
+				catch (IOException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}).start();
+		new Thread(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				try
+				{
+					String line;
+					while ((line = err.readLine()) != null)
+					System.out.println(line);
+				}
+				catch (IOException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}			}
+		}).start();
 	}
 
 }

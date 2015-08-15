@@ -10,8 +10,6 @@
  */
 package org.rzo.yajsw.os;
 
-import io.netty.handler.logging.LogLevel;
-
 import java.io.FileDescriptor;
 import java.io.InputStream;
 import java.io.OutputStream;

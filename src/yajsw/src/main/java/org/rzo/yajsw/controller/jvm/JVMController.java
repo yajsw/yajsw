@@ -26,6 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.rzo.yajsw.Constants;
 import org.rzo.yajsw.controller.AbstractController;
@@ -91,7 +92,7 @@ public class JVMController extends AbstractController
 
 	/** The _session. */
 	// IoSession _session;
-	volatile Channel									_channel;
+	final AtomicReference<Channel>									_channel = new AtomicReference<Channel>();
 
 	/** The Constant pool. */
 	// static final SimpleIoProcessorPool pool = new
@@ -349,17 +350,17 @@ public class JVMController extends AbstractController
 		if (_parentChannel != null)
 		{
 			int i = 0;
-			while (_channel != null && _channel.isActive() && i < 3)
+			while (_channel.get() != null && _channel.get().isActive() && i < 3)
 			{
 				i++;
 				if (_debug > 1)
 					getLog().info("controller sending a stop command");
-				if (_channel != null)
+				if (_channel.get() != null)
 				{
 					String txt = null;
 					if (reason != null && reason.length() > 0)
 						txt = ":" + reason;
-					_channel.writeAndFlush(new Message(Constants.WRAPPER_MSG_STOP, txt));
+					_channel.get().writeAndFlush(new Message(Constants.WRAPPER_MSG_STOP, txt));
 				}
 				try
 				{
@@ -371,10 +372,10 @@ public class JVMController extends AbstractController
 			}
 			// /* if we close the channel here, the app cannot send
 			// signalStop(time) messages
-			if (_channel != null && _channel.isOpen())
+			if (_channel.get() != null && _channel.get().isOpen())
 				try
 				{
-					ChannelFuture cf = _channel.close();
+					ChannelFuture cf = _channel.get().close();
 					if (getDebug() > 1)
 					getLog().info("controller close session");
 					cf.await(1000);
@@ -582,8 +583,8 @@ public class JVMController extends AbstractController
 	 */
 	public void requestThreadDump()
 	{
-		if (_channel != null)
-			_channel.writeAndFlush(new Message(Constants.WRAPPER_MSG_THREAD_DUMP, null));
+		if (_channel.get() != null)
+			_channel.get().writeAndFlush(new Message(Constants.WRAPPER_MSG_THREAD_DUMP, null));
 	}
 
 	/**
@@ -591,8 +592,8 @@ public class JVMController extends AbstractController
 	 */
 	public void requestGc()
 	{
-		if (_channel != null)
-			_channel.writeAndFlush(new Message(Constants.WRAPPER_MSG_GC, null));
+		if (_channel.get() != null)
+			_channel.get().writeAndFlush(new Message(Constants.WRAPPER_MSG_GC, null));
 	}
 
 	/**
@@ -600,8 +601,8 @@ public class JVMController extends AbstractController
 	 */
 	public void requestDumpHeap(String fileName)
 	{
-		if (_channel != null)
-			_channel.writeAndFlush(new Message(Constants.WRAPPER_MSG_DUMP_HEAP, fileName));
+		if (_channel.get() != null)
+			_channel.get().writeAndFlush(new Message(Constants.WRAPPER_MSG_DUMP_HEAP, fileName));
 	}
 
 	public void reset()

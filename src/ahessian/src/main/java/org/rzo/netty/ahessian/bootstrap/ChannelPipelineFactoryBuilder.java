@@ -1,7 +1,6 @@
 package org.rzo.netty.ahessian.bootstrap;
 
 import io.netty.bootstrap.AbstractBootstrap;
-import io.netty.channel.EventLoopGroup;
 import io.netty.handler.ipfilter.IpFilterRuleHandler;
 import io.netty.handler.ipfilter.IpFilterRuleList;
 import io.netty.util.HashedWheelTimer;
@@ -32,7 +31,6 @@ import org.rzo.netty.ahessian.heartbeat.ServerHeartbeatHandler;
 import org.rzo.netty.ahessian.io.InputStreamHandler;
 import org.rzo.netty.ahessian.io.OutputStreamHandler;
 import org.rzo.netty.ahessian.io.PullInputStreamConsumer;
-import org.rzo.netty.ahessian.log.OutLogger;
 import org.rzo.netty.ahessian.rpc.client.BootstrapProvider;
 import org.rzo.netty.ahessian.rpc.client.HessianProxyFactory;
 import org.rzo.netty.ahessian.rpc.client.ReconnectHandler;

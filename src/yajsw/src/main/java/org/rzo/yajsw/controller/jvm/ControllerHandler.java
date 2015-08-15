@@ -1,6 +1,5 @@
 package org.rzo.yajsw.controller.jvm;
 
-import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -23,7 +22,7 @@ public class ControllerHandler extends ChannelInboundHandlerAdapter implements C
 		if (_controller.getState() == JVMController.STATE_USER_STOP)
 		{
 			// set the channel if not set
-			_controller._channel = ctx.channel();
+			_controller._channel.set(ctx.channel());
 			_controller.stop(JVMController.STATE_USER_STOP, "INTERNAL");
 			return;
 		}
@@ -35,7 +34,7 @@ public class ControllerHandler extends ChannelInboundHandlerAdapter implements C
 			if (_controller._key.equals(message.getMessage()))
 			{
 				// we set the channel not in channelConnected, 
-				_controller._channel = ctx.channel();
+				_controller._channel.set(ctx.channel());
 				_controller.setState(JVMController.STATE_LOGGED_ON);
 				_controller.startupOK();
 				ctx.channel().writeAndFlush(new Message(Constants.WRAPPER_MSG_OKKEY, "" + _controller._wrappedProcess.getAppPid()));
@@ -110,7 +109,7 @@ public class ControllerHandler extends ChannelInboundHandlerAdapter implements C
 
 		// we accept only one session. if we already have one -> close the
 		// new session
-		if (_controller._channel != null && _controller._channel != ctx.channel())
+		if (_controller._channel.get() != null && !_controller._channel.get().remoteAddress().equals(ctx.channel().remoteAddress()))
 		{
 			if (_controller.getDebug() > 2)
 				_controller.getLog().info("session already established -> ignore further sessions");
@@ -135,17 +134,20 @@ public class ControllerHandler extends ChannelInboundHandlerAdapter implements C
 	{
 		synchronized (_controller)
 		{
-		if (_controller._channel == ctx.channel())
+		if (_controller._channel.get() == ctx.channel())
 		{
 			// stop processing outgoing messages
 			//_controller.workerExecutor.shutdownNow();
 
 			// stop the controller
-			_controller._channel = null;
+			_controller._channel.set(null);
 			_controller.setState(JVMController.STATE_WAITING_CLOSED);
 			if (_controller.getDebug() > 2)
 				_controller.getLog().info("session closed -> waiting");
 		}
+		else  if (_controller.getDebug() > 2)
+			_controller.getLog().info("unexpected connection closed: "+ctx.channel().remoteAddress());
+ 
 		
 		}
 	}

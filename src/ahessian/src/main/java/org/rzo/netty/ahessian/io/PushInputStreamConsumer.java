@@ -2,7 +2,6 @@ package org.rzo.netty.ahessian.io;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.io.InputStream;
 import java.util.concurrent.Executor;

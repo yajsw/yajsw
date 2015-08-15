@@ -3,20 +3,16 @@ package org.rzo.netty.ahessian.bootstrap;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.local.LocalEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.oio.OioEventLoopGroup;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 
 import java.net.ConnectException;
-import java.net.InetSocketAddress;
 import java.util.Set;
 
-import org.rzo.netty.ahessian.log.OutLogger;
 import org.rzo.netty.ahessian.rpc.server.HessianRPCServiceHandler.ConnectListener;
 
 public class DefaultClient<T> extends DefaultEndpoint

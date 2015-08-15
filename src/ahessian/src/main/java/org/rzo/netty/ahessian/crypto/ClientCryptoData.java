@@ -2,7 +2,6 @@ package org.rzo.netty.ahessian.crypto;
 
 import java.security.SecureRandom;
 import java.util.Arrays;
-import  org.rzo.netty.ahessian.crypto.CryptoConstants;
 
 public class ClientCryptoData
 {

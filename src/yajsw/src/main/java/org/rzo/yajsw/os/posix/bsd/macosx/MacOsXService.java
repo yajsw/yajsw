@@ -1,5 +1,16 @@
 package org.rzo.yajsw.os.posix.bsd.macosx;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -13,17 +24,6 @@ import org.rzo.yajsw.os.OperatingSystem;
 import org.rzo.yajsw.os.posix.PosixUtils;
 import org.rzo.yajsw.os.posix.VelocityLog;
 import org.rzo.yajsw.util.Utils;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class MacOsXService extends AbstractService implements Constants
 {
