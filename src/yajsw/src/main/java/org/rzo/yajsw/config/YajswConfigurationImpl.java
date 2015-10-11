@@ -157,7 +157,9 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 		}
 		catch (Exception e1)
 		{
-			e1.printStackTrace();
+			//e1.printStackTrace();
+			log.warn("WARNING: could not instatiate groovy in wrapper configuration.");
+			
 		}
 		
 		if (_localConfiguration != null)
