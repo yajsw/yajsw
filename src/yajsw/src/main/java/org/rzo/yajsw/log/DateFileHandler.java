@@ -180,11 +180,11 @@ public class DateFileHandler extends Handler
 		String pattern = _pattern.replace("%d", _currentDate);
 		try
 		{
-			File dd = MyFileHandler.generate(pattern, 0, 0, _count);
+			File dd = new File(MyFileHandler.parseFileName(pattern, 0, 0, _count));
 			if (!dd.getParentFile().exists())
 				dd.getParentFile().mkdirs();
 		}
-		catch (IOException e1)
+		catch (Exception e1)
 		{
 		}
 		Calendar next = Calendar.getInstance(); // current date
@@ -255,11 +255,11 @@ public class DateFileHandler extends Handler
 		{
 			try
 			{
-				f = MyFileHandler.generate(pattern, 0, unique, _count);
+				f = new File(MyFileHandler.parseFileName(pattern, 0, unique, _count));
 				if (!f.exists())
 					break;
 			}
-			catch (IOException e1)
+			catch (Exception e1)
 			{
 				// should not happen, but keep silent for now
 			}
@@ -267,7 +267,7 @@ public class DateFileHandler extends Handler
 			{
 			try
 			{
-				f = MyFileHandler.generate(pattern, generation, unique, _count);
+				f = new File(MyFileHandler.parseFileName(pattern, generation, unique, _count));
 				if (f.exists())
 				{
 					f.delete();
@@ -275,7 +275,7 @@ public class DateFileHandler extends Handler
 				else
 					break;
 			}
-			catch (IOException e)
+			catch (Exception e)
 			{
 				// should not happen, but keep silent for now
 			}
@@ -285,15 +285,15 @@ public class DateFileHandler extends Handler
 		try
 		{
 			// remove old lock files
-			f = MyFileHandler.generate(pattern+".lck", 0, 0, _count);
+			f = new File(MyFileHandler.parseFileName(pattern+".lck", 0, 0, _count));
 			f.delete();
-			f = MyFileHandler.generate(pattern, 0, 0, _count);
+			f = new File(MyFileHandler.parseFileName(pattern, 0, 0, _count));
 			while (!f.getName().contains(date))
 				f = f.getParentFile();
 			if (f.isDirectory())
 				f.delete();
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
 			// should not happen, but keep silent for now
 		}		
@@ -318,13 +318,13 @@ public class DateFileHandler extends Handler
 				File f;
 				try
 				{
-					f = MyFileHandler.generate(pattern, 0, 0, _count);
+					f = new File(MyFileHandler.parseFileName(pattern, 0, 0, _count));
 					if (f.exists())
 					{
 						dateFound = true;
 					}
 				}
-				catch (IOException e)
+				catch (Exception e)
 				{
 					// should not happen, but keep silent for now
 				}
