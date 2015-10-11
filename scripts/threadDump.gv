@@ -9,5 +9,5 @@
  * 
  * wrapper.app.shutdown.script = threadDump.gv
  */
-println "Thead Dump YAJSW shutdown hook"
+logger.info "Thead Dump YAJSW shutdown hook"
 new org.rzo.yajsw.action.ThreadDumpImpl5().execute(null, null, System.out, null)

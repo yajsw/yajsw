@@ -39,14 +39,14 @@ if (callCount == 0 && process.isOSProcessRunning())
 		long duration = Long.parseLong(args[0])
 		Timeout timeout = timer.newTimeout(task, duration, TimeUnit.SECONDS)
 		context.put("timeout", timeout);
-		System.out.println("Script maxDuration.gv: timeout set")
+		logger.info("Script maxDuration.gv: timeout set")
 }
 else if (!process.isOSProcessRunning())
 {
 	Timeout timeout = context.remove("timeout");
 	if (timeout != null && !timeout.isExpired())
 		timeout.cancel();
-	System.out.println("Script maxDuration.gv: timeout removed")
+	logger.info("Script maxDuration.gv: timeout removed")
 }
 
 

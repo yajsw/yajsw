@@ -9,4 +9,4 @@
  *
  */
 
-'net use k: \\\\myserver\\$c'.execute().text
+println 'net use k: \\\\myserver\\$c'.execute().text

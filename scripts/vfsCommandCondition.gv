@@ -22,7 +22,7 @@
  * Example Configuration:
  * 
  * wrapper.condition.script=scripts/vfsCommandCondition.gv 
- * wrapper.condition.script.args=http://localhost/cmd.txt 
+ * wrapper.condition.script.args=dbx://myapp/cmd.txt 
  * wrapper.condition.cycle=1 
  */
  
@@ -35,11 +35,14 @@ if (callCount == 0)
 {
 	process.start()
 	
-	file = VFS.getManager().resolveFile(args[0]) 
-	lastmodified = 0 
+	def file = VFS.getManager().resolveFile(args[0]) 
+	def long lastmodified = 0 
 	if (file != null && file.exists()) 
 		lastmodified = file.getContent().getLastModifiedTime() 
-
+	def instream = null
+	def shutdown = false
+	def reboot = false
+	
 }
 
 
@@ -66,6 +69,13 @@ doCommand = { cmd ->
 		writer.write(process.getStringState())
 		writer.close()
 	}
+	
+		else if ("REBOOT".equals(cmd))
+	{
+		process.stop();
+		reboot = true;
+	}
+
 	else
 		logger.info("unknown command");
 }
@@ -73,10 +83,11 @@ doCommand = { cmd ->
 	VFS.getManager().getFilesCache().close()
 	file = VFS.getManager().resolveFile(args[0]) 
 	
-if (file != null && file.exists() && lastmodified < file.getContent().getLastModifiedTime())
-// do the file
 try
 {
+if (file != null && file.exists() && lastmodified < file.getContent().getLastModifiedTime())
+{
+// do the file
 	lastmodified = file.getContent().getLastModifiedTime() 
 	shutdown = false;
 	logger.info("new command file found " + file)
@@ -84,16 +95,30 @@ try
 	for (s = instream.readLine(); s != null; s = instream.readLine())
 	  doCommand(s)
 	instream.close()
+	instream = null
+	}
 	
 	if (shutdown)
 	{
 		Thread.sleep(5000)
 		Runtime.getRuntime().halt(0);
 	}
+	
+	if (reboot)
+	  'reboot'.execute();
+	
 }
-catch (Exception ex)
+catch (Throwable ex)
 {
 	logger.info("Error executing command file "+ex.getMessage())
+	if (ex instanceof java.lang.OutOfMemoryError)
+	{
+		'reboot'.execute();
+	}
+	try
+	{
 	if (instream != null)
 	  instream.close()
+	}
+	catch (Exception exx){}
 }

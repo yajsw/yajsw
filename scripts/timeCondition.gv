@@ -22,7 +22,7 @@ import org.joda.time.*
 
 if (this.args == null || this.args.length != 2)
 {
-	println "error in script timeCondition.gv missing arguments. check configuration"
+	logger.info "error in script timeCondition.gv missing arguments. check configuration"
 	return;
 }
 
@@ -72,11 +72,11 @@ processState = process.getStringState()
 
 if (getInterval().containsNow() && "IDLE".equals(processState))
 {
-	println "starting process"
+	logger.info "starting process"
 	process.start();
 }
 else if (!getInterval().containsNow() && !"IDLE".equals(processState))
 {
-	println "stopping process"
+	logger.info "stopping process"
 	process.stop();
 }

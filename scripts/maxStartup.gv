@@ -26,14 +26,14 @@
 import org.jboss.netty.util.*
 import java.util.concurrent.TimeUnit
 
-println "maxStartup.gv invoked: $line"
+logger.info "maxStartup.gv invoked: $line"
 
 	Timeout timeout = context.remove("timeout");
 // if a timeout has been set: remove it.
 	if (timeout != null && !timeout.isExpired())
 	{
 		timeout.cancel();
-		println "Script maxStartup.gv: timeout removed"
+		logger.info "Script maxStartup.gv: timeout removed"
 		}
 
 // if we are not invoked by a trigger
@@ -45,14 +45,14 @@ if (line == null || "".equals(line))
 	{ Object[] tt ->
 			if (myProcess.isOSProcessRunning())
 			{
-			println "Script maxStartup.gv: took too long to startup -> restart"
+			logger.info "Script maxStartup.gv: took too long to startup -> restart"
 				myProcess.restart();
 			}
 	} as TimerTask;
 		long duration = Long.parseLong(args[0])
 		timeout = timer.newTimeout(task, duration, TimeUnit.SECONDS)
 		context.put("timeout", timeout);
-		println "Script maxStartup.gv: timeout set"
+		logger.info "Script maxStartup.gv: timeout set"
 }
 // else: nothing to do: timeout has already been removed
 

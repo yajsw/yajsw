@@ -80,7 +80,7 @@ logger.info("mail sent " +mailTo)
 }
 catch (Exception ex)
 {
-logger.throwing("sendMail.gv", "run", ex)
+logger.error("sendMail.gv", ex)
 }
 
 

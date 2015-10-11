@@ -2,9 +2,7 @@
  * Script for displaying a system tray message.
  * 
  * Arguments: 
- * - toMail
- * - subject
- * - message
+  * - message
  * 
  * Example Configuration:
  * 
@@ -15,13 +13,13 @@
 
 if (this.args == null || this.args.length != 1)
 {
-	println "error in script trayMessage.gv: missing arguments. check configuration"
+	logger.info "error in script trayMessage.gv: missing arguments. check configuration"
 	return;
 }
 
 if (process == null || process.getTrayIcon() == null)
 {
-	println "error in script trayMessage.gv: no process or process not configured for tray icon"
+	logger.info "error in script trayMessage.gv: no process or process not configured for tray icon"
 	return; 
 }
 

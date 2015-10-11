@@ -20,7 +20,7 @@ import com.sun.jna.win32.W32APIOptions;
 // set the variables in the following map
 def vars = ['testvar1':'testval1', 'testvar2':'testval2']
 
-println "setting environment variables"
+logger.info "setting environment variables"
 
 
 public interface Kernel32 extends StdCallLibrary 
@@ -38,5 +38,5 @@ vars.each
 	Kernel32.INSTANCE.SetEnvironmentVariable(var, value)
 }
 
-println "done setting environment variables"
+logger.info "done setting environment variables"
 

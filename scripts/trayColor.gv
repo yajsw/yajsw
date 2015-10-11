@@ -18,7 +18,7 @@
  
 if (this.args == null || this.args.length != 1)
 {
-	println "error in script trayMessage.gv missing arguments. check configuration"
+	logger.info "error in script trayMessage.gv missing arguments. check configuration"
 	return;
 }
 
