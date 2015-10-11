@@ -1222,7 +1222,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		if (title != null)
 			_osProcess.setTitle(title);
 		
-		_osProcess.setUseSpawn(_config.getBoolean("wrapper.posix_spawn", false));
+		_osProcess.setUseSpawn(_config.getBoolean("wrapper.posix_spawn", true));
 		_osProcess.setLinuxUseVfork(_config.getBoolean("wrapper.posix_vfork", false));
 
 		_osProcess.setVisible(_config.getBoolean("wrapper.console.visible",
@@ -3718,7 +3718,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 
 	protected void createOSProcess()
 	{
-		if (_config.getBoolean("wrapper.fork_hack", false))
+		if (_config.getBoolean("wrapper.fork_hack", false) && !Platform.isWindows() && !_config.getBoolean("wrapper.posix_spawn", true))
 			_osProcess = new BSDProcess();
 		else
 			_osProcess = OperatingSystem.instance().processManagerInstance()
