@@ -86,7 +86,7 @@ public class JVMController extends AbstractController
 	/** The _ping timeout. */
 	int													_pingTimeout			= 10;
 
-	boolean												_pingOK					= false;
+	volatile boolean									_pingOK					= false;
 
 	static Executor										_pingExecutor			= Executors.newCachedThreadPool(new DaemonThreadFactory("pinger"));
 
@@ -556,7 +556,7 @@ public class JVMController extends AbstractController
 	 */
 	public boolean waitFor(long timeout)
 	{
-		long end = System.currentTimeMillis() + 10000;
+		long end = System.currentTimeMillis() + timeout;
 		while (true)
 		{
 			if (_state == STATE_LOGGED_ON)
