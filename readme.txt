@@ -1,20 +1,13 @@
-yajsw-beta-12.01
+yajsw-beta-12.03
 
-    Bug: Quotes in java command line
-    Bug: multiple bugs in RuntimeJavaMain
-    Change: switched from quartz to yacron4j.
-    Change: removed pause from batch files.
-    Change: updated groovy and netty libs
-    New: Configuration property: wrapper....script.<n>.maxConcInvoc
-    New: Support for vfs-dbx (dropbox). thus command files and automatic updates can be done from dropbox.
-    New: Configuration property: wrapper.debug.level
-    New: Configuration property: wrapper.filter.debug.default
-    New: Configuration properties: wrapper.wrapperJar, wrapper.appJar
-    New: Configuration property: wrapper.logfile.desc
-    Patch: Make the console output fill the window when resized 
-    Patch: Startup under AIX 7.1 fails due to StringIndexOutOfBoundsException
-    Patch: Fix "No such file or directory" error on Mac OSX with Java 1.7
-    Patch: Fix getPid() in MacOSXService
-    Patch: MacOSX: Make sure that install script works on vanila machines (when no custom services installed yet and directory is not exists)
-    Patch: made sure wrapper works on Mac when installed in directory with spaces
-    Patch: MacOsxService does not append configuration parameters to the execution command
+    * Bug: windows service: add quotes to java command if it contains blank
+    * Bug: genConfig: error parsing java command line
+    * Bug: JVMController: use parameter instead of fixed timeout when reconnecting
+    * Change: Log an error if folder listing returns null (in java this may be a network hdd error)
+    * Change: update ahessian
+    * Change: updated groovy scripts: logging 
+    * Change: property: wrapper.posix_spawn is now default for all posix OS
+    * Change: MyFileHandler due to license conflict
+    * Change: log if a folder listing returns null (java: error accessing a network drive)
+
+NOTE: property: wrapper.posix_spawn is now default for all posix OS
