@@ -273,6 +273,10 @@ public class StandardFileSystemManager extends DefaultFileSystemManager
 				new String[] { "com.dropbox.core.DbxClient" }, null,
 				false);
 		}
+		catch (Error ex)
+		{
+			getLogger().info("could not load vfs-dbx provider: " + ex.getMessage());
+		}
 		catch (Exception ex)
 		{
 			getLogger().info("could not load vfs-dbx provider: " + ex.getMessage());
