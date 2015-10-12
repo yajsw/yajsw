@@ -386,7 +386,8 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			//e.printStackTrace();
+			log.warn("WARNING: could not load configuration groovy interpolator");
 		}
 		return result;
 	}
