@@ -121,6 +121,9 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	protected static final ThreadPoolExecutor scriptExecutor = (ThreadPoolExecutor) Executors
 			.newCachedThreadPool(new DaemonThreadFactory("scriptExecutor"));
 
+	protected static final ThreadPoolExecutor jmxExecutor = (ThreadPoolExecutor) Executors
+			.newCachedThreadPool(new DaemonThreadFactory("jmxStarter"));
+
 	/** The _first restart time. */
 	protected long _firstRestartTime;
 	/** The _state. */
@@ -190,7 +193,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	volatile boolean _stopRequested = false;
 	volatile boolean _startRequested = false;
 	MBeanServer _mbeanServer = null;
-	AHessianJmxServer _ahessianServer = null;
+	volatile AHessianJmxServer _ahessianServer = null;
 	boolean _reconnecting = false;
 	boolean _init = false;
 
@@ -364,9 +367,18 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		// a tray proxy for displaying messages
 		if (_config.getBoolean("wrapper.tray", false))
 		{
-			startAhessianService();
-			if (_ahessianServer != null)
-				_trayIconMessages = new TrayIconProxy();
+			jmxExecutor.execute(new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					startAhessianService();
+					if (_ahessianServer != null)
+						_trayIconMessages = new TrayIconProxy();
+				}
+			});
+			Thread.yield();
 		}
 
 		// if we are not running as a sevice -> spawn the tray icon as a
@@ -395,7 +407,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		_minAppLogLines = _config.getInt("wrapper.app.status.log.lines",
 				MIN_PROCESS_LINES_TO_LOG);
 		Utils.verifyIPv4IsPreferred(getWrapperLogger());
-
+		
 		_init = true;
 
 	}
