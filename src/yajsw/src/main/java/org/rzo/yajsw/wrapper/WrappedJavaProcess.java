@@ -256,7 +256,7 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 			String value = _config.getString(key);
 			if (value == null)
 				continue;
-			result.add(checkValue(value));
+			result.add(checkQuotes(checkValue(value)));
 			hasXrs |= value.contains("-Xrs");
 			hasXmx |= value.contains("-Xmx");
 			hasXms |= value.contains("-Xms");
@@ -270,7 +270,7 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 				String key = (String) it.next();
 				if (_config.getString(key) == null)
 					continue;
-				sb.append(checkValue(_config.getString(key)));
+				sb.append(checkQuotes(checkValue(_config.getString(key))));
 				if (it.hasNext())
 					sb.append(PATHSEP);
 			}
@@ -396,6 +396,16 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		 * result.add("-Dcom.sun.management.jmxremote");
 		 */
 		return result;
+	}
+
+	// avoid -Dkey="somequotedstring"withnonequoted
+	private String checkQuotes(String value)
+	{
+		if (value.contains("\""))
+			value = value.replaceAll("\"", "");
+		if (value.contains(" "))
+			value = "\""+value+"\"";
+		return value;
 	}
 
 	// call to java "-Ddir=c:\" will cause a parse exception in the java
