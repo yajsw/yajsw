@@ -115,7 +115,7 @@ public class ControllerHandler extends ChannelInboundHandlerAdapter implements C
 				_controller.getLog().info("session already established -> ignore further sessions");
 			ctx.channel().close();
 		}
-		else if (_controller._channel == null)
+		else if (_controller._channel.get() == null)
 		{
 			if (_controller.getState() != JVMController.STATE_USER_STOP)
 				_controller.setState(JVMController.STATE_ESTABLISHED);
@@ -136,14 +136,7 @@ public class ControllerHandler extends ChannelInboundHandlerAdapter implements C
 		{
 		if (_controller._channel.get() == ctx.channel())
 		{
-			// stop processing outgoing messages
-			//_controller.workerExecutor.shutdownNow();
-
-			// stop the controller
-			_controller._channel.set(null);
-			_controller.setState(JVMController.STATE_WAITING_CLOSED);
-			if (_controller.getDebug() > 2)
-				_controller.getLog().info("session closed -> waiting");
+			_controller.closeChannel();
 		}
 		else  if (_controller.getDebug() > 2)
 			_controller.getLog().info("unexpected connection closed: "+ctx.channel().remoteAddress());
@@ -151,6 +144,7 @@ public class ControllerHandler extends ChannelInboundHandlerAdapter implements C
 		
 		}
 	}
+
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) throws Exception

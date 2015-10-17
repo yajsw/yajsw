@@ -372,19 +372,7 @@ public class JVMController extends AbstractController
 			}
 			// /* if we close the channel here, the app cannot send
 			// signalStop(time) messages
-			if (_channel.get() != null && _channel.get().isOpen())
-				try
-				{
-					ChannelFuture cf = _channel.get().close();
-					if (getDebug() > 1)
-					getLog().info("controller close session");
-					cf.await(1000);
-				}
-				catch (InterruptedException e)
-				{
-					e.printStackTrace();
-					getLog().info("session close wait interrupted in JVMController");
-				}
+			closeChannel();
 			// */
 
 			// undind and dispose all channels and ports.
@@ -826,6 +814,32 @@ public class JVMController extends AbstractController
 	public void setMaxFullGCTimeRestart(long maxFullGCTimeRestart)
 	{
 		_maxFullGCTimeRestart = maxFullGCTimeRestart;
+	}
+
+	public synchronized void closeChannel()
+	{
+		if (_channel.get() != null && _channel.get().isOpen())
+			try
+			{
+				ChannelFuture cf = _channel.get().close();
+				Thread.yield();
+				if (getDebug() > 1)
+				getLog().info("controller close session");
+				cf.await(1000);
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+				getLog().info("session close wait interrupted in JVMController");
+			}
+			// stop processing outgoing messages
+			//_controller.workerExecutor.shutdownNow();
+
+			// stop the controller
+			_channel.set(null);
+			setState(JVMController.STATE_WAITING_CLOSED);
+			if (getDebug() > 2)
+				getLog().info("session closed -> waiting");
 	}
 
 
