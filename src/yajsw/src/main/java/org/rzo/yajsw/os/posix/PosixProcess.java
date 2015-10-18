@@ -1268,6 +1268,15 @@ public class PosixProcess extends AbstractProcess
 		{
 			cmdList.add("-Dwrapperx.nice=-2");
 		}
+		
+		if (getWorkingDir() != null && getWorkingDir().length() > 0)
+		{
+			String wdir = getWorkingDir();
+			wdir = wdir.replaceAll("\"", "");
+			if (wdir.contains(" "))
+				wdir += "\""+wdir+"\"";
+			cmdList.add("-Dwrapperx.workingdir="+wdir);
+		}
 
 		
 		// if (_password != null)
