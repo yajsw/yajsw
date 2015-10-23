@@ -39,6 +39,7 @@ import org.rzo.yajsw.os.OperatingSystem;
 import org.rzo.yajsw.os.ms.win.w32.WindowsXPProcess;
 import org.rzo.yajsw.tools.ConfigGenerator;
 import org.rzo.yajsw.tray.TrayIconMain;
+import org.rzo.yajsw.util.MyKeyStoreInterface;
 import org.rzo.yajsw.util.VFSFileValidator;
 import org.rzo.yajsw.wrapper.WrappedProcess;
 import org.rzo.yajsw.wrapper.WrappedProcessFactory;
@@ -119,6 +120,7 @@ public class WrapperExe
 	/** The Constant OPTION_QX. */
 	static final int			OPTION_QX			= 11;
 	static final int			OPTION_RW			= 12;
+	static final int			OPTION_K			= 13;
 
 	/** The Constant CONF_FILE. */
 	//static final String			CONF_FILE			= "confFile";
@@ -130,6 +132,8 @@ public class WrapperExe
 	/** The Constant PID. */
 	static final String			PID					= "pid";
 
+	static final String			KS_KEY_VALUE				= "ksKeyValue";
+
 	/** The Constant DEFAULT_FILE. */
 	static final String			DEFAULT_FILE		= "default configuration file";
 
@@ -140,6 +144,8 @@ public class WrapperExe
 	static int					_exitCode			= 0;
 
 	static Map<String, Object>	_properties			= new HashMap<String, Object>();
+
+	static List keyValue;
 
 	private static WrappedService getService()
 	{
@@ -247,9 +253,37 @@ public class WrapperExe
 		case OPTION_Y:
 			doStartTrayIcon();
 			break;
+		case OPTION_K:
+			keyValue = cl.getValues(cmd);
+			doAddKey();
+			break;
 		default:
 			System.out.println("unimplemented option " + cmd.getPreferredName());
 		}
+	}
+
+	private static void doAddKey()
+	{
+		String key = (String) keyValue.get(0);
+		String value = (String)keyValue.get(1);
+		try
+		{
+			MyKeyStoreInterface ks = getMyKeystore();
+			ks.init();
+			ks.put(key, value.toCharArray());
+			
+		}
+		catch (Exception ex)
+		{
+			System.out.println("error storing data in keystore -> check folder or user rights");
+			System.out.println(ex.getMessage());
+		}
+	}
+
+	private static MyKeyStoreInterface getMyKeystore() throws Exception
+	{
+		Class clazz = MyKeyStoreInterface.class.getClassLoader().loadClass("org.rzo.yajsw.util.MyKeyStore");
+		return (MyKeyStoreInterface) clazz.newInstance();
 	}
 
 	/**
@@ -750,6 +784,11 @@ public class WrapperExe
 		gBuilder.withOption(oBuilder.reset().withId(OPTION_QX).withShortName("qx").withLongName("queryposix").withDescription(
 				"Query the status of a posix daemon. Return status as exit code").create());
 
+		Argument ksKey = aBuilder.reset().withName(KS_KEY_VALUE).withDescription("Key/Value in Keystore").withMinimum(2).withMaximum(2).create();
+
+		gBuilder.withOption(oBuilder.reset().withId(OPTION_K).withShortName("k").withLongName("keystoreAdd").withDescription(
+				"Add Key/Value to Keystore").withArgument(ksKey).create());
+
 		Argument pid = aBuilder.reset().withName(PID).withDescription("PID of process to reconnect to").withMinimum(1).withMaximum(1).withValidator(
 				NumberValidator.getIntegerInstance()).create();
 
@@ -789,8 +828,12 @@ public class WrapperExe
 		fValidator.setFile(false);
 		// fValidator.setReadable(true);
 		gBuilder.withOption(aBuilder.reset().withName(ARGS).withDescription("Arguments: a list of configuration files, for example conf/wrapper.conf followed by an optional list of configuration name-value pairs, for example wrapper.debug=true")
-				.withMinimum(1).create());
+				.withMinimum(0).create());
 
+		gBuilder.withMaximum(3);
+
+		
+		
 		/*
 		Validator pValidator = new Validator()
 		{
@@ -814,7 +857,6 @@ public class WrapperExe
 				.create());
 				*/
 
-		gBuilder.withMaximum(3);
 		group = gBuilder.create();
 
 	}

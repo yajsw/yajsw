@@ -35,6 +35,7 @@ Class-Path-Wrapper-Extended:
  ./lib/extended/vfs-dbx/jackson-core-2.2.4.jar 
  ./lib/extended/glazedlists/commons-beanutils-1.8.2.jar 
  ./lib/extended/glazedlists/glazedlists-1.8.0_java15.jar 
+ ./lib/extended/keystore/keystore.jar 
  ./lib/extended/abeille/formsrt.jar
   
 Class-Path-App: 

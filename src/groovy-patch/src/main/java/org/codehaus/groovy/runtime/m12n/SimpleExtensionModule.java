@@ -16,17 +16,17 @@
 package org.codehaus.groovy.runtime.m12n;
 
 import groovy.lang.MetaMethod;
-import org.codehaus.groovy.reflection.CachedClass;
-import org.codehaus.groovy.reflection.CachedMethod;
-import org.codehaus.groovy.reflection.ReflectionCache;
-import org.codehaus.groovy.runtime.metaclass.NewInstanceMetaMethod;
-import org.codehaus.groovy.runtime.metaclass.NewStaticMetaMethod;
-
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.util.LinkedList;
 import java.util.List;
+
+import org.codehaus.groovy.reflection.CachedClass;
+import org.codehaus.groovy.reflection.CachedMethod;
+import org.codehaus.groovy.reflection.ReflectionCache;
+import org.codehaus.groovy.runtime.metaclass.NewInstanceMetaMethod;
+import org.codehaus.groovy.runtime.metaclass.NewStaticMetaMethod;
 
 /**
  * An extension module which provides extension methods using a {@link org.codehaus.groovy.runtime.DefaultGroovyMethods}-like implementation, that

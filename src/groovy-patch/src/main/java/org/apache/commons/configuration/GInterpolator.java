@@ -8,6 +8,8 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.rzo.yajsw.util.MyKeyStoreInterface;
+
 
 public class GInterpolator implements Interpolator
 {
@@ -18,6 +20,7 @@ public class GInterpolator implements Interpolator
 	String[]		_imports	= null;
 	InternalLogger			log						= InternalLoggerFactory.getInstance(this.getClass().getName());
 	Map<String, String>             _fromBinding = new HashMap<String, String>();
+	volatile MyKeyStoreInterface _ks = null;
 
 	public GInterpolator(Configuration conf, boolean cache, String[] imports, Map utils)
 	{
@@ -50,6 +53,19 @@ public class GInterpolator implements Interpolator
 				return cachedResult;
 		}
 		String result = (String) value;
+		try
+		{
+		if (result.startsWith("${keystore "))
+		{
+			String x = result.substring(11);
+			x = x.substring(0, x.lastIndexOf('}'));
+			return getFromKeystore(x.trim());
+		}
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
 		int i = result.lastIndexOf("${");
 		while (i != -1)
 		{
@@ -65,6 +81,24 @@ public class GInterpolator implements Interpolator
 			_cache.put(value, result);
 		return result;
 
+	}
+
+	private String getFromKeystore(String key) throws Exception
+	{
+		MyKeyStoreInterface ks = getKeyStore();
+		String result =  new String(ks.get(key));
+		return result;
+	}
+
+	private MyKeyStoreInterface getKeyStore() throws Exception
+	{
+		if (_ks == null)
+		{
+				Class clazz = MyKeyStoreInterface.class.getClassLoader().loadClass("org.rzo.yajsw.util.MyKeyStore");
+				_ks = (MyKeyStoreInterface) clazz.newInstance();
+			_ks.start();
+		}
+		return _ks;
 	}
 
 	private int getExpression(String value, int i)
