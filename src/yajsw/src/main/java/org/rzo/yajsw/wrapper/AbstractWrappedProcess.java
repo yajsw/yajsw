@@ -1885,7 +1885,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			String sValue = _config.getString(sKey, "");
 			List args = _config.getList(sKey + ".args", null);
 			int timeout = _config.getInt(sKey + ".timeout", 0);
-			int maxConcInvoc = _config.getInt(sKey + ".maxConcInvoc", 0);
+			int maxConcInvoc = _config.getInt(sKey + ".maxConcInvoc", 1);
 			String[] strArgs = null;
 			if (args != null && args.size() > 0)
 			{
@@ -2034,10 +2034,10 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 
 			public Object execute(final String line)
 			{
-				if (scriptExecutor.getActiveCount() > 20)
+				if (scriptExecutor.getActiveCount() > 100)
 				{
 					getInternalWrapperLogger()
-							.warn("executing too many scripts concurrently -> aborting script execution");
+							.warn("executing too many scripts concurrently ("+scriptExecutor.getActiveCount()+") -> aborting script execution");
 					return null;
 				}
 				scriptExecutor.execute(new Runnable()
