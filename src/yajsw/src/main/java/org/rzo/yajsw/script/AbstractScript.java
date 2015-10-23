@@ -118,15 +118,18 @@ public abstract class AbstractScript implements Script
 						if (_timerTimeout != null)
 							_timerTimeout.cancel();
 						_timerTimeout = null;
-						_remainingConcInvocations.decrementAndGet();
+						_remainingConcInvocations.incrementAndGet();
+						log("executed script: "+_name+" "+_remainingConcInvocations);
 						return result;
 					}
 				});
+		Thread.yield();
 	}
 
 	private boolean checkRemainConc()
 	{
-		if (_remainingConcInvocations.decrementAndGet() <= 0)
+		System.out.println("checkRemainConc "+_name+" "+_remainingConcInvocations);
+		if (_remainingConcInvocations.decrementAndGet() < 0)
 		{
 			_remainingConcInvocations.incrementAndGet();
 			return false;

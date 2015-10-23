@@ -71,7 +71,7 @@ public class Utils
 		if (value != null && !value.contains(" "))
 			return "-D" + key + "=" + value;
 		else
-			return "-D" + key + "=\"" + value + "\"";
+			return "\"-D" + key.trim() + "=" + value.trim() + "\"";
 	}
 	
 	public static int parseOctal(String txt)
