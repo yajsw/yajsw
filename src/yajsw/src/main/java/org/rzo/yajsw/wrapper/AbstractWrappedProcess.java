@@ -21,6 +21,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.security.AccessController;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -92,6 +93,8 @@ import org.rzo.yajsw.util.MyPatternInterface;
 import org.rzo.yajsw.util.MyReentrantLock;
 import org.rzo.yajsw.util.Utils;
 import org.rzo.yajsw.util.VFSUtils;
+
+import sun.security.action.GetPropertyAction;
 
 import com.sun.jna.Platform;
 import com.sun.jna.PlatformEx;
@@ -212,6 +215,9 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	JdkLogger2Factory _internalLoggerFactory = null;
 
 	volatile int _minAppLogLines = MIN_PROCESS_LINES_TO_LOG;
+	
+	static final String lineSeparator = ((String)AccessController.doPrivileged(new GetPropertyAction("line.separator")));
+
 
 	public Configuration getConfiguration()
 	{
@@ -3559,7 +3565,15 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 
 	public void writeOutput(String txt)
 	{
-		((PrintStream) getOutputStream()).println(txt);
+		try
+		{
+			getOutputStream().write((txt+lineSeparator).getBytes());
+			getOutputStream().flush();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	public void writeInquireResponse(String s)

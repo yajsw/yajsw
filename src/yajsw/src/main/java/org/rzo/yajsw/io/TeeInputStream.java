@@ -107,6 +107,7 @@ public class TeeInputStream extends InputStream
 	@Override
 	public int read() throws IOException
 	{
+		//System.out.println("do tee read ");
 		lock.lock();
 		while (true)
 		{
@@ -115,6 +116,7 @@ public class TeeInputStream extends InputStream
 				{
 					int result = sources[i].getBuffer().get();
 					lock.unlock();
+					//System.out.println("tee read "+result);
 					return result;
 				}
 			try
@@ -137,6 +139,8 @@ public class TeeInputStream extends InputStream
 	@Override
 	public int read(byte b[], int off, int len) throws IOException
 	{
+		//System.out.println("do tee reads ");
+
 		lock.lock();
 		try
 		{
@@ -147,6 +151,7 @@ public class TeeInputStream extends InputStream
 					{
 						int result = sources[i].getBuffer().get(b, off, len);
 						lock.unlock();
+						//System.out.println("tee reads "+result);
 						return result;
 					}
 				try
