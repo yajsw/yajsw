@@ -1,6 +1,6 @@
 #!/bin/bash
 # -----------------------------------------------------------------------------
-# remove YAJSW daemon script
+# query YAJSW daemon status script
 #
 # -----------------------------------------------------------------------------
 
@@ -18,7 +18,7 @@ while [ -h "$PRG" ] ; do
 done
  
 PRGDIR=`dirname "$PRG"`
-EXECUTABLE=queryDaemonNoPriv.sh
+EXECUTABLE=wrapper.sh
 
 # set java and conf file
 source "$PRGDIR"/setenv.sh
@@ -31,6 +31,6 @@ if [ ! -x "$PRGDIR"/"$EXECUTABLE" ]; then
   exit 1
 fi
 
-sudo "$PRGDIR"/"$EXECUTABLE"
+exec "$PRGDIR"/"$EXECUTABLE" -q "$conf_file"
 
  
