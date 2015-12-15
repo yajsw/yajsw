@@ -3,6 +3,7 @@ package com.sun.jna;
 public class PlatformEx
 {
 	private static boolean		winVista	= false;
+	private static boolean		macYosemite	= false;
 
 	static
 	{
@@ -13,9 +14,29 @@ public class PlatformEx
 		}
 	}
 
+	static
+	{
+		if (Platform.isMac())
+		try {
+			String[] versionStr = System.getProperty("os.version").split("\\.");
+			int maj = Integer.parseInt(versionStr[0]);
+			int min = Integer.parseInt(versionStr[1]);
+			macYosemite = (maj == 10 && min >= 10) || maj > 10;			
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+
 	public static boolean isWinVista()
 	{
 		return winVista;
+	}
+	
+	public static boolean isMacYosemite()
+	{
+		return macYosemite;
 	}
 
 }

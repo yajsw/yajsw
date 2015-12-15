@@ -45,7 +45,7 @@ public class MacOsXService extends AbstractService implements Constants
 			System.out.println("no name for daemon -> abort");
 			return;
 		}
-		_launchdDir = _config.getString("wrapper.launchd.dir", System.getProperty("user.home") + "/Library/LaunchAgents");
+		_launchdDir = _config.getString("wrapper.launchd.dir", getDefaultLaunchDir());
 		File daemonDir = new File(_launchdDir);
 		if (!daemonDir.exists())
 		{
@@ -107,7 +107,7 @@ public class MacOsXService extends AbstractService implements Constants
 		if (daemonScript.exists())
 			System.out.println(daemonScript.getAbsolutePath() + " already exists -> overwrite");
 
-		_plistName = "wrapper." + _name;
+		_plistName = getPlistPrefix() + _name;
 		File plistFile = new File(_launchdDir, _plistName + ".plist");
 		try
 		{
@@ -174,6 +174,16 @@ public class MacOsXService extends AbstractService implements Constants
 
 	}
 
+	protected String getPlistPrefix()
+	{
+		return "wrapper.";
+	}
+
+	protected String getDefaultLaunchDir()
+	{
+		return System.getProperty("user.home") + "/Library/LaunchAgents";
+	}
+
 	public boolean install()
 	{
 		if (_plistFile == null)
@@ -199,7 +209,8 @@ public class MacOsXService extends AbstractService implements Constants
 			t.merge(context, writer);
 			writer.flush();
 			writer.close();
-			_utils.osCommand("launchctl load " + _plistFile, 5000);
+			preload();
+			System.out.println(_utils.osCommand("launchctl load " + _plistFile, 5000));
 
 		}
 		catch (Exception ex)
@@ -207,7 +218,29 @@ public class MacOsXService extends AbstractService implements Constants
 			ex.printStackTrace();
 			return false;
 		}
-		return isInstalled();
+		boolean result = isInstalled();
+		int i = 0;
+		while (!result && i<10)
+		{
+			try
+			{
+				Thread.sleep(2000);
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+				return result;
+			}
+			result = isInstalled();
+			i++;
+		}
+		return result;
+	}
+
+	protected void preload()
+	{
+		// do nothing
+		
 	}
 
 	private List<String> splitCommandByWhitespace() {
@@ -222,11 +255,12 @@ public class MacOsXService extends AbstractService implements Constants
 	{
 		//String sp = String.format(".*\\d+.*%1$s.*", _plistName);
 		//Pattern p = Pattern.compile(sp, Pattern.DOTALL);
-		String sp = String.format("^(\\d+).*\\s*%1$s$", _plistName);
-		Pattern p = Pattern.compile(sp, Pattern.MULTILINE);
+		//String sp = String.format("^[(\\d+),-].*\\s*%1$s$", _plistName);
+		//Pattern p = Pattern.compile(sp, Pattern.MULTILINE);
 		String list = _utils.osCommand("launchctl list", 5000);
-		Matcher m = p.matcher(list);
-		return m.matches();
+		//Matcher m = p.matcher(list);
+		//return m.matches();
+		return list.contains(_plistName);
 	}
 
 	public boolean isRunning()
@@ -243,7 +277,23 @@ public class MacOsXService extends AbstractService implements Constants
 			return true;
 		}
 		_utils.osCommand("launchctl start " + _plistName, 5000);
-		return isRunning();
+		boolean result = isRunning();
+		int i = 0;
+		while (!result && i<10)
+		{
+			try
+			{
+				Thread.sleep(2000);
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+				return result;
+			}
+			result = isRunning();
+			i++;
+		}
+		return result;
 	}
 
 	public boolean stop()
@@ -251,7 +301,23 @@ public class MacOsXService extends AbstractService implements Constants
 		if (isRunning())
 		{
 			_utils.osCommand("launchctl stop " + _plistName, 5000);
-			return !isRunning();
+			boolean result = !isRunning();
+			int i = 0;
+			while (!result && i<10)
+			{
+				try
+				{
+					Thread.sleep(2000);
+				}
+				catch (InterruptedException e)
+				{
+					e.printStackTrace();
+					return result;
+				}
+				result = !isRunning();
+				i++;
+			}
+			return result;
 		}
 		return true;
 	}
@@ -262,7 +328,23 @@ public class MacOsXService extends AbstractService implements Constants
 			stop();
 		_utils.osCommand("launchctl unload " + _plistFile, 5000);
 		new File(_plistFile).delete();
-		return true;
+		boolean result = isInstalled();
+		int i = 0;
+		while (result && i<10)
+		{
+			try
+			{
+				Thread.sleep(2000);
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+				return result;
+			}
+			result = isInstalled();
+			i++;
+		}
+		return !result;
 	}
 
 	public int state()

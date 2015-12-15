@@ -6,11 +6,15 @@ import org.rzo.yajsw.os.Service;
 import org.rzo.yajsw.os.ServiceInfo;
 import org.rzo.yajsw.os.ServiceManager;
 
+import com.sun.jna.PlatformEx;
+
 public class MacOsXServiceManager implements ServiceManager
 {
 
 	public Service createService()
 	{
+		if (PlatformEx.isMacYosemite())
+			return new MacOsXServiceYosemite();
 		return new MacOsXService();
 	}
 
