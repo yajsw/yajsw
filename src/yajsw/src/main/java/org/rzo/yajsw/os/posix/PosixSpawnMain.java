@@ -61,6 +61,9 @@ public class PosixSpawnMain
 		}
 		
 		String[] env = null;//getEnv();
+		
+		for (int i=0; i<args.length; i++)
+			System.out.println(args[i]);
 
 		// start the subprocess
 		int ret = -1;

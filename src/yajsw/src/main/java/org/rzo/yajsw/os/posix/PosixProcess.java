@@ -807,7 +807,11 @@ public class PosixProcess extends AbstractProcess
 			for (String c : _arrCmd)
 			{
 				if (c != null)
+				{
+					if (c != null && c.indexOf(' ')>-1 && c.indexOf('"')==-1);
+					  c = "\""+c+"\"";
 					cmd += c + " ";
+				}
 			}
 			// if (_debug)
 			log("exec:" + cmd);
@@ -1273,8 +1277,8 @@ public class PosixProcess extends AbstractProcess
 		{
 			String wdir = getWorkingDir();
 			wdir = wdir.replaceAll("\"", "");
-			if (wdir.contains(" "))
-				wdir += "\""+wdir+"\"";
+			//if (wdir.contains(" "))
+			//	wdir = "\""+wdir+"\"";
 			cmdList.add("-Dwrapperx.workingdir="+wdir);
 		}
 
@@ -1290,6 +1294,8 @@ public class PosixProcess extends AbstractProcess
 		for (int i = 0; i < cmd.length; i++)
 		{
 			cmd[i] = cmdList.get(i);
+			//if (cmd[i].indexOf(' ')>-1 && cmd[i].indexOf('"') == -1)
+			//	cmd[i] = "\""+cmd[i]+"\"";
 			if (_debug)
 				sb.append(cmd[i] + " ");
 		}

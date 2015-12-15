@@ -68,10 +68,10 @@ public class Utils
 		//value = value.replace("\\", "\\\\");
 		value = value.replaceAll("\"", "");
 
-		if (value != null && !value.contains(" "))
+	//	if (value != null && !value.contains(" "))
 			return "-D" + key + "=" + value;
-		else
-			return "\"-D" + key.trim() + "=" + value.trim() + "\"";
+	//	else
+	//		return "\"-D" + key.trim() + "=" + value.trim() + "\"";
 	}
 	
 	public static int parseOctal(String txt)
