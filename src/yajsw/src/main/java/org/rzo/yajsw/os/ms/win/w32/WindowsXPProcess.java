@@ -136,7 +136,7 @@ public class WindowsXPProcess extends AbstractProcess
 			  @Override
 			  protected List getFieldOrder() {
 			  return Arrays.asList(new String[]{"cbSize", "fMask", "hwnd", "lpVerb", "lpFile", "lpParameters", "lpDirectory", "nShow", "hInstApp", "lpIDList",
-			  "lpClass", "hKeyClass", "dwHotKey", "hMonitor", "hProcess"});
+			  "lpClass", "hkeyClass", "dwHotKey", "hMonitor", "hProcess"});
 			  }
 		}
 		
