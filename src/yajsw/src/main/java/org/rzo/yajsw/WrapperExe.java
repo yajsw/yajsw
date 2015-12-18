@@ -271,6 +271,7 @@ public class WrapperExe
 			MyKeyStoreInterface ks = getMyKeystore();
 			ks.init();
 			ks.put(key, value.toCharArray());
+			System.out.println("added key "+key+" to keystore "+ks.getFile());
 			
 		}
 		catch (Exception ex)
@@ -721,7 +722,10 @@ public class WrapperExe
 					confFileList.add(arg);					
 			}
 			if (confFileList.isEmpty())
-				System.out.println("no wrapper config file found ");
+			{
+				if ( ((Option)cmds.get(0)).getId() != OPTION_K)
+					System.out.println("no wrapper config file found ");
+			}
 			else
 				confFile = (String) confFileList.get(0);
 			/*

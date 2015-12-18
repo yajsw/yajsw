@@ -6,5 +6,6 @@ public interface MyKeyStoreInterface
 	public void start() throws Exception;
 	public void put(String key, char[] value) throws Exception;
 	public char[] get(String key) throws Exception;
+	public String getFile();
 
 }

@@ -197,4 +197,10 @@ public class MyKeyStore implements MyKeyStoreInterface
 		}
 	}
 
+	@Override
+	public String getFile()
+	{
+		return new File(file).getAbsolutePath();
+	}
+
 }
