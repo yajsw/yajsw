@@ -201,6 +201,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 	MessageFormat gcFormat = null;
 
 	boolean _initGCBeans = false;
+	
+	volatile Runnable _shutdownListener;
 
 	private String getSystemProperty(String key)
 	{
@@ -1378,6 +1380,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 							// DO NOTHING
 						}
 					executeShutdownScript();
+					executeShutdownListener();
 					if (!_externalStop)
 					{
 						System.exit(_exitCode);
@@ -1801,6 +1804,13 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 		}
 
 	}
+	
+	private void executeShutdownListener()
+	{
+		if (_shutdownListener == null)
+			return;
+		new Thread(_shutdownListener).start();
+	}
 
 	public void executeScript(String scriptFileName,
 			ClassLoader wrapperClassLoader)
@@ -1868,6 +1878,12 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 	public String getStopReason()
 	{
 		return _stopReason;
+	}
+
+	@Override
+	public void setShutdownListener(Runnable listener)
+	{
+		_shutdownListener = listener;
 	}
 
 }

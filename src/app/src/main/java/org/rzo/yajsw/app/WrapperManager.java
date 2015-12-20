@@ -88,4 +88,6 @@ public interface WrapperManager
 	public Properties getProperties();
 	
 	public String getStopReason();
+	
+	public void setShutdownListener(Runnable listener);
 }
