@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.os.posix.solaris;
 
 import java.io.File;
@@ -46,11 +61,11 @@ public class SolarisProcess extends PosixProcess
 	 * psinfo_t;
 	 */
 
-	static int	PRARGSZ	= 80;	/* number of chars of arguments */
+	static int PRARGSZ = 80; /* number of chars of arguments */
 
 	public static class psinfo
 	{
-		ByteBuffer	_b;
+		ByteBuffer _b;
 
 		psinfo(ByteBuffer b)
 		{
@@ -93,7 +108,6 @@ public class SolarisProcess extends PosixProcess
 	{
 		return 3;
 	}
-	
 
 	public static Process getProcess(int pid)
 	{
@@ -112,7 +126,8 @@ public class SolarisProcess extends PosixProcess
 
 	private String getCommandInternal()
 	{
-		String result = _utils.osCommand(String.format("pargs -l %1$s", _pid), 5000);
+		String result = _utils.osCommand(String.format("pargs -l %1$s", _pid),
+				5000);
 		if (result == null)
 			result = "?";
 		// System.out.println("cmd line: "+result);
@@ -136,11 +151,13 @@ public class SolarisProcess extends PosixProcess
 		FileChannel in;
 		try
 		{
-			in = new FileInputStream(String.format("/proc/%1$s/psinfo", _pid)).getChannel();
+			in = new FileInputStream(String.format("/proc/%1$s/psinfo", _pid))
+					.getChannel();
 		}
 		catch (FileNotFoundException e)
 		{
-			System.out.println("error in getCurrentThreads() " + e.getMessage());
+			System.out
+					.println("error in getCurrentThreads() " + e.getMessage());
 			return null;
 		}
 		int size;
@@ -150,7 +167,8 @@ public class SolarisProcess extends PosixProcess
 		}
 		catch (IOException e)
 		{
-			System.out.println("error in getCurrentThreads() " + e.getMessage());
+			System.out
+					.println("error in getCurrentThreads() " + e.getMessage());
 			return null;
 		}
 		ByteBuffer b = ByteBuffer.allocateDirect(size);
@@ -211,52 +229,59 @@ public class SolarisProcess extends PosixProcess
 
 	protected String getWorkingDirInternal()
 	{
-    String result = "";
-    String cwd;
-    boolean success = false;
+		String result = "";
+		String cwd;
+		boolean success = false;
 		String procCwd = "/proc/" + getPid() + "/cwd";
-    try
-    {
+		try
+		{
 
-  	 short BUFSIZE = 4096;
-		 Memory dir = new Memory(BUFSIZE);
-		 dir.clear();
+			short BUFSIZE = 4096;
+			Memory dir = new Memory(BUFSIZE);
+			dir.clear();
 
-		 if( CLibrary.INSTANCE.getcwd(dir, BUFSIZE) != null )
-     {
-       cwd = dir.getString(0);
-       dir.clear();
+			if (CLibrary.INSTANCE.getcwd(dir, BUFSIZE) != null)
+			{
+				cwd = dir.getString(0);
+				dir.clear();
 
-       if( CLibrary.INSTANCE.chdir(procCwd) == 0 )
-       {
-          if( CLibrary.INSTANCE.getcwd(dir, BUFSIZE) != null ){
-            result = new File(dir.getString(0)).getCanonicalPath();
-            success = true;
-          }
-          // Restore starting directory ( if different )
-          CLibrary.INSTANCE.chdir(cwd);
-       }
+				if (CLibrary.INSTANCE.chdir(procCwd) == 0)
+				{
+					if (CLibrary.INSTANCE.getcwd(dir, BUFSIZE) != null)
+					{
+						result = new File(dir.getString(0)).getCanonicalPath();
+						success = true;
+					}
+					// Restore starting directory ( if different )
+					CLibrary.INSTANCE.chdir(cwd);
+				}
 
-     }
+			}
 
-     if( !success )
-       System.out.println("error reading process working dir -> please edit wrapper.working.dir in configuration file");
+			if (!success)
+				System.out
+						.println("error reading process working dir -> please edit wrapper.working.dir in configuration file");
 
-    } catch (IOException e){  }
+		}
+		catch (IOException e)
+		{
+		}
 
-    return result;
+		return result;
 
-//-KBG:		short BUFSIZE = 512;
-//-KBG:		Memory result = new Memory(BUFSIZE);
-//-KBG:		result.clear();
-//-KBG:		short size = CLibrary.INSTANCE.readlink(f, result, (short) (BUFSIZE - 1));
-//-KBG:		if (size <= 0)
-//-KBG:		{
-//-KBG:			System.out.println("error reading process working dir -> please edit wrapper.working.dir in configuration file");
-//-KBG:			return f;
-//-KBG:		}
-//-KBG:		result.setByte((long) size, (byte) 0);
-//-KBG:		return result.getString(0);
+		// -KBG: short BUFSIZE = 512;
+		// -KBG: Memory result = new Memory(BUFSIZE);
+		// -KBG: result.clear();
+		// -KBG: short size = CLibrary.INSTANCE.readlink(f, result, (short)
+		// (BUFSIZE - 1));
+		// -KBG: if (size <= 0)
+		// -KBG: {
+		// -KBG:
+		// System.out.println("error reading process working dir -> please edit wrapper.working.dir in configuration file");
+		// -KBG: return f;
+		// -KBG: }
+		// -KBG: result.setByte((long) size, (byte) 0);
+		// -KBG: return result.getString(0);
 
 		/*
 		 * String result = null; File f = new File("/proc/" + getPid() +

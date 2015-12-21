@@ -1,18 +1,18 @@
-/**
- *    	Copyright [2007] [Rohit B. Rai]
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
  *
- *     	Licensed under the Apache License, Version 2.0 (the "License");
- *     	you may not use this file except in compliance with the License.
- *     	You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *	http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *	Unless required by applicable law or agreed to in writing, software
- *	distributed under the License is distributed on an "AS IS" BASIS,
- *	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *	See the License for the specific language governing permissions and
- *	limitations under the License.
- */
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.log;
 
 import java.text.DateFormat;
@@ -31,7 +31,7 @@ public class PatternFormatter extends Formatter
 {
 
 	/** The sh. */
-	java.util.logging.SimpleFormatter	sh;
+	java.util.logging.SimpleFormatter sh;
 
 	/**
 	 * <pre>
@@ -45,22 +45,22 @@ public class PatternFormatter extends Formatter
 	 * default time format is "dd-MMM-yyy; HH:mm:ss".
 	 */
 
-	private String						logPattern;
+	private String logPattern;
 
 	/** The exception pattern. */
-	private String						exceptionPattern;
+	private String exceptionPattern;
 
 	/** The time format. */
-	private String						timeFormat;
+	private String timeFormat;
 
 	/** The log message format. */
-	private MessageFormat				logMessageFormat;
+	private MessageFormat logMessageFormat;
 
 	/** The exception message format. */
-	private MessageFormat				exceptionMessageFormat;
+	private MessageFormat exceptionMessageFormat;
 
 	/** The date format. */
-	private DateFormat					dateFormat;
+	private DateFormat dateFormat;
 
 	/**
 	 * Instantiates a new pattern formatter.
@@ -169,9 +169,17 @@ public class PatternFormatter extends Formatter
 
 		if (record.getThrown() == null)
 		{
-			Object[] log =
-			{ record.getLoggerName(), record.getLevel(), formattedTime, record.getMessage(), record.getSourceClassName(),
-					record.getSourceMethodName(), record.getParameters() == null ? "" : record.getParameters()[0], record.getParameters() == null ? "" : record.getParameters()[1] };
+			Object[] log = {
+					record.getLoggerName(),
+					record.getLevel(),
+					formattedTime,
+					record.getMessage(),
+					record.getSourceClassName(),
+					record.getSourceMethodName(),
+					record.getParameters() == null ? "" : record
+							.getParameters()[0],
+					record.getParameters() == null ? "" : record
+							.getParameters()[1] };
 
 			logMessage = logMessageFormat.format(log);
 		}
@@ -179,9 +187,10 @@ public class PatternFormatter extends Formatter
 		{
 			String stack = getStackLayout(record.getThrown(), "");
 
-			Object[] log =
-			{ record.getLoggerName(), record.getLevel(), formattedTime, record.getMessage(), record.getSourceClassName(),
-					record.getSourceMethodName(), record.getThrown().getMessage(), stack };
+			Object[] log = { record.getLoggerName(), record.getLevel(),
+					formattedTime, record.getMessage(),
+					record.getSourceClassName(), record.getSourceMethodName(),
+					record.getThrown().getMessage(), stack };
 
 			logMessage = exceptionMessageFormat.format(log);
 		}
@@ -212,7 +221,8 @@ public class PatternFormatter extends Formatter
 		String innerStack = "";
 		if (t.getCause() != null)
 		{
-			innerStack = indenter + "Caused by: " + t.getCause().getMessage() + "\n";
+			innerStack = indenter + "Caused by: " + t.getCause().getMessage()
+					+ "\n";
 			innerStack = innerStack + getStackLayout(t.getCause(), indenter);
 		}
 		stack = stack + "\n" + innerStack;

@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.os.posix.solaris;
 
 import java.io.File;
@@ -21,17 +36,17 @@ import org.rzo.yajsw.os.posix.VelocityLog;
 
 public class SolarisService extends AbstractService implements Constants
 {
-	String	_launchdDir;
-	String	_plistTemplate;
-	String	_plistFile;
-	int		_stopTimeout;
-	String	_plistName;
+	String _launchdDir;
+	String _plistTemplate;
+	String _plistFile;
+	int _stopTimeout;
+	String _plistName;
 
-	String	_execCmd;
+	String _execCmd;
 
-	String	_confFile;
+	String _confFile;
 
-	PosixUtils	_utils	= new PosixUtils();
+	PosixUtils _utils = new PosixUtils();
 
 	public void init()
 	{
@@ -40,18 +55,21 @@ public class SolarisService extends AbstractService implements Constants
 			System.out.println("no name for daemon -> abort");
 			return;
 		}
-		_launchdDir = _config.getString("wrapper.launchd.dir", System.getProperty("user.home") + "/Library/LaunchAgents");
+		_launchdDir = _config.getString("wrapper.launchd.dir",
+				System.getProperty("user.home") + "/Library/LaunchAgents");
 		File daemonDir = new File(_launchdDir);
 		if (!daemonDir.exists() || !daemonDir.isDirectory())
 		{
-			System.out.println("Error " + _launchdDir + " : is not a directory");
+			System.out
+					.println("Error " + _launchdDir + " : is not a directory");
 			return;
 		}
 		String wrapperJar = WrapperLoader.getWrapperJar().trim();
 		String wrapperHome = ".";
 		try
 		{
-			wrapperHome = new File(wrapperJar).getParentFile().getCanonicalPath();
+			wrapperHome = new File(wrapperJar).getParentFile()
+					.getCanonicalPath();
 		}
 		catch (IOException e1)
 		{
@@ -86,16 +104,19 @@ public class SolarisService extends AbstractService implements Constants
 		{
 			e.printStackTrace();
 		}
-		_plistTemplate = _config.getString("wrapper.launchd.template", wrapperHome + "templeates/launchd.plist.vm");
+		_plistTemplate = _config.getString("wrapper.launchd.template",
+				wrapperHome + "templeates/launchd.plist.vm");
 		File daemonTemplate = new File(_plistTemplate);
 		if (!daemonTemplate.exists() || !daemonTemplate.isFile())
 		{
-			System.out.println("Error " + _plistTemplate + " : template file not found");
+			System.out.println("Error " + _plistTemplate
+					+ " : template file not found");
 			return;
 		}
 		File daemonScript = new File(daemonDir, "wrapper." + getName());
 		if (daemonScript.exists())
-			System.out.println(daemonScript.getAbsolutePath() + " already exists -> overwrite");
+			System.out.println(daemonScript.getAbsolutePath()
+					+ " already exists -> overwrite");
 
 		_plistName = "wrapper." + _name;
 		File plistFile = new File(_launchdDir, _plistName + ".plist");
@@ -118,7 +139,9 @@ public class SolarisService extends AbstractService implements Constants
 			e.printStackTrace();
 		}
 
-		_execCmd = String.format("%1$s -Dwrapper.service=true -Dwrapper.visible=false -jar %2$s -c %3$s", java, wrapperJar, _confFile);
+		_execCmd = String
+				.format("%1$s -Dwrapper.service=true -Dwrapper.visible=false -jar %2$s -c %3$s",
+						java, wrapperJar, _confFile);
 
 	}
 
@@ -134,14 +157,17 @@ public class SolarisService extends AbstractService implements Constants
 			File daemonTemplate = new File(_plistTemplate);
 			VelocityEngine ve = new VelocityEngine();
 			ve.setProperty(VelocityEngine.RESOURCE_LOADER, "file");
-			ve.setProperty("file.resource.loader.path", daemonTemplate.getParent());
-			ve.setProperty("runtime.log.logsystem.class", VelocityLog.class.getCanonicalName());
+			ve.setProperty("file.resource.loader.path",
+					daemonTemplate.getParent());
+			ve.setProperty("runtime.log.logsystem.class",
+					VelocityLog.class.getCanonicalName());
 			ve.init();
 			Template t = ve.getTemplate(daemonTemplate.getName());
 			VelocityContext context = new VelocityContext();
 			context.put("name", _plistName);
 			context.put("command", Arrays.asList(_execCmd.split(" ")));
-			context.put("autoStart", "AUTOMATIC".equals(_config.getString("wrapper.ntservice.starttype", DEFAULT_SERVICE_START_TYPE)));
+			context.put("autoStart", "AUTOMATIC".equals(_config.getString(
+					"wrapper.ntservice.starttype", DEFAULT_SERVICE_START_TYPE)));
 			FileWriter writer = new FileWriter(_plistFile);
 
 			t.merge(context, writer);

@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.wrapper;
 
 import io.netty.util.internal.logging.SimpleLoggerFactory;
@@ -38,30 +53,30 @@ public class WrappedService
 {
 
 	/** The _config. */
-	YajswConfigurationImpl	_config;
+	YajswConfigurationImpl _config;
 
 	/** The _debug. */
-	int					_debug					= 3;
+	int _debug = 3;
 
 	/** The Constant PATHSEP. */
-	static final String		PATHSEP					= System.getProperty("path.separator");
+	static final String PATHSEP = System.getProperty("path.separator");
 
 	/** The _log. */
-	Logger					_log					= Logger.getLogger(this.getClass().getName());
+	Logger _log = Logger.getLogger(this.getClass().getName());
 
 	/** The _local configuration. */
-	protected Configuration	_localConfiguration		= new BaseConfiguration();
+	protected Configuration _localConfiguration = new BaseConfiguration();
 
 	/** The _use system properties. */
-	boolean					_useSystemProperties	= true;
+	boolean _useSystemProperties = true;
 
-	Service					_osService;
+	Service _osService;
 
-	Cache					_cache					= null;
+	Cache _cache = null;
 
-	volatile boolean		_init					= false;
+	volatile boolean _init = false;
 
-	private List<String>	_confFilesList;
+	private List<String> _confFilesList;
 
 	/*
 	 * (non-Javadoc)
@@ -74,17 +89,21 @@ public class WrappedService
 			return;
 		Map utils = new HashMap();
 		utils.put("util", new Utils(this));
-		if (_confFilesList != null && !_confFilesList.isEmpty() && _localConfiguration != null && !_localConfiguration.containsKey("wrapper.config"))
+		if (_confFilesList != null && !_confFilesList.isEmpty()
+				&& _localConfiguration != null
+				&& !_localConfiguration.containsKey("wrapper.config"))
 		{
-			_localConfiguration.setProperty("wrapper.config", _confFilesList.get(0));
+			_localConfiguration.setProperty("wrapper.config",
+					_confFilesList.get(0));
 		}
 
-		_config = new YajswConfigurationImpl(_localConfiguration, _useSystemProperties, utils);
+		_config = new YajswConfigurationImpl(_localConfiguration,
+				_useSystemProperties, utils);
 		if (_confFilesList != null && !_confFilesList.isEmpty())
 		{
-			_config.setProperty("wrapperx.config", _confFilesList);			
+			_config.setProperty("wrapperx.config", _confFilesList);
 		}
-		
+
 		int umask = Utils.parseOctal(_config.getString("wrapper.umask", null));
 		if (umask != -1)
 			OperatingSystem.instance().processManagerInstance().umask(umask);
@@ -96,9 +115,10 @@ public class WrappedService
 				_cache.load(_config);
 			}
 
-		
-		_debug = _config.getBoolean("wrapper.debug", false) ? _config.getInt("wrapper.debug.level", 3) : 0;
-		_osService = OperatingSystem.instance().serviceManagerInstance().createService();
+		_debug = _config.getBoolean("wrapper.debug", false) ? _config.getInt(
+				"wrapper.debug.level", 3) : 0;
+		_osService = OperatingSystem.instance().serviceManagerInstance()
+				.createService();
 		_osService.setLogger(_log);
 		_osService.setName(_config.getString("wrapper.ntservice.name"));
 
@@ -106,7 +126,8 @@ public class WrappedService
 		String description = _config.getString("wrapper.ntservice.description");
 
 		Set dependeciesSet = new HashSet();
-		for (Iterator it = _config.getKeys("wrapper.ntservice.dependency"); it.hasNext();)
+		for (Iterator it = _config.getKeys("wrapper.ntservice.dependency"); it
+				.hasNext();)
 		{
 			String value = _config.getString((String) it.next());
 			if (value != null && value.length() > 0)
@@ -118,7 +139,8 @@ public class WrappedService
 			dependencies[i] = (String) it.next();
 
 		dependeciesSet = new HashSet();
-		for (Iterator it = _config.getKeys("wrapper.ntservice.stop_dependency"); it.hasNext();)
+		for (Iterator it = _config.getKeys("wrapper.ntservice.stop_dependency"); it
+				.hasNext();)
 		{
 			String value = _config.getString((String) it.next());
 			if (value != null && value.length() > 0)
@@ -131,7 +153,8 @@ public class WrappedService
 
 		String account = _config.getString("wrapper.ntservice.account");
 		String password = _config.getString("wrapper.ntservice.password");
-		String startType = _config.getString("wrapper.ntservice.starttype", Constants.DEFAULT_SERVICE_START_TYPE);
+		String startType = _config.getString("wrapper.ntservice.starttype",
+				Constants.DEFAULT_SERVICE_START_TYPE);
 
 		String[] command = getCommand();
 		_osService.setAccount(account);
@@ -143,7 +166,8 @@ public class WrappedService
 		_osService.setPassword(password);
 		_osService.setConfig(_config);
 		_osService.setStartType(startType);
-		_osService.setFailureActions(OperatingSystem.instance().getServiceFailureActions(_config));
+		_osService.setFailureActions(OperatingSystem.instance()
+				.getServiceFailureActions(_config));
 		_osService.init();
 
 		_init = true;
@@ -227,23 +251,24 @@ public class WrappedService
 		// first add lookup vars eg ${lookup}
 		if (_config.getBoolean("wrapper.save_interpolated", true))
 		{
-		
-		for (Entry<String, String> e : _config.getEnvLookupSet().entrySet())
-		{
-			if (!e.getKey().contains("password"))
-				result.add(Utils.getDOption(e.getKey(), e.getValue()));
-		}
-		for (Iterator it = _config.getLookupSet().iterator(); it.hasNext();)
-		{
-			String key = (String) it.next();
-			if (key.contains("password"))
-				continue;
-			if (!"wrapper.working.dir".equals(key))
-			result.add(Utils.getDOption(key, _config.getString(key)));
-		}
+
+			for (Entry<String, String> e : _config.getEnvLookupSet().entrySet())
+			{
+				if (!e.getKey().contains("password"))
+					result.add(Utils.getDOption(e.getKey(), e.getValue()));
+			}
+			for (Iterator it = _config.getLookupSet().iterator(); it.hasNext();)
+			{
+				String key = (String) it.next();
+				if (key.contains("password"))
+					continue;
+				if (!"wrapper.working.dir".equals(key))
+					result.add(Utils.getDOption(key, _config.getString(key)));
+			}
 		}
 
-		for (Iterator it = _config.getSystemConfiguration().getKeys("wrapper"); it.hasNext();)
+		for (Iterator it = _config.getSystemConfiguration().getKeys("wrapper"); it
+				.hasNext();)
 		{
 			String key = (String) it.next();
 			if (key.equals("wrapper.config"))
@@ -266,12 +291,14 @@ public class WrappedService
 			for (int i = 0; i < _confFilesList.size(); i++)
 			{
 				// load it
-				Configuration localConfiguration = ConfigurationUtils.cloneConfiguration(_localConfiguration);
+				Configuration localConfiguration = ConfigurationUtils
+						.cloneConfiguration(_localConfiguration);
 				String conf = _confFilesList.get(i);
 				localConfiguration.setProperty("wrapper.config", conf);
 				Map utils = new HashMap();
 				utils.put("util", new Utils(this));
-				YajswConfigurationImpl config = new YajswConfigurationImpl(localConfiguration, _useSystemProperties, utils);
+				YajswConfigurationImpl config = new YajswConfigurationImpl(
+						localConfiguration, _useSystemProperties, utils);
 				Cache cache = null;
 				// check if we need to download files from remote location
 				if (!config.isLocalFile())
@@ -296,7 +323,9 @@ public class WrappedService
 		if (_config.getString("wrapper.stop.conf") != null)
 			try
 			{
-				result.add(Utils.getDOption("wrapper.stop.conf", new File(_config.getString("wrapper.stop.conf")).getCanonicalPath()));
+				result.add(Utils.getDOption("wrapper.stop.conf", new File(
+						_config.getString("wrapper.stop.conf"))
+						.getCanonicalPath()));
 			}
 			catch (IOException e)
 			{
@@ -305,17 +334,19 @@ public class WrappedService
 		if (_config.getString("wrapper.groovy") != null)
 			try
 			{
-				result.add(Utils.getDOption("wrapper.groovy", new File(_config.getString("wrapper.groovy")).getCanonicalPath()));
+				result.add(Utils.getDOption("wrapper.groovy",
+						new File(_config.getString("wrapper.groovy"))
+								.getCanonicalPath()));
 			}
 			catch (IOException e)
 			{
 				e.printStackTrace();
 			}
-			String tmpDir = _config.getString("wrapper.tmp.path", null);
-			if (tmpDir == null)
-				tmpDir = System.getProperty("java.io.tmpdir");
-			File tmpFile = new File(tmpDir);
-			result.add(Utils.getDOption("jna_tmpdir", tmpFile.getAbsolutePath()));
+		String tmpDir = _config.getString("wrapper.tmp.path", null);
+		if (tmpDir == null)
+			tmpDir = System.getProperty("java.io.tmpdir");
+		File tmpFile = new File(tmpDir);
+		result.add(Utils.getDOption("jna_tmpdir", tmpFile.getAbsolutePath()));
 
 		return result;
 	}
@@ -386,23 +417,29 @@ public class WrappedService
 	 */
 	String[] getCommand()
 	{
-		// interpolate all configuration properties, so that we may evaluate all required environment variables
-		for (Iterator it = _config.getKeys(); it.hasNext(); )
+		// interpolate all configuration properties, so that we may evaluate all
+		// required environment variables
+		for (Iterator it = _config.getKeys(); it.hasNext();)
 		{
 			String key = (String) it.next();
 			if (key.startsWith("wrapper."))
 				try
-			{
-				_config.getList(key);
-			}
-			catch (Exception ex)
-			{
-			
-			}
+				{
+					_config.getList(key);
+				}
+				catch (Exception ex)
+				{
+
+				}
 		}
 		JavaHome javaHome = OperatingSystem.instance().getJavaHome(_config);
-		javaHome.setLogger(SimpleLoggerFactory.getInstance(this.getClass().getName()), _debug);
-		String java = javaHome.findJava(_config.getString("wrapper.ntservice.java.command", _config.getString("wrapper.java.command")), _config.getString("wrapper.ntservice.java.customProcName"));
+		javaHome.setLogger(
+				SimpleLoggerFactory.getInstance(this.getClass().getName()),
+				_debug);
+		String java = javaHome.findJava(
+				_config.getString("wrapper.ntservice.java.command",
+						_config.getString("wrapper.java.command")),
+				_config.getString("wrapper.ntservice.java.customProcName"));
 		if (java == null)
 		{
 			_log.warning("no java exe found. check configuration file. -> using default \"java\"");
@@ -418,7 +455,8 @@ public class WrappedService
 			if (!wd.exists() || !wd.isDirectory())
 				_log.warning("working directory " + workingDir + " not found");
 		}
-		String[] result = new String[jvmOptions.size() + wrapperOptions.size() + 2];
+		String[] result = new String[jvmOptions.size() + wrapperOptions.size()
+				+ 2];
 		result[0] = java;
 		result[result.length - 1] = mainClass;
 		int i = 1;
@@ -457,12 +495,13 @@ public class WrappedService
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			if (f != null && f.exists() && !classpath.contains(f.getAbsolutePath()))
+			if (f != null && f.exists()
+					&& !classpath.contains(f.getAbsolutePath()))
 			{
 				// System.out.println("adding classpath :"+f+":");
 				classpath.add(f);
-				//if (f.getName().endsWith(".jar"))
-				//	addClasspathFromManifest(classpath, f);
+				// if (f.getName().endsWith(".jar"))
+				// addClasspathFromManifest(classpath, f);
 			}
 		}
 		StringBuffer sb = new StringBuffer();
@@ -484,7 +523,7 @@ public class WrappedService
 		}
 		String cp = sb.toString();
 		if (cp.contains(" "))
-			cp = "\""+cp+"\"";
+			cp = "\"" + cp + "\"";
 		result.add(cp);
 		result.add("-Xrs");
 		result.add("-Dwrapper.service=true");
@@ -495,7 +534,8 @@ public class WrappedService
 			if (f.exists() && f.isDirectory())
 				try
 				{
-					result.add(Utils.getDOption("wrapper.working.dir", f.getCanonicalPath()));
+					result.add(Utils.getDOption("wrapper.working.dir",
+							f.getCanonicalPath()));
 				}
 				catch (IOException e)
 				{
@@ -507,28 +547,30 @@ public class WrappedService
 			result.add("-Xdebug");
 			result.add("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=1044");
 		}
-		for (Iterator it = _config.getKeys("wrapper.ntservice.additional"); it.hasNext();)
+		for (Iterator it = _config.getKeys("wrapper.ntservice.additional"); it
+				.hasNext();)
 		{
 			String key = (String) it.next();
 			String value = _config.getString(key);
 			result.add(value);
 		}
-		if (verifyNeedIPv4IsPreferred() && !result.contains("-Djava.net.preferIPv4Stack=true"))
+		if (verifyNeedIPv4IsPreferred()
+				&& !result.contains("-Djava.net.preferIPv4Stack=true"))
 		{
 			result.add("-Djava.net.preferIPv4Stack=true");
 			if (_log != null)
-				_log.info("Windows & JVM7: Setting -Djava.net.preferIPv4Stack=true (see java bug 7179799 )" );
+				_log.info("Windows & JVM7: Setting -Djava.net.preferIPv4Stack=true (see java bug 7179799 )");
 
 		}
 		return result;
 	}
-	
-	private boolean verifyNeedIPv4IsPreferred() {
+
+	private boolean verifyNeedIPv4IsPreferred()
+	{
 		boolean isJDK7 = System.getProperty("java.version").startsWith("1.7");
 		boolean isWindows = PlatformEx.isWinVista();
 		return isWindows && isJDK7;
 	}
-
 
 	public String getServiceName()
 	{
@@ -538,7 +580,8 @@ public class WrappedService
 	public static void main(String[] args)
 	{
 		System.setProperty("wrapper.java.app.mainclass", "test.HelloWorld");
-		System.setProperty("wrapper.ntservice.name", "JavaServiceWrapper_1207751158998");
+		System.setProperty("wrapper.ntservice.name",
+				"JavaServiceWrapper_1207751158998");
 		System.setProperty("wrapper.filter.trigger.1", "999");
 		System.setProperty("wrapper.java.additional.1", "-Xrs");
 		System.setProperty("wrapper.on_exit.default", "RESTART");
@@ -665,7 +708,7 @@ public class WrappedService
 	public boolean requiresElevate()
 	{
 		if (_osService != null && _osService instanceof WindowsXPService)
-			return ((WindowsXPService)_osService).requestElevation();
+			return ((WindowsXPService) _osService).requestElevation();
 		return false;
 	}
 

@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.tray;
 
 import java.awt.event.ActionEvent;
@@ -42,37 +48,38 @@ public class Console extends JFrame
 {
 
 	/** The _tray icon. */
-	WrapperTrayIconImpl				_trayIcon;
+	WrapperTrayIconImpl _trayIcon;
 
 	/** true if the console has been shut down */
-	volatile boolean							stop;
-	protected static final Executor	executor			= Executors.newCachedThreadPool(new DaemonThreadFactory("console"));
+	volatile boolean stop;
+	protected static final Executor executor = Executors
+			.newCachedThreadPool(new DaemonThreadFactory("console"));
 
 	/** The max lines in the output window */
-	int								maxLines			= 1500;
+	int maxLines = 1500;
 
 	/** The console UI. */
-	ConsoleForm						_consoleForm		= new ConsoleForm();
+	ConsoleForm _consoleForm = new ConsoleForm();
 
 	/** The date time format. */
-	SimpleDateFormat				_dateTimeFormat		= new SimpleDateFormat();
+	SimpleDateFormat _dateTimeFormat = new SimpleDateFormat();
 
 	/** The byte format. */
-	ByteFormat						_byteFormat			= new ByteFormat();
+	ByteFormat _byteFormat = new ByteFormat();
 
 	/** The ok icon. */
-	Icon							_okIcon;
+	Icon _okIcon;
 
-	JMenuItem						_startOutputItem	= new JMenuItem();
+	JMenuItem _startOutputItem = new JMenuItem();
 
-	JMenuItem						_pauseOutputItem	= new JMenuItem();
+	JMenuItem _pauseOutputItem = new JMenuItem();
 
-	JMenuItem						_clearOutputItem	= new JMenuItem();
+	JMenuItem _clearOutputItem = new JMenuItem();
 
-	volatile boolean				_outputPaused		= false;
-	volatile String					_outputFilter		= null;
-	volatile LinkedList<String>		_outputLines		= new LinkedList<String>();
-	ReentrantLock					_outputLock			= new MyReentrantLock();
+	volatile boolean _outputPaused = false;
+	volatile String _outputFilter = null;
+	volatile LinkedList<String> _outputLines = new LinkedList<String>();
+	ReentrantLock _outputLock = new MyReentrantLock();
 
 	/**
 	 * Instantiates a new console.
@@ -88,7 +95,8 @@ public class Console extends JFrame
 		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		_okIcon = _trayIcon.createImageIcon("/resources/tick.png");
 
-		_clearOutputItem.setAction(new AbstractAction(null, WrapperTrayIconImpl.createImageIcon("/resources/edit-clear.png"))
+		_clearOutputItem.setAction(new AbstractAction(null, WrapperTrayIconImpl
+				.createImageIcon("/resources/edit-clear.png"))
 		{
 			public void actionPerformed(ActionEvent e)
 			{
@@ -97,7 +105,8 @@ public class Console extends JFrame
 
 		});
 
-		_pauseOutputItem.setAction(new AbstractAction(null, WrapperTrayIconImpl.createImageIcon("/resources/pause.png"))
+		_pauseOutputItem.setAction(new AbstractAction(null, WrapperTrayIconImpl
+				.createImageIcon("/resources/pause.png"))
 		{
 			public void actionPerformed(ActionEvent e)
 			{
@@ -108,7 +117,8 @@ public class Console extends JFrame
 
 		});
 
-		_startOutputItem.setAction(new AbstractAction(null, WrapperTrayIconImpl.createImageIcon("/resources/start.png"))
+		_startOutputItem.setAction(new AbstractAction(null, WrapperTrayIconImpl
+				.createImageIcon("/resources/start.png"))
 		{
 			public void actionPerformed(ActionEvent e)
 			{
@@ -147,8 +157,10 @@ public class Console extends JFrame
 	private void initButtons()
 	{
 		initButton(_consoleForm._EXIT_TRAY_ICON_BUTTON, _trayIcon._exitItem);
-		initButton(_consoleForm._EXIT_WRAPPER_BUTTON, _trayIcon._exitWrapperItem);
-		initButton(_consoleForm._THREAD_DUMP_WRAPPER_BUTTON, _trayIcon._threadDumpWrapperItem);
+		initButton(_consoleForm._EXIT_WRAPPER_BUTTON,
+				_trayIcon._exitWrapperItem);
+		initButton(_consoleForm._THREAD_DUMP_WRAPPER_BUTTON,
+				_trayIcon._threadDumpWrapperItem);
 		initButton(_consoleForm._RESTART_BUTTON, _trayIcon._restartItem);
 		initButton(_consoleForm._START_BUTTON, _trayIcon._startItem);
 		initButton(_consoleForm._STOP_BUTTON, _trayIcon._stopItem);
@@ -179,7 +191,8 @@ public class Console extends JFrame
 				{
 					setAppCpu(_trayIcon._process.getAppCpu());
 					setAppHandles(_trayIcon._process.getAppHandles());
-					setAppMemory(_trayIcon._process.getAppPMemory(), _trayIcon._process.getAppVMemory());
+					setAppMemory(_trayIcon._process.getAppPMemory(),
+							_trayIcon._process.getAppVMemory());
 					setAppThreads(_trayIcon._process.getAppThreads());
 					try
 					{
@@ -338,7 +351,7 @@ public class Console extends JFrame
 	{
 		String sPBytes = pBytes > 0 ? _byteFormat.format(pBytes) : "?";
 		String sVBytes = vBytes > 0 ? _byteFormat.format(vBytes) : "?";
-		_consoleForm._memory.setText(sPBytes+"["+sVBytes+"]");
+		_consoleForm._memory.setText(sPBytes + "[" + sVBytes + "]");
 	}
 
 	/**
@@ -432,7 +445,8 @@ public class Console extends JFrame
 				// stopped
 				try
 				{
-					if (_trayIcon._process == null || !_trayIcon._process.hasOutput())
+					if (_trayIcon._process == null
+							|| !_trayIcon._process.hasOutput())
 					{
 						_consoleForm._input.setText("No input possible");
 						_consoleForm._input.selectAll();
@@ -461,7 +475,7 @@ public class Console extends JFrame
 			{
 				while (!stop)
 				{
-						_trayIcon.showState(_trayIcon._process.getState());
+					_trayIcon.showState(_trayIcon._process.getState());
 					try
 					{
 						Thread.sleep(500);
@@ -487,13 +501,16 @@ public class Console extends JFrame
 					{
 						List<String> lines;
 						t = System.currentTimeMillis();
-						while (!stop && !_outputPaused && (lines = _trayIcon._process.readDrainLine()) != null)
+						while (!stop
+								&& !_outputPaused
+								&& (lines = _trayIcon._process.readDrainLine()) != null)
 						{
 							t2 = System.currentTimeMillis();
 							for (String line : lines)
 								addLine(line);
-						//System.out.println(System.currentTimeMillis()+" readDrainLine "+(System.currentTimeMillis()-t)+"/"+(System.currentTimeMillis()-t2)+" "+(lines == null ? null : lines.size()));
-						t = System.currentTimeMillis();
+							// System.out.println(System.currentTimeMillis()+" readDrainLine "+(System.currentTimeMillis()-t)+"/"+(System.currentTimeMillis()-t2)+" "+(lines
+							// == null ? null : lines.size()));
+							t = System.currentTimeMillis();
 						}
 					}
 					try
@@ -523,7 +540,8 @@ public class Console extends JFrame
 				_outputLock.lock();
 				try
 				{
-					_consoleForm._output.getDocument().remove(0, _consoleForm._output.getDocument().getLength());
+					_consoleForm._output.getDocument().remove(0,
+							_consoleForm._output.getDocument().getLength());
 				}
 				catch (BadLocationException e)
 				{
@@ -586,7 +604,7 @@ public class Console extends JFrame
 	{
 		if (stop)
 			return;
-		//System.out.println("console close");
+		// System.out.println("console close");
 		stop = true;
 		this.setVisible(false);
 		this.dispose();

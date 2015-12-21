@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.io;
 
 import java.io.BufferedInputStream;
@@ -45,12 +51,14 @@ public class CyclicBufferFileInputStream extends BufferedInputStream
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
-	public CyclicBufferFileInputStream(File file, String mode) throws FileNotFoundException, IOException
+	public CyclicBufferFileInputStream(File file, String mode)
+			throws FileNotFoundException, IOException
 	{
 		super(newInputStream(file, mode));
 	}
 
-	public CyclicBufferFileInputStream(File file) throws FileNotFoundException, IOException
+	public CyclicBufferFileInputStream(File file) throws FileNotFoundException,
+			IOException
 	{
 		super(newInputStream(file, "rw"));
 	}
@@ -66,19 +74,20 @@ public class CyclicBufferFileInputStream extends BufferedInputStream
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
-	public static InputStream newInputStream(final File file, final String mode) throws IOException
+	public static InputStream newInputStream(final File file, final String mode)
+			throws IOException
 	{
 
 		return new InputStream()
 		{
 
-			volatile boolean	closed	= false;
-			volatile boolean	opened	= false;
-			Lock				lock	= new MyReentrantLock();
-			RandomAccessFile	raf;
-			ByteBuffer			buf;
-			ByteBuffer			posBuf;
-			ByteBuffer			lockBuf;
+			volatile boolean closed = false;
+			volatile boolean opened = false;
+			Lock lock = new MyReentrantLock();
+			RandomAccessFile raf;
+			ByteBuffer buf;
+			ByteBuffer posBuf;
+			ByteBuffer lockBuf;
 
 			synchronized void open() throws IOException
 			{
@@ -93,14 +102,19 @@ public class CyclicBufferFileInputStream extends BufferedInputStream
 							// System.out.println("open "+file);
 							if (raf == null)
 								raf = new RandomAccessFile(file, mode);
-							buf = raf.getChannel().map(FileChannel.MapMode.READ_ONLY, 5, CyclicBufferFilePrintStream.length - 5);
-							posBuf = raf.getChannel().map(FileChannel.MapMode.READ_ONLY, 1, 4);
-							lockBuf = raf.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, 1);
+							buf = raf.getChannel().map(
+									FileChannel.MapMode.READ_ONLY, 5,
+									CyclicBufferFilePrintStream.length - 5);
+							posBuf = raf.getChannel().map(
+									FileChannel.MapMode.READ_ONLY, 1, 4);
+							lockBuf = raf.getChannel().map(
+									FileChannel.MapMode.READ_ONLY, 0, 1);
 							opened = true;
 						}
 						catch (Exception ex)
 						{
-							System.out.println(file.getName() +": "+ ex.getMessage());
+							System.out.println(file.getName() + ": "
+									+ ex.getMessage());
 						}
 					lock.unlock();
 					if (!opened)
@@ -110,10 +124,11 @@ public class CyclicBufferFileInputStream extends BufferedInputStream
 						}
 						catch (InterruptedException e)
 						{
-							//e.printStackTrace();
+							// e.printStackTrace();
 							// Thread.currentThread().interrupt();
 							// may cause endless loop
-							System.out.println("CyclicBufferFileInputStream - sleep interrupted");
+							System.out
+									.println("CyclicBufferFileInputStream - sleep interrupted");
 							throw new IOException(e);
 						}
 				}
@@ -254,7 +269,8 @@ public class CyclicBufferFileInputStream extends BufferedInputStream
 		}
 		InputStreamReader isr = new InputStreamReader(reader);
 		final BufferedReader br = new BufferedReader(isr);
-		Executor executor = Executors.newCachedThreadPool(new DaemonThreadFactory("test"));
+		Executor executor = Executors
+				.newCachedThreadPool(new DaemonThreadFactory("test"));
 		executor.execute(new Runnable()
 		{
 
@@ -268,7 +284,7 @@ public class CyclicBufferFileInputStream extends BufferedInputStream
 					{
 						if (prevLine != null && prevLine.equals(line))
 							System.out.println("repetition found " + prevLine);
-						//System.out.println(line);
+						// System.out.println(line);
 						prevLine = line;
 					}
 					System.out.println("terminated ");

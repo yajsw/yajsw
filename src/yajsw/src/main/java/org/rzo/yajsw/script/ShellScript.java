@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.script;
 
 import org.rzo.yajsw.os.OperatingSystem;
@@ -29,9 +35,11 @@ public class ShellScript extends AbstractScript
 	 *            the script
 	 * @param timeout
 	 */
-	public ShellScript(String script, String id, WrappedProcess process, String[] args, int timeout, int maxConcInvocations)
+	public ShellScript(String script, String id, WrappedProcess process,
+			String[] args, int timeout, int maxConcInvocations)
 	{
-		super("scripts/" + script, id, process, args, timeout, maxConcInvocations);
+		super("scripts/" + script, id, process, args, timeout,
+				maxConcInvocations);
 	}
 
 	/*
@@ -50,15 +58,18 @@ public class ShellScript extends AbstractScript
 		String exitCode = "" + _process.getExitCode();
 		try
 		{
-			p = OperatingSystem.instance().processManagerInstance().createProcess();
-			p.setCommand(getScript() + " " + id + " " + state + " " + count + " " + pid + " " + exitCode);
+			p = OperatingSystem.instance().processManagerInstance()
+					.createProcess();
+			p.setCommand(getScript() + " " + id + " " + state + " " + count
+					+ " " + pid + " " + exitCode);
 			p.setPipeStreams(false, false);
 			p.start();
 			p.waitFor(getTimeout());
 			if (p.isRunning())
 				p.kill(999);
 			if (p.getExitCode() != 0)
-				System.out.println("script " + getScript() + "returned " + p.getExitCode());
+				System.out.println("script " + getScript() + "returned "
+						+ p.getExitCode());
 			p.destroy();
 			p = null;
 		}
@@ -77,7 +88,7 @@ public class ShellScript extends AbstractScript
 	public void executeWithTimeout()
 	{
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -88,7 +99,7 @@ public class ShellScript extends AbstractScript
 			p.destroy();
 		}
 	}
-	
+
 	void log(String msg)
 	{
 		if (_process != null && _process.getInternalWrapperLogger() != null)
@@ -96,6 +107,5 @@ public class ShellScript extends AbstractScript
 		else
 			System.out.println(msg);
 	}
-
 
 }

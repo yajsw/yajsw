@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.config.jnlp;
 
 import java.io.FileNotFoundException;
@@ -22,9 +37,10 @@ import org.xml.sax.SAXException;
 
 public class JnlpSupport
 {
-	Document	_doc	= null;
+	Document _doc = null;
 
-	public JnlpSupport(String file) throws ParserConfigurationException, SAXException, IOException
+	public JnlpSupport(String file) throws ParserConfigurationException,
+			SAXException, IOException
 	{
 		FileObject fo = VFSUtils.resolveFile(".", file);
 		if (fo == null || !fo.exists())
@@ -34,7 +50,8 @@ public class JnlpSupport
 		in.close();
 	}
 
-	public PropertiesConfiguration toConfiguration(String defaultsFile) throws ConfigurationException, IOException
+	public PropertiesConfiguration toConfiguration(String defaultsFile)
+			throws ConfigurationException, IOException
 	{
 		int i = 1;
 		PropertiesConfiguration jnlpConf = new PropertiesConfiguration();
@@ -94,7 +111,8 @@ public class JnlpSupport
 
 	}
 
-	private Document parseJnlp(InputStream in) throws ParserConfigurationException, SAXException, IOException
+	private Document parseJnlp(InputStream in)
+			throws ParserConfigurationException, SAXException, IOException
 	{
 		Document doc = null;
 		// Get Document Builder Factory
@@ -117,7 +135,8 @@ public class JnlpSupport
 		NodeList args = doc.getElementsByTagName("jar");
 		for (int i = 0; i < args.getLength(); i++)
 		{
-			result.add(args.item(i).getAttributes().getNamedItem("href").getTextContent());
+			result.add(args.item(i).getAttributes().getNamedItem("href")
+					.getTextContent());
 		}
 		return result;
 	}
@@ -128,7 +147,8 @@ public class JnlpSupport
 		NodeList args = doc.getElementsByTagName("icon");
 		for (int i = 0; i < args.getLength(); i++)
 		{
-			result.add(args.item(i).getAttributes().getNamedItem("href").getTextContent());
+			result.add(args.item(i).getAttributes().getNamedItem("href")
+					.getTextContent());
 		}
 		return result;
 	}
@@ -139,8 +159,10 @@ public class JnlpSupport
 		NodeList args = doc.getElementsByTagName("property");
 		for (int i = 0; i < args.getLength(); i++)
 		{
-			String key = args.item(i).getAttributes().getNamedItem("name").getTextContent();
-			String value = args.item(i).getAttributes().getNamedItem("value").getTextContent();
+			String key = args.item(i).getAttributes().getNamedItem("name")
+					.getTextContent();
+			String value = args.item(i).getAttributes().getNamedItem("value")
+					.getTextContent();
 			result.add(Utils.getDOption(key, value));
 		}
 		return result;
@@ -159,12 +181,14 @@ public class JnlpSupport
 
 	private static Object getMainClass(Document doc)
 	{
-		return doc.getElementsByTagName("application-desc").item(0).getAttributes().getNamedItem("main-class").getTextContent();
+		return doc.getElementsByTagName("application-desc").item(0)
+				.getAttributes().getNamedItem("main-class").getTextContent();
 	}
 
 	private static String getCodebase(Document doc)
 	{
-		return doc.getElementsByTagName("jnlp").item(0).getAttributes().getNamedItem("codebase").getTextContent();
+		return doc.getElementsByTagName("jnlp").item(0).getAttributes()
+				.getNamedItem("codebase").getTextContent();
 	}
 
 }

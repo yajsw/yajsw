@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.controller;
 
 import java.util.ArrayList;
@@ -18,17 +33,19 @@ import org.rzo.yajsw.wrapper.WrappedProcess;
 
 public abstract class AbstractController implements Constants, Controller
 {
-	Logger							_logger		= Logger.getLogger(getClass().getName());
+	Logger _logger = Logger.getLogger(getClass().getName());
 	/** The _listeners. */
-	protected Map					_listeners	= Collections.synchronizedMap(MultiValueMap.decorate(new HashMap(), HashSet.class));
+	protected Map _listeners = Collections.synchronizedMap(MultiValueMap
+			.decorate(new HashMap(), HashSet.class));
 	/** The _wrapped java process. */
-	public WrappedProcess			_wrappedProcess;
-	protected static final Executor	executor	= Executors.newCachedThreadPool(new DaemonThreadFactory("controller"));
+	public WrappedProcess _wrappedProcess;
+	protected static final Executor executor = Executors
+			.newCachedThreadPool(new DaemonThreadFactory("controller"));
 	/** The _state. */
-	public int						_state		= 0;
+	public int _state = 0;
 	/** The _debug. */
-	protected int				_debug		= 0;
-	protected boolean				_debugComm		= false;
+	protected int _debug = 0;
+	protected boolean _debugComm = false;
 
 	/**
 	 * The listener interface for receiving controller events. The class that is
@@ -96,11 +113,12 @@ public abstract class AbstractController implements Constants, Controller
 		{
 			if (_listeners != null)
 			{
-			Collection<ControllerListener> listeners =  (Collection<ControllerListener>)_listeners.get(state);
-			if (listeners == null)
-				return;
-			listeners = new ArrayList(listeners);
-				//synchronized (_listeners)
+				Collection<ControllerListener> listeners = (Collection<ControllerListener>) _listeners
+						.get(state);
+				if (listeners == null)
+					return;
+				listeners = new ArrayList(listeners);
+				// synchronized (_listeners)
 				{
 					for (ControllerListener listener : listeners)
 						try
@@ -139,7 +157,8 @@ public abstract class AbstractController implements Constants, Controller
 			if (_state == state)
 				return;
 			if (_debug > 1)
-			_logger.info("Controller State: " + stateAsStr(_state) + " -> " + stateAsStr(state));
+				_logger.info("Controller State: " + stateAsStr(_state) + " -> "
+						+ stateAsStr(state));
 			_state = state;
 		}
 		logStateChange(state);
@@ -149,7 +168,5 @@ public abstract class AbstractController implements Constants, Controller
 	public abstract void logStateChange(int state);
 
 	public abstract String stateAsStr(int state);
-	
-	
 
 }

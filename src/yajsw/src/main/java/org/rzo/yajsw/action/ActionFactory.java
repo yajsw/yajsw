@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.action;
 
 import io.netty.channel.Channel;
@@ -33,7 +48,8 @@ public class ActionFactory
 		return new Action()
 		{
 
-			public void execute(Message msg, Channel session, PrintStream out, Object data)
+			public void execute(Message msg, Channel session, PrintStream out,
+					Object data)
 			{
 				System.out.println("Error No Action for " + msg);
 			}

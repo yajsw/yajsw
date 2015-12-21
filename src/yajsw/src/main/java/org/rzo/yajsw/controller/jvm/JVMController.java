@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.controller.jvm;
 
 import io.netty.bootstrap.ServerBootstrap;
@@ -44,55 +50,56 @@ public class JVMController extends AbstractController
 {
 
 	/** The Constant STATE_UNKNOWN. */
-	static final int									STATE_UNKNOWN			= 0;
+	static final int STATE_UNKNOWN = 0;
 
 	/** The Constant STATE_WAITING. */
-	static final int									STATE_WAITING			= 1;
+	static final int STATE_WAITING = 1;
 
 	/** The Constant STATE_ESTABLISHED. */
-	static final int									STATE_ESTABLISHED		= 2;
+	static final int STATE_ESTABLISHED = 2;
 
 	/** The Constant STATE_LOGGED_ON. */
-	static final int									STATE_LOGGED_ON			= 3;
+	static final int STATE_LOGGED_ON = 3;
 
 	/** The Constant STATE_STARTUP_TIMEOUT. */
-	public static final int								STATE_STARTUP_TIMEOUT	= 4;
+	public static final int STATE_STARTUP_TIMEOUT = 4;
 
 	/** The Constant STATE_WAITING_CLOSED. */
-	public static final int								STATE_WAITING_CLOSED	= 5;
+	public static final int STATE_WAITING_CLOSED = 5;
 
 	/** The Constant STATE_USER_STOP. */
-	public static final int								STATE_USER_STOP			= 6;
+	public static final int STATE_USER_STOP = 6;
 
-	public static final int								STATE_PING_TIMEOUT		= 7;
+	public static final int STATE_PING_TIMEOUT = 7;
 
-	public static final int								STATE_PROCESS_KILLED	= 8;
+	public static final int STATE_PROCESS_KILLED = 8;
 
-	public static final int								STATE_THRESHOLD			= 9;
+	public static final int STATE_THRESHOLD = 9;
 
 	/** The _port. */
-	int													_port					= DEFAULT_PORT;
+	int _port = DEFAULT_PORT;
 
-	int													_minPort				= DEFAULT_PORT;
+	int _minPort = DEFAULT_PORT;
 
-	int													_maxPort				= 65535;
+	int _maxPort = 65535;
 
 	/** The _startup timeout. */
-	int													_startupTimeout			= DEFAULT_STARTUP_TIMEOUT * 1000;
+	int _startupTimeout = DEFAULT_STARTUP_TIMEOUT * 1000;
 
 	/** The _key. */
-	String												_key;
+	String _key;
 
 	/** The _ping timeout. */
-	int													_pingTimeout			= 10;
+	int _pingTimeout = 10;
 
-	volatile boolean									_pingOK					= false;
+	volatile boolean _pingOK = false;
 
-	static Executor										_pingExecutor			= Executors.newCachedThreadPool(new DaemonThreadFactory("pinger"));
+	static Executor _pingExecutor = Executors
+			.newCachedThreadPool(new DaemonThreadFactory("pinger"));
 
 	/** The _session. */
 	// IoSession _session;
-	final AtomicReference<Channel>									_channel = new AtomicReference<Channel>();
+	final AtomicReference<Channel> _channel = new AtomicReference<Channel>();
 
 	/** The Constant pool. */
 	// static final SimpleIoProcessorPool pool = new
@@ -104,35 +111,37 @@ public class JVMController extends AbstractController
 	 * The _acceptor.
 	 */
 	// NioSocketAcceptor _acceptor = null;
-	ServerBootstrap										_acceptor				= null;
-	volatile Channel									_parentChannel;
+	ServerBootstrap _acceptor = null;
+	volatile Channel _parentChannel;
 
 	/** The _init. */
-	boolean												_init					= false;
+	boolean _init = false;
 
 	/** The Constant _usedPorts. */
-	static final Set									_usedPorts				= Collections.synchronizedSet(new TreeSet());
+	static final Set _usedPorts = Collections.synchronizedSet(new TreeSet());
 
 	/** The Constant _scheduler. */
-	static private final ScheduledThreadPoolExecutor	_scheduler				= (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(1,
-																						new DaemonThreadFactory("controller.scheduler"));
+	static private final ScheduledThreadPoolExecutor _scheduler = (ScheduledThreadPoolExecutor) Executors
+			.newScheduledThreadPool(1, new DaemonThreadFactory(
+					"controller.scheduler"));
 
 	/** The _timeout handle. */
-	volatile ScheduledFuture<?>							_timeoutHandle;
+	volatile ScheduledFuture<?> _timeoutHandle;
 
-	Cycler												_pingCheck;
-	//ExecutorService										workerExecutor			= Executors.newCachedThreadPool(new DaemonThreadFactory(
-	//																					"controller-worker"));
+	Cycler _pingCheck;
+	// ExecutorService workerExecutor = Executors.newCachedThreadPool(new
+	// DaemonThreadFactory(
+	// "controller-worker"));
 
-	Runnable											_serviceStartupListener;
+	Runnable _serviceStartupListener;
 
-	float												_heap					= -1;
-	long												_minGC					= -1;
-	long												_fullGC					= -1;
-	long												_heapInBytes			= -1;
-    EventLoopGroup _bossGroup; 
-    EventLoopGroup _workerGroup;
-    volatile boolean _bound = false; 
+	float _heap = -1;
+	long _minGC = -1;
+	long _fullGC = -1;
+	long _heapInBytes = -1;
+	EventLoopGroup _bossGroup;
+	EventLoopGroup _workerGroup;
+	volatile boolean _bound = false;
 
 	/**
 	 * Instantiates a new controller.
@@ -143,47 +152,50 @@ public class JVMController extends AbstractController
 	public JVMController(WrappedProcess wrappedJavaProcess)
 	{
 		super(wrappedJavaProcess);
-		_bossGroup = new OioEventLoopGroup(); 
-	    _workerGroup = new OioEventLoopGroup();
-	    ControllerPipelineFactory pipelineFactory = new ControllerPipelineFactory(this); 
+		_bossGroup = new OioEventLoopGroup();
+		_workerGroup = new OioEventLoopGroup();
+		ControllerPipelineFactory pipelineFactory = new ControllerPipelineFactory(
+				this);
 
 		pipelineFactory.setDebug(_debug > 2);
-        _acceptor = new ServerBootstrap() 
-        .group(_bossGroup, _workerGroup)
-         .channel(OioServerSocketChannel.class)
-         .childOption(ChannelOption.TCP_NODELAY, true)
-         //.option(ChannelOption.SO_BACKLOG, 128)
-         .childHandler(pipelineFactory);
+		_acceptor = new ServerBootstrap().group(_bossGroup, _workerGroup)
+				.channel(OioServerSocketChannel.class)
+				.childOption(ChannelOption.TCP_NODELAY, true)
+				// .option(ChannelOption.SO_BACKLOG, 128)
+				.childHandler(pipelineFactory);
 
-		
 	}
 
 	public void init()
 	{
 		if (_pingCheck == null)
-			_pingCheck = new Cycler(_pingTimeout, _pingTimeout, _pingExecutor, new Runnable()
-			{
-				int	r	= 2;
-
-				public void run()
-				{
-					if (!_pingOK)
+			_pingCheck = new Cycler(_pingTimeout, _pingTimeout, _pingExecutor,
+					new Runnable()
 					{
-						getLog().info("Missing wrapper ping within timeout of " + _pingTimeout);
-						// stop the process in a separate thread, otherwise
-						// conflict
-						executor.execute(new Runnable()
+						int r = 2;
+
+						public void run()
 						{
-							public void run()
+							if (!_pingOK)
 							{
-								stop(STATE_PING_TIMEOUT, "PING_TIMEOUT");
+								getLog().info(
+										"Missing wrapper ping within timeout of "
+												+ _pingTimeout);
+								// stop the process in a separate thread,
+								// otherwise
+								// conflict
+								executor.execute(new Runnable()
+								{
+									public void run()
+									{
+										stop(STATE_PING_TIMEOUT, "PING_TIMEOUT");
+									}
+								});
 							}
-						});
-					}
-					else
-						_pingOK = false;
-				}
-			});
+							else
+								_pingOK = false;
+						}
+					});
 	}
 
 	/**
@@ -191,7 +203,7 @@ public class JVMController extends AbstractController
 	 */
 	private void initInternal()
 	{
-		
+
 		// ???do not allow multiple servers to bind on the same port
 		_init = true;
 
@@ -213,7 +225,8 @@ public class JVMController extends AbstractController
 		// wrapper: do not use this port for a sub-process
 		try
 		{
-			myPort = Integer.parseInt((String) System.getProperties().get("wrapper.port"));
+			myPort = Integer.parseInt((String) System.getProperties().get(
+					"wrapper.port"));
 		}
 		catch (Exception e)
 		{
@@ -226,7 +239,7 @@ public class JVMController extends AbstractController
 			initInternal();
 			setState(STATE_UNKNOWN);
 			// if we have kept the channel
-			if (_parentChannel != null && _parentChannel.isActive()) //??
+			if (_parentChannel != null && _parentChannel.isActive()) // ??
 			{
 				setState(STATE_WAITING);
 				// beginWaitForStartup();
@@ -248,19 +261,21 @@ public class JVMController extends AbstractController
 						ChannelFuture f = _acceptor.bind(_port).sync();
 						if (f.isSuccess())
 						{
-						_parentChannel = f.channel();
-						setState(STATE_WAITING);
-						_bound = true;
-						// beginWaitForStartup();
-						if (getDebug() > 2)
-							getLog().info("binding successfull");
-						return true;
+							_parentChannel = f.channel();
+							setState(STATE_WAITING);
+							_bound = true;
+							// beginWaitForStartup();
+							if (getDebug() > 2)
+								getLog().info("binding successfull");
+							return true;
 						}
 					}
 					catch (Exception ex)
 					{
 						if (_debug > 2)
-							getLog().info("binding error: " + ex.getMessage() + " -> retry with another port");
+							getLog().info(
+									"binding error: " + ex.getMessage()
+											+ " -> retry with another port");
 
 						_usedPorts.remove(_port);
 						try
@@ -270,14 +285,17 @@ public class JVMController extends AbstractController
 						catch (InterruptedException e)
 						{
 							e.printStackTrace();
-							getLog().info("sleep interrupted in JVMcontroller start");
+							getLog().info(
+									"sleep interrupted in JVMcontroller start");
 							Thread.currentThread().interrupt();
 							return false;
 						}
 						_port++;
 					}
 			}
-			getLog().severe("could not find a free port in the range " + _minPort + "..." + _maxPort);
+			getLog().severe(
+					"could not find a free port in the range " + _minPort
+							+ "..." + _maxPort);
 			return false;
 		}
 		catch (Exception ex)
@@ -296,16 +314,19 @@ public class JVMController extends AbstractController
 			return;
 		final Runnable timeOutAction = new Runnable()
 		{
-			int	r	= 1;
+			int r = 1;
 
 			public void run()
 			{
 				if (getDebug() > 1)
-					getLog().severe("WrapperManger did not log on within timeout of " + _startupTimeout);
+					getLog().severe(
+							"WrapperManger did not log on within timeout of "
+									+ _startupTimeout);
 				stop(STATE_STARTUP_TIMEOUT, "STARTUP_TIMEOUT");
 			}
 		};
-		_timeoutHandle = _scheduler.schedule(timeOutAction, _startupTimeout, TimeUnit.MILLISECONDS);
+		_timeoutHandle = _scheduler.schedule(timeOutAction, _startupTimeout,
+				TimeUnit.MILLISECONDS);
 	}
 
 	void schedulePingCheck()
@@ -360,7 +381,8 @@ public class JVMController extends AbstractController
 					String txt = null;
 					if (reason != null && reason.length() > 0)
 						txt = ":" + reason;
-					_channel.get().writeAndFlush(new Message(Constants.WRAPPER_MSG_STOP, txt));
+					_channel.get().writeAndFlush(
+							new Message(Constants.WRAPPER_MSG_STOP, txt));
 				}
 				try
 				{
@@ -572,7 +594,8 @@ public class JVMController extends AbstractController
 	public void requestThreadDump()
 	{
 		if (_channel.get() != null)
-			_channel.get().writeAndFlush(new Message(Constants.WRAPPER_MSG_THREAD_DUMP, null));
+			_channel.get().writeAndFlush(
+					new Message(Constants.WRAPPER_MSG_THREAD_DUMP, null));
 	}
 
 	/**
@@ -581,7 +604,8 @@ public class JVMController extends AbstractController
 	public void requestGc()
 	{
 		if (_channel.get() != null)
-			_channel.get().writeAndFlush(new Message(Constants.WRAPPER_MSG_GC, null));
+			_channel.get().writeAndFlush(
+					new Message(Constants.WRAPPER_MSG_GC, null));
 	}
 
 	/**
@@ -590,7 +614,8 @@ public class JVMController extends AbstractController
 	public void requestDumpHeap(String fileName)
 	{
 		if (_channel.get() != null)
-			_channel.get().writeAndFlush(new Message(Constants.WRAPPER_MSG_DUMP_HEAP, fileName));
+			_channel.get().writeAndFlush(
+					new Message(Constants.WRAPPER_MSG_DUMP_HEAP, fileName));
 	}
 
 	public void reset()
@@ -619,29 +644,31 @@ public class JVMController extends AbstractController
 		}
 	}
 
-	private volatile boolean	_waitingForProcessTermination	= false;
+	private volatile boolean _waitingForProcessTermination = false;
 
-	private float				_maxHeapRestart					= -1;
+	private float _maxHeapRestart = -1;
 
-	private long				_maxFullGCTimeRestart			= -1;
+	private long _maxFullGCTimeRestart = -1;
 
 	// invoked when the process has been spawned
 	// so we can wait for it to terminate
 	public void processStarted()
 	{
 		int waitCounter = 0;
-		// it may, but should not happen, that 
+		// it may, but should not happen, that
 		// this method is called twice although this should not happen
-		// we log this and after some time if we do not return from 
+		// we log this and after some time if we do not return from
 		// osProcess.waitFor(); we restart the application.
 		// TODO
 		while (_waitingForProcessTermination)
 			try
 			{
-				getLog().info("should not happen: waiting for termination thread");
+				getLog().info(
+						"should not happen: waiting for termination thread");
 				if (waitCounter < 100)
 				{
-					getLog().info("should not happen: waiting for termination thread");
+					getLog().info(
+							"should not happen: waiting for termination thread");
 				}
 
 				Thread.sleep(200);
@@ -668,7 +695,7 @@ public class JVMController extends AbstractController
 		_waitingForProcessTermination = true;
 		executor.execute(new Runnable()
 		{
-			int	r	= 3;
+			int r = 3;
 
 			public void run()
 			{
@@ -688,7 +715,8 @@ public class JVMController extends AbstractController
 					_waitingForProcessTermination = false;
 				}
 				_wrappedProcess.osProcessTerminated();
-				if (_state == STATE_LOGGED_ON || _state == STATE_WAITING_CLOSED || osProcess == null || osProcess.isTerminated())
+				if (_state == STATE_LOGGED_ON || _state == STATE_WAITING_CLOSED
+						|| osProcess == null || osProcess.isTerminated())
 				{
 					stopPingCheck();
 					executor.execute(new Runnable()
@@ -737,11 +765,11 @@ public class JVMController extends AbstractController
 	public void logStateChange(int state)
 	{
 		if (state == STATE_STARTUP_TIMEOUT)
-			getLog().warning("startup of java application timed out. if this is due to server overload consider increasing wrapper.startup.timeout");
+			getLog().warning(
+					"startup of java application timed out. if this is due to server overload consider increasing wrapper.startup.timeout");
 		else if (state == STATE_PING_TIMEOUT)
-			getLog()
-					.warning(
-							"ping between java application and wrapper timed out. if this this is due to server overload consider increasing wrapper.ping.timeout");
+			getLog().warning(
+					"ping between java application and wrapper timed out. if this this is due to server overload consider increasing wrapper.ping.timeout");
 
 	}
 
@@ -759,7 +787,7 @@ public class JVMController extends AbstractController
 	{
 		executor.execute(new Runnable()
 		{
-			int	r	= 4;
+			int r = 4;
 
 			public void run()
 			{
@@ -776,12 +804,17 @@ public class JVMController extends AbstractController
 		_heapInBytes = heapInBytes;
 		if (_heap > -1 && _heap > _maxHeapRestart && _maxHeapRestart > 0)
 		{
-			getLog().warning("restarting due to heap threshold : " + _heap + " > " + _maxHeapRestart);
+			getLog().warning(
+					"restarting due to heap threshold : " + _heap + " > "
+							+ _maxHeapRestart);
 			restartProcess();
 		}
-		else if (_fullGC > -1 && _fullGC > _maxFullGCTimeRestart && _maxFullGCTimeRestart > 0)
+		else if (_fullGC > -1 && _fullGC > _maxFullGCTimeRestart
+				&& _maxFullGCTimeRestart > 0)
 		{
-			getLog().warning("restarting due to gc duration threshold : " + _fullGC + " > " + _maxFullGCTimeRestart);
+			getLog().warning(
+					"restarting due to gc duration threshold : " + _fullGC
+							+ " > " + _maxFullGCTimeRestart);
 			restartProcess();
 		}
 	}
@@ -824,7 +857,7 @@ public class JVMController extends AbstractController
 				ChannelFuture cf = _channel.get().close();
 				Thread.yield();
 				if (getDebug() > 1)
-				getLog().info("controller close session");
+					getLog().info("controller close session");
 				cf.await(1000);
 			}
 			catch (InterruptedException e)
@@ -832,15 +865,14 @@ public class JVMController extends AbstractController
 				e.printStackTrace();
 				getLog().info("session close wait interrupted in JVMController");
 			}
-			// stop processing outgoing messages
-			//_controller.workerExecutor.shutdownNow();
+		// stop processing outgoing messages
+		// _controller.workerExecutor.shutdownNow();
 
-			// stop the controller
-			_channel.set(null);
-			setState(JVMController.STATE_WAITING_CLOSED);
-			if (getDebug() > 2)
-				getLog().info("session closed -> waiting");
+		// stop the controller
+		_channel.set(null);
+		setState(JVMController.STATE_WAITING_CLOSED);
+		if (getDebug() > 2)
+			getLog().info("session closed -> waiting");
 	}
-
 
 }

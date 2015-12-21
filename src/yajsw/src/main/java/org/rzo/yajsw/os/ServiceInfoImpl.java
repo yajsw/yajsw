@@ -1,26 +1,42 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.os;
 
 import java.io.Serializable;
 
 import org.rzo.yajsw.tools.JCLParser;
 
-public class ServiceInfoImpl implements ServiceInfo, Serializable, Comparable<ServiceInfo>
+public class ServiceInfoImpl implements ServiceInfo, Serializable,
+		Comparable<ServiceInfo>
 {
-	private String		_account					= "?";
-	private String		_command					= "?";
-	private String		_description				= "?";
-	private String		_name						= "?";
-	private int			_pid						= -1;
-	private String		_startType					= "?";
-	private int			_state						= -1;
-	private int			_wrapperAppPid				= -1;
-	private String		_wrapperConfigurationPath	= "?";
-	private int			_wrapperJmxPort				= -1;
-	private boolean		_interactive				= false;		;
-	private String		_wrapped					= "-";
-	private String[]	_dependencies;
-	private String		_displayName;
-	private String		_host						= "localhost";
+	private String _account = "?";
+	private String _command = "?";
+	private String _description = "?";
+	private String _name = "?";
+	private int _pid = -1;
+	private String _startType = "?";
+	private int _state = -1;
+	private int _wrapperAppPid = -1;
+	private String _wrapperConfigurationPath = "?";
+	private int _wrapperJmxPort = -1;
+	private boolean _interactive = false;;
+	private String _wrapped = "-";
+	private String[] _dependencies;
+	private String _displayName;
+	private String _host = "localhost";
 
 	public String getAccount()
 	{
@@ -105,9 +121,11 @@ public class ServiceInfoImpl implements ServiceInfo, Serializable, Comparable<Se
 			_wrapped = "Service";
 			for (String option : p.getVmOptions())
 				if (option.startsWith("-Dwrapper.config="))
-					_wrapperConfigurationPath = option.substring("-Dwrapper.config=".length());
+					_wrapperConfigurationPath = option
+							.substring("-Dwrapper.config=".length());
 		}
-		else if (p.getJar() != null && p.getJar().endsWith("wrapper.jar") && p.getArgs().size() > 1 && p.getArgs().get(0).equals("-c"))
+		else if (p.getJar() != null && p.getJar().endsWith("wrapper.jar")
+				&& p.getArgs().size() > 1 && p.getArgs().get(0).equals("-c"))
 		{
 			_wrapped = "Console";
 			_wrapperConfigurationPath = p.getArgs().get(1);

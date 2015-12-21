@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.tray;
 
 import java.awt.BorderLayout;
@@ -27,45 +42,45 @@ import com.jgoodies.forms.layout.FormLayout;
 
 public class ConsoleForm3 extends JPanel
 {
-	JTextArea			_output						= new JTextArea();
-	JTextField			_input						= new JTextField();
-	JButton				_START_BUTTON				= new JButton();
-	JButton				_STOP_BUTTON				= new JButton();
-	JButton				_RESTART_BUTTON				= new JButton();
-	JButton				_EXIT_WRAPPER_BUTTON		= new JButton();
-	JButton				_THREAD_DUMP_BUTTON			= new JButton();
-	JLabel				_appStopTime				= new JLabel();
-	JLabel				_state						= new JLabel();
-	JLabel				_wStartTime					= new JLabel();
-	JLabel				_trigger					= new JLabel();
-	JButton				_STOP_TIMER_BUTTON			= new JButton();
-	JLabel				_appPid						= new JLabel();
-	JLabel				_appStartTime				= new JLabel();
-	JLabel				_wPid						= new JLabel();
-	TitledBorderLabel	_titledborderlabel1			= new TitledBorderLabel();
-	TitledBorderSide	_titledborderside1			= new TitledBorderSide();
-	TitledBorderSide	_titledborderside2			= new TitledBorderSide();
-	TitledBorderBottom	_titledborderbottom1		= new TitledBorderBottom();
-	TitledBorderLabel	_titledborderlabel2			= new TitledBorderLabel();
-	TitledBorderSide	_titledborderside3			= new TitledBorderSide();
-	TitledBorderSide	_titledborderside4			= new TitledBorderSide();
-	TitledBorderBottom	_titledborderbottom2		= new TitledBorderBottom();
-	JButton				_jbutton1					= new JButton();
-	JLabel				_timer						= new JLabel();
-	JLabel				_condition					= new JLabel();
-	JLabel				_wrapperType				= new JLabel();
-	JLabel				_cpu						= new JLabel();
-	JLabel				_memory						= new JLabel();
-	JLabel				_handles					= new JLabel();
-	JLabel				_threads					= new JLabel();
-	JLabel				_count						= new JLabel();
-	JLabel				_exitCode					= new JLabel();
-	JButton				_THREAD_DUMP_WRAPPER_BUTTON	= new JButton();
-	JButton				_EXIT_TRAY_ICON_BUTTON		= new JButton();
-	JButton				_START_OUTPUT_BUTTON		= new JButton();
-	JButton				_PAUSE_OUTPUT_BUTTON		= new JButton();
-	JTextField			__OUTPUT_FILTER				= new JTextField();
-	JButton				_CLEAR_OUTPUT_BUTTON		= new JButton();
+	JTextArea _output = new JTextArea();
+	JTextField _input = new JTextField();
+	JButton _START_BUTTON = new JButton();
+	JButton _STOP_BUTTON = new JButton();
+	JButton _RESTART_BUTTON = new JButton();
+	JButton _EXIT_WRAPPER_BUTTON = new JButton();
+	JButton _THREAD_DUMP_BUTTON = new JButton();
+	JLabel _appStopTime = new JLabel();
+	JLabel _state = new JLabel();
+	JLabel _wStartTime = new JLabel();
+	JLabel _trigger = new JLabel();
+	JButton _STOP_TIMER_BUTTON = new JButton();
+	JLabel _appPid = new JLabel();
+	JLabel _appStartTime = new JLabel();
+	JLabel _wPid = new JLabel();
+	TitledBorderLabel _titledborderlabel1 = new TitledBorderLabel();
+	TitledBorderSide _titledborderside1 = new TitledBorderSide();
+	TitledBorderSide _titledborderside2 = new TitledBorderSide();
+	TitledBorderBottom _titledborderbottom1 = new TitledBorderBottom();
+	TitledBorderLabel _titledborderlabel2 = new TitledBorderLabel();
+	TitledBorderSide _titledborderside3 = new TitledBorderSide();
+	TitledBorderSide _titledborderside4 = new TitledBorderSide();
+	TitledBorderBottom _titledborderbottom2 = new TitledBorderBottom();
+	JButton _jbutton1 = new JButton();
+	JLabel _timer = new JLabel();
+	JLabel _condition = new JLabel();
+	JLabel _wrapperType = new JLabel();
+	JLabel _cpu = new JLabel();
+	JLabel _memory = new JLabel();
+	JLabel _handles = new JLabel();
+	JLabel _threads = new JLabel();
+	JLabel _count = new JLabel();
+	JLabel _exitCode = new JLabel();
+	JButton _THREAD_DUMP_WRAPPER_BUTTON = new JButton();
+	JButton _EXIT_TRAY_ICON_BUTTON = new JButton();
+	JButton _START_OUTPUT_BUTTON = new JButton();
+	JButton _PAUSE_OUTPUT_BUTTON = new JButton();
+	JTextField __OUTPUT_FILTER = new JTextField();
+	JButton _CLEAR_OUTPUT_BUTTON = new JButton();
 
 	/**
 	 * Default constructor
@@ -200,13 +215,16 @@ public class ConsoleForm3 extends JPanel
 		jlabel1.setFont(new Font("Tahoma", Font.BOLD, 11));
 		jlabel1.setOpaque(true);
 		jlabel1.setText("Output");
-		jpanel1.add(jlabel1, new CellConstraints(4, 2, 1, 1, CellConstraints.FILL, CellConstraints.DEFAULT));
+		jpanel1.add(jlabel1, new CellConstraints(4, 2, 1, 1,
+				CellConstraints.FILL, CellConstraints.DEFAULT));
 
 		_output.setName("output");
 		JScrollPane jscrollpane1 = new JScrollPane();
 		jscrollpane1.setViewportView(_output);
-		jscrollpane1.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-		jscrollpane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		jscrollpane1
+				.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		jscrollpane1
+				.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		jpanel1.add(jscrollpane1, cc.xywh(4, 4, 17, 1));
 
 		JLabel jlabel2 = new JLabel();
@@ -220,7 +238,8 @@ public class ConsoleForm3 extends JPanel
 		jlabel3.setOpaque(true);
 		jlabel3.setText("State ");
 		jlabel3.setHorizontalAlignment(JLabel.LEFT);
-		jpanel1.add(jlabel3, new CellConstraints(4, 9, 1, 1, CellConstraints.FILL, CellConstraints.DEFAULT));
+		jpanel1.add(jlabel3, new CellConstraints(4, 9, 1, 1,
+				CellConstraints.FILL, CellConstraints.DEFAULT));
 
 		_input.setName("input");
 		jpanel1.add(_input, cc.xywh(6, 6, 15, 1));
@@ -243,12 +262,14 @@ public class ConsoleForm3 extends JPanel
 		_EXIT_WRAPPER_BUTTON.setActionCommand("Exit");
 		_EXIT_WRAPPER_BUTTON.setName("EXIT_WRAPPER_BUTTON");
 		_EXIT_WRAPPER_BUTTON.setToolTipText("Stop Wrapper");
-		jpanel1.add(_EXIT_WRAPPER_BUTTON, new CellConstraints(20, 17, 1, 1, CellConstraints.RIGHT, CellConstraints.DEFAULT));
+		jpanel1.add(_EXIT_WRAPPER_BUTTON, new CellConstraints(20, 17, 1, 1,
+				CellConstraints.RIGHT, CellConstraints.DEFAULT));
 
 		_THREAD_DUMP_BUTTON.setActionCommand("Thread Dump");
 		_THREAD_DUMP_BUTTON.setName("THREAD_DUMP_BUTTON");
 		_THREAD_DUMP_BUTTON.setToolTipText("Thread Dump");
-		jpanel1.add(_THREAD_DUMP_BUTTON, new CellConstraints(10, 17, 1, 1, CellConstraints.LEFT, CellConstraints.DEFAULT));
+		jpanel1.add(_THREAD_DUMP_BUTTON, new CellConstraints(10, 17, 1, 1,
+				CellConstraints.LEFT, CellConstraints.DEFAULT));
 
 		_appStopTime.setName("appStopTime");
 		_appStopTime.setText("-");
@@ -259,7 +280,8 @@ public class ConsoleForm3 extends JPanel
 		jlabel4.setFont(new Font("Tahoma", Font.BOLD, 11));
 		jlabel4.setOpaque(true);
 		jlabel4.setText("Started");
-		jpanel1.add(jlabel4, new CellConstraints(8, 9, 1, 1, CellConstraints.FILL, CellConstraints.DEFAULT));
+		jpanel1.add(jlabel4, new CellConstraints(8, 9, 1, 1,
+				CellConstraints.FILL, CellConstraints.DEFAULT));
 
 		_state.setBackground(new Color(255, 255, 255));
 		_state.setName("state");
@@ -271,7 +293,8 @@ public class ConsoleForm3 extends JPanel
 		jlabel5.setFont(new Font("Tahoma", Font.BOLD, 11));
 		jlabel5.setOpaque(true);
 		jlabel5.setText("Stopped");
-		jpanel1.add(jlabel5, new CellConstraints(10, 9, 1, 1, CellConstraints.FILL, CellConstraints.DEFAULT));
+		jpanel1.add(jlabel5, new CellConstraints(10, 9, 1, 1,
+				CellConstraints.FILL, CellConstraints.DEFAULT));
 
 		_wStartTime.setName("wStartTime");
 		_wStartTime.setText("-");
@@ -286,26 +309,30 @@ public class ConsoleForm3 extends JPanel
 		jlabel6.setFont(new Font("Tahoma", Font.BOLD, 11));
 		jlabel6.setOpaque(true);
 		jlabel6.setText("PID");
-		jpanel1.add(jlabel6, new CellConstraints(16, 9, 1, 1, CellConstraints.FILL, CellConstraints.DEFAULT));
+		jpanel1.add(jlabel6, new CellConstraints(16, 9, 1, 1,
+				CellConstraints.FILL, CellConstraints.DEFAULT));
 
 		JLabel jlabel7 = new JLabel();
 		jlabel7.setBackground(new Color(204, 204, 204));
 		jlabel7.setFont(new Font("Tahoma", Font.BOLD, 11));
 		jlabel7.setOpaque(true);
 		jlabel7.setText("Started");
-		jpanel1.add(jlabel7, new CellConstraints(18, 9, 1, 1, CellConstraints.FILL, CellConstraints.DEFAULT));
+		jpanel1.add(jlabel7, new CellConstraints(18, 9, 1, 1,
+				CellConstraints.FILL, CellConstraints.DEFAULT));
 
 		JLabel jlabel8 = new JLabel();
 		jlabel8.setBackground(new Color(204, 204, 204));
 		jlabel8.setFont(new Font("Tahoma", Font.BOLD, 11));
 		jlabel8.setOpaque(true);
 		jlabel8.setText("Trigger");
-		jpanel1.add(jlabel8, new CellConstraints(20, 9, 1, 1, CellConstraints.FILL, CellConstraints.DEFAULT));
+		jpanel1.add(jlabel8, new CellConstraints(20, 9, 1, 1,
+				CellConstraints.FILL, CellConstraints.DEFAULT));
 
 		_STOP_TIMER_BUTTON.setActionCommand("Stop Timer / Condition");
 		_STOP_TIMER_BUTTON.setName("STOP_TIMER_BUTTON");
 		_STOP_TIMER_BUTTON.setToolTipText("Stop Timer / Condition");
-		jpanel1.add(_STOP_TIMER_BUTTON, new CellConstraints(18, 17, 1, 1, CellConstraints.RIGHT, CellConstraints.DEFAULT));
+		jpanel1.add(_STOP_TIMER_BUTTON, new CellConstraints(18, 17, 1, 1,
+				CellConstraints.RIGHT, CellConstraints.DEFAULT));
 
 		_appPid.setName("appPid");
 		_appPid.setText("-");
@@ -362,7 +389,8 @@ public class ConsoleForm3 extends JPanel
 		jlabel9.setOpaque(true);
 		jlabel9.setText("PID");
 		jlabel9.setHorizontalAlignment(JLabel.LEFT);
-		jpanel1.add(jlabel9, new CellConstraints(6, 9, 1, 1, CellConstraints.FILL, CellConstraints.DEFAULT));
+		jpanel1.add(jlabel9, new CellConstraints(6, 9, 1, 1,
+				CellConstraints.FILL, CellConstraints.DEFAULT));
 
 		JLabel jlabel10 = new JLabel();
 		jlabel10.setBackground(new Color(204, 204, 204));
@@ -370,7 +398,8 @@ public class ConsoleForm3 extends JPanel
 		jlabel10.setOpaque(true);
 		jlabel10.setText("Timer");
 		jlabel10.setHorizontalAlignment(JLabel.LEFT);
-		jpanel1.add(jlabel10, new CellConstraints(16, 13, 1, 1, CellConstraints.FILL, CellConstraints.DEFAULT));
+		jpanel1.add(jlabel10, new CellConstraints(16, 13, 1, 1,
+				CellConstraints.FILL, CellConstraints.DEFAULT));
 
 		JLabel jlabel11 = new JLabel();
 		jlabel11.setBackground(new Color(204, 204, 204));
@@ -378,7 +407,8 @@ public class ConsoleForm3 extends JPanel
 		jlabel11.setOpaque(true);
 		jlabel11.setText("Condition");
 		jlabel11.setHorizontalAlignment(JLabel.LEFT);
-		jpanel1.add(jlabel11, new CellConstraints(18, 13, 1, 1, CellConstraints.FILL, CellConstraints.DEFAULT));
+		jpanel1.add(jlabel11, new CellConstraints(18, 13, 1, 1,
+				CellConstraints.FILL, CellConstraints.DEFAULT));
 
 		JLabel jlabel12 = new JLabel();
 		jlabel12.setBackground(new Color(204, 204, 204));
@@ -386,7 +416,8 @@ public class ConsoleForm3 extends JPanel
 		jlabel12.setOpaque(true);
 		jlabel12.setText("Type");
 		jlabel12.setHorizontalAlignment(JLabel.LEFT);
-		jpanel1.add(jlabel12, new CellConstraints(20, 13, 1, 1, CellConstraints.FILL, CellConstraints.DEFAULT));
+		jpanel1.add(jlabel12, new CellConstraints(20, 13, 1, 1,
+				CellConstraints.FILL, CellConstraints.DEFAULT));
 
 		JLabel jlabel13 = new JLabel();
 		jlabel13.setBackground(new Color(204, 204, 204));
@@ -394,7 +425,8 @@ public class ConsoleForm3 extends JPanel
 		jlabel13.setOpaque(true);
 		jlabel13.setText("CPU");
 		jlabel13.setHorizontalAlignment(JLabel.LEFT);
-		jpanel1.add(jlabel13, new CellConstraints(4, 13, 1, 1, CellConstraints.FILL, CellConstraints.DEFAULT));
+		jpanel1.add(jlabel13, new CellConstraints(4, 13, 1, 1,
+				CellConstraints.FILL, CellConstraints.DEFAULT));
 
 		_cpu.setName("cpu");
 		_cpu.setText("-");
@@ -406,7 +438,8 @@ public class ConsoleForm3 extends JPanel
 		jlabel14.setOpaque(true);
 		jlabel14.setText("Memory");
 		jlabel14.setHorizontalAlignment(JLabel.LEFT);
-		jpanel1.add(jlabel14, new CellConstraints(6, 13, 1, 1, CellConstraints.FILL, CellConstraints.DEFAULT));
+		jpanel1.add(jlabel14, new CellConstraints(6, 13, 1, 1,
+				CellConstraints.FILL, CellConstraints.DEFAULT));
 
 		_memory.setName("memory");
 		_memory.setText("-");
@@ -418,7 +451,8 @@ public class ConsoleForm3 extends JPanel
 		jlabel15.setOpaque(true);
 		jlabel15.setText("Handles");
 		jlabel15.setHorizontalAlignment(JLabel.LEFT);
-		jpanel1.add(jlabel15, new CellConstraints(8, 13, 1, 1, CellConstraints.FILL, CellConstraints.DEFAULT));
+		jpanel1.add(jlabel15, new CellConstraints(8, 13, 1, 1,
+				CellConstraints.FILL, CellConstraints.DEFAULT));
 
 		_handles.setName("handles");
 		_handles.setText("-");
@@ -430,7 +464,8 @@ public class ConsoleForm3 extends JPanel
 		jlabel16.setOpaque(true);
 		jlabel16.setText("Threads");
 		jlabel16.setHorizontalAlignment(JLabel.LEFT);
-		jpanel1.add(jlabel16, new CellConstraints(10, 13, 1, 1, CellConstraints.FILL, CellConstraints.DEFAULT));
+		jpanel1.add(jlabel16, new CellConstraints(10, 13, 1, 1,
+				CellConstraints.FILL, CellConstraints.DEFAULT));
 
 		_threads.setName("threads");
 		_threads.setText("-");
@@ -445,14 +480,16 @@ public class ConsoleForm3 extends JPanel
 		jlabel17.setFont(new Font("Tahoma", Font.BOLD, 11));
 		jlabel17.setOpaque(true);
 		jlabel17.setText("Restarts");
-		jpanel1.add(jlabel17, new CellConstraints(12, 13, 1, 1, CellConstraints.FILL, CellConstraints.DEFAULT));
+		jpanel1.add(jlabel17, new CellConstraints(12, 13, 1, 1,
+				CellConstraints.FILL, CellConstraints.DEFAULT));
 
 		JLabel jlabel18 = new JLabel();
 		jlabel18.setBackground(new Color(204, 204, 204));
 		jlabel18.setFont(new Font("Tahoma", Font.BOLD, 11));
 		jlabel18.setOpaque(true);
 		jlabel18.setText("Exit Code");
-		jpanel1.add(jlabel18, new CellConstraints(12, 9, 1, 1, CellConstraints.FILL, CellConstraints.DEFAULT));
+		jpanel1.add(jlabel18, new CellConstraints(12, 9, 1, 1,
+				CellConstraints.FILL, CellConstraints.DEFAULT));
 
 		_exitCode.setName("exitCode");
 		_exitCode.setText("-");
@@ -461,12 +498,14 @@ public class ConsoleForm3 extends JPanel
 		_THREAD_DUMP_WRAPPER_BUTTON.setActionCommand("Exit");
 		_THREAD_DUMP_WRAPPER_BUTTON.setName("THREAD_DUMP_WRAPPER_BUTTON");
 		_THREAD_DUMP_WRAPPER_BUTTON.setToolTipText("Thread Dump Wrapper");
-		jpanel1.add(_THREAD_DUMP_WRAPPER_BUTTON, new CellConstraints(16, 17, 1, 1, CellConstraints.RIGHT, CellConstraints.DEFAULT));
+		jpanel1.add(_THREAD_DUMP_WRAPPER_BUTTON, new CellConstraints(16, 17, 1,
+				1, CellConstraints.RIGHT, CellConstraints.DEFAULT));
 
 		_EXIT_TRAY_ICON_BUTTON.setActionCommand("Exit");
 		_EXIT_TRAY_ICON_BUTTON.setName("EXIT_TRAY_ICON_BUTTON");
 		_EXIT_TRAY_ICON_BUTTON.setToolTipText("Exit Tray Icon");
-		jpanel1.add(_EXIT_TRAY_ICON_BUTTON, new CellConstraints(18, 20, 1, 1, CellConstraints.RIGHT, CellConstraints.DEFAULT));
+		jpanel1.add(_EXIT_TRAY_ICON_BUTTON, new CellConstraints(18, 20, 1, 1,
+				CellConstraints.RIGHT, CellConstraints.DEFAULT));
 
 		_START_OUTPUT_BUTTON.setEnabled(false);
 		_START_OUTPUT_BUTTON.setName("START_OUTPUT_BUTTON");
@@ -489,9 +528,10 @@ public class ConsoleForm3 extends JPanel
 		_CLEAR_OUTPUT_BUTTON.setToolTipText("Clear Output");
 		jpanel1.add(_CLEAR_OUTPUT_BUTTON, cc.xy(10, 2));
 
-		addFillComponents(jpanel1, new int[]
-		{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21 }, new int[]
-		{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21 });
+		addFillComponents(jpanel1, new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+				11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21 }, new int[] { 1, 2,
+				3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+				20, 21 });
 		return jpanel1;
 	}
 

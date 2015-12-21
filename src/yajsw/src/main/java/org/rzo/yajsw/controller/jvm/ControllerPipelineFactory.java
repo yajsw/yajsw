@@ -1,5 +1,19 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.controller.jvm;
-
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
@@ -22,14 +36,14 @@ import org.rzo.yajsw.nettyutils.WhitelistFilter;
 class ControllerPipelineFactory extends ChannelInitializer<SocketChannel>
 {
 
-	JVMController	_controller;
-	boolean			_debug	= false;
+	JVMController _controller;
+	boolean _debug = false;
 
 	ControllerPipelineFactory(JVMController controller)
 	{
 		_controller = controller;
 	}
-	
+
 	public void setDebug(boolean debug)
 	{
 		_debug = debug;
@@ -40,9 +54,10 @@ class ControllerPipelineFactory extends ChannelInitializer<SocketChannel>
 	{
 		ChannelPipeline pipeline = ch.pipeline(); // Note the static import.
 		if (_debug)
-			pipeline.addLast("logging1", new LoggingFilter(_controller.getLog(), "controller"));
+			pipeline.addLast("logging1", new LoggingFilter(
+					_controller.getLog(), "controller"));
 
-		// allow new connections only if state != LOGGED_ON 
+		// allow new connections only if state != LOGGED_ON
 		// and only if state != PROCESS_KILLED
 		pipeline.addLast("checkWaiting", new ConditionFilter(new Condition()
 		{
@@ -52,13 +67,16 @@ class ControllerPipelineFactory extends ChannelInitializer<SocketChannel>
 				int currentState = _controller.getState();
 				if (currentState == JVMController.STATE_LOGGED_ON)
 				{
-					_controller.getLog().info("app already logged on -> rejecting new connection");
+					_controller
+							.getLog()
+							.info("app already logged on -> rejecting new connection");
 					result = false;
 				}
 				else if (currentState == JVMController.STATE_PROCESS_KILLED)
 				{
 					if (_debug)
-					_controller.getLog().info("app not running -> rejecting new connection");
+						_controller.getLog().info(
+								"app not running -> rejecting new connection");
 					result = false;
 				}
 				return result;
@@ -75,11 +93,13 @@ class ControllerPipelineFactory extends ChannelInitializer<SocketChannel>
 		}
 		catch (UnknownHostException e)
 		{
-			_controller.getLog().throwing(JVMController.class.getName(), "start", e);
+			_controller.getLog().throwing(JVMController.class.getName(),
+					"start", e);
 		}
 
 		// add a framer to split incoming bytes to message chunks
-		pipeline.addLast("framer", new DelimiterBasedFrameDecoder(8192, true, Delimiters.nulDelimiter()));
+		pipeline.addLast("framer", new DelimiterBasedFrameDecoder(8192, true,
+				Delimiters.nulDelimiter()));
 
 		// add messge codec
 		pipeline.addLast("messageEncoder", new MessageEncoder());
@@ -87,24 +107,26 @@ class ControllerPipelineFactory extends ChannelInitializer<SocketChannel>
 
 		if (_debug)
 		{
-			pipeline.addLast("logging", new LoggingFilter(_controller.getLog(), "controller"));
+			pipeline.addLast("logging", new LoggingFilter(_controller.getLog(),
+					"controller"));
 			_controller.getLog().info("jvm controller: netty logger set");
 		}
 
 		// if we found our partner close all other open connections
-		pipeline.addLast("removeConnected", new ChannelGroupFilter(new Condition()
-		{
-			public boolean isOk(ChannelHandlerContext ctx, Object msg)
-			{
-				boolean result = false;
-				if (msg instanceof Message)
+		pipeline.addLast("removeConnected", new ChannelGroupFilter(
+				new Condition()
 				{
-					Message m = (Message) msg;
-					result = m.getCode() == Constants.WRAPPER_MSG_OKKEY;
-				}
-				return result;
-			}
-		}));
+					public boolean isOk(ChannelHandlerContext ctx, Object msg)
+					{
+						boolean result = false;
+						if (msg instanceof Message)
+						{
+							Message m = (Message) msg;
+							result = m.getCode() == Constants.WRAPPER_MSG_OKKEY;
+						}
+						return result;
+					}
+				}));
 
 		// at last add the message handler
 		pipeline.addLast("handler", new ControllerHandler(_controller));

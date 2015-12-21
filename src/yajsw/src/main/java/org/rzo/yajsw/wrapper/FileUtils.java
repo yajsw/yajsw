@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.wrapper;
 
 import java.io.File;
@@ -35,7 +41,7 @@ public class FileUtils
 {
 
 	/** The log. */
-	static Logger	log	= Logger.getLogger(FileUtils.class.getName());
+	static Logger log = Logger.getLogger(FileUtils.class.getName());
 
 	/**
 	 * Gets the files.
@@ -71,7 +77,7 @@ public class FileUtils
 
 		// so this must be a pattern try to figure out the files
 		// does not work -> without separator
-		//String[] s = pattern.split("[" + File.separator + "|/]");
+		// String[] s = pattern.split("[" + File.separator + "|/]");
 		String[] s = pattern.split("[\\\\|/]");
 		String[] sh;
 		if (s.length == 1)
@@ -86,12 +92,12 @@ public class FileUtils
 		if (!Platform.isWindows() && pattern.startsWith("/"))
 		{
 			if (sh[0].equals("."))
-				sh[1] = "/"+sh[1];
+				sh[1] = "/" + sh[1];
 			else
-				sh[0] = "/"+sh[0];
-				
+				sh[0] = "/" + sh[0];
+
 		}
-		
+
 		Collection paths = new HashSet();
 		paths.add(sh[0]);
 		for (int i = 1; i < sh.length; i++)
@@ -106,9 +112,11 @@ public class FileUtils
 				if (pathStr.endsWith(":"))
 					pathStr += "/";
 				File path = new File(pathStr);
-				if ((!path.isDirectory()) || (!path.exists()) || (!(path.isAbsolute())))
+				if ((!path.isDirectory()) || (!path.exists())
+						|| (!(path.isAbsolute())))
 					path = new File(workingDir, pathStr);
-				Collection files = getWildcardFiles(path.getAbsolutePath(), file);
+				Collection files = getWildcardFiles(path.getAbsolutePath(),
+						file);
 				for (Iterator it2 = files.iterator(); it2.hasNext();)
 				{
 					File f = (File) it2.next();
@@ -158,7 +166,7 @@ public class FileUtils
 		file = file.trim();
 		if (file.equals(".") || file.equals(".."))
 		{
-			result.add(new File(path+"/"+file));
+			result.add(new File(path + "/" + file));
 			return result;
 		}
 		File fPath = new File(path);
@@ -166,13 +174,15 @@ public class FileUtils
 		{
 			if (!fPath.isDirectory())
 			{
-				log.warning("classpath directory " + fPath.getCanonicalPath() + " not found");
+				log.warning("classpath directory " + fPath.getCanonicalPath()
+						+ " not found");
 				return result;
 			}
 		}
 		catch (Exception ex)
 		{
-			log.warning("classpath directory " + path + " error" + ex.getMessage());
+			log.warning("classpath directory " + path + " error"
+					+ ex.getMessage());
 			return result;
 		}
 		FileFilter fileFilter = new WildcardFileFilter(file);
@@ -196,7 +206,8 @@ public class FileUtils
 	 */
 	public static void main(String[] args)
 	{
-		System.out.println(getFiles(".", "z:\\dev\\yajsw\\..\\yajsw\\*.jar").size());
+		System.out.println(getFiles(".", "z:\\dev\\yajsw\\..\\yajsw\\*.jar")
+				.size());
 		try
 		{
 			// String
@@ -205,11 +216,16 @@ public class FileUtils
 			CompositeConfiguration compConfig = new CompositeConfiguration();
 			AbstractConfiguration configuraton = new BaseConfiguration();
 			compConfig.addConfiguration(new EnvironmentConfiguration());
-			configuraton.setProperty("wrapper.java.classpath.1", "${VERSANT_ROOT}/lib/jvi.*jar");
-			configuraton.setProperty("wrapper.java.classpath.2", "${GROOVY_HOME}/lib/*.jar");
+			configuraton.setProperty("wrapper.java.classpath.1",
+					"${VERSANT_ROOT}/lib/jvi.*jar");
+			configuraton.setProperty("wrapper.java.classpath.2",
+					"${GROOVY_HOME}/lib/*.jar");
 			compConfig.addConfiguration(configuraton);
-			System.out.println("Configuration: " + ConfigurationConverter.getProperties(compConfig));
-			System.out.println("subset: " + ConfigurationConverter.getProperties(compConfig.subset("wrapper.java")));
+			System.out.println("Configuration: "
+					+ ConfigurationConverter.getProperties(compConfig));
+			System.out.println("subset: "
+					+ ConfigurationConverter.getProperties(compConfig
+							.subset("wrapper.java")));
 
 			// Collection files=FileUtils.getFiles("../..",
 			// "C:/versant/7_0_1/lib/jvi*.jar");
@@ -220,7 +236,7 @@ public class FileUtils
 			// File[] files= new
 			// File("C:").listFiles((FilenameFilter)FileFilterUtils.nameFileFilter("C:/versant/7_0_1/lib/jvi*.jar"));
 
-			//         
+			//
 			// FileUtils.getFiles("C:/versant/7_0_1/lib/", "jvi*.jar");
 			// System.out.println("FileList="+
 			// FileUtils.getFiles("C:/versant/7_0_1/lib/", "jvi*.jar"));

@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.os.ms.win.w32;
 
 import io.netty.util.internal.logging.InternalLogger;
@@ -36,8 +42,8 @@ public class WindowsJavaHome implements JavaHome
 {
 
 	/** The _config. */
-	Configuration	_config;
-	InternalLogger	_logger;
+	Configuration _config;
+	InternalLogger _logger;
 	int _debug = 3;
 
 	public void setLogger(InternalLogger logger, int debug)
@@ -66,7 +72,8 @@ public class WindowsJavaHome implements JavaHome
 	{
 		String java = null;
 		// String wrapperJava = _config.getString("wrapper.java.command");
-		if (wrapperJava != null && !wrapperJava.endsWith(".exe") && !wrapperJava.endsWith("}"))
+		if (wrapperJava != null && !wrapperJava.endsWith(".exe")
+				&& !wrapperJava.endsWith("}"))
 			wrapperJava = wrapperJava + ".exe";
 		try
 		{
@@ -76,7 +83,8 @@ public class WindowsJavaHome implements JavaHome
 				File f = new File(wrapperJava);
 				if (!f.isAbsolute())
 				{
-					File f2 = new File(WrapperLoader.getWrapperHome(), wrapperJava);
+					File f2 = new File(WrapperLoader.getWrapperHome(),
+							wrapperJava);
 					if (f2.exists())
 						try
 						{
@@ -92,7 +100,8 @@ public class WindowsJavaHome implements JavaHome
 					wrapperJava = new File(wrapperJava).getCanonicalPath();
 					if (!new File(wrapperJava).exists())
 					{
-						_logger.error("java file does not exist: " + wrapperJava);
+						_logger.error("java file does not exist: "
+								+ wrapperJava);
 						return null;
 					}
 				}
@@ -105,26 +114,39 @@ public class WindowsJavaHome implements JavaHome
 		java = wrapperJava;
 		// String customProcName =
 		// _config.getString("wrapper.java.customProcName");
-		boolean useJavaw = _config.getBoolean("wrapper.java.command.javaw", (wrapperJava != null) && (wrapperJava.endsWith("javaw.exe")));
+		boolean useJavaw = _config.getBoolean("wrapper.java.command.javaw",
+				(wrapperJava != null) && (wrapperJava.endsWith("javaw.exe")));
 
 		if (java == null)
 		{
-			String minVersion = _config.getString("wrapper.java.command.minVersion");
-			String maxVersion = _config.getString("wrapper.java.command.maxVersion");
-			boolean b64bit = _config.getBoolean("wrapper.java.command.64bit", false);
-			boolean jreOnly = _config.getBoolean("wrapper.java.command.jreOnly", false);
-			boolean preferJdk = _config.getBoolean("wrapper.java.command.preferJdk", false);
-			boolean preferJre = _config.getBoolean("wrapper.java.command.preferJre", true && !preferJdk);
-			boolean jdkOnly = _config.getBoolean("wrapper.java.command.jdkOnly", false);
-			String registryBase = Platform.is64Bit() && (!b64bit) ? "SOFTWARE\\Wow6432Node" : "SOFTWARE";
+			String minVersion = _config
+					.getString("wrapper.java.command.minVersion");
+			String maxVersion = _config
+					.getString("wrapper.java.command.maxVersion");
+			boolean b64bit = _config.getBoolean("wrapper.java.command.64bit",
+					false);
+			boolean jreOnly = _config.getBoolean(
+					"wrapper.java.command.jreOnly", false);
+			boolean preferJdk = _config.getBoolean(
+					"wrapper.java.command.preferJdk", false);
+			boolean preferJre = _config.getBoolean(
+					"wrapper.java.command.preferJre", true && !preferJdk);
+			boolean jdkOnly = _config.getBoolean(
+					"wrapper.java.command.jdkOnly", false);
+			String registryBase = Platform.is64Bit() && (!b64bit) ? "SOFTWARE\\Wow6432Node"
+					: "SOFTWARE";
 			if (!jdkOnly && (jreOnly || preferJre))
 			{
-				java = findJavaInRegistry(new String[]
-				{ registryBase+"\\JavaSoft\\Java Runtime Environment", registryBase+"\\IBM\\Java2 Runtime Environment" }, minVersion, maxVersion, b64bit);
+				java = findJavaInRegistry(new String[] {
+						registryBase + "\\JavaSoft\\Java Runtime Environment",
+						registryBase + "\\IBM\\Java2 Runtime Environment" },
+						minVersion, maxVersion, b64bit);
 			}
 			if (java == null && !jreOnly)
-				java = findJavaInRegistry(new String[]
-				{ registryBase+"\\JavaSoft\\Java Development Kit", registryBase+"\\IBM\\Java Development Kit" }, minVersion, maxVersion, b64bit);
+				java = findJavaInRegistry(new String[] {
+						registryBase + "\\JavaSoft\\Java Development Kit",
+						registryBase + "\\IBM\\Java Development Kit" },
+						minVersion, maxVersion, b64bit);
 		}
 		else if (customProcName != null)
 		{
@@ -237,7 +259,8 @@ public class WindowsJavaHome implements JavaHome
 			}
 
 			// Create temp file.
-			customProcName = customProcName.endsWith(".exe") ? customProcName.substring(0, customProcName.length() - 4) : customProcName;
+			customProcName = customProcName.endsWith(".exe") ? customProcName
+					.substring(0, customProcName.length() - 4) : customProcName;
 			String exeName = "java_" + customProcName + "_";
 			if (tmpJavaFile == null)
 				try
@@ -258,7 +281,8 @@ public class WindowsJavaHome implements JavaHome
 		}
 		catch (Throwable e)
 		{
-			_logger.error("error copying java: " + java + " -> " + customProcName, e);
+			_logger.error("error copying java: " + java + " -> "
+					+ customProcName, e);
 		}
 		return null;
 	}
@@ -276,7 +300,8 @@ public class WindowsJavaHome implements JavaHome
 	 */
 	void copyFile(File in, File out) throws IOException
 	{
-		_logger.info("copying java: " + in.getAbsolutePath() + " -> " + out.getAbsolutePath());
+		_logger.info("copying java: " + in.getAbsolutePath() + " -> "
+				+ out.getAbsolutePath());
 		FileChannel inChannel = new FileInputStream(in).getChannel();
 		FileChannel outChannel = new FileOutputStream(out).getChannel();
 		try
@@ -320,7 +345,8 @@ public class WindowsJavaHome implements JavaHome
 	 * 
 	 * @return the string
 	 */
-	private String findJavaInRegistry(String[] keys, String minVersion, String maxVersion, boolean b64bit)
+	private String findJavaInRegistry(String[] keys, String minVersion,
+			String maxVersion, boolean b64bit)
 	{
 		String[] values = null;
 		String result = null;
@@ -332,10 +358,13 @@ public class WindowsJavaHome implements JavaHome
 		{
 			try
 			{
-				values = Registry.getSubKeys(REGISTRY_ROOT_KEY.LOCAL_MACHINE, key);
+				values = Registry.getSubKeys(REGISTRY_ROOT_KEY.LOCAL_MACHINE,
+						key);
 				for (String value : values)
 				{
-					String dir = Registry.getStringValue(REGISTRY_ROOT_KEY.LOCAL_MACHINE, key + "\\" + value, "JavaHome");
+					String dir = Registry.getStringValue(
+							REGISTRY_ROOT_KEY.LOCAL_MACHINE,
+							key + "\\" + value, "JavaHome");
 					boolean exists = false;
 					try
 					{
@@ -345,7 +374,8 @@ public class WindowsJavaHome implements JavaHome
 					{
 						System.out.println("wrong registry key value: " + dir);
 					}
-					if (exists && value.compareTo(maxVersion) <= 0 && value.compareTo(minVersion) >= 0)
+					if (exists && value.compareTo(maxVersion) <= 0
+							&& value.compareTo(minVersion) >= 0)
 					{
 						if (result == null)
 						{
@@ -382,29 +412,39 @@ public class WindowsJavaHome implements JavaHome
 		Configuration conf = new BaseConfiguration();
 		conf.setProperty("wrapper.java.command", "java");
 		WindowsJavaHome javaHome = new WindowsJavaHome(conf);
-		System.out.println(javaHome.findJava(conf.getString("wrapper.java.command"), conf.getString("wrapper.java.command")));
+		System.out.println(javaHome.findJava(
+				conf.getString("wrapper.java.command"),
+				conf.getString("wrapper.java.command")));
 
 		conf.setProperty("wrapper.java.customProcName", "test");
 		javaHome = new WindowsJavaHome(conf);
-		System.out.println(javaHome.findJava(conf.getString("wrapper.java.command"), conf.getString("wrapper.java.command")));
+		System.out.println(javaHome.findJava(
+				conf.getString("wrapper.java.command"),
+				conf.getString("wrapper.java.command")));
 
 		conf.setProperty("wrapper.java.command", "javaw");
 		javaHome = new WindowsJavaHome(conf);
-		System.out.println(javaHome.findJava(conf.getString("wrapper.java.command"), conf.getString("wrapper.java.command")));
+		System.out.println(javaHome.findJava(
+				conf.getString("wrapper.java.command"),
+				conf.getString("wrapper.java.command")));
 
 		conf.clear();
 		conf.setProperty("wrapper.java.minversion", "1.5.0");
 		conf.setProperty("wrapper.java.maxversion", "1.5.99");
 		conf.setProperty("wrapper.java.customProcName", "test");
 		javaHome = new WindowsJavaHome(conf);
-		System.out.println(javaHome.findJava(conf.getString("wrapper.java.command"), conf.getString("wrapper.java.command")));
+		System.out.println(javaHome.findJava(
+				conf.getString("wrapper.java.command"),
+				conf.getString("wrapper.java.command")));
 
 		conf.clear();
 		conf.setProperty("wrapper.java.minversion", "1.6.0");
 		conf.setProperty("wrapper.java.customProcName", "test");
 		conf.setProperty("wrapper.java.preferJdk", true);
 		javaHome = new WindowsJavaHome(conf);
-		System.out.println(javaHome.findJava(conf.getString("wrapper.java.command"), conf.getString("wrapper.java.command")));
+		System.out.println(javaHome.findJava(
+				conf.getString("wrapper.java.command"),
+				conf.getString("wrapper.java.command")));
 
 	}
 

@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.tray;
 
 import java.awt.AWTException;
@@ -996,44 +1002,52 @@ public class WrapperTrayIconImpl implements WrapperTrayIcon
 		}
 
 	}
-	
-	    private void stopService() {
-		        try {
-					int myPid = OperatingSystem.instance().processManagerInstance()
-							.currentProcessId();
-					Process me = OperatingSystem.instance().processManagerInstance()
-							.getProcess(myPid);
-					String cmd = me.getCommand();
-					me.destroy();
-					JCLParser parser = JCLParser.parse(cmd);
-					String[] startCmd = new String[5];
-					startCmd[0] = parser.getJava();
-					startCmd[1] = "-jar";
-					startCmd[2] = new File(WrapperLoader.getWrapperJar())
-							.getCanonicalPath();
-					startCmd[3] = "-p";
-					startCmd[4] = parser.getArgs().get(1);
-					Process startProcess = OperatingSystem.instance()
-							.processManagerInstance().createProcess();
-					startProcess.setCommand(startCmd);
-					startProcess.setDebug(false);
-					startProcess.start();
-					startProcess.waitFor();
-					startProcess.destroy();
-		        } catch (Throwable ex) {
-		            ex.printStackTrace();
-		        }
-		    }
-		 
-		    private void restartService() {
-		        try {
-		        	stopService();
-		        	Thread.sleep(15000L);
-		        	startService();
-		        } catch (Throwable ex) {
-		            ex.printStackTrace();
-		        }
-		    }
+
+	private void stopService()
+	{
+		try
+		{
+			int myPid = OperatingSystem.instance().processManagerInstance()
+					.currentProcessId();
+			Process me = OperatingSystem.instance().processManagerInstance()
+					.getProcess(myPid);
+			String cmd = me.getCommand();
+			me.destroy();
+			JCLParser parser = JCLParser.parse(cmd);
+			String[] startCmd = new String[5];
+			startCmd[0] = parser.getJava();
+			startCmd[1] = "-jar";
+			startCmd[2] = new File(WrapperLoader.getWrapperJar())
+					.getCanonicalPath();
+			startCmd[3] = "-p";
+			startCmd[4] = parser.getArgs().get(1);
+			Process startProcess = OperatingSystem.instance()
+					.processManagerInstance().createProcess();
+			startProcess.setCommand(startCmd);
+			startProcess.setDebug(false);
+			startProcess.start();
+			startProcess.waitFor();
+			startProcess.destroy();
+		}
+		catch (Throwable ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+
+	private void restartService()
+	{
+		try
+		{
+			stopService();
+			Thread.sleep(15000L);
+			startService();
+		}
+		catch (Throwable ex)
+		{
+			ex.printStackTrace();
+		}
+	}
 
 	private void closePopup()
 	{

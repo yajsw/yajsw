@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.wrapper;
 
 import io.netty.util.internal.logging.InternalLogger;
@@ -12,39 +27,40 @@ import org.apache.commons.configuration.Configuration;
 public interface WrappedProcess
 {
 	/** The Constant STATE_IDLE. */
-	static final int	STATE_IDLE			= 0;
+	static final int STATE_IDLE = 0;
 
 	/** The Constant STATE_STARTING. */
-	static final int	STATE_STARTING		= 1;
+	static final int STATE_STARTING = 1;
 
 	/** The Constant STATE_RESTART. */
-	static final int	STATE_RESTART		= 2;
+	static final int STATE_RESTART = 2;
 
 	/** The Constant STATE_STOP. */
-	static final int	STATE_STOP			= 3;
+	static final int STATE_STOP = 3;
 
 	/** The Constant STATE_RUNNING. */
-	static final int	STATE_RUNNING		= 4;
+	static final int STATE_RUNNING = 4;
 
 	/** The Constant STATE_RESTART_START. */
-	static final int	STATE_RESTART_START	= 5;
+	static final int STATE_RESTART_START = 5;
 
 	/** The Constant STATE_RESTART_STOP. */
-	static final int	STATE_RESTART_STOP	= 6;
+	static final int STATE_RESTART_STOP = 6;
 
 	/** The Constant STATE_RESTART_WAIT. */
-	static final int	STATE_RESTART_WAIT	= 7;
+	static final int STATE_RESTART_WAIT = 7;
 
 	/** The Constant STATE_USER_STOP. */
-	static final int	STATE_USER_STOP		= 8;
+	static final int STATE_USER_STOP = 8;
 
 	/** The Constant STATE_ABORT. */
-	static final int	STATE_ABORT			= 9;
+	static final int STATE_ABORT = 9;
 
-	static final int	STATE_SHUTDOWN		= 10;
+	static final int STATE_SHUTDOWN = 10;
 
-	// used only within tray icon to show that app has not yet reported that it is up and running
-	static final int	STATE_APP_WAIT	= 11;
+	// used only within tray icon to show that app has not yet reported that it
+	// is up and running
+	static final int STATE_APP_WAIT = 11;
 
 	/**
 	 * Inits the.
@@ -60,6 +76,7 @@ public interface WrappedProcess
 	 * Stop.
 	 */
 	public void stop();
+
 	public void stop(String reason);
 
 	/**
@@ -147,6 +164,7 @@ public interface WrappedProcess
 	public int getAppThreads();
 
 	public long getAppVMemory();
+
 	public long getAppPMemory();
 
 	public int getAppCpu();
@@ -162,7 +180,7 @@ public interface WrappedProcess
 	public void threadDump();
 
 	public void gc();
-	
+
 	public void dumpHeap(String fileName);
 
 	public void stopTimerCondition();
@@ -204,18 +222,17 @@ public interface WrappedProcess
 	public long getMaxStartTime();
 
 	public void setStopper(boolean b);
-	
+
 	public Configuration getYajswConfig();
 
 	public void signalStopping(long valueOf);
-	
+
 	public boolean isAppReportedReady();
 
 	public void setAppReportedReady(boolean appReportedReady);
 
 	public InternalLogger getInternalWrapperLogger();
-	
-	public void update(String conf, boolean autostart);
 
+	public void update(String conf, boolean autostart);
 
 }

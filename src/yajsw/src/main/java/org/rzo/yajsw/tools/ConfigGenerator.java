@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.tools;
 
 import java.io.File;
@@ -12,13 +27,15 @@ public class ConfigGenerator
 {
 	private static void usage()
 	{
-		System.out.println("Usage: java -cp wrapper.jar org.rzo.yajsw.ConfigurationGenerator <pid> <output file>");
+		System.out
+				.println("Usage: java -cp wrapper.jar org.rzo.yajsw.ConfigurationGenerator <pid> <output file>");
 		System.exit(-1);
 	}
 
 	public static void generate(int pid, File input, File output)
 	{
-		Process p = OperatingSystem.instance().processManagerInstance().getProcess(pid);
+		Process p = OperatingSystem.instance().processManagerInstance()
+				.getProcess(pid);
 		if (p == null)
 		{
 			System.out.println("cannot find process " + pid);
@@ -78,7 +95,8 @@ public class ConfigGenerator
 
 	}
 
-	private static void createConfigFile(Process p, File input, File output, String cmd)
+	private static void createConfigFile(Process p, File input, File output,
+			String cmd)
 	{
 		if (isJavaCmd(p))
 			createJavaConfigFile(p, input, output);
@@ -88,12 +106,15 @@ public class ConfigGenerator
 		System.out.println("-----------------");
 		System.out.println("Output file: " + output.getAbsolutePath());
 		System.out.println("-----------------");
-		System.out.println("NOTE: check/edit the following properties in the config file!");
+		System.out
+				.println("NOTE: check/edit the following properties in the config file!");
 		System.out.println();
-		System.out.println("wrapper.app.account, wrapper.app.password: either set the password or remove the account");
+		System.out
+				.println("wrapper.app.account, wrapper.app.password: either set the password or remove the account");
 		System.out.println("wrapper.java.command");
 		System.out.println("wrapper.working.dir");
-		System.out.println("wrapper.ntservice.name, wrapper.ntservice.displayname, wrapper.ntservice.description");
+		System.out
+				.println("wrapper.ntservice.name, wrapper.ntservice.displayname, wrapper.ntservice.description");
 		System.out.println("-----------------");
 
 	}
@@ -152,9 +173,11 @@ public class ConfigGenerator
 			 * conf.setProperty("wrapper.java.app.mainclass", mainClass);
 			 */
 			if (parsedCmd.getMainClass() != null)
-				conf.setProperty("wrapper.java.app.mainclass", parsedCmd.getMainClass());
+				conf.setProperty("wrapper.java.app.mainclass",
+						parsedCmd.getMainClass());
 			else
-				conf.setProperty("wrapper.java.app.jar", relativeString(parsedCmd.getJar(), workingDir));
+				conf.setProperty("wrapper.java.app.jar",
+						relativeString(parsedCmd.getJar(), workingDir));
 
 			/*
 			 * // this does not seem to work correctly -> get jvm the hard way
@@ -177,9 +200,10 @@ public class ConfigGenerator
 			 */
 			int i = 1;
 			List<String> classpathList = parsedCmd.getClasspath();
-			// no longer required - wrapper will automatically add the jar to the classpath
-			//if (conf.getString("wrapper.java.app.jar", null) != null)
-			//	classpathList.add(conf.getString("wrapper.java.app.jar"));
+			// no longer required - wrapper will automatically add the jar to
+			// the classpath
+			// if (conf.getString("wrapper.java.app.jar", null) != null)
+			// classpathList.add(conf.getString("wrapper.java.app.jar"));
 			if (classpathList == null || classpathList.isEmpty())
 				classpathList = getClasspathFromEnvironment(p);
 			if (classpathList.isEmpty() && parsedCmd.getJar() == null)
@@ -285,15 +309,15 @@ public class ConfigGenerator
 		List<String> result = new ArrayList<String>();
 		try
 		{
-		String cp = (String) p.getEnvironmentAsMap().get("CLASSPATH");
-		if (cp == null)
-			return result;
-		String[] cpArr = cp.split(File.pathSeparator);
-		for (String cc : cpArr)
-		{
-			cc = cc.replaceAll("\"", "");
-			result.add(cc.trim());
-		}
+			String cp = (String) p.getEnvironmentAsMap().get("CLASSPATH");
+			if (cp == null)
+				return result;
+			String[] cpArr = cp.split(File.pathSeparator);
+			for (String cc : cpArr)
+			{
+				cc = cc.replaceAll("\"", "");
+				result.add(cc.trim());
+			}
 		}
 		catch (Exception ex)
 		{

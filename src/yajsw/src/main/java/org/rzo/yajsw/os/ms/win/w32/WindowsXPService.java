@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.os.ms.win.w32;
 
 import java.util.ArrayList;
@@ -41,12 +56,12 @@ public class WindowsXPService extends AbstractService
 		public void log(String txt, int level)
 		{
 			if (_debug > level)
-			System.out.println(txt);
+				System.out.println(txt);
 		}
 
 	}
 
-	MyWin32Service	_service;
+	MyWin32Service _service;
 
 	public boolean install()
 	{
@@ -55,9 +70,11 @@ public class WindowsXPService extends AbstractService
 			if (_command[i].startsWith("\"") || !_command[i].contains(" "))
 				command += _command[i] + " ";
 			else
-				command += '"'+_command[i] + "\" ";
+				command += '"' + _command[i] + "\" ";
 
-		return _service.install(_displayName, _description, _dependencies, _account, _password, command, _startType, _interactive, _failureActions);
+		return _service.install(_displayName, _description, _dependencies,
+				_account, _password, command, _startType, _interactive,
+				_failureActions);
 	}
 
 	public boolean start()
@@ -93,7 +110,8 @@ public class WindowsXPService extends AbstractService
 		{
 			_service = new MyWin32Service(_name);
 		}
-		if (_config != null && _config.getBoolean("wrapper.ntservice.interactive", false))
+		if (_config != null
+				&& _config.getBoolean("wrapper.ntservice.interactive", false))
 			_interactive = true;
 	}
 
@@ -113,7 +131,8 @@ public class WindowsXPService extends AbstractService
 	public static Map<String, ServiceInfo> getServiceList()
 	{
 		Map<String, ServiceInfo> result = new HashMap<String, ServiceInfo>();
-		Map<String, ENUM_SERVICE_STATUS_PROCESS> services = Win32Service.enumerateServices(null);
+		Map<String, ENUM_SERVICE_STATUS_PROCESS> services = Win32Service
+				.enumerateServices(null);
 		for (String name : services.keySet())
 		{
 			result.put(name, getServiceInfo(name));
@@ -132,44 +151,49 @@ public class WindowsXPService extends AbstractService
 			return _service.requestElevation();
 		return false;
 	}
-	
+
 	public static Object getServiceFailureActions(Configuration config)
 	{
-		String cmd = config.getString("wrapper.ntservice.failure_actions.command", null);
-		List<Object> actions = config.getList("wrapper.ntservice.failure_actions.actions", null);
-		List<Object> actionsDelay = config.getList("wrapper.ntservice.failure_actions.actions_delay", new ArrayList());
+		String cmd = config.getString(
+				"wrapper.ntservice.failure_actions.command", null);
+		List<Object> actions = config.getList(
+				"wrapper.ntservice.failure_actions.actions", null);
+		List<Object> actionsDelay = config.getList(
+				"wrapper.ntservice.failure_actions.actions_delay",
+				new ArrayList());
 		if (actions == null)
 			return null;
-		
-		SC_ACTION[] scActions = (SC_ACTION[]) new SC_ACTION().toArray(actions.size());
-			int i = 0;
-			int lastDelay = 0;
-			for (Object action : actions)
+
+		SC_ACTION[] scActions = (SC_ACTION[]) new SC_ACTION().toArray(actions
+				.size());
+		int i = 0;
+		int lastDelay = 0;
+		for (Object action : actions)
+		{
+			// scActions[i] = new SC_ACTION();
+			if ("NONE".equals(action))
 			{
-				//scActions[i] = new SC_ACTION();
-				if ("NONE".equals(action))
-				{
-					scActions[i].Type = Advapi32.SC_ACTION_NONE;
-				}
-				else if ("REBOOT".equals(action))
-				{
-					scActions[i].Type = Advapi32.SC_ACTION_REBOOT;
-				}
-				else if ("RESTART".equals(action))
-				{
-					scActions[i].Type = Advapi32.SC_ACTION_RESTART;
-				}
-				else if ("COMMAND".equals(action))
-				{
-					scActions[i].Type = Advapi32.SC_ACTION_RUN_COMMAND;
-				}
-				else
-				{
-					System.out.println("ERROR: unknown failure action : " + action);
-					System.out.println("Aborting setting failure actions");
-					return null;
-				}
-				if (actionsDelay.size() > i)
+				scActions[i].Type = Advapi32.SC_ACTION_NONE;
+			}
+			else if ("REBOOT".equals(action))
+			{
+				scActions[i].Type = Advapi32.SC_ACTION_REBOOT;
+			}
+			else if ("RESTART".equals(action))
+			{
+				scActions[i].Type = Advapi32.SC_ACTION_RESTART;
+			}
+			else if ("COMMAND".equals(action))
+			{
+				scActions[i].Type = Advapi32.SC_ACTION_RUN_COMMAND;
+			}
+			else
+			{
+				System.out.println("ERROR: unknown failure action : " + action);
+				System.out.println("Aborting setting failure actions");
+				return null;
+			}
+			if (actionsDelay.size() > i)
 				try
 				{
 					Object d = actionsDelay.get(i);
@@ -177,25 +201,29 @@ public class WindowsXPService extends AbstractService
 				}
 				catch (Exception ex)
 				{
-					System.out.println("Error: failure actions delay is not a number.");
+					System.out
+							.println("Error: failure actions delay is not a number.");
 				}
-				scActions[i].Delay = lastDelay;
-				i++;
-			}
+			scActions[i].Delay = lastDelay;
+			i++;
+		}
 
 		SERVICE_FAILURE_ACTIONS result = new SERVICE_FAILURE_ACTIONS();
-		result.dwResetPeriod = config.getInt("wrapper.ntservice.failure_actions.reset_period", 0);
-		result.lpCommand = config.getString("wrapper.ntservice.failure_actions.command", "");
-		result.lpRebootMsg = config.getString("wrapper.ntservice.failure_actions.reboot_msg", null);
+		result.dwResetPeriod = config.getInt(
+				"wrapper.ntservice.failure_actions.reset_period", 0);
+		result.lpCommand = config.getString(
+				"wrapper.ntservice.failure_actions.command", "");
+		result.lpRebootMsg = config.getString(
+				"wrapper.ntservice.failure_actions.reboot_msg", null);
 		result.cActions = scActions.length;
 		scActions[0].autoWrite();
 		result.lpsaActions = scActions[0].getPointer();
 		result.write();
-//		for (int z = 0; z<result.cActions*scActions[0].size(); z++)
-//		{
-//			System.out.print(z + ": ");
-//			System.out.println(Integer.toHexString(result.lpsaActions.getByte(z)));
-//		}
+		// for (int z = 0; z<result.cActions*scActions[0].size(); z++)
+		// {
+		// System.out.print(z + ": ");
+		// System.out.println(Integer.toHexString(result.lpsaActions.getByte(z)));
+		// }
 		return result;
 
 	}

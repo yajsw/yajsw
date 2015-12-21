@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw;
 
 import java.io.File;
@@ -56,94 +62,94 @@ public class WrapperExe
 {
 
 	/** The group. */
-	static Group				group;
+	static Group group;
 
 	/** The cl. */
-	static CommandLine			cl;
+	static CommandLine cl;
 
 	/** The conf file. */
-	static String				confFile;
+	static String confFile;
 
-	static List					confFileList;
+	static List confFileList;
 
 	/** The properties. */
-	static List					properties;
+	static List properties;
 
 	/** The cmds. */
-	static List					cmds;
+	static List cmds;
 
 	/** The pid. */
-	static int					pid;
+	static int pid;
 
 	/** The pid. */
-	static String				defaultFile;
+	static String defaultFile;
 
 	/** The Constant OPTION_C. */
-	static final int			OPTION_C			= 0;
+	static final int OPTION_C = 0;
 
 	/** The Constant OPTION_T. */
-	static final int			OPTION_T			= 1;
+	static final int OPTION_T = 1;
 
 	/** The Constant OPTION_P. */
-	static final int			OPTION_P			= 2;
+	static final int OPTION_P = 2;
 
 	/** The Constant OPTION_T. */
-	static final int			OPTION_TX			= 91;
+	static final int OPTION_TX = 91;
 
 	/** The Constant OPTION_P. */
-	static final int			OPTION_PX			= 92;
+	static final int OPTION_PX = 92;
 
 	/** The Constant OPTION_I. */
-	static final int			OPTION_I			= 3;
+	static final int OPTION_I = 3;
 
 	/** The Constant OPTION_R. */
-	static final int			OPTION_R			= 4;
+	static final int OPTION_R = 4;
 
 	/** The Constant OPTION_N. */
-	static final int			OPTION_N			= 5;
+	static final int OPTION_N = 5;
 
 	/** The Constant OPTION_G. */
-	static final int			OPTION_G			= 6;
+	static final int OPTION_G = 6;
 
 	/** The Constant OPTION_D. */
-	static final int			OPTION_D			= 7;
+	static final int OPTION_D = 7;
 
 	/** The Constant OPTION_Q. */
-	static final int			OPTION_Q			= 8;
+	static final int OPTION_Q = 8;
 
 	/** The Constant OPTION_QS. */
-	static final int			OPTION_QS			= 9;
+	static final int OPTION_QS = 9;
 
 	/** The Constant OPTION_Y. */
-	static final int			OPTION_Y			= 10;
+	static final int OPTION_Y = 10;
 
 	/** The Constant OPTION_QX. */
-	static final int			OPTION_QX			= 11;
-	static final int			OPTION_RW			= 12;
-	static final int			OPTION_K			= 13;
+	static final int OPTION_QX = 11;
+	static final int OPTION_RW = 12;
+	static final int OPTION_K = 13;
 
 	/** The Constant CONF_FILE. */
-	//static final String			CONF_FILE			= "confFile";
+	// static final String CONF_FILE = "confFile";
 
 	/** The Constant PROPERTIES. */
-	//static final String			PROPERTIES			= "properties";
-	static final String			ARGS			= "arguments";
+	// static final String PROPERTIES = "properties";
+	static final String ARGS = "arguments";
 
 	/** The Constant PID. */
-	static final String			PID					= "pid";
+	static final String PID = "pid";
 
-	static final String			KS_KEY_VALUE				= "ksKeyValue";
+	static final String KS_KEY_VALUE = "ksKeyValue";
 
 	/** The Constant DEFAULT_FILE. */
-	static final String			DEFAULT_FILE		= "default configuration file";
+	static final String DEFAULT_FILE = "default configuration file";
 
-	static WrappedService		_service			= null;
+	static WrappedService _service = null;
 
-	static boolean				_exitOnTerminate	= true;
+	static boolean _exitOnTerminate = true;
 
-	static int					_exitCode			= 0;
+	static int _exitCode = 0;
 
-	static Map<String, Object>	_properties			= new HashMap<String, Object>();
+	static Map<String, Object> _properties = new HashMap<String, Object>();
 
 	static List keyValue;
 
@@ -168,14 +174,16 @@ public class WrapperExe
 	 */
 	public static void main(String[] args)
 	{
-		System.out.println("YAJSW: "+YajswVersion.YAJSW_VERSION);
-		System.out.println("OS   : "+YajswVersion.OS_VERSION);
-		System.out.println("JVM  : "+YajswVersion.JAVA_VERSION);
+		System.out.println("YAJSW: " + YajswVersion.YAJSW_VERSION);
+		System.out.println("OS   : " + YajswVersion.OS_VERSION);
+		System.out.println("JVM  : " + YajswVersion.JAVA_VERSION);
 		String wrapperJar = WrapperLoader.getWrapperJar();
 		String homeDir = new File(wrapperJar).getParent();
 		if (!OperatingSystem.instance().setWorkingDir(homeDir))
-			System.out.println("could not set working dir, pls check configuration or user rights: "+homeDir);
-		
+			System.out
+					.println("could not set working dir, pls check configuration or user rights: "
+							+ homeDir);
+
 		// System.out.println(System.getProperty("java.class.path"));
 		buildOptions();
 		parseCommand(args);
@@ -258,32 +266,36 @@ public class WrapperExe
 			doAddKey();
 			break;
 		default:
-			System.out.println("unimplemented option " + cmd.getPreferredName());
+			System.out
+					.println("unimplemented option " + cmd.getPreferredName());
 		}
 	}
 
 	private static void doAddKey()
 	{
 		String key = (String) keyValue.get(0);
-		String value = (String)keyValue.get(1);
+		String value = (String) keyValue.get(1);
 		try
 		{
 			MyKeyStoreInterface ks = getMyKeystore();
 			ks.init();
 			ks.put(key, value.toCharArray());
-			System.out.println("added key "+key+" to keystore "+ks.getFile());
-			
+			System.out.println("added key " + key + " to keystore "
+					+ ks.getFile());
+
 		}
 		catch (Exception ex)
 		{
-			System.out.println("error storing data in keystore -> check folder or user rights");
+			System.out
+					.println("error storing data in keystore -> check folder or user rights");
 			System.out.println(ex.getMessage());
 		}
 	}
 
 	private static MyKeyStoreInterface getMyKeystore() throws Exception
 	{
-		Class clazz = MyKeyStoreInterface.class.getClassLoader().loadClass("org.rzo.yajsw.util.MyKeyStore");
+		Class clazz = MyKeyStoreInterface.class.getClassLoader().loadClass(
+				"org.rzo.yajsw.util.MyKeyStore");
 		return (MyKeyStoreInterface) clazz.newInstance();
 	}
 
@@ -297,7 +309,8 @@ public class WrapperExe
 		YajswConfiguration conf = new YajswConfigurationImpl(localConf, true);
 		WrappedProcess w = WrappedProcessFactory.createProcess(conf);
 
-		System.out.println("************* RECONNECTING WRAPPER TO PID  " + pid + " ***********************");
+		System.out.println("************* RECONNECTING WRAPPER TO PID  " + pid
+				+ " ***********************");
 		System.out.println();
 
 		if (w.reconnect(pid))
@@ -315,20 +328,22 @@ public class WrapperExe
 	{
 		prepareProperties();
 		WrappedService w = getService();
-		System.out.println("************* REMOVING " + w.getServiceName() + " ***********************");
+		System.out.println("************* REMOVING " + w.getServiceName()
+				+ " ***********************");
 		System.out.println();
 		boolean result = w.uninstall();
-		
-			if (PlatformEx.isWinVista() && w.requiresElevate())
-			{
-				System.out.println("try uac elevate");
-				WindowsXPProcess.elevateMe();
-				return;
-			}
+
+		if (PlatformEx.isWinVista() && w.requiresElevate())
+		{
+			System.out.println("try uac elevate");
+			WindowsXPProcess.elevateMe();
+			return;
+		}
 		if (result)
 			System.out.println("Service " + w.getServiceName() + " removed");
 		else
-			System.out.println("Service " + w.getServiceName() + " NOT removed");
+			System.out
+					.println("Service " + w.getServiceName() + " NOT removed");
 
 	}
 
@@ -336,16 +351,17 @@ public class WrapperExe
 	{
 		prepareProperties();
 		WrappedService w = getService();
-		System.out.println("************* REMOVING " + w.getServiceName() + " ***********************");
+		System.out.println("************* REMOVING " + w.getServiceName()
+				+ " ***********************");
 		System.out.println();
 		boolean result = w.uninstall();
-		
-			if (PlatformEx.isWinVista() && w.requiresElevate())
-			{
-				System.out.println("try uac elevate");
-				WindowsXPProcess.elevateMe();
-				return;
-			}
+
+		if (PlatformEx.isWinVista() && w.requiresElevate())
+		{
+			System.out.println("try uac elevate");
+			WindowsXPProcess.elevateMe();
+			return;
+		}
 		if (result)
 		{
 			while (w.isInstalled())
@@ -361,7 +377,8 @@ public class WrapperExe
 			System.out.println("Service " + w.getServiceName() + " removed");
 		}
 		else
-			System.out.println("Service " + w.getServiceName() + " NOT removed");
+			System.out
+					.println("Service " + w.getServiceName() + " NOT removed");
 
 	}
 
@@ -371,7 +388,8 @@ public class WrapperExe
 	private static void doInstall()
 	{
 		WrappedService w = getService();
-		System.out.println("************* INSTALLING " + w.getServiceName() + " ***********************");
+		System.out.println("************* INSTALLING " + w.getServiceName()
+				+ " ***********************");
 		System.out.println();
 		int i = 0;
 		while (w.isInstalled() && i < 10)
@@ -396,7 +414,6 @@ public class WrapperExe
 			}
 		}
 
-		
 		boolean result = w.install();
 		if (PlatformEx.isWinVista() && w.requiresElevate())
 		{
@@ -408,7 +425,8 @@ public class WrapperExe
 		if (result)
 			System.out.println("Service " + w.getServiceName() + " installed");
 		else
-			System.out.println("Service " + w.getServiceName() + " NOT installed");
+			System.out.println("Service " + w.getServiceName()
+					+ " NOT installed");
 
 	}
 
@@ -419,7 +437,8 @@ public class WrapperExe
 	{
 		WrappedService w = getService();
 
-		System.out.println("************* STOPPING " + w.getServiceName() + " ***********************");
+		System.out.println("************* STOPPING " + w.getServiceName()
+				+ " ***********************");
 		System.out.println();
 
 		try
@@ -433,9 +452,11 @@ public class WrapperExe
 			}
 
 			if (w.isRunning())
-				System.out.println("Service " + w.getServiceName() + " NOT stopped");
+				System.out.println("Service " + w.getServiceName()
+						+ " NOT stopped");
 			else
-				System.out.println("Service " + w.getServiceName() + " stopped");
+				System.out
+						.println("Service " + w.getServiceName() + " stopped");
 		}
 		catch (Exception e)
 		{
@@ -448,7 +469,8 @@ public class WrapperExe
 	{
 		WrappedService w = getService();
 
-		System.out.println("************* STOPPING " + w.getServiceName() + " ***********************");
+		System.out.println("************* STOPPING " + w.getServiceName()
+				+ " ***********************");
 		System.out.println();
 
 		try
@@ -483,7 +505,8 @@ public class WrapperExe
 		// w.setDebug(true);
 		w.init();
 
-		System.out.println("************* STARTING " + w.getServiceName() + " ***********************");
+		System.out.println("************* STARTING " + w.getServiceName()
+				+ " ***********************");
 		System.out.println();
 
 		w.start();
@@ -526,7 +549,8 @@ public class WrapperExe
 		}
 		else
 		{
-			System.out.println("Service " + w.getServiceName() + " NOT started");
+			System.out
+					.println("Service " + w.getServiceName() + " NOT started");
 			_exitCode = 1;
 			_exitOnTerminate = true;
 		}
@@ -536,7 +560,8 @@ public class WrapperExe
 	private static void doStartPosix()
 	{
 		WrappedService w = getService();
-		System.out.println("************* STARTING " + w.getServiceName() + " ***********************");
+		System.out.println("************* STARTING " + w.getServiceName()
+				+ " ***********************");
 		System.out.println();
 
 		w.startProcess();
@@ -556,7 +581,8 @@ public class WrapperExe
 		if (w.isRunning())
 			System.out.println("Service " + w.getServiceName() + " started");
 		else
-			System.out.println("Service " + w.getServiceName() + " NOT started");
+			System.out
+					.println("Service " + w.getServiceName() + " NOT started");
 		_exitOnTerminate = true;
 
 	}
@@ -569,11 +595,9 @@ public class WrapperExe
 		prepareProperties();
 		String[] args;
 		if (_service != null)
-			args = new String[]
-			{ _service.getConfigLocalPath() };
+			args = new String[] { _service.getConfigLocalPath() };
 		else
-			args = new String[]
-			{ confFile };
+			args = new String[] { confFile };
 		try
 		{
 			TrayIconMain.main(args);
@@ -636,26 +660,30 @@ public class WrapperExe
 	private static void doConsole()
 	{
 		prepareProperties();
-		final WrappedProcessList list = WrappedProcessFactory.createProcessList(_properties, confFileList, true);
+		final WrappedProcessList list = WrappedProcessFactory
+				.createProcessList(_properties, confFileList, true);
 		list.startAll();
-//		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable()
-//		{
-//
-//			public void run()
-//			{
-//				list.onStopWrapper();
-//			}
-//			
-//		}));
+		// Runtime.getRuntime().addShutdownHook(new Thread(new Runnable()
+		// {
+		//
+		// public void run()
+		// {
+		// list.onStopWrapper();
+		// }
+		//
+		// }));
 		_exitOnTerminate = false;
 	}
 
 	private static void doGenerate()
 	{
-		System.out.println("************* GENERATING YAJSW CONFIGURATION FOR PID " + pid + " ***********************");
+		System.out
+				.println("************* GENERATING YAJSW CONFIGURATION FOR PID "
+						+ pid + " ***********************");
 		System.out.println();
 		if (defaultFile != null)
-			ConfigGenerator.generate(pid, new File(defaultFile), new File(confFile));
+			ConfigGenerator.generate(pid, new File(defaultFile), new File(
+					confFile));
 		else
 			ConfigGenerator.generate(pid, null, new File(confFile));
 
@@ -699,7 +727,8 @@ public class WrapperExe
 		Parser p = new Parser();
 		p.setGroup(group);
 		p.setHelpFormatter(hf);
-		p.setHelpOption(oBuilder.withLongName("help").withShortName("?").create());
+		p.setHelpOption(oBuilder.withLongName("help").withShortName("?")
+				.create());
 		cl = p.parseAndHelp(args);
 
 		// abort application if no CommandLine was parsed
@@ -719,22 +748,21 @@ public class WrapperExe
 				if (Pattern.matches("wrapper\\..*=.*", arg))
 					properties.add(arg);
 				else
-					confFileList.add(arg);					
+					confFileList.add(arg);
 			}
 			if (confFileList.isEmpty())
 			{
-				if ( ((Option)cmds.get(0)).getId() != OPTION_K)
+				if (((Option) cmds.get(0)).getId() != OPTION_K)
 					System.out.println("no wrapper config file found ");
 			}
 			else
 				confFile = (String) confFileList.get(0);
 			/*
-			confFileList = cl.getValues(CONF_FILE);
-			if (confFileList == null || confFileList.isEmpty())
-				System.out.println("no wrapper config file found ");
-			else
-				confFile = (String) confFileList.get(0);
-				*/
+			 * confFileList = cl.getValues(CONF_FILE); if (confFileList == null
+			 * || confFileList.isEmpty())
+			 * System.out.println("no wrapper config file found "); else
+			 * confFile = (String) confFileList.get(0);
+			 */
 		}
 		catch (Exception ex)
 		{
@@ -750,7 +778,7 @@ public class WrapperExe
 		{
 			// no defaults -> maybe ok
 		}
-		//properties = cl.getValues(PROPERTIES);
+		// properties = cl.getValues(PROPERTIES);
 
 	}
 
@@ -759,51 +787,105 @@ public class WrapperExe
 	 */
 	private static void buildOptions()
 	{
-		DefaultOptionBuilder oBuilder = new DefaultOptionBuilder("-", "--", true);
+		DefaultOptionBuilder oBuilder = new DefaultOptionBuilder("-", "--",
+				true);
 		ArgumentBuilder aBuilder = new ArgumentBuilder();
 		GroupBuilder gBuilder = new GroupBuilder();
 
-		gBuilder.withOption(oBuilder.reset().withId(OPTION_C).withShortName("c").withLongName("console").withDescription(
-				"run as a Console application").create());
-		gBuilder.withOption(oBuilder.reset().withId(OPTION_T).withShortName("t").withLongName("start").withDescription(
-				"starT an NT service or Unix daemon").create());
-		gBuilder.withOption(oBuilder.reset().withId(OPTION_P).withShortName("p").withLongName("stop").withDescription(
-				"stoP a running NT service or Unix daemon").create());
-		gBuilder.withOption(oBuilder.reset().withId(OPTION_TX).withShortName("tx").withLongName("startx").withDescription(
-				"starT -internal a Posix daemon").create());
-		gBuilder.withOption(oBuilder.reset().withId(OPTION_PX).withShortName("px").withLongName("stopx").withDescription(
-				"stoP -internal- a running Posix daemon").create());
-		gBuilder.withOption(oBuilder.reset().withId(OPTION_I).withShortName("i").withLongName("install").withDescription(
-				"Install an NT service or Unix daemon").create());
-		gBuilder.withOption(oBuilder.reset().withId(OPTION_R).withShortName("r").withLongName("remove").withDescription(
-		"Remove an NT service or Unix daemon").create());
-		gBuilder.withOption(oBuilder.reset().withId(OPTION_RW).withShortName("rw").withLongName("removeWait").withDescription(
-		"Remove an NT service or Unix daemon and wait until it is removed").create());
-		gBuilder.withOption(oBuilder.reset().withId(OPTION_Q).withShortName("q").withLongName("query").withDescription(
-				"Query the status of an NT service or Unix daemon").create());
-		gBuilder.withOption(oBuilder.reset().withId(OPTION_Y).withShortName("y").withLongName("tray").withDescription("Start System Tray Icon")
+		gBuilder.withOption(oBuilder.reset().withId(OPTION_C)
+				.withShortName("c").withLongName("console")
+				.withDescription("run as a Console application").create());
+		gBuilder.withOption(oBuilder.reset().withId(OPTION_T)
+				.withShortName("t").withLongName("start")
+				.withDescription("starT an NT service or Unix daemon").create());
+		gBuilder.withOption(oBuilder.reset().withId(OPTION_P)
+				.withShortName("p").withLongName("stop")
+				.withDescription("stoP a running NT service or Unix daemon")
 				.create());
-		gBuilder.withOption(oBuilder.reset().withId(OPTION_QS).withShortName("qs").withLongName("querysilent").withDescription(
-				"Silent Query the status of an NT service or Unix daemon").create());
-		gBuilder.withOption(oBuilder.reset().withId(OPTION_QX).withShortName("qx").withLongName("queryposix").withDescription(
-				"Query the status of a posix daemon. Return status as exit code").create());
+		gBuilder.withOption(oBuilder.reset().withId(OPTION_TX)
+				.withShortName("tx").withLongName("startx")
+				.withDescription("starT -internal a Posix daemon").create());
+		gBuilder.withOption(oBuilder.reset().withId(OPTION_PX)
+				.withShortName("px").withLongName("stopx")
+				.withDescription("stoP -internal- a running Posix daemon")
+				.create());
+		gBuilder.withOption(oBuilder.reset().withId(OPTION_I)
+				.withShortName("i").withLongName("install")
+				.withDescription("Install an NT service or Unix daemon")
+				.create());
+		gBuilder.withOption(oBuilder.reset().withId(OPTION_R)
+				.withShortName("r").withLongName("remove")
+				.withDescription("Remove an NT service or Unix daemon")
+				.create());
+		gBuilder.withOption(oBuilder
+				.reset()
+				.withId(OPTION_RW)
+				.withShortName("rw")
+				.withLongName("removeWait")
+				.withDescription(
+						"Remove an NT service or Unix daemon and wait until it is removed")
+				.create());
+		gBuilder.withOption(oBuilder
+				.reset()
+				.withId(OPTION_Q)
+				.withShortName("q")
+				.withLongName("query")
+				.withDescription(
+						"Query the status of an NT service or Unix daemon")
+				.create());
+		gBuilder.withOption(oBuilder.reset().withId(OPTION_Y)
+				.withShortName("y").withLongName("tray")
+				.withDescription("Start System Tray Icon").create());
+		gBuilder.withOption(oBuilder
+				.reset()
+				.withId(OPTION_QS)
+				.withShortName("qs")
+				.withLongName("querysilent")
+				.withDescription(
+						"Silent Query the status of an NT service or Unix daemon")
+				.create());
+		gBuilder.withOption(oBuilder
+				.reset()
+				.withId(OPTION_QX)
+				.withShortName("qx")
+				.withLongName("queryposix")
+				.withDescription(
+						"Query the status of a posix daemon. Return status as exit code")
+				.create());
 
-		Argument ksKey = aBuilder.reset().withName(KS_KEY_VALUE).withDescription("Key/Value in Keystore").withMinimum(2).withMaximum(2).create();
+		Argument ksKey = aBuilder.reset().withName(KS_KEY_VALUE)
+				.withDescription("Key/Value in Keystore").withMinimum(2)
+				.withMaximum(2).create();
 
-		gBuilder.withOption(oBuilder.reset().withId(OPTION_K).withShortName("k").withLongName("keystoreAdd").withDescription(
-				"Add Key/Value to Keystore").withArgument(ksKey).create());
+		gBuilder.withOption(oBuilder.reset().withId(OPTION_K)
+				.withShortName("k").withLongName("keystoreAdd")
+				.withDescription("Add Key/Value to Keystore")
+				.withArgument(ksKey).create());
 
-		Argument pid = aBuilder.reset().withName(PID).withDescription("PID of process to reconnect to").withMinimum(1).withMaximum(1).withValidator(
-				NumberValidator.getIntegerInstance()).create();
+		Argument pid = aBuilder.reset().withName(PID)
+				.withDescription("PID of process to reconnect to")
+				.withMinimum(1).withMaximum(1)
+				.withValidator(NumberValidator.getIntegerInstance()).create();
 
-		gBuilder.withOption(oBuilder.reset().withId(OPTION_N).withShortName("n").withLongName("reconnect").withDescription(
-				"recoNnect to existing application").withArgument(pid).create());
+		gBuilder.withOption(oBuilder.reset().withId(OPTION_N)
+				.withShortName("n").withLongName("reconnect")
+				.withDescription("recoNnect to existing application")
+				.withArgument(pid).create());
 
-		Argument pid2 = aBuilder.reset().withName(PID).withDescription("PID of process to reconnect to").withMinimum(1).withMaximum(1).withValidator(
-				NumberValidator.getIntegerInstance()).create();
+		Argument pid2 = aBuilder.reset().withName(PID)
+				.withDescription("PID of process to reconnect to")
+				.withMinimum(1).withMaximum(1)
+				.withValidator(NumberValidator.getIntegerInstance()).create();
 
-		Argument defaultFile = aBuilder.reset().withName(DEFAULT_FILE).withDescription("Default Configuration File").withMinimum(0).withMaximum(1)
-				.withValidator(VFSFileValidator.getExistingFileInstance().setBase(".")).create();
+		Argument defaultFile = aBuilder
+				.reset()
+				.withName(DEFAULT_FILE)
+				.withDescription("Default Configuration File")
+				.withMinimum(0)
+				.withMaximum(1)
+				.withValidator(
+						VFSFileValidator.getExistingFileInstance().setBase("."))
+				.create();
 		/*
 		 * GroupBuilder childGbuilder = new GroupBuilder(); DefaultOptionBuilder
 		 * childoObuilder = new DefaultOptionBuilder("-", "--", true);
@@ -822,44 +904,45 @@ public class WrapperExe
 		 * ).withArgument(pid2).withChildren(childGbuilder.create()).create());
 		 */
 
-		gBuilder.withOption(oBuilder.reset().withId(OPTION_D).withShortName("d").withLongName("defaultConf").withDescription(
-				"Default Configuration File").withArgument(defaultFile).create());
+		gBuilder.withOption(oBuilder.reset().withId(OPTION_D)
+				.withShortName("d").withLongName("defaultConf")
+				.withDescription("Default Configuration File")
+				.withArgument(defaultFile).create());
 
-		gBuilder.withOption(oBuilder.reset().withId(OPTION_G).withShortName("g").withLongName("genconf").withDescription(
-				"Generate configuration file from pid").withArgument(pid2).create());
+		gBuilder.withOption(oBuilder.reset().withId(OPTION_G)
+				.withShortName("g").withLongName("genconf")
+				.withDescription("Generate configuration file from pid")
+				.withArgument(pid2).create());
 
-		FileValidator fValidator = VFSFileValidator.getExistingFileInstance().setBase(".");
+		FileValidator fValidator = VFSFileValidator.getExistingFileInstance()
+				.setBase(".");
 		fValidator.setFile(false);
 		// fValidator.setReadable(true);
-		gBuilder.withOption(aBuilder.reset().withName(ARGS).withDescription("Arguments: a list of configuration files, for example conf/wrapper.conf followed by an optional list of configuration name-value pairs, for example wrapper.debug=true")
+		gBuilder.withOption(aBuilder
+				.reset()
+				.withName(ARGS)
+				.withDescription(
+						"Arguments: a list of configuration files, for example conf/wrapper.conf followed by an optional list of configuration name-value pairs, for example wrapper.debug=true")
 				.withMinimum(0).create());
 
 		gBuilder.withMaximum(3);
 
-		
-		
 		/*
-		Validator pValidator = new Validator()
-		{
-
-			public void validate(List values) throws InvalidArgumentException
-			{
-				for (Iterator it = values.iterator(); it.hasNext();)
-				{
-					String p = (String) it.next();
-					if (!Pattern.matches("wrapper\\..*=.*", p))
-					{
-						throw new InvalidArgumentException(p);
-					}
-				}
-
-			}
-
-		};
-		gBuilder.withOption(aBuilder.reset().withName(PROPERTIES).withDescription(
-				"are configuration name-value pairs which override values. For example: wrapper.debug=true").withMinimum(0).withValidator(pValidator)
-				.create());
-				*/
+		 * Validator pValidator = new Validator() {
+		 * 
+		 * public void validate(List values) throws InvalidArgumentException {
+		 * for (Iterator it = values.iterator(); it.hasNext();) { String p =
+		 * (String) it.next(); if (!Pattern.matches("wrapper\\..*=.*", p)) {
+		 * throw new InvalidArgumentException(p); } }
+		 * 
+		 * }
+		 * 
+		 * };
+		 * gBuilder.withOption(aBuilder.reset().withName(PROPERTIES).withDescription
+		 * (
+		 * "are configuration name-value pairs which override values. For example: wrapper.debug=true"
+		 * ).withMinimum(0).withValidator(pValidator) .create());
+		 */
 
 		group = gBuilder.create();
 

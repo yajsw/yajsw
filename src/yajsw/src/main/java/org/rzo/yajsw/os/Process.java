@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.os;
 
 import java.io.InputStream;
@@ -41,6 +47,7 @@ public interface Process
 	 *            the new working dir
 	 */
 	public void setWorkingDir(String dir); //
+
 	public boolean changeWorkingDir(String dir); //
 
 	/**
@@ -248,25 +255,25 @@ public interface Process
 	public boolean stop(int timeout, int code);
 
 	/** The Constant PRIORITY_NORMAL. */
-	public static final int	PRIORITY_NORMAL			= 0;
+	public static final int PRIORITY_NORMAL = 0;
 
 	/** The Constant PRIORITY_BELOW_NORMAL. */
-	public static final int	PRIORITY_BELOW_NORMAL	= -1;
+	public static final int PRIORITY_BELOW_NORMAL = -1;
 
 	/** The Constant PRIORITY_LOW. */
-	public static final int	PRIORITY_LOW			= -2;
+	public static final int PRIORITY_LOW = -2;
 
 	/** The Constant PRIORITY_ABOVE_NORMAL. */
-	public static final int	PRIORITY_ABOVE_NORMAL	= 1;
+	public static final int PRIORITY_ABOVE_NORMAL = 1;
 
 	/** The Constant PRIORITY_HIGH. */
-	public static final int	PRIORITY_HIGH			= 2;
+	public static final int PRIORITY_HIGH = 2;
 
 	/** The Constant PRIORITY_UNDEFINED. */
-	public static final int	PRIORITY_UNDEFINED		= -99;
+	public static final int PRIORITY_UNDEFINED = -99;
 
 	/** The Constant AFFINITY_UNDEFINED. */
-	public static final int	AFFINITY_UNDEFINED		= -99;
+	public static final int AFFINITY_UNDEFINED = -99;
 
 	public void setTmpPath(String tmpPath);
 
@@ -299,17 +306,17 @@ public interface Process
 	public void setDebug(boolean debug);
 
 	public void setMinimized(boolean b);
-	
+
 	public boolean isLogonActiveSession();
-	
+
 	public void setLogonActiveSession(boolean logonActiveSession);
-	
+
 	public void setDesktop(String desktop);
 
 	public void setUmask(int umask);
-	
+
 	public void setUseSpawn(boolean useSpawn);
-	
+
 	public void setLinuxUseVfork(boolean linuxUseVfork);
 
 }

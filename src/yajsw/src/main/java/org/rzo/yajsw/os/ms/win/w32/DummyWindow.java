@@ -1,13 +1,18 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.os.ms.win.w32;
 
 import java.util.ArrayList;
@@ -50,7 +55,8 @@ public class DummyWindow
 	{
 
 		/** The INSTANCE. */
-		MyKernel32	INSTANCE	= (MyKernel32) Native.loadLibrary("Kernel32", MyKernel32.class);
+		MyKernel32 INSTANCE = (MyKernel32) Native.loadLibrary("Kernel32",
+				MyKernel32.class);
 
 		/*
 		 * HMODULE WINAPI GetModuleHandle( __in LPCTSTR lpModuleName );
@@ -81,7 +87,8 @@ public class DummyWindow
 		 * 
 		 * @return true, if successful
 		 */
-		boolean GetModuleHandleExA(int dwFlags, String lpModuleName, PointerByReference phModule);
+		boolean GetModuleHandleExA(int dwFlags, String lpModuleName,
+				PointerByReference phModule);
 
 		/**
 		 * Global add atom a.
@@ -98,12 +105,14 @@ public class DummyWindow
 	/**
 	 * The Interface MyUser32.
 	 */
-	public abstract interface MyUser32 extends com.sun.jna.platform.win32.User32
+	public abstract interface MyUser32 extends
+			com.sun.jna.platform.win32.User32
 	{
 		// Method declarations, constant and structure definitions go here
 
 		/** The INSTANCE. */
-		MyUser32	INSTANCE	= (MyUser32) Native.loadLibrary("User32", MyUser32.class);
+		MyUser32 INSTANCE = (MyUser32) Native.loadLibrary("User32",
+				MyUser32.class);
 
 		/**
 		 * Register hot key.
@@ -164,7 +173,7 @@ public class DummyWindow
 		}
 
 		/** The W m_ hotkey. */
-		int	WM_HOTKEY	= 786;
+		int WM_HOTKEY = 786;
 
 		/*
 		 * typedef struct { UINT cbSize; UINT style; WNDPROC lpfnWndProc; int
@@ -173,10 +182,10 @@ public class DummyWindow
 		 * lpszClassName; HICON hIconSm; } WNDCLASSEX,PWNDCLASSEX;
 		 */
 		/** The C s_ hredraw. */
-		int	CS_HREDRAW	= 2;
+		int CS_HREDRAW = 2;
 
 		/** The C s_ vredraw. */
-		int	CS_VREDRAW	= 1;
+		int CS_VREDRAW = 1;
 
 		/**
 		 * The Class WNDCLASSEX.
@@ -185,49 +194,48 @@ public class DummyWindow
 		{
 
 			/** The cb size. */
-			public int		cbSize			= size();
+			public int cbSize = size();
 
 			/** The style. */
-			public int		style			= 0;
+			public int style = 0;
 
 			/** The lpfn wnd proc. */
-			public WNDPROC	lpfnWndProc;
+			public WNDPROC lpfnWndProc;
 
 			/** The cb cls extra. */
-			public int		cbClsExtra		= 0;
+			public int cbClsExtra = 0;
 
 			/** The cb wnd extra. */
-			public int		cbWndExtra		= 0;
+			public int cbWndExtra = 0;
 
 			/** The h instance. */
-			public Pointer	hInstance;
+			public Pointer hInstance;
 
 			/** The h icon. */
-			public Pointer	hIcon			= null;
+			public Pointer hIcon = null;
 
 			/** The h cursor. */
-			public Pointer	hCursor			= null;
+			public Pointer hCursor = null;
 
 			/** The hbr background. */
-			public Pointer	hbrBackground	= null;
+			public Pointer hbrBackground = null;
 
 			/** The lpsz menu name. */
-			public String	lpszMenuName	= null;
+			public String lpszMenuName = null;
 
 			/** The lpsz class name. */
-			public String	lpszClassName	= "JavaDummyWnd";
+			public String lpszClassName = "JavaDummyWnd";
 
 			/** The h icon sm. */
-			public Pointer	hIconSm			= null;
+			public Pointer hIconSm = null;
 
 			@Override
 			protected List getFieldOrder()
 			{
-				return Arrays.asList(new String[]{
-				"cbSize", "style",
-				"lpfnWndProc", "cbClsExtra", "cbWndExtra", "hInstance", "hIcon",
-				"hCursor", "hbrBackground", "lpszMenuName", "lpszClassName", "hIconSm"
-				});
+				return Arrays.asList(new String[] { "cbSize", "style",
+						"lpfnWndProc", "cbClsExtra", "cbWndExtra", "hInstance",
+						"hIcon", "hCursor", "hbrBackground", "lpszMenuName",
+						"lpszClassName", "hIconSm" });
 			}
 		}
 
@@ -266,16 +274,16 @@ public class DummyWindow
 		 */
 
 		/** The W s_ overlappedwindow. */
-		int	WS_OVERLAPPEDWINDOW	= 0xcf0000;
+		int WS_OVERLAPPEDWINDOW = 0xcf0000;
 
 		/** The W s_ e x_ clientedge. */
-		int	WS_EX_CLIENTEDGE	= 512;
+		int WS_EX_CLIENTEDGE = 512;
 
 		/** The W s_ overlapped. */
-		int	WS_OVERLAPPED		= 0;
+		int WS_OVERLAPPED = 0;
 
 		/** The W s_ visible. */
-		int	WS_VISIBLE			= 0x10000000;
+		int WS_VISIBLE = 0x10000000;
 
 		/**
 		 * Creates the window ex a.
@@ -307,8 +315,10 @@ public class DummyWindow
 		 * 
 		 * @return the pointer
 		 */
-		Pointer CreateWindowExA(int dwExStyle, String lpClassName, String lpWindowName, int dwStyle, int x, int y, int nWidth, int nHeight,
-				Pointer hWndParent, Pointer hMenu, Pointer hInstance, Pointer lpParam);
+		Pointer CreateWindowExA(int dwExStyle, String lpClassName,
+				String lpWindowName, int dwStyle, int x, int y, int nWidth,
+				int nHeight, Pointer hWndParent, Pointer hMenu,
+				Pointer hInstance, Pointer lpParam);
 
 		/*
 		 * LONG_PTR SetWindowLongPtr( HWND hWnd, int nIndex, LONG_PTR dwNewLong
@@ -344,7 +354,7 @@ public class DummyWindow
 		Pointer GetWindowLongA(Pointer hWnd, int nIndex);
 
 		/** The GWL p_ userdata. */
-		int	GWLP_USERDATA	= -21;
+		int GWLP_USERDATA = -21;
 
 		/*
 		 * LRESULT DefWindowProc( HWND hWnd, UINT Msg, WPARAM wParam, LPARAM
@@ -382,13 +392,13 @@ public class DummyWindow
 		int ShowWindow(Pointer hWnd, int nCmdShow);
 
 		/** The S w_ hide. */
-		int	SW_HIDE			= 0;
+		int SW_HIDE = 0;
 
 		/** The S w_ show. */
-		int	SW_SHOW			= 5;
+		int SW_SHOW = 5;
 
 		/** The S w_ shownormal. */
-		int	SW_SHOWNORMAL	= 1;
+		int SW_SHOWNORMAL = 1;
 
 		/*
 		 * BOOL UpdateWindow( HWND hWnd // handle to window );
@@ -415,30 +425,28 @@ public class DummyWindow
 		{
 
 			/** The hwnd. */
-			public Pointer	hwnd;
+			public Pointer hwnd;
 
 			/** The message. */
-			public int		message;
+			public int message;
 
 			/** The w param. */
-			public int		wParam;
+			public int wParam;
 
 			/** The l param. */
-			public int		lParam;
+			public int lParam;
 
 			/** The time. */
-			public int		time;
+			public int time;
 
 			/** The pt. */
-			public POINT	pt;
-			
+			public POINT pt;
+
 			@Override
 			protected List getFieldOrder()
 			{
-				return Arrays.asList(new String[]{
-				"hwnd",
-				"message", "wParam", "lParam", "time", "pt"
-				});
+				return Arrays.asList(new String[] { "hwnd", "message",
+						"wParam", "lParam", "time", "pt" });
 			}
 
 		}
@@ -461,7 +469,8 @@ public class DummyWindow
 		 * 
 		 * @return the int
 		 */
-		int GetMessageA(MSG lpMsg, Pointer hWnd, int wMsgFilterMin, int wMsgFilterMax);
+		int GetMessageA(MSG lpMsg, Pointer hWnd, int wMsgFilterMin,
+				int wMsgFilterMax);
 
 		/*
 		 * LRESULT DispatchMessage( const MSGlpmsg );
@@ -485,7 +494,8 @@ public class DummyWindow
 	{
 
 		/** The INSTANCE. */
-		MyGdi32	INSTANCE	= (MyGdi32) Native.loadLibrary("gdi32", MyGdi32.class, Options.UNICODE_OPTIONS);
+		MyGdi32 INSTANCE = (MyGdi32) Native.loadLibrary("gdi32", MyGdi32.class,
+				Options.UNICODE_OPTIONS);
 
 		/*
 		 * HGDIOBJ GetStockObject( int fnObject // stock object type );
@@ -501,7 +511,7 @@ public class DummyWindow
 		Pointer GetStockObject(int fnObject);
 
 		/** The BLAC k_ brush. */
-		int	BLACK_BRUSH	= 4;
+		int BLACK_BRUSH = 4;
 
 	}// Gdi32
 
@@ -512,13 +522,13 @@ public class DummyWindow
 	{
 
 		/** The _u msg. */
-		int	_uMsg;
+		int _uMsg;
 
 		/** The _w param. */
-		int	_wParam;
+		int _wParam;
 
 		/** The _l param. */
-		int	_lParam;
+		int _lParam;
 
 		/**
 		 * Instantiates a new callback message.
@@ -539,31 +549,31 @@ public class DummyWindow
 	}
 
 	/** The _instance. */
-	static DummyWindow			_instance;
+	static DummyWindow _instance;
 
 	/** The _listners. */
-	static Map					_listners	= new MultiValueMap();
+	static Map _listners = new MultiValueMap();
 
 	/** The _wnd proc. */
-	WndProc						_wndProc	= new WndProc();
+	WndProc _wndProc = new WndProc();
 
 	/** The _hinstance. */
-	Pointer						_hinstance;
+	Pointer _hinstance;
 
 	/** The _h wnd. */
-	Pointer						_hWnd;
+	Pointer _hWnd;
 
 	/** The _wnd class. */
-	WNDCLASSEX					_wndClass	= new WNDCLASSEX();
+	WNDCLASSEX _wndClass = new WNDCLASSEX();
 
 	/** The _queue. */
-	static LinkedBlockingQueue	_queue		= new LinkedBlockingQueue();
+	static LinkedBlockingQueue _queue = new LinkedBlockingQueue();
 
 	/** The _hot keys. */
-	static BidiMap				_hotKeys	= new DualHashBidiMap();
+	static BidiMap _hotKeys = new DualHashBidiMap();
 
 	/** The _semaphore. */
-	Semaphore					_semaphore	= new Semaphore(0);
+	Semaphore _semaphore = new Semaphore(0);
 
 	/**
 	 * The Class HotKey.
@@ -586,10 +596,10 @@ public class DummyWindow
 		}
 
 		/** The _w param. */
-		int	_wParam;
+		int _wParam;
 
 		/** The _l param. */
-		int	_lParam;
+		int _lParam;
 
 		/*
 		 * (non-Javadoc)
@@ -651,7 +661,8 @@ public class DummyWindow
 				CallbackMessage msg = new CallbackMessage(uMsg, wParam, lParam);
 				_queue.offer(msg);
 			}
-			int res = MyUser32.INSTANCE.DefWindowProcA(hWnd, uMsg, wParam, lParam);
+			int res = MyUser32.INSTANCE.DefWindowProcA(hWnd, uMsg, wParam,
+					lParam);
 			// System.out.println(">" + res);
 			return res;
 		}
@@ -739,8 +750,9 @@ public class DummyWindow
 				_wndClass.hInstance = _hinstance;
 				if (MyUser32.INSTANCE.RegisterClassExA(_wndClass) == 0)
 					return;
-				_hWnd = MyUser32.INSTANCE.CreateWindowExA(0, _wndClass.lpszClassName, _wndClass.lpszClassName, 0, 0, 0, 0, 0, null, null, _hinstance,
-						null);
+				_hWnd = MyUser32.INSTANCE.CreateWindowExA(0,
+						_wndClass.lpszClassName, _wndClass.lpszClassName, 0, 0,
+						0, 0, 0, null, null, _hinstance, null);
 				MyUser32.INSTANCE.ShowWindow(_hWnd, MyUser32.SW_HIDE);
 				MyUser32.INSTANCE.UpdateWindow(_hWnd);
 
@@ -753,11 +765,14 @@ public class DummyWindow
 					// System.out.println("get message "+msg);
 					if (msg.message == WindowsXPKeyboard.WND_REGISTER_HOTKEY)
 					{
-						int id = MyKernel32.INSTANCE.GlobalAddAtomA("JHOTKEY-" + msg.wParam + "-" + msg.lParam);
-						int ret2 = MyUser32.INSTANCE.RegisterHotKey(_hWnd, id, msg.wParam, msg.lParam);
+						int id = MyKernel32.INSTANCE.GlobalAddAtomA("JHOTKEY-"
+								+ msg.wParam + "-" + msg.lParam);
+						int ret2 = MyUser32.INSTANCE.RegisterHotKey(_hWnd, id,
+								msg.wParam, msg.lParam);
 						// System.out.println("register: "+id);
 						if (ret2 != 0)
-							_hotKeys.put(new Integer(id), new HotKey(msg.wParam, msg.lParam));
+							_hotKeys.put(new Integer(id), new HotKey(
+									msg.wParam, msg.lParam));
 						// System.out.println("register "+ret2);
 						_semaphore.release();
 					}
@@ -767,7 +782,8 @@ public class DummyWindow
 						Integer id = (Integer) _hotKeys.getKey(k);
 						// System.out.println("unregister: "+id);
 						if (id != null)
-							if (MyUser32.INSTANCE.UnregisterHotKey(_hWnd, id.intValue()))
+							if (MyUser32.INSTANCE.UnregisterHotKey(_hWnd,
+									id.intValue()))
 								_hotKeys.remove(id);
 						_semaphore.release();
 
@@ -789,12 +805,15 @@ public class DummyWindow
 					{
 						msg = (CallbackMessage) _queue.take();
 						// System.out.println("Message queue: "+msg._uMsg);
-						Collection listners = (Collection) _listners.get(new Integer(msg._uMsg));
+						Collection listners = (Collection) _listners
+								.get(new Integer(msg._uMsg));
 						if (listners != null)
-							for (Iterator it = listners.iterator(); it.hasNext();)
+							for (Iterator it = listners.iterator(); it
+									.hasNext();)
 							{
 								WndListner listner = (WndListner) it.next();
-								listner.execute(msg._uMsg, msg._wParam, msg._lParam);
+								listner.execute(msg._uMsg, msg._wParam,
+										msg._lParam);
 							}
 					}
 				}

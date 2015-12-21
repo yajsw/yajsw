@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.os.ms.win.w32;
 
 import java.io.File;
@@ -30,12 +36,13 @@ import com.sun.jna.platform.win32.WinNT;
  */
 public class FileUtils
 {
-	static Logger	log	= Logger.getLogger(FileUtils.class.getName());
+	static Logger log = Logger.getLogger(FileUtils.class.getName());
 
 	public static long created(File file)
 	{
 
-		throw new UnsupportedOperationException("Sorry, not implemented in this verson");
+		throw new UnsupportedOperationException(
+				"Sorry, not implemented in this verson");
 		// long result = -1;
 		// SYSTEMTIME sysTime = new SYSTEMTIME();
 		// sysTime.size();
@@ -62,12 +69,12 @@ public class FileUtils
 		// final long ms_since_19700101 = ms_since_16010101 - EPOCH_DIFF;
 		// result = ms_since_19700101;
 		// }
-		//			
+		//
 		// MyKernel32.INSTANCE.CloseHandle(hFile);
-		//			
+		//
 		// }
-		//		
-		//		
+		//
+		//
 		// return result;
 	}
 
@@ -79,13 +86,17 @@ public class FileUtils
 		WinNT.LARGE_INTEGER.ByReference lpTotalNumberOfFreeBytes = new WinNT.LARGE_INTEGER.ByReference();
 		lpTotalNumberOfFreeBytes.clear();
 
-		boolean ret = Kernel32.INSTANCE.GetDiskFreeSpaceEx(file.getPath(), null, null, lpTotalNumberOfFreeBytes);
+		boolean ret = Kernel32.INSTANCE.GetDiskFreeSpaceEx(file.getPath(),
+				null, null, lpTotalNumberOfFreeBytes);
 		if (ret)
 			return lpTotalNumberOfFreeBytes.getValue();
 		else
 		{
-			String s = Kernel32Util.formatMessageFromLastErrorCode(Kernel32.INSTANCE.GetLastError());
-			log.severe("error in File.freeSpace getting for \"" + file.getPath() + "\" " + s);
+			String s = Kernel32Util
+					.formatMessageFromLastErrorCode(Kernel32.INSTANCE
+							.GetLastError());
+			log.severe("error in File.freeSpace getting for \""
+					+ file.getPath() + "\" " + s);
 		}
 
 		return -1;
@@ -99,13 +110,17 @@ public class FileUtils
 		WinNT.LARGE_INTEGER.ByReference lpTotalNumberOfBytes = new WinNT.LARGE_INTEGER.ByReference();
 		lpTotalNumberOfBytes.clear();
 
-		boolean ret = Kernel32.INSTANCE.GetDiskFreeSpaceEx(file.getPath(), null, lpTotalNumberOfBytes, null);
+		boolean ret = Kernel32.INSTANCE.GetDiskFreeSpaceEx(file.getPath(),
+				null, lpTotalNumberOfBytes, null);
 		if (ret)
 			return lpTotalNumberOfBytes.getValue();
 		else
 		{
-			String s = Kernel32Util.formatMessageFromLastErrorCode(Kernel32.INSTANCE.GetLastError());
-			log.severe("error in File.totalSpace getting for \"" + file.getPath() + "\" " + s);
+			String s = Kernel32Util
+					.formatMessageFromLastErrorCode(Kernel32.INSTANCE
+							.GetLastError());
+			log.severe("error in File.totalSpace getting for \""
+					+ file.getPath() + "\" " + s);
 		}
 
 		return -1;
@@ -176,7 +191,8 @@ public class FileUtils
 				File path = new File(pathStr);
 				if (!path.isDirectory() || !path.exists() || !path.isAbsolute())
 					path = new File(workingDir, pathStr);
-				Collection files = getWildcardFiles(path.getAbsolutePath(), file);
+				Collection files = getWildcardFiles(path.getAbsolutePath(),
+						file);
 				for (Iterator it2 = files.iterator(); it2.hasNext();)
 				{
 					File f = (File) it2.next();
@@ -227,13 +243,15 @@ public class FileUtils
 		{
 			if (!fPath.isDirectory())
 			{
-				log.warning("classpath directory " + fPath.getCanonicalPath() + " not found");
+				log.warning("classpath directory " + fPath.getCanonicalPath()
+						+ " not found");
 				return result;
 			}
 		}
 		catch (Exception ex)
 		{
-			log.warning("classpath directory " + path + " error" + ex.getMessage());
+			log.warning("classpath directory " + path + " error"
+					+ ex.getMessage());
 			return result;
 		}
 		FileFilter fileFilter = new WildcardFileFilter(file);
@@ -265,7 +283,8 @@ public class FileUtils
 	{
 		System.out.println(FileUtils.freeSpace(new File("C:\\")));
 		System.out.println(FileUtils.totalSpace(new File("C:\\")));
-		for (Iterator it = getFiles(".", "lib/*/*/*jar").iterator(); it.hasNext();)
+		for (Iterator it = getFiles(".", "lib/*/*/*jar").iterator(); it
+				.hasNext();)
 			System.out.println(it.next());
 	}
 }

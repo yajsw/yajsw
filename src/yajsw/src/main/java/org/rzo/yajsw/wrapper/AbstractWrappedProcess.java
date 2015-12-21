@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.wrapper;
 
 import io.netty.util.internal.logging.InternalLogger;
@@ -215,9 +230,9 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	JdkLogger2Factory _internalLoggerFactory = null;
 
 	volatile int _minAppLogLines = MIN_PROCESS_LINES_TO_LOG;
-	
-	static final String lineSeparator = ((String)AccessController.doPrivileged(new GetPropertyAction("line.separator")));
 
+	static final String lineSeparator = ((String) AccessController
+			.doPrivileged(new GetPropertyAction("line.separator")));
 
 	public Configuration getConfiguration()
 	{
@@ -269,7 +284,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 
 		String dbg = _config.getString("wrapper.debug");
 		int dbgLevel = _config.getInt("wrapper.debug.level", 3);
-		_debug = (dbg != null && "true".equals(dbg))  ? dbgLevel : 0;
+		_debug = (dbg != null && "true".equals(dbg)) ? dbgLevel : 0;
 		if (_debug > 0)
 			InternalLoggerFactory.setDefaultFactory(new SimpleLoggerFactory());
 		_successfulInvocationTime = _config.getLong(
@@ -375,7 +390,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		{
 			jmxExecutor.execute(new Runnable()
 			{
-				
+
 				@Override
 				public void run()
 				{
@@ -413,7 +428,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		_minAppLogLines = _config.getInt("wrapper.app.status.log.lines",
 				MIN_PROCESS_LINES_TO_LOG);
 		Utils.verifyIPv4IsPreferred(getWrapperLogger());
-		
+
 		_init = true;
 
 	}
@@ -456,7 +471,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			final Script script = ScriptFactory.createScript(clusterScript, "",
 					this, args, getInternalWrapperLogger(), timeout,
 					_config.getString("wrapper.script.encoding"),
-					_config.getBoolean("wrapper.script.reload", false), _debug, Constants.MAX_CONC_INVOC);
+					_config.getBoolean("wrapper.script.reload", false), _debug,
+					Constants.MAX_CONC_INVOC);
 			if (script == null)
 				return;
 			try
@@ -559,7 +575,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		List<String> listeners = new ArrayList();
 		for (Iterator it = listenersIterator; it.hasNext();)
 			listeners.add((String) it.next());
-		Collections.sort(listeners, new AlphanumComparator());
+		Collections.sort(listeners, new AlphaNumericComparator());
 		_listeners.clear();
 		_listeners.putAll(_userListeners);
 		for (String key : listeners)
@@ -570,7 +586,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 				String value = _config.getString(key);
 				List args = _config.getList(key + ".args", new ArrayList());
 				int timeout = _config.getInt(key + ".timeout", 0);
-				int maxConcInvoc = _config.getInt(key + ".maxConcInvoc", Constants.MAX_CONC_INVOC);
+				int maxConcInvoc = _config.getInt(key + ".maxConcInvoc",
+						Constants.MAX_CONC_INVOC);
 
 				String state = key.substring(key.lastIndexOf(".") + 1);
 				final Script script = ScriptFactory.createScript(value, state,
@@ -1239,9 +1256,10 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		String title = _config.getString("wrapper.console.title");
 		if (title != null)
 			_osProcess.setTitle(title);
-		
+
 		_osProcess.setUseSpawn(_config.getBoolean("wrapper.posix_spawn", true));
-		_osProcess.setLinuxUseVfork(_config.getBoolean("wrapper.posix_vfork", false));
+		_osProcess.setLinuxUseVfork(_config.getBoolean("wrapper.posix_vfork",
+				false));
 
 		_osProcess.setVisible(_config.getBoolean("wrapper.console.visible",
 				Constants.DEFAULT_CONSOLE_VISIBLE)
@@ -1264,8 +1282,9 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			_osProcess.setUser(user);
 			_osProcess.setPassword(_config.getString("wrapper.app.password"));
 		}
-		
-		int appUmask = Utils.parseOctal(_config.getString("wrapper.java.umask", null));
+
+		int appUmask = Utils.parseOctal(_config.getString("wrapper.java.umask",
+				null));
 		if (appUmask != -1)
 			_osProcess.setUmask(appUmask);
 
@@ -1281,7 +1300,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			else
 				_osProcess.setWorkingDir(wd.getAbsolutePath());
 			if (_debug > 1)
-			getWrapperLogger().info("working dir " + wd.getAbsolutePath());
+				getWrapperLogger().info("working dir " + wd.getAbsolutePath());
 		}
 		_osProcess.setEnvironment(getProcessEnvironment(_config));
 		if (Platform.isWindows()
@@ -1317,7 +1336,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 
 	private List<String[]> getProcessEnvironment(YajswConfigurationImpl config)
 	{
-		System.out.println("system.env "+System.getenv().size());
+		System.out.println("system.env " + System.getenv().size());
 		// if user did not set env properties: use default.
 		if (!config.getKeys("wrapper.app.env").hasNext())
 		{
@@ -1340,7 +1359,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			result.add(new String[] { entry.getKey(), entry.getValue() });
 		}
 		if (result != null)
-			System.out.println("env result "+result.size());
+			System.out.println("env result " + result.size());
 		return result;
 	}
 
@@ -1484,15 +1503,16 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 				count = 1;
 			boolean rollDate = "DATE".equals(rollMode);
 			boolean desc = _config.getBoolean("wrapper.logfile.desc", false);
-			int umask = Utils.parseOctal(_config.getString("wrapper.logfile.umask", null));
+			int umask = Utils.parseOctal(_config.getString(
+					"wrapper.logfile.umask", null));
 			String encoding = _config.getString("wrapper.log.encoding");
 			int maxDays = _config.getInt("wrapper.logfile.maxdays", -1);
 			_fileHandler = fileName.contains("%d") ? new DateFileHandler(
 					fileName, limit, count, append, rollDate,
 					getFileFormatter(), getLogLevel(fileLogLevel), encoding,
-					maxDays, desc, umask) : new MyFileHandler(fileName, limit, count,
-					append, getFileFormatter(), getLogLevel(fileLogLevel),
-					encoding, desc, umask);
+					maxDays, desc, umask) : new MyFileHandler(fileName, limit,
+					count, append, getFileFormatter(),
+					getLogLevel(fileLogLevel), encoding, desc, umask);
 		}
 		catch (Exception e)
 		{
@@ -1758,7 +1778,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			String sValue = _config.getString(sKey, "");
 			List args = _config.getList(sKey + ".args", null);
 			int timeout = _config.getInt(sKey + ".timeout", 0);
-			int maxConcInvoc = _config.getInt(sKey + ".maxConcInvoc", Constants.MAX_CONC_INVOC);
+			int maxConcInvoc = _config.getInt(sKey + ".maxConcInvoc",
+					Constants.MAX_CONC_INVOC);
 			String[] strArgs = null;
 			if (args != null && args.size() > 0)
 			{
@@ -1766,7 +1787,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 				for (int i = 0; i < strArgs.length; i++)
 					strArgs[i] = args.get(i).toString();
 			}
-			Object script = getTriggerScript(sValue, tName, strArgs, timeout, maxConcInvoc);
+			Object script = getTriggerScript(sValue, tName, strArgs, timeout,
+					maxConcInvoc);
 			if (action != null || script != null)
 			{
 				result.put(tValue, new MissingTriggerAction(tName, executor,
@@ -1831,7 +1853,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			String sValue = _config.getString(sKey, "");
 			List args = _config.getList(sKey + ".args", null);
 			int timeout = _config.getInt(sKey + ".timeout", 0);
-			int maxConcInv = _config.getInt(sKey + ".maxConcInv", Constants.MAX_CONC_INVOC);
+			int maxConcInv = _config.getInt(sKey + ".maxConcInv",
+					Constants.MAX_CONC_INVOC);
 			String[] strArgs = null;
 			if (args != null && args.size() > 0)
 			{
@@ -1839,7 +1862,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 				for (int i = 0; i < strArgs.length; i++)
 					strArgs[i] = args.get(i).toString();
 			}
-			Object script = getTriggerScript(sValue, tName, strArgs, timeout, maxConcInv);
+			Object script = getTriggerScript(sValue, tName, strArgs, timeout,
+					maxConcInv);
 			if (action != null || script != null)
 			{
 				result.put(tValue, new MissingTriggerAction(tName, executor,
@@ -1856,7 +1880,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 
 	private void setTriggerDebug(String tName)
 	{
-		if (_config.getBoolean("wrapper.filter.debug." + tName, _config.getBoolean("wrapper.filter.debug.default", false)))
+		if (_config.getBoolean("wrapper.filter.debug." + tName,
+				_config.getBoolean("wrapper.filter.debug.default", false)))
 			enabledTriggerDebug.add(tName);
 	}
 
@@ -1874,7 +1899,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		{
 			configList.add(it.next());
 		}
-		Collections.sort(configList, new AlphanumComparator());
+		Collections.sort(configList, new AlphaNumericComparator());
 
 		for (Iterator it = configList.listIterator(); it.hasNext();)
 		{
@@ -1899,7 +1924,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 				for (int i = 0; i < strArgs.length; i++)
 					strArgs[i] = args.get(i).toString();
 			}
-			Object script = getTriggerScript(sValue, tName, strArgs, timeout, maxConcInvoc);
+			Object script = getTriggerScript(sValue, tName, strArgs, timeout,
+					maxConcInvoc);
 			if (action != null && script != null)
 			{
 				addToActionMap(result, tValue,
@@ -1976,7 +2002,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			String sValue = _config.getString(sKey, "");
 			List args = _config.getList(sKey + ".args", null);
 			int timeout = _config.getInt(sKey + ".timeout", 0);
-			int maxConcInvoc = _config.getInt(sKey + ".maxConcInvoc", Constants.MAX_CONC_INVOC);
+			int maxConcInvoc = _config.getInt(sKey + ".maxConcInvoc",
+					Constants.MAX_CONC_INVOC);
 			String[] strArgs = null;
 			if (args != null && args.size() > 0)
 			{
@@ -1985,7 +2012,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 					strArgs[i] = args.get(i).toString();
 			}
 
-			Object script = getTriggerScript(sValue, tName, strArgs, timeout, maxConcInvoc);
+			Object script = getTriggerScript(sValue, tName, strArgs, timeout,
+					maxConcInvoc);
 			if (action != null && script != null)
 			{
 				addToActionMap(result, tValue,
@@ -2021,7 +2049,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		final Script s = ScriptFactory.createScript(script, key, this, args,
 				getInternalWrapperLogger(), timeout,
 				_config.getString("wrapper.script.encoding"),
-				_config.getBoolean("wrapper.script.reload", false), _debug, maxConcInvoc);
+				_config.getBoolean("wrapper.script.reload", false), _debug,
+				maxConcInvoc);
 		if (s == null)
 		{
 			this.getWrapperLogger().info("error initializing script " + script);
@@ -2042,8 +2071,10 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			{
 				if (scriptExecutor.getActiveCount() > 100)
 				{
-					getInternalWrapperLogger()
-							.warn("executing too many scripts concurrently ("+scriptExecutor.getActiveCount()+") -> aborting script execution");
+					getInternalWrapperLogger().warn(
+							"executing too many scripts concurrently ("
+									+ scriptExecutor.getActiveCount()
+									+ ") -> aborting script execution");
 					return null;
 				}
 				scriptExecutor.execute(new Runnable()
@@ -2139,8 +2170,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		if (_state != STATE_RUNNING && _state != STATE_IDLE)
 		{
 			if (_debug > 1)
-			getWrapperLogger().info(
-					"process not in state RUNNING -> Delaying stop");
+				getWrapperLogger().info(
+						"process not in state RUNNING -> Delaying stop");
 			_stopRequested = true;
 		}
 		stopInternal();
@@ -2272,7 +2303,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		}
 		_osProcess.destroy();
 
-		//if (_debug > 0)
+		// if (_debug > 0)
 		getWrapperLogger().info(
 				"process exit code: " + _osProcess.getExitCode());
 	}
@@ -2386,10 +2417,12 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	private void savePidFile()
 	{
 		String file = _config.getString("wrapper.pidfile");
-		int umask = Utils.parseOctal(_config.getString("wrapper.pidfile.umask", null));
+		int umask = Utils.parseOctal(_config.getString("wrapper.pidfile.umask",
+				null));
 		int prevUmask = -1;
 		if (umask != -1)
-			prevUmask = OperatingSystem.instance().processManagerInstance().umask(umask);
+			prevUmask = OperatingSystem.instance().processManagerInstance()
+					.umask(umask);
 		if (file != null)
 		{
 			try
@@ -2423,7 +2456,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			}
 		}
 		if (prevUmask != -1)
-			OperatingSystem.instance().processManagerInstance().umask(prevUmask);
+			OperatingSystem.instance().processManagerInstance()
+					.umask(prevUmask);
 	}
 
 	/**
@@ -2850,7 +2884,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			_restartDelayScript = ScriptFactory.createScript(script, "", this,
 					args, getInternalWrapperLogger(), 0,
 					_config.getString("wrapper.script.encoding"),
-					_config.getBoolean("wrapper.script.reload", false), _debug, Constants.MAX_CONC_INVOC);
+					_config.getBoolean("wrapper.script.reload", false), _debug,
+					Constants.MAX_CONC_INVOC);
 		}
 		return _restartDelayScript;
 	}
@@ -2979,7 +3014,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 					String s = (String) it.next();
 					try
 					{
-						_actionTriggersRegex[i] = MyPatternFactory.createPattern(s);
+						_actionTriggersRegex[i] = MyPatternFactory
+								.createPattern(s);
 					}
 					catch (Throwable ex)
 					{
@@ -3011,7 +3047,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 					String s = (String) it.next();
 					try
 					{
-						_missingActionTriggersRegex[i] = MyPatternFactory.createPattern(s);
+						_missingActionTriggersRegex[i] = MyPatternFactory
+								.createPattern(s);
 					}
 					catch (Throwable ex)
 					{
@@ -3567,7 +3604,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	{
 		try
 		{
-			getOutputStream().write((txt+lineSeparator).getBytes());
+			getOutputStream().write((txt + lineSeparator).getBytes());
 			getOutputStream().flush();
 		}
 		catch (IOException e)
@@ -3744,7 +3781,9 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 
 	protected void createOSProcess()
 	{
-		if (_config.getBoolean("wrapper.fork_hack", false) && !Platform.isWindows() && !_config.getBoolean("wrapper.posix_spawn", true))
+		if (_config.getBoolean("wrapper.fork_hack", false)
+				&& !Platform.isWindows()
+				&& !_config.getBoolean("wrapper.posix_spawn", true))
 			_osProcess = new BSDProcess();
 		else
 			_osProcess = OperatingSystem.instance().processManagerInstance()

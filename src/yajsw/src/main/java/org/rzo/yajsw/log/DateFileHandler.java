@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.log;
 
 import java.io.File;
@@ -29,35 +35,35 @@ public class DateFileHandler extends Handler
 {
 
 	/** The _handler. */
-	volatile MyFileHandler			_handler;
+	volatile MyFileHandler _handler;
 
 	/** The _end date. */
-	volatile long				_endDate;
+	volatile long _endDate;
 
 	/** The _pattern. */
-	volatile String				_pattern;
+	volatile String _pattern;
 
 	/** The _limit. */
-	volatile int					_limit;
+	volatile int _limit;
 
 	/** The _count. */
-	volatile int					_count;
+	volatile int _count;
 
 	/** The _append. */
-	volatile boolean				_append;
+	volatile boolean _append;
 
 	/** The format. */
-	final SimpleDateFormat	format	= new SimpleDateFormat("yyyyMMdd");
+	final SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
 
 	/** The _init. */
-	volatile boolean				_init	= false;
-	
+	volatile boolean _init = false;
+
 	volatile boolean _rollDate = false;
-	
+
 	volatile long _startDate = System.currentTimeMillis();
-	
-	//volatile LinkedList<File> _previousFiles = new LinkedList<File>();
-	//volatile LinkedList<File> _currentFiles = new LinkedList<File>();
+
+	// volatile LinkedList<File> _previousFiles = new LinkedList<File>();
+	// volatile LinkedList<File> _currentFiles = new LinkedList<File>();
 	volatile LinkedList<String> _previousDates = new LinkedList<String>();
 	volatile String _currentDate = null;
 	volatile int _maxDays = -1;
@@ -81,7 +87,10 @@ public class DateFileHandler extends Handler
 	 * @throws SecurityException
 	 *             the security exception
 	 */
-	public DateFileHandler(String pattern, int limit, int count, boolean append, boolean rollDate, PatternFormatter fileFormatter, Level logLevel, String encoding, int maxDays, boolean desc, int umask)
+	public DateFileHandler(String pattern, int limit, int count,
+			boolean append, boolean rollDate, PatternFormatter fileFormatter,
+			Level logLevel, String encoding, int maxDays, boolean desc,
+			int umask)
 	{
 		_umask = umask;
 		_desc = desc;
@@ -105,7 +114,7 @@ public class DateFileHandler extends Handler
 		setLevel(logLevel);
 		findPreviousDates();
 		rotateDate();
-		//checkFileCount();
+		// checkFileCount();
 	}
 
 	/*
@@ -141,13 +150,14 @@ public class DateFileHandler extends Handler
 	{
 		if (_rollDate)
 		{
-		if (_endDate < record.getMillis())
-			rotateDate();
-		if (System.currentTimeMillis() - _startDate > 25*60*60*1000)
-		{
-			String msg = record.getMessage();
-			record.setMessage("missed file rolling at: "+new Date(_endDate)+"\n"+msg);
-		}
+			if (_endDate < record.getMillis())
+				rotateDate();
+			if (System.currentTimeMillis() - _startDate > 25 * 60 * 60 * 1000)
+			{
+				String msg = record.getMessage();
+				record.setMessage("missed file rolling at: "
+						+ new Date(_endDate) + "\n" + msg);
+			}
 		}
 		_handler.publish(record);
 
@@ -180,7 +190,8 @@ public class DateFileHandler extends Handler
 		String pattern = _pattern.replace("%d", _currentDate);
 		try
 		{
-			File dd = new File(MyFileHandler.parseFileName(pattern, 0, 0, _count));
+			File dd = new File(MyFileHandler.parseFileName(pattern, 0, 0,
+					_count));
 			if (!dd.getParentFile().exists())
 				dd.getParentFile().mkdirs();
 		}
@@ -198,7 +209,8 @@ public class DateFileHandler extends Handler
 
 		try
 		{
-			_handler = new MyFileHandler(pattern, _limit, _count, _append, _desc, _umask);
+			_handler = new MyFileHandler(pattern, _limit, _count, _append,
+					_desc, _umask);
 			if (_init)
 			{
 				_handler.setEncoding(this.getEncoding());
@@ -206,23 +218,19 @@ public class DateFileHandler extends Handler
 				_handler.setFilter(this.getFilter());
 				_handler.setFormatter(this.getFormatter());
 				_handler.setLevel(this.getLevel());
-				//findFiles();
-				//_currentFiles.clear();
-				//addFiles(_handler.getCurrentFiles());
+				// findFiles();
+				// _currentFiles.clear();
+				// addFiles(_handler.getCurrentFiles());
 				/*
-				_handler.setNewFileListner(new FileChangeListner()
-				{
+				 * _handler.setNewFileListner(new FileChangeListner() {
+				 * 
+				 * public void fileChange(File file, boolean added) {
+				 * System.out.println("file change: "+added+
+				 * " "+file.getName()); if (added) addFile(file); }
+				 * 
+				 * });
+				 */
 
-					public void fileChange(File file, boolean added)
-					{
-						System.out.println("file change: "+added+ " "+file.getName());
-						if (added)
-							addFile(file);
-					}
-					
-				});
-				*/
-				
 			}
 		}
 		catch (SecurityException e)
@@ -236,7 +244,7 @@ public class DateFileHandler extends Handler
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void cleanupDates()
 	{
 		if (_maxDays >= 0)
@@ -246,16 +254,17 @@ public class DateFileHandler extends Handler
 				cleanupDate(toCleanup);
 			}
 	}
-	
+
 	private void cleanupDate(String date)
 	{
 		String pattern = _pattern.replace("%d", date);
 		File f;
-		for (int unique=0; unique<_count; unique++)
+		for (int unique = 0; unique < _count; unique++)
 		{
 			try
 			{
-				f = new File(MyFileHandler.parseFileName(pattern, 0, unique, _count));
+				f = new File(MyFileHandler.parseFileName(pattern, 0, unique,
+						_count));
 				if (!f.exists())
 					break;
 			}
@@ -263,29 +272,31 @@ public class DateFileHandler extends Handler
 			{
 				// should not happen, but keep silent for now
 			}
-			for (int generation=0; generation<_count; generation++)
+			for (int generation = 0; generation < _count; generation++)
 			{
-			try
-			{
-				f = new File(MyFileHandler.parseFileName(pattern, generation, unique, _count));
-				if (f.exists())
+				try
 				{
-					f.delete();
+					f = new File(MyFileHandler.parseFileName(pattern,
+							generation, unique, _count));
+					if (f.exists())
+					{
+						f.delete();
+					}
+					else
+						break;
 				}
-				else
-					break;
-			}
-			catch (Exception e)
-			{
-				// should not happen, but keep silent for now
-			}
+				catch (Exception e)
+				{
+					// should not happen, but keep silent for now
+				}
 			}
 		}
 		// cleanup parent folder if necessary
 		try
 		{
 			// remove old lock files
-			f = new File(MyFileHandler.parseFileName(pattern+".lck", 0, 0, _count));
+			f = new File(MyFileHandler.parseFileName(pattern + ".lck", 0, 0,
+					_count));
 			f.delete();
 			f = new File(MyFileHandler.parseFileName(pattern, 0, 0, _count));
 			while (!f.getName().contains(date))
@@ -296,9 +307,9 @@ public class DateFileHandler extends Handler
 		catch (Exception e)
 		{
 			// should not happen, but keep silent for now
-		}		
+		}
 	}
-	
+
 	private void findPreviousDates()
 	{
 		if (_maxDays < 0)
@@ -306,90 +317,60 @@ public class DateFileHandler extends Handler
 		Calendar date = Calendar.getInstance();
 		// service may not run daily
 		// for performance: do not scan all files.
-		// service may not run every day, but we assume it will run at least once a year
+		// service may not run every day, but we assume it will run at least
+		// once a year
 		int scanDays = Math.max(365, _maxDays);
-		for (int i = 0; i<scanDays; i++)
+		for (int i = 0; i < scanDays; i++)
 		{
 			date.add(Calendar.DAY_OF_MONTH, -1);
 			String cDate = format.format(date.getTime());
 			String pattern = _pattern.replace("%d", cDate);
 			boolean dateFound = false;
 
-				File f;
-				try
+			File f;
+			try
+			{
+				f = new File(MyFileHandler.parseFileName(pattern, 0, 0, _count));
+				if (f.exists())
 				{
-					f = new File(MyFileHandler.parseFileName(pattern, 0, 0, _count));
-					if (f.exists())
-					{
-						dateFound = true;
-					}
+					dateFound = true;
 				}
-				catch (Exception e)
-				{
-					// should not happen, but keep silent for now
-				}
-				
-		
+			}
+			catch (Exception e)
+			{
+				// should not happen, but keep silent for now
+			}
+
 			if (dateFound)
 				_previousDates.addFirst(cDate);
 		}
-		
-	}
-	
-/*	private void checkFileCount()
-	{
-		while (_previousFiles.size() > 0 && _previousFiles.size()+_currentFiles.size()>_count)
-		{
-			File f = _previousFiles.removeLast();
-			if (f.exists())
-				f.delete();
-		}
-	}
-	
-	private void addFile(File f)
-	{
-		if (!_currentFiles.contains(f))
-			_currentFiles.addFirst(f);
-		checkFileCount();
-	}
-	
-	private void addFiles(LinkedList<File> files)
-	{
-		while (!files.isEmpty())
-			addFile(files.removeLast());			
-	}
-	
-	private void findFiles() throws IOException
-	{
-		Calendar date = Calendar.getInstance();
-		while (_previousFiles.size() < _count)
-		{
-			date.add(Calendar.DAY_OF_MONTH, -1); 
-			String pattern = _pattern.replace("%d", format.format(date.getTime()));
-			for (int unique=0; unique<_count; unique++)
-			{
-				for (int generation=0; generation<_count; generation++)
-				{
-				File f = MyFileHandler.generate(pattern, generation, unique, _count);
-				if (f.exists() && !_previousFiles.contains(f))
-				{
-					_previousFiles.addLast(f);
-				}
-				else
-				{
-					break;
-				}
-				}
-				File f = MyFileHandler.generate(pattern, 0, unique, _count);
-				if (!f.exists() || _previousFiles.contains(f))
-					break;
-			}
-			File f = MyFileHandler.generate(pattern, 0, 0, _count);
-			if (!f.exists())
-				break;
-		}
 
 	}
-	*/
+
+	/*
+	 * private void checkFileCount() { while (_previousFiles.size() > 0 &&
+	 * _previousFiles.size()+_currentFiles.size()>_count) { File f =
+	 * _previousFiles.removeLast(); if (f.exists()) f.delete(); } }
+	 * 
+	 * private void addFile(File f) { if (!_currentFiles.contains(f))
+	 * _currentFiles.addFirst(f); checkFileCount(); }
+	 * 
+	 * private void addFiles(LinkedList<File> files) { while (!files.isEmpty())
+	 * addFile(files.removeLast()); }
+	 * 
+	 * private void findFiles() throws IOException { Calendar date =
+	 * Calendar.getInstance(); while (_previousFiles.size() < _count) {
+	 * date.add(Calendar.DAY_OF_MONTH, -1); String pattern =
+	 * _pattern.replace("%d", format.format(date.getTime())); for (int unique=0;
+	 * unique<_count; unique++) { for (int generation=0; generation<_count;
+	 * generation++) { File f = MyFileHandler.generate(pattern, generation,
+	 * unique, _count); if (f.exists() && !_previousFiles.contains(f)) {
+	 * _previousFiles.addLast(f); } else { break; } } File f =
+	 * MyFileHandler.generate(pattern, 0, unique, _count); if (!f.exists() ||
+	 * _previousFiles.contains(f)) break; } File f =
+	 * MyFileHandler.generate(pattern, 0, 0, _count); if (!f.exists()) break; }
+	 * 
+	 * }
+	 */
 
 }

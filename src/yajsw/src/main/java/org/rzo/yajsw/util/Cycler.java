@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.util;
 
 import java.util.concurrent.Executor;
@@ -5,14 +20,14 @@ import java.util.concurrent.Executors;
 
 public class Cycler
 {
-	Executor	_executor;
-	long		_period;
-	long		_delay;
-	Runnable	_runnable;
-	boolean		_started		= false;
-	boolean		_terminated		= true;
-	Runnable	_worker;
-	Thread		_cyclerThread	= null;
+	Executor _executor;
+	long _period;
+	long _delay;
+	Runnable _runnable;
+	boolean _started = false;
+	boolean _terminated = true;
+	Runnable _worker;
+	Thread _cyclerThread = null;
 
 	public Cycler(long period, long delay, Executor executor, Runnable runnable)
 	{
@@ -93,13 +108,16 @@ public class Cycler
 
 	public static void main(String[] args) throws InterruptedException
 	{
-		Cycler c = new Cycler(1000, 0, Executors.newCachedThreadPool(new DaemonThreadFactory("controller")), new Runnable()
-		{
-			public void run()
-			{
-				System.out.println(System.currentTimeMillis() + " running");
-			}
-		});
+		Cycler c = new Cycler(1000, 0,
+				Executors.newCachedThreadPool(new DaemonThreadFactory(
+						"controller")), new Runnable()
+				{
+					public void run()
+					{
+						System.out.println(System.currentTimeMillis()
+								+ " running");
+					}
+				});
 		while (true)
 		{
 			c.start();

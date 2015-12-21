@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.os.ms.win.w32;
 
 import java.net.UnknownHostException;
@@ -21,12 +36,13 @@ import com.sun.jna.ptr.IntByReference;
 
 public class Cluster
 {
-	static Logger	_log		= Logger.getLogger(Cluster.class.getCanonicalName());
-	ExecutorService	threadPool	= Executors.newSingleThreadExecutor();
+	static Logger _log = Logger.getLogger(Cluster.class.getCanonicalName());
+	ExecutorService threadPool = Executors.newSingleThreadExecutor();
 
 	public interface Clusapi extends com.sun.jna.win32.StdCallLibrary
 	{
-		Clusapi	INSTANCE	= (Clusapi) Native.loadLibrary("ClusApi", Clusapi.class);
+		Clusapi INSTANCE = (Clusapi) Native.loadLibrary("ClusApi",
+				Clusapi.class);
 
 		/*
 		 * HCLUSTER WINAPI OpenCluster( __in_opt LPCWSTR lpszClusterName );
@@ -42,27 +58,28 @@ public class Cluster
 		 * HCHANGE WINAPI CreateClusterNotifyPort( __in HCHANGE hChange, __in
 		 * HCLUSTER hCluster, __in DWORD dwFilter, __in DWORD_PTR dwNotifyKey );
 		 */
-		Pointer CreateClusterNotifyPort(Pointer hChange, Pointer hCluster, int dwFilter, IntByReference dwNotifyKey);
+		Pointer CreateClusterNotifyPort(Pointer hChange, Pointer hCluster,
+				int dwFilter, IntByReference dwNotifyKey);
 
-		final static int	CLUSTER_CHANGE_GROUP_STATE			= 0x00001000;
-		final static int	CLUSTER_CHANGE_HANDLE_CLOSE			= 0x80000000;
-		final static int	CLUSTER_CHANGE_CLUSTER_RECONNECT	= 0x00080000;
-		final static int	CLUSTER_CHANGE_CLUSTER_STATE		= 0x20000000;
-		final static int	CLUSTER_CHANGE_GROUP_DELETED		= 0x00002000;
-		final static int	CLUSTER_CHANGE_GROUP_ADDED			= 0x00004000;
+		final static int CLUSTER_CHANGE_GROUP_STATE = 0x00001000;
+		final static int CLUSTER_CHANGE_HANDLE_CLOSE = 0x80000000;
+		final static int CLUSTER_CHANGE_CLUSTER_RECONNECT = 0x00080000;
+		final static int CLUSTER_CHANGE_CLUSTER_STATE = 0x20000000;
+		final static int CLUSTER_CHANGE_GROUP_DELETED = 0x00002000;
+		final static int CLUSTER_CHANGE_GROUP_ADDED = 0x00004000;
 
 		// Results
-		final static int	WAIT_TIMEOUT						= 0x102;
-		final static int	ERROR_SUCCESS						= 0x0;
-		final static int	ERROR_NO_MORE_ITEMS					= 0x103;
+		final static int WAIT_TIMEOUT = 0x102;
+		final static int ERROR_SUCCESS = 0x0;
+		final static int ERROR_NO_MORE_ITEMS = 0x103;
 
 		// GetClusterGroupState results
-		final static int	CLUSTER_GROUP_STATE_UNKNOWN			= -1;
-		final static int	CLUSTER_GROUP_ONLINE				= 0;
-		final static int	CLUSTER_GROUP_OFFLINE				= 1;
-		final static int	CLUSTER_GROUP_FAILED				= 2;
-		final static int	CLUSTER_GROUP_PARTIAL_ONLINE		= 3;
-		final static int	CLUSTER_GROUP_PENDING				= 4;
+		final static int CLUSTER_GROUP_STATE_UNKNOWN = -1;
+		final static int CLUSTER_GROUP_ONLINE = 0;
+		final static int CLUSTER_GROUP_OFFLINE = 1;
+		final static int CLUSTER_GROUP_FAILED = 2;
+		final static int CLUSTER_GROUP_PARTIAL_ONLINE = 3;
+		final static int CLUSTER_GROUP_PENDING = 4;
 
 		enum ClusterGroupState
 		{
@@ -95,8 +112,9 @@ public class Cluster
 		 * *lpdwNotifyKey, __out LPDWORD lpdwFilterType, __out LPWSTR lpszName,
 		 * __inout LPDWORD lpcchName, __in_opt DWORD dwMilliseconds );
 		 */
-		int GetClusterNotify(Pointer hChange, IntByReference lpdwNotifyKey, IntByReference lpdwFilterType, Memory lpszName, IntByReference lpcchName,
-				int dwMilliseconds);
+		int GetClusterNotify(Pointer hChange, IntByReference lpdwNotifyKey,
+				IntByReference lpdwFilterType, Memory lpszName,
+				IntByReference lpcchName, int dwMilliseconds);
 
 		/*
 		 * BOOL WINAPI CloseClusterNotifyPort( __in HCHANGE hChange );
@@ -127,10 +145,10 @@ public class Cluster
 
 		Pointer ClusterNodeOpenEnum(Pointer hNode, int dwType);
 
-		static int	CLUSTER_ENUM_NODE			= 1;
-		static int	CLUSTER_ENUM_RESOURCE		= 4;
-		static int	CLUSTER_ENUM_NETINTERFACE	= 32;
-		static int	CLUSTER_ENUM_GROUP			= 8;
+		static int CLUSTER_ENUM_NODE = 1;
+		static int CLUSTER_ENUM_RESOURCE = 4;
+		static int CLUSTER_ENUM_NETINTERFACE = 32;
+		static int CLUSTER_ENUM_GROUP = 8;
 
 		/*
 		 * DWORD WINAPI ClusterCloseEnum( __in HCLUSENUM hEnum );
@@ -142,9 +160,12 @@ public class Cluster
 		 * __out LPDWORD lpdwType, __out LPWSTR lpszName, __inout LPDWORD
 		 * lpcchName );
 		 */
-		int ClusterEnum(Pointer hEnum, int dwIndex, IntByReference lpdwType, Memory lpszName, IntByReference lpcchName);
+		int ClusterEnum(Pointer hEnum, int dwIndex, IntByReference lpdwType,
+				Memory lpszName, IntByReference lpcchName);
 
-		int ClusterNodeEnum(Pointer hEnum, int dwIndex, IntByReference lpdwType, Memory lpszName, IntByReference lpcchName);
+		int ClusterNodeEnum(Pointer hEnum, int dwIndex,
+				IntByReference lpdwType, Memory lpszName,
+				IntByReference lpcchName);
 
 		/*
 		 * HRESOURCE WINAPI OpenClusterResource( __in HCLUSTER hCluster, __in
@@ -162,11 +183,12 @@ public class Cluster
 		 * CLUSTER_GROUP_STATE WINAPI GetClusterGroupState( __in HGROUP hGroup,
 		 * __out_opt LPWSTR lpszNodeName, __inout_opt LPDWORD lpcchNodeName );
 		 */
-		int GetClusterGroupState(Pointer hGroup, Memory lpszNodeName, IntByReference lpcchNodeName);
+		int GetClusterGroupState(Pointer hGroup, Memory lpszNodeName,
+				IntByReference lpcchNodeName);
 	}
 
-	ArrayList<ClusterNodeChangeListener>	_listeners	= new ArrayList<ClusterNodeChangeListener>();
-	boolean									_stopped	= true;
+	ArrayList<ClusterNodeChangeListener> _listeners = new ArrayList<ClusterNodeChangeListener>();
+	boolean _stopped = true;
 
 	public String getActiveNode()
 	{
@@ -175,7 +197,8 @@ public class Cluster
 		try
 		{
 			Pointer cluster = Clusapi.INSTANCE.OpenCluster(null);
-			Pointer hEnum = Clusapi.INSTANCE.ClusterOpenEnum(cluster, Clusapi.CLUSTER_ENUM_GROUP);
+			Pointer hEnum = Clusapi.INSTANCE.ClusterOpenEnum(cluster,
+					Clusapi.CLUSTER_ENUM_GROUP);
 			int dwIndex = 0;
 			IntByReference lpdwType = new IntByReference();
 			IntByReference lpcchName = new IntByReference();
@@ -185,7 +208,8 @@ public class Cluster
 			int result = 0;
 			do
 			{
-				result = Clusapi.INSTANCE.ClusterEnum(hEnum, dwIndex, lpdwType, lpszName, lpcchName);
+				result = Clusapi.INSTANCE.ClusterEnum(hEnum, dwIndex, lpdwType,
+						lpszName, lpcchName);
 				if (result == Clusapi.ERROR_SUCCESS)
 				{
 					String group = lpszName.getString(0, true);
@@ -209,21 +233,26 @@ public class Cluster
 		ClusterGroupInfo result = null;
 		try
 		{
-			Pointer hGroup = Clusapi.INSTANCE.OpenClusterGroup(cluster, new WString(groupName));
+			Pointer hGroup = Clusapi.INSTANCE.OpenClusterGroup(cluster,
+					new WString(groupName));
 
 			if (hGroup == null)
-				throw new RuntimeException("Clusapi call to OpenClusterGroup returned err code " + MyKernel32.INSTANCE.GetLastError());
+				throw new RuntimeException(
+						"Clusapi call to OpenClusterGroup returned err code "
+								+ MyKernel32.INSTANCE.GetLastError());
 
 			IntByReference lpcchNodeName = new IntByReference();
 			Memory lpszNodeName = new Memory(256);
 			lpszNodeName.clear();
 			lpcchNodeName.setValue(256);
 
-			int state = Clusapi.INSTANCE.GetClusterGroupState(hGroup, lpszNodeName, lpcchNodeName);
+			int state = Clusapi.INSTANCE.GetClusterGroupState(hGroup,
+					lpszNodeName, lpcchNodeName);
 			String location = lpszNodeName.getString(0, true);
 
 			if (state == Clusapi.CLUSTER_GROUP_STATE_UNKNOWN)
-				_log.severe("unknown group state for group " + groupName + " err code " + MyKernel32.INSTANCE.GetLastError());
+				_log.severe("unknown group state for group " + groupName
+						+ " err code " + MyKernel32.INSTANCE.GetLastError());
 
 			result = new ClusterGroupInfo(groupName, state, location);
 
@@ -240,11 +269,16 @@ public class Cluster
 	{
 		Pointer hCluster = Clusapi.INSTANCE.OpenCluster(null);
 		if (hCluster == null)
-			throw new RuntimeException("Clusapi call to OpenClusterGroup returned err code " + MyKernel32.INSTANCE.GetLastError());
+			throw new RuntimeException(
+					"Clusapi call to OpenClusterGroup returned err code "
+							+ MyKernel32.INSTANCE.GetLastError());
 
-		Pointer hEnum = Clusapi.INSTANCE.ClusterOpenEnum(hCluster, Clusapi.CLUSTER_ENUM_GROUP);
+		Pointer hEnum = Clusapi.INSTANCE.ClusterOpenEnum(hCluster,
+				Clusapi.CLUSTER_ENUM_GROUP);
 		if (hEnum == null)
-			throw new RuntimeException("Clusapi call to ClusterOpenEnum returned err code " + MyKernel32.INSTANCE.GetLastError());
+			throw new RuntimeException(
+					"Clusapi call to ClusterOpenEnum returned err code "
+							+ MyKernel32.INSTANCE.GetLastError());
 
 		Set<ClusterGroupInfo> result = new LinkedHashSet<ClusterGroupInfo>();
 
@@ -264,7 +298,8 @@ public class Cluster
 				lpszName.clear();
 				lpcchName.setValue(256);
 
-				returnValue = Clusapi.INSTANCE.ClusterEnum(hEnum, dwIndex, lpdwType, lpszName, lpcchName);
+				returnValue = Clusapi.INSTANCE.ClusterEnum(hEnum, dwIndex,
+						lpdwType, lpszName, lpcchName);
 
 				if (returnValue == Clusapi.ERROR_SUCCESS)
 				{
@@ -274,8 +309,10 @@ public class Cluster
 						result.add(info);
 				}
 
-				if ((returnValue != Clusapi.ERROR_NO_MORE_ITEMS) && (returnValue != Clusapi.ERROR_SUCCESS))
-					_log.log(Level.SEVERE, "strange returnValue from ClusApi" + returnValue);
+				if ((returnValue != Clusapi.ERROR_NO_MORE_ITEMS)
+						&& (returnValue != Clusapi.ERROR_SUCCESS))
+					_log.log(Level.SEVERE, "strange returnValue from ClusApi"
+							+ returnValue);
 
 				dwIndex++;
 			}
@@ -283,7 +320,8 @@ public class Cluster
 		}
 		catch (Exception e)
 		{
-			_log.log(Level.SEVERE, "Error while getting Cluster group information", e);
+			_log.log(Level.SEVERE,
+					"Error while getting Cluster group information", e);
 		}
 		finally
 		{
@@ -311,9 +349,12 @@ public class Cluster
 						Memory lpszName = new Memory(256);
 						Pointer minusOne = Pointer.createConstant(-1);
 						int dwMilliseconds = 300 * 1000;
-						final int dwFilter = Clusapi.CLUSTER_CHANGE_GROUP_STATE | Clusapi.CLUSTER_CHANGE_HANDLE_CLOSE
-								| Clusapi.CLUSTER_CHANGE_GROUP_DELETED | Clusapi.CLUSTER_CHANGE_CLUSTER_STATE
-								| Clusapi.CLUSTER_CHANGE_CLUSTER_RECONNECT | Clusapi.CLUSTER_CHANGE_GROUP_ADDED;
+						final int dwFilter = Clusapi.CLUSTER_CHANGE_GROUP_STATE
+								| Clusapi.CLUSTER_CHANGE_HANDLE_CLOSE
+								| Clusapi.CLUSTER_CHANGE_GROUP_DELETED
+								| Clusapi.CLUSTER_CHANGE_CLUSTER_STATE
+								| Clusapi.CLUSTER_CHANGE_CLUSTER_RECONNECT
+								| Clusapi.CLUSTER_CHANGE_GROUP_ADDED;
 
 						while (!_stopped)
 						{
@@ -333,43 +374,60 @@ public class Cluster
 
 								hCluster = Clusapi.INSTANCE.OpenCluster(null);
 								if (hCluster == null)
-									_log.severe("ClusApi.OpenCluster returned err code " + MyKernel32.INSTANCE.GetLastError());
+									_log.severe("ClusApi.OpenCluster returned err code "
+											+ MyKernel32.INSTANCE
+													.GetLastError());
 								else
 								{
-									hChange = Clusapi.INSTANCE.CreateClusterNotifyPort(minusOne, hCluster, dwFilter, dwNotifyKey);
+									hChange = Clusapi.INSTANCE
+											.CreateClusterNotifyPort(minusOne,
+													hCluster, dwFilter,
+													dwNotifyKey);
 									if (hChange == null)
-										_log.severe("ClusApi.CreateClusterNotifyPort returned err code " + MyKernel32.INSTANCE.GetLastError());
+										_log.severe("ClusApi.CreateClusterNotifyPort returned err code "
+												+ MyKernel32.INSTANCE
+														.GetLastError());
 								}
 
 								if (hCluster == null || hChange == null)
 									Thread.sleep(5000);
 								else
 								{
-									int result = Clusapi.INSTANCE.GetClusterNotify(hChange, lpdwNotifyKey, lpdwFilterType, lpszName, lpcchName,
-											dwMilliseconds);
+									int result = Clusapi.INSTANCE
+											.GetClusterNotify(hChange,
+													lpdwNotifyKey,
+													lpdwFilterType, lpszName,
+													lpcchName, dwMilliseconds);
 
 									if (result == Clusapi.ERROR_SUCCESS)
-										doListeners(null, lpdwFilterType.getValue(), lpszName.getString(0, true));
+										doListeners(null,
+												lpdwFilterType.getValue(),
+												lpszName.getString(0, true));
 									else if (result != Clusapi.WAIT_TIMEOUT) // 258
 																				// =
 																				// Wait
 																				// Time
 																				// Out
-										_log.warning("ClusApi.GetClusterNotify result=" + result);
+										_log.warning("ClusApi.GetClusterNotify result="
+												+ result);
 								}
 							}
 							catch (Throwable e)
 							{
-								_log.log(Level.SEVERE, "Error getting ClusterInformation", e);
+								_log.log(Level.SEVERE,
+										"Error getting ClusterInformation", e);
 							}
 							finally
 							{
-								_log.info("check cluster took " + (System.currentTimeMillis() - started) + " ms");
+								_log.info("check cluster took "
+										+ (System.currentTimeMillis() - started)
+										+ " ms");
 								if (hChange != null)
 								{
 									try
 									{
-										Clusapi.INSTANCE.CloseClusterNotifyPort(hChange);
+										Clusapi.INSTANCE
+												.CloseClusterNotifyPort(hChange);
 									}
 									catch (Throwable e2)
 									{
@@ -391,7 +449,8 @@ public class Cluster
 		new Thread(check, "cluster listener thread").start();
 	}
 
-	private void doListeners(String activeNode, int lpdwFilterType, String lpszName)
+	private void doListeners(String activeNode, int lpdwFilterType,
+			String lpszName)
 	{
 		// LOGGING
 		try
@@ -411,21 +470,26 @@ public class Cluster
 				break;
 
 			case Clusapi.CLUSTER_CHANGE_HANDLE_CLOSE:
-				_log.severe("The queue receives a notification when a handle associated with a cluster object is closed. " + lpszName);
+				_log.severe("The queue receives a notification when a handle associated with a cluster object is closed. "
+						+ lpszName);
 				break;
 
 			case Clusapi.CLUSTER_CHANGE_CLUSTER_RECONNECT:
 				_log.severe("The queue receives a notification when the connection to the cluster "
 						+ "identified by hCluster is reestablished after a brief disconnect. Some events "
-						+ "generated immediately before or after this event may have been lost. val=" + lpszName);
+						+ "generated immediately before or after this event may have been lost. val="
+						+ lpszName);
 				break;
 
 			case Clusapi.CLUSTER_CHANGE_CLUSTER_STATE:
-				_log.severe("all attempts to communicate with the cluster failed, val=" + lpszName);
+				_log.severe("all attempts to communicate with the cluster failed, val="
+						+ lpszName);
 				break;
 
 			default:
-				_log.severe("unknown event id=" + Integer.toHexString(lpdwFilterType) + ", val=" + lpszName);
+				_log.severe("unknown event id="
+						+ Integer.toHexString(lpdwFilterType) + ", val="
+						+ lpszName);
 				break;
 			}
 		}
@@ -451,7 +515,10 @@ public class Cluster
 					}
 					catch (Throwable e)
 					{
-						_log.log(Level.SEVERE, "Error in ClusterNodeChangeListener.nodeChanged()", e);
+						_log.log(
+								Level.SEVERE,
+								"Error in ClusterNodeChangeListener.nodeChanged()",
+								e);
 					}
 			}
 		});
@@ -500,9 +567,9 @@ public class Cluster
 
 	public class ClusterGroupInfo
 	{
-		final private String	_groupName;
-		final private String	_location;
-		ClusterGroupState		_state	= ClusterGroupState.Unknown;
+		final private String _groupName;
+		final private String _location;
+		ClusterGroupState _state = ClusterGroupState.Unknown;
 
 		public ClusterGroupInfo(String groupName, int state, String location)
 		{
@@ -531,7 +598,9 @@ public class Cluster
 			if (super.equals(info))
 				return true;
 
-			if (StringUtils.equals(_location, info._location) && StringUtils.equals(_groupName, info._groupName) && _state == info._state)
+			if (StringUtils.equals(_location, info._location)
+					&& StringUtils.equals(_groupName, info._groupName)
+					&& _state == info._state)
 				return true;
 
 			return false;

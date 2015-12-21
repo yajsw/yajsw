@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.os;
 
 import java.util.logging.Logger;
@@ -6,19 +21,19 @@ import org.apache.commons.configuration.Configuration;
 
 abstract public class AbstractService implements Service
 {
-	protected String		_displayName;
-	protected String		_description;
-	protected String[]		_dependencies;
-	protected String		_account;
-	protected String		_password;
-	protected String		_command[];
-	protected String		_name;
-	protected Configuration	_config;
-	protected String		_startType;
-	protected boolean		_interactive;
-	protected Logger		_logger;
-	protected Object		_failureActions = null;
-	protected String[]		_stopDependencies;
+	protected String _displayName;
+	protected String _description;
+	protected String[] _dependencies;
+	protected String _account;
+	protected String _password;
+	protected String _command[];
+	protected String _name;
+	protected Configuration _config;
+	protected String _startType;
+	protected boolean _interactive;
+	protected Logger _logger;
+	protected Object _failureActions = null;
+	protected String[] _stopDependencies;
 
 	public String getDisplayName()
 	{
@@ -169,12 +184,12 @@ abstract public class AbstractService implements Service
 	{
 		_interactive = interactive;
 	}
-	
+
 	public void setFailureActions(Object failureActions)
 	{
 		_failureActions = failureActions;
 	}
-	
+
 	public Object getFailureActions()
 	{
 		return _failureActions;
@@ -189,6 +204,5 @@ abstract public class AbstractService implements Service
 	{
 		_stopDependencies = stopDependencies;
 	}
-
 
 }

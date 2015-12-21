@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.io;
 
 import java.io.IOException;
@@ -16,7 +22,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
 import org.rzo.yajsw.util.MyReentrantLock;
-
 
 // TODO: Auto-generated Javadoc
 /**
@@ -28,36 +33,36 @@ public class CircularBuffer extends Reader
 {
 
 	/** Default buffer size. */
-	public final static int	DEFAULT_BUFFER_SIZE		= 512;
+	public final static int DEFAULT_BUFFER_SIZE = 512;
 
 	/** The synchronization lock. */
-	private Lock			lock					= new MyReentrantLock();
+	private Lock lock = new MyReentrantLock();
 
 	/** Sync condition indicating that buffer is not empty. */
-	private Condition		notEmpty				= lock.newCondition();
+	private Condition notEmpty = lock.newCondition();
 
 	/** The not full. */
-	private Condition		notFull					= lock.newCondition();
+	private Condition notFull = lock.newCondition();
 
 	/** The buffer. */
-	private byte[]			buffer;
+	private byte[] buffer;
 
 	/** The number of valid elements in the buffe. */
-	private int				size					= 0;
+	private int size = 0;
 
 	/** The index to put next value. */
-	private int				putIndex				= 0;
+	private int putIndex = 0;
 
 	/** The index to get next value. */
-	private int				getIndex				= 0;
+	private int getIndex = 0;
 
 	/** The blocking. */
-	boolean					blocking				= true;
+	boolean blocking = true;
 
-	byte[]					fullIndicator;
-	boolean					fullIndocatorWritten	= false;
-	boolean					writeBlocking;
-	int						fullIndicatorIndex		= -1;
+	byte[] fullIndicator;
+	boolean fullIndocatorWritten = false;
+	boolean writeBlocking;
+	int fullIndicatorIndex = -1;
 
 	/**
 	 * Instantiates a new circular buffer.
@@ -96,7 +101,7 @@ public class CircularBuffer extends Reader
 	 */
 	public void put(byte value)
 	{
-		//System.out.println("drain put "+1);
+		// System.out.println("drain put "+1);
 		lock.lock(); // lock this object
 		// while no empty locations, place thread in waiting state
 		try
@@ -126,7 +131,7 @@ public class CircularBuffer extends Reader
 
 		notEmpty.signal(); // signal threads waiting to read from buffer
 		lock.unlock(); // unlock this object
-		//System.out.println("-drain put "+1);
+		// System.out.println("-drain put "+1);
 	} // end method put
 
 	private void writeFullIndicator()
@@ -147,13 +152,13 @@ public class CircularBuffer extends Reader
 	 */
 	public void put(byte[] buf, int off, int len)
 	{
-		//System.out.println("drain put "+len);
+		// System.out.println("drain put "+len);
 		lock.lock(); // lock this object
 		for (int i = off; i < off + len - 1; i++)
 			putByte(buf[i]);
 		notEmpty.signal(); // signal threads waiting to read from buffer
 		lock.unlock(); // unlock this object
-		//System.out.println("-put "+len);
+		// System.out.println("-put "+len);
 
 	}
 
@@ -195,7 +200,7 @@ public class CircularBuffer extends Reader
 	 */
 	public byte get()
 	{
-		//System.out.println("drain get "+1);
+		// System.out.println("drain get "+1);
 
 		byte result = 0; // initialize value read from buffer
 		lock.lock(); // lock this object
@@ -219,7 +224,7 @@ public class CircularBuffer extends Reader
 			result = getByte();
 			notFull.signal();
 		} // end try
-		// if waiting thread interrupted, print stack trace
+			// if waiting thread interrupted, print stack trace
 		catch (InterruptedException exception)
 		{
 			exception.printStackTrace();
@@ -229,7 +234,7 @@ public class CircularBuffer extends Reader
 		{
 			lock.unlock(); // unlock this object
 		} // end finally
-		//System.out.println("-drain get "+1);
+			// System.out.println("-drain get "+1);
 
 		return result;
 	} // end method get
@@ -249,7 +254,7 @@ public class CircularBuffer extends Reader
 	 */
 	public int get(byte[] buf, int off, int len)
 	{
-		//System.out.println("drain get "+len);
+		// System.out.println("drain get "+len);
 		lock.lock(); // lock this object
 		int i = 0;
 
@@ -263,7 +268,7 @@ public class CircularBuffer extends Reader
 				// filled
 			} // end while
 		} // end try
-		// if waiting thread interrupted, print stack trace
+			// if waiting thread interrupted, print stack trace
 		catch (Exception exception)
 		{
 			exception.printStackTrace();
@@ -275,7 +280,7 @@ public class CircularBuffer extends Reader
 		}
 		notFull.signal();
 		lock.unlock(); // unlock this object
-		//System.out.println("-drain get "+i);
+		// System.out.println("-drain get "+i);
 
 		return i;
 
@@ -355,8 +360,7 @@ public class CircularBuffer extends Reader
 		b.put((byte) 3);
 		System.out.println(b.get());
 		System.out.println(b.get());
-		b.put(new byte[]
-		{ 1, 2, 3, 4 }, 0, 4);
+		b.put(new byte[] { 1, 2, 3, 4 }, 0, 4);
 		System.out.println(b.get(new byte[10], 0, 10));
 		System.out.println(b.get(new byte[10], 0, 10));
 	}
@@ -369,7 +373,7 @@ public class CircularBuffer extends Reader
 	@Override
 	public int read(char[] cbuf, int off, int len) throws IOException
 	{
-		//System.out.println("drain read  "+len);
+		// System.out.println("drain read  "+len);
 
 		lock.lock(); // lock this object
 		int i = 0;
@@ -389,7 +393,7 @@ public class CircularBuffer extends Reader
 				}
 			} // end while
 		} // end try
-		// if waiting thread interrupted, print stack trace
+			// if waiting thread interrupted, print stack trace
 		catch (Exception exception)
 		{
 			exception.printStackTrace();
@@ -401,7 +405,7 @@ public class CircularBuffer extends Reader
 		}
 		notFull.signal();
 		lock.unlock(); // unlock this object
-		//System.out.println("-drain read  "+i);
+		// System.out.println("-drain read  "+i);
 
 		return i;
 	}
@@ -418,13 +422,13 @@ public class CircularBuffer extends Reader
 	 */
 	public void write(char[] cbuf, int off, int len)
 	{
-		//System.out.println("drain write  "+len);
+		// System.out.println("drain write  "+len);
 		lock.lock(); // lock this object
 		for (int i = off; i < off + len - 1; i++)
 			putByte((byte) cbuf[i]);
 		notEmpty.signal(); // signal threads waiting to read from buffer
 		lock.unlock(); // unlock this object
-		//System.out.println("-drain write  "+len);
+		// System.out.println("-drain write  "+len);
 	}
 
 	/**

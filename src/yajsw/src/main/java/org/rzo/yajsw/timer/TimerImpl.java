@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.timer;
 
 import java.text.ParseException;
@@ -35,41 +41,41 @@ public class TimerImpl implements Timer
 	private static final int REPEAT_INDEFINITELY = -1;
 
 	/** The _config. */
-	YajswConfigurationImpl	_config;
+	YajswConfigurationImpl _config;
 
 	/** The _wp. */
-	WrappedProcess			_wp;
+	WrappedProcess _wp;
 
 	/** The _scheduler. */
-	Scheduler		_cronScheduler;
-	ScheduledExecutorService _simpleScheduler; 
+	Scheduler _cronScheduler;
+	ScheduledExecutorService _simpleScheduler;
 
 	/** The _cron start. */
-	MyCronTrigger			_cronStart;
+	MyCronTrigger _cronStart;
 
 	/** The _cron stop. */
-	MyCronTrigger			_cronStop;
+	MyCronTrigger _cronStop;
 
 	/** The _cron restart. */
-	MyCronTrigger			_cronRestart;
+	MyCronTrigger _cronRestart;
 
 	/** The _simple start. */
-	MySimpleTrigger			_simpleStart;
+	MySimpleTrigger _simpleStart;
 
 	/** The _simple stop. */
-	MySimpleTrigger			_simpleStop;
+	MySimpleTrigger _simpleStop;
 
 	/** The _simple restart. */
-	MySimpleTrigger			_simpleRestart;
+	MySimpleTrigger _simpleRestart;
 
 	/** The _has trigger. */
-	boolean					_hasTrigger		= false;
+	boolean _hasTrigger = false;
 
 	/** The _start immediate. */
-	boolean					_startImmediate	= true;
+	boolean _startImmediate = true;
 
 	/** The _triggered. */
-	boolean					_triggered		= false;
+	boolean _triggered = false;
 
 	/**
 	 * Instantiates a new timer.
@@ -111,7 +117,8 @@ public class TimerImpl implements Timer
 						_simpleRestart = getSimpleTrigger(key);
 				}
 				else
-					System.out.println("Cannot interpret timer property: " + key);
+					System.out.println("Cannot interpret timer property: "
+							+ key);
 			}
 			else if (key.contains(".cron."))
 			{
@@ -122,7 +129,8 @@ public class TimerImpl implements Timer
 				else if (key.contains(".RESTART"))
 					_cronRestart = getCronTrigger(key);
 				else
-					System.out.println("Cannot interpret timer property: " + key);
+					System.out.println("Cannot interpret timer property: "
+							+ key);
 			}
 			else
 			{
@@ -148,18 +156,18 @@ public class TimerImpl implements Timer
 		Date startTime = getStartTime(key);
 		int repeatCount = getRepeatCount(key);
 		int interval = getInterval(key);
-		
+
 		MySimpleTrigger trigger;
 		try
 		{
-			trigger = new MySimpleTrigger(jobDetail, startTime, repeatCount, interval);
+			trigger = new MySimpleTrigger(jobDetail, startTime, repeatCount,
+					interval);
 		}
 		catch (Exception ex)
 		{
 			return null;
 		}
 
-		
 		_hasTrigger = true;
 		_startImmediate = false; // getStartTime will always return a date.
 		// per default the current time.
@@ -177,9 +185,10 @@ public class TimerImpl implements Timer
 	 */
 	private int getInterval(String key)
 	{
-		int x = _config.getInt(key.substring(0, key.lastIndexOf(".")) + ".INTERVAL", REPEAT_INDEFINITELY);
+		int x = _config.getInt(key.substring(0, key.lastIndexOf("."))
+				+ ".INTERVAL", REPEAT_INDEFINITELY);
 		if (x > 0)
-			x = x*1000;
+			x = x * 1000;
 		return x;
 	}
 
@@ -193,7 +202,9 @@ public class TimerImpl implements Timer
 	 */
 	private int getRepeatCount(String key)
 	{
-		return _config.getInt(key.substring(0, key.lastIndexOf(".")) + ".COUNT", REPEAT_INDEFINITELY);
+		return _config.getInt(
+				key.substring(0, key.lastIndexOf(".")) + ".COUNT",
+				REPEAT_INDEFINITELY);
 	}
 
 	/**
@@ -206,7 +217,8 @@ public class TimerImpl implements Timer
 	 */
 	private Date getStartTime(String key)
 	{
-		String str = _config.getString(key.substring(0, key.lastIndexOf(".")) + ".FIRST");
+		String str = _config.getString(key.substring(0, key.lastIndexOf("."))
+				+ ".FIRST");
 		if (str == null)
 			return new Date();
 		SimpleDateFormat df = null;
@@ -267,7 +279,7 @@ public class TimerImpl implements Timer
 			_hasTrigger = true;
 			return trigger;
 		}
-			return null;
+		return null;
 	}
 
 	/**
@@ -285,7 +297,7 @@ public class TimerImpl implements Timer
 		{
 			return null;
 		}
-			return str;
+		return str;
 	}
 
 	/**
@@ -341,7 +353,8 @@ public class TimerImpl implements Timer
 		if (trigger instanceof MyCronTrigger)
 			try
 			{
-				getCronScheduler().schedule(jobDetail, ((MyCronTrigger) trigger)._cronExpression);
+				getCronScheduler().schedule(jobDetail,
+						((MyCronTrigger) trigger)._cronExpression);
 			}
 			catch (Exception e)
 			{
@@ -355,22 +368,26 @@ public class TimerImpl implements Timer
 			ScheduledFuture future;
 			if (simpleTrigger._startTime != null)
 			{
-				initialDelay = simpleTrigger._startTime.getTime() -  System.currentTimeMillis();
+				initialDelay = simpleTrigger._startTime.getTime()
+						- System.currentTimeMillis();
 				if (initialDelay < 0)
 					initialDelay = 0;
 			}
 			if (simpleTrigger._interval > 0)
 			{
-				future = scheduler.scheduleWithFixedDelay(jobDetail, initialDelay, simpleTrigger._interval, TimeUnit.MILLISECONDS);
+				future = scheduler.scheduleWithFixedDelay(jobDetail,
+						initialDelay, simpleTrigger._interval,
+						TimeUnit.MILLISECONDS);
 				jobDetail.setFuture(future);
-				
+
 			}
 			else
 			{
-				future = scheduler.schedule(jobDetail, initialDelay, TimeUnit.MILLISECONDS);
+				future = scheduler.schedule(jobDetail, initialDelay,
+						TimeUnit.MILLISECONDS);
 				jobDetail.setFuture(future);
 			}
-			
+
 		}
 	}
 
@@ -385,13 +402,13 @@ public class TimerImpl implements Timer
 				options.setMaxThreads(1);
 				options.setThreadFactory(new ThreadFactory()
 				{
-					
+
 					@Override
 					public Thread newThread(Runnable r)
 					{
 						Thread result = new Thread(r);
 						result.setDaemon(true);
-						result.setName("yajsw-timer-"+tcount++);
+						result.setName("yajsw-timer-" + tcount++);
 						return result;
 					}
 				});
@@ -471,16 +488,16 @@ public class TimerImpl implements Timer
 	{
 		return _hasTrigger;
 	}
-	
+
 	interface Trigger
 	{
 		Runnable getJobDetail();
 	}
-	
+
 	class AbstractTrigger implements Trigger
 	{
 		final Job _job;
-		
+
 		AbstractTrigger(Job job)
 		{
 			_job = job;
@@ -506,7 +523,6 @@ public class TimerImpl implements Timer
 			super(job);
 			_cronExpression = cronExpression;
 		}
-		
 
 	}
 
@@ -521,9 +537,10 @@ public class TimerImpl implements Timer
 
 		/**
 		 * Instantiates a new my simple trigger.
-		 * @param interval 
-		 * @param repeatCount 
-		 * @param startTime 
+		 * 
+		 * @param interval
+		 * @param repeatCount
+		 * @param startTime
 		 * 
 		 * @param jobDetail
 		 *            the job detail
@@ -531,7 +548,8 @@ public class TimerImpl implements Timer
 		MySimpleTrigger(Job job, Date startTime, int repeatCount, int interval)
 		{
 			super(job);
-			if (startTime == null && repeatCount == REPEAT_INDEFINITELY && interval == REPEAT_INDEFINITELY)
+			if (startTime == null && repeatCount == REPEAT_INDEFINITELY
+					&& interval == REPEAT_INDEFINITELY)
 				throw new RuntimeException("simple trigger configuration error");
 			_startTime = startTime;
 			_repeatCount = repeatCount;

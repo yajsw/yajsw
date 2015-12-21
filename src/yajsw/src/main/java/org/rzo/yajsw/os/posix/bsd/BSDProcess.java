@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.os.posix.bsd;
 
 import java.io.BufferedReader;
@@ -20,8 +35,8 @@ import com.sun.jna.ptr.IntByReference;
 
 public class BSDProcess extends PosixProcess
 {
-	java.lang.Process	_process;
-	
+	java.lang.Process _process;
+
 	@Override
 	public String getStdInName()
 	{
@@ -40,18 +55,15 @@ public class BSDProcess extends PosixProcess
 		return "__stderrp";
 	}
 
-
-	
-	
 	private String getDOption(String key, String value)
 	{
-		// posix: setting quotes does not work (cmd is str array). windows: quotes are set in Process class.
-		//if (value != null && !value.contains(" "))
-			return "-D"+key+"="+value;
-		//else
-		//	return "-D"+key+"=\""+value+"\"";
+		// posix: setting quotes does not work (cmd is str array). windows:
+		// quotes are set in Process class.
+		// if (value != null && !value.contains(" "))
+		return "-D" + key + "=" + value;
+		// else
+		// return "-D"+key+"=\""+value+"\"";
 	}
-
 
 	public boolean start()
 	{
@@ -76,8 +88,8 @@ public class BSDProcess extends PosixProcess
 			cmdList.add("-Dwrapperx.user=" + _user);
 		if (_umask != -1)
 			cmdList.add("-Dwrapperx.umask=" + _umask);
-		//if (_password != null)
-		//	cmdList.add("-Dwrapperx.password=" + _password);
+		// if (_password != null)
+		// cmdList.add("-Dwrapperx.password=" + _password);
 		String[] xenv = getXEnv();
 		cmdList.add(AppStarter.class.getName());
 		for (int i = 0; i < _arrCmd.length; i++)
@@ -103,19 +115,20 @@ public class BSDProcess extends PosixProcess
 			_terminated = true;
 			return false;
 		}
-		BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+		BufferedReader in = new BufferedReader(new InputStreamReader(
+				p.getInputStream()));
 		String line;
 		try
 		{
 			do
 			{
 				line = in.readLine();
-				//System.out.println("line: " +line);
+				// System.out.println("line: " +line);
 				if (line != null && line.contains("PID:"))
 				{
 					setPid(Integer.parseInt(line.substring(4)));
 					if (this._teeName == null)
-					   line = null;
+						line = null;
 					// otherwise the stream is closed by the wrapped app
 					// we will continue reading the input stream in the gobbler
 				}
@@ -168,7 +181,8 @@ public class BSDProcess extends PosixProcess
 			try
 			{
 				// System.out.println("opening tee streams out");
-				_inputStream = new CyclicBufferFileInputStream(createRWfile(_tmpPath, "out_" + _teeName));
+				_inputStream = new CyclicBufferFileInputStream(createRWfile(
+						_tmpPath, "out_" + _teeName));
 			}
 			catch (Exception e)
 			{
@@ -177,7 +191,8 @@ public class BSDProcess extends PosixProcess
 			try
 			{
 				// System.out.println("opening tee streams err");
-				_errorStream = new CyclicBufferFileInputStream(createRWfile(_tmpPath, "err_" + _teeName));
+				_errorStream = new CyclicBufferFileInputStream(createRWfile(
+						_tmpPath, "err_" + _teeName));
 			}
 			catch (Exception e)
 			{
@@ -186,7 +201,8 @@ public class BSDProcess extends PosixProcess
 			try
 			{
 				// System.out.println("opening tee streams in");
-				_outputStream = new CyclicBufferFilePrintStream(createRWfile(_tmpPath, "in_" + _teeName));
+				_outputStream = new CyclicBufferFilePrintStream(createRWfile(
+						_tmpPath, "in_" + _teeName));
 			}
 			catch (Exception e)
 			{
@@ -219,12 +235,12 @@ public class BSDProcess extends PosixProcess
 		List<String[]> env = getEnvironment();
 		if (env != null && !env.isEmpty())
 		{
-			String [] result = new String[env.size()];
+			String[] result = new String[env.size()];
 			int i = 0;
 			for (String[] x : env)
 			{
-				result[i] = x[0]+"="+x[1];
-				System.out.println("bsd env "+result[i]);
+				result[i] = x[0] + "=" + x[1];
+				System.out.println("bsd env " + result[i]);
 				i++;
 			}
 			return result;
@@ -250,8 +266,10 @@ public class BSDProcess extends PosixProcess
 
 	private String getCurrentJava()
 	{
-		int myPid = OperatingSystem.instance().processManagerInstance().currentProcessId();
-		Process myProcess = OperatingSystem.instance().processManagerInstance().getProcess(myPid);
+		int myPid = OperatingSystem.instance().processManagerInstance()
+				.currentProcessId();
+		Process myProcess = OperatingSystem.instance().processManagerInstance()
+				.getProcess(myPid);
 		String cmd = myProcess.getCommand();
 		String jvm = null;
 		if (cmd.startsWith("\""))
@@ -319,11 +337,11 @@ public class BSDProcess extends PosixProcess
 	{
 		BSDProcess p = new BSDProcess();
 		System.out.println(p.getCurrentJava());
-		p.setCommand(new String[]
-		{ "ping", "localhost" });
+		p.setCommand(new String[] { "ping", "localhost" });
 		p.setPipeStreams(true, false);
 		p.start();
-		BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+		BufferedReader in = new BufferedReader(new InputStreamReader(
+				p.getInputStream()));
 		String line;
 		try
 		{
@@ -340,18 +358,20 @@ public class BSDProcess extends PosixProcess
 		}
 
 	}
-	
+
 	private boolean checkPath(String path)
 	{
 		int ix = path.indexOf("!");
 		if (ix == -1)
 		{
-			System.out.println("<yajsw>/lib/core/jna/jna-xxx.jar not found, please check classpath. aborting wrapper !");
-			//Runtime.getRuntime().halt(999);// -> groovy eclipse plugin crashes
+			System.out
+					.println("<yajsw>/lib/core/jna/jna-xxx.jar not found, please check classpath. aborting wrapper !");
+			// Runtime.getRuntime().halt(999);// -> groovy eclipse plugin
+			// crashes
 			return false;
 		}
 		return true;
-		
+
 	}
 
 	private String getJNAJar()
@@ -361,7 +381,8 @@ public class BSDProcess extends PosixProcess
 		String path = ".";
 		try
 		{
-			path = FromNativeConverter.class.getClassLoader().getResource(rn).getPath();
+			path = FromNativeConverter.class.getClassLoader().getResource(rn)
+					.getPath();
 			if (!checkPath(path))
 				return null;
 			path = path.substring(0, path.indexOf("!"));
@@ -375,7 +396,5 @@ public class BSDProcess extends PosixProcess
 		}
 		return null;
 	}
-	
-
 
 }

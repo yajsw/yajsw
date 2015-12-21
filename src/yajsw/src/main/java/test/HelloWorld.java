@@ -29,8 +29,8 @@ import org.rzo.yajsw.app.WrapperJVMMain;
 
 public class HelloWorld
 {
-	Map			m			= new CaseInsensitiveMap();
-	static Map	outOfMem	= new HashMap();
+	Map m = new CaseInsensitiveMap();
+	static Map outOfMem = new HashMap();
 	static Executor executor = Executors.newSingleThreadExecutor();
 
 	static class MyWriter implements Runnable
@@ -142,19 +142,22 @@ public class HelloWorld
 	// test for application main.
 	public static void main(final String[] args) throws Exception
 	{
-		//OperatingSystem.instance().setWorkingDir("..");
-		System.out.println("TESTENV :" +System.getenv("TESTENV"));
-		System.out.println("TESTPROP: "+System.getProperty("D_1"));
+		// OperatingSystem.instance().setWorkingDir("..");
+		System.out.println("TESTENV :" + System.getenv("TESTENV"));
+		System.out.println("TESTPROP: " + System.getProperty("D_1"));
 		try
 		{
-			Class clazz = ClassLoader.getSystemClassLoader().loadClass("java.nio.file.Paths");
-			Method m = clazz.getDeclaredMethod("get", String.class, String[].class);
+			Class clazz = ClassLoader.getSystemClassLoader().loadClass(
+					"java.nio.file.Paths");
+			Method m = clazz.getDeclaredMethod("get", String.class,
+					String[].class);
 			Object p = m.invoke(null, ".", new String[0]);
-			clazz = ClassLoader.getSystemClassLoader().loadClass("java.nio.file.Path");
+			clazz = ClassLoader.getSystemClassLoader().loadClass(
+					"java.nio.file.Path");
 			m = clazz.getDeclaredMethod("toAbsolutePath", null);
-			
+
 			System.out.println(m);
-		System.out.println("working dir path: "+m.invoke(p));
+			System.out.println("working dir path: " + m.invoke(p));
 		}
 		catch (Exception ex)
 		{
@@ -169,9 +172,10 @@ public class HelloWorld
 			public void run()
 			{
 				Thread.currentThread().setName("shutdown hook");
-				System.out.println("TESTENV :" +System.getenv("TESTENV"));
+				System.out.println("TESTENV :" + System.getenv("TESTENV"));
 				if (WrapperJVMMain.WRAPPER_MANAGER != null)
-					System.out.println("stop reason: " + WrapperJVMMain.WRAPPER_MANAGER.getStopReason());
+					System.out.println("stop reason: "
+							+ WrapperJVMMain.WRAPPER_MANAGER.getStopReason());
 				if (args.length > 0 && args[0].equals("exception"))
 				{
 					System.out.println("Exception 1");
@@ -199,30 +203,31 @@ public class HelloWorld
 								{
 									try
 									{
-								if (WrapperJVMMain.WRAPPER_MANAGER != null)
-								{
-									WrapperJVMMain.WRAPPER_MANAGER.signalStopping(5000);
-									System.out.println("signaled stopping 5000");
-								}
-									Thread.sleep(5000);
-								}
-								catch (InterruptedException e)
-								{
-									e.printStackTrace();
-									break;
-								}
+										if (WrapperJVMMain.WRAPPER_MANAGER != null)
+										{
+											WrapperJVMMain.WRAPPER_MANAGER
+													.signalStopping(5000);
+											System.out
+													.println("signaled stopping 5000");
+										}
+										Thread.sleep(5000);
+									}
+									catch (InterruptedException e)
+									{
+										e.printStackTrace();
+										break;
+									}
 								}
 							}
-							
-						}
-						);
+
+						});
 						Thread.sleep(60000);
 						System.out.println("- sleeping");
 					}
 					else if (args.length > 0 && args[0].equals("sleepStop"))
 					{
-					 Thread.sleep(180000);
-					 Runtime.getRuntime().halt(0);
+						Thread.sleep(180000);
+						Runtime.getRuntime().halt(0);
 					}
 				}
 				catch (Exception e)
@@ -234,8 +239,9 @@ public class HelloWorld
 			}
 
 		});
-		
-		System.out.println("java.library.path: "+System.getProperty("java.library.path"));
+
+		System.out.println("java.library.path: "
+				+ System.getProperty("java.library.path"));
 
 		if (args.length >= 1 && "crash".equals(args[0]))
 		{
@@ -305,7 +311,9 @@ public class HelloWorld
 
 		System.out.println("myenv " + System.getProperty("myenv"));
 		if (WrapperJVMMain.WRAPPER_MANAGER != null)
-			System.out.println("wrapper property: " + WrapperJVMMain.WRAPPER_MANAGER.getProperties().getProperty("wrapper.debug"));
+			System.out.println("wrapper property: "
+					+ WrapperJVMMain.WRAPPER_MANAGER.getProperties()
+							.getProperty("wrapper.debug"));
 		/*
 		 * try { Process p = Runtime.getRuntime().exec("../set.bat");
 		 * BufferedReader in1 = new BufferedReader(new
@@ -329,7 +337,8 @@ public class HelloWorld
 			System.out.println(args[i]);
 		final Vector v = new Vector();
 		new File("test.txt").delete();
-		final BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		final BufferedReader in = new BufferedReader(new InputStreamReader(
+				System.in));
 		new Thread(new Runnable()
 		{
 			public void run()
@@ -480,20 +489,23 @@ public class HelloWorld
 	{
 		JFrame frame = new JFrame("Hellow World");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().add(new JLabel("hellow world test"), BorderLayout.CENTER);
+		frame.getContentPane().add(new JLabel("hellow world test"),
+				BorderLayout.CENTER);
 		frame.pack();
 		frame.setVisible(true);
 	}
-	
+
 	private static void startProcess() throws IOException
 	{
 		Process p = Runtime.getRuntime().exec("ping localhost -t");
-		final BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-		final BufferedReader err = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-		
+		final BufferedReader in = new BufferedReader(new InputStreamReader(
+				p.getInputStream()));
+		final BufferedReader err = new BufferedReader(new InputStreamReader(
+				p.getErrorStream()));
+
 		new Thread(new Runnable()
 		{
-			
+
 			@Override
 			public void run()
 			{
@@ -501,7 +513,7 @@ public class HelloWorld
 				{
 					String line;
 					while ((line = in.readLine()) != null)
-					System.out.println(line);
+						System.out.println(line);
 				}
 				catch (IOException e)
 				{
@@ -512,7 +524,7 @@ public class HelloWorld
 		}).start();
 		new Thread(new Runnable()
 		{
-			
+
 			@Override
 			public void run()
 			{
@@ -520,13 +532,14 @@ public class HelloWorld
 				{
 					String line;
 					while ((line = err.readLine()) != null)
-					System.out.println(line);
+						System.out.println(line);
 				}
 				catch (IOException e)
 				{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}			}
+				}
+			}
 		}).start();
 	}
 

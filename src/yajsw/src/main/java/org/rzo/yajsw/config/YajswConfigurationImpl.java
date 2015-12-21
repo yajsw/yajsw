@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.config;
 
 import io.netty.util.internal.logging.InternalLogger;
@@ -49,40 +55,42 @@ import org.rzo.yajsw.util.VFSUtils;
 /**
  * The Class AjswConfigurationImpl.
  */
-public class YajswConfigurationImpl extends CompositeConfiguration implements YajswConfiguration
+public class YajswConfigurationImpl extends CompositeConfiguration implements
+		YajswConfiguration
 {
 
 	/** The log. */
-	InternalLogger					log						= InternalLoggerFactory.getInstance(this.getClass().getName());
+	InternalLogger log = InternalLoggerFactory.getInstance(this.getClass()
+			.getName());
 
 	/** The _system properties. */
-	Configuration			_systemProperties;
+	Configuration _systemProperties;
 
 	/** The _local configuration. */
-	Configuration			_localConfiguration;
+	Configuration _localConfiguration;
 
 	/** The _system configuration. */
-	CompositeConfiguration	_systemConfiguration	= new CompositeConfiguration();
+	CompositeConfiguration _systemConfiguration = new CompositeConfiguration();
 
 	/** The debug. */
-	boolean					debug					= false;
+	boolean debug = false;
 
 	/** The _use system properties. */
-	boolean					_useSystemProperties	= true;
+	boolean _useSystemProperties = true;
 
-	boolean					_isStopper				= false;
+	boolean _isStopper = false;
 
-	boolean					_init					= false;
+	boolean _init = false;
 
-	PropertiesConfiguration	_fileConfiguration		= null;
+	PropertiesConfiguration _fileConfiguration = null;
 
-	Interpolator			_interpolator;
+	Interpolator _interpolator;
 
-	Set						_interpolated			= new HashSet();
+	Set _interpolated = new HashSet();
 
-	Map						_scriptUtils			= null;
+	Map _scriptUtils = null;
 
-	boolean					_isJavaDebug			= false;
+	boolean _isJavaDebug = false;
 
 	/**
 	 * Instantiates a new ajsw configuration impl.
@@ -104,7 +112,8 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 		init();
 	}
 
-	public YajswConfigurationImpl(Configuration localConfiguration, boolean useSystemProperties)
+	public YajswConfigurationImpl(Configuration localConfiguration,
+			boolean useSystemProperties)
 	{
 		this(localConfiguration, useSystemProperties, null);
 	}
@@ -117,19 +126,19 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 	 * @param useSystemProperties
 	 *            the use system properties
 	 */
-	public YajswConfigurationImpl(Configuration localConfiguration, boolean useSystemProperties, Map scriptUtils)
+	public YajswConfigurationImpl(Configuration localConfiguration,
+			boolean useSystemProperties, Map scriptUtils)
 	{
 		_localConfiguration = localConfiguration;
 		_useSystemProperties = useSystemProperties;
 		_scriptUtils = scriptUtils;
 		init();
 	}
-	
+
 	public Interpolator getYajswInterpolator()
 	{
 		return _interpolator;
 	}
-
 
 	/*
 	 * (non-Javadoc)
@@ -137,7 +146,7 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 	 * @see org.rzo.yajsw.AjswConfiguration#init()
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-  public void init()
+	public void init()
 	{
 		if (_init)
 			return;
@@ -151,17 +160,19 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 			_scriptUtils = new HashMap();
 		try
 		{
-			// use introspection, so that groovy can be removed from the classpath, if not required
-			_interpolator = createGInterpolatornew(this, true, null, _scriptUtils);
+			// use introspection, so that groovy can be removed from the
+			// classpath, if not required
+			_interpolator = createGInterpolatornew(this, true, null,
+					_scriptUtils);
 			this.setInterpolator(_interpolator);
 		}
 		catch (Exception e1)
 		{
-			//e1.printStackTrace();
+			// e1.printStackTrace();
 			log.warn("WARNING: could not instatiate groovy in wrapper configuration.");
-			
+
 		}
-		
+
 		if (_localConfiguration != null)
 		{
 			_systemConfiguration.addConfiguration(_localConfiguration);
@@ -174,14 +185,18 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 		// load configuration from System Properties
 		if (_useSystemProperties)
 		{
-			_systemProperties = ConfigurationConverter.getConfiguration((Properties) System.getProperties().clone());
+			_systemProperties = ConfigurationConverter
+					.getConfiguration((Properties) System.getProperties()
+							.clone());
 			_systemConfiguration.addConfiguration(_systemProperties);
 			if (debug)
 				log.debug("added system configuration ");
 		}
-		//_systemConfiguration.addConfiguration(new EnvironmentConfiguration());
-    _systemConfiguration.addConfiguration(new MapConfiguration(!OperatingSystem.instance().isPosix() ? new CaseInsensitiveMap(System.getenv()) : new HashMap(System.getenv())));
-
+		// _systemConfiguration.addConfiguration(new
+		// EnvironmentConfiguration());
+		_systemConfiguration.addConfiguration(new MapConfiguration(
+				!OperatingSystem.instance().isPosix() ? new CaseInsensitiveMap(
+						System.getenv()) : new HashMap(System.getenv())));
 
 		addConfiguration(_systemConfiguration);
 		// check if we have config file
@@ -204,7 +219,8 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 				try
 				{
 					JnlpSupport jnlp = new JnlpSupport(configFile);
-					_fileConfiguration = jnlp.toConfiguration((String) getProperty("wrapperx.default.config"));
+					_fileConfiguration = jnlp
+							.toConfiguration((String) getProperty("wrapperx.default.config"));
 					_fileConfiguration.setFileName(configFile);
 					addConfiguration(_fileConfiguration);
 				}
@@ -226,8 +242,10 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 						public Map getOptions()
 						{
 							Map result = new HashMap();
-							String httpProxy = System.getProperty("http.proxyHost");
-							String httpPort = System.getProperty("http.proxyPort");
+							String httpProxy = System
+									.getProperty("http.proxyHost");
+							String httpPort = System
+									.getProperty("http.proxyPort");
 							if (httpProxy != null)
 							{
 								int port = 8080;
@@ -240,7 +258,8 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 									{
 										ex.printStackTrace();
 									}
-								result.put(FileOptionsProvider.PROXY_HOST, httpProxy);
+								result.put(FileOptionsProvider.PROXY_HOST,
+										httpProxy);
 								result.put(FileOptionsProvider.PROXY_PORT, port);
 							}
 							return result;
@@ -255,32 +274,31 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 					// then set the file name and load it
 					_fileConfiguration.setFileName(configFile);
 					/*
-					try
-					{
-						_fileConfiguration.setBasePath(new File(".").getCanonicalPath());
-					}
-					catch (IOException e)
-					{
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					*/
-					
+					 * try { _fileConfiguration.setBasePath(new
+					 * File(".").getCanonicalPath()); } catch (IOException e) {
+					 * // TODO Auto-generated catch block e.printStackTrace(); }
+					 */
+
 					_fileConfiguration.append(_systemConfiguration);
 					if (_interpolator != null)
 						try
 						{
-							_fileConfiguration.setInterpolator(createGInterpolatornew(_fileConfiguration, true, null, _scriptUtils));
+							_fileConfiguration
+									.setInterpolator(createGInterpolatornew(
+											_fileConfiguration, true, null,
+											_scriptUtils));
 						}
 						catch (Exception e)
 						{
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						//System.out.println("platform "+_systemConfiguration.getString("platform"));
+					// System.out.println("platform "+_systemConfiguration.getString("platform"));
 					_fileConfiguration.load();
-					String encoding = _fileConfiguration.getString("wrapper.conf.encoding");
-					// if we have an encoding: reload the file with the given encoding.
+					String encoding = _fileConfiguration
+							.getString("wrapper.conf.encoding");
+					// if we have an encoding: reload the file with the given
+					// encoding.
 					if (encoding != null)
 					{
 						_fileConfiguration = new PropertiesConfiguration();
@@ -288,21 +306,19 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 						// then set the file name and load it
 						_fileConfiguration.setFileName(configFile);
 						/*
-						try
-						{
-							_fileConfiguration.setBasePath(new File(".").getCanonicalPath());
-						}
-						catch (IOException e)
-						{
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						*/
+						 * try { _fileConfiguration.setBasePath(new
+						 * File(".").getCanonicalPath()); } catch (IOException
+						 * e) { // TODO Auto-generated catch block
+						 * e.printStackTrace(); }
+						 */
 						_fileConfiguration.append(_systemConfiguration);
 						if (_interpolator != null)
 							try
 							{
-								_fileConfiguration.setInterpolator(createGInterpolatornew(_fileConfiguration, true, null, _scriptUtils));
+								_fileConfiguration
+										.setInterpolator(createGInterpolatornew(
+												_fileConfiguration, true, null,
+												_scriptUtils));
 							}
 							catch (Exception e)
 							{
@@ -317,7 +333,9 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 				}
 				catch (ConfigurationException e)
 				{
-					log.error("error loading configuration file <init>AsjwConfiguration", e);
+					log.error(
+							"error loading configuration file <init>AsjwConfiguration",
+							e);
 				}
 			if (!isLocalFile())
 			{
@@ -325,7 +343,9 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 				if (_fileConfiguration.getProperty("wrapper.working.dir") == null)
 					try
 					{
-						_fileConfiguration.setProperty("wrapper.working.dir", new File(getCache()).getCanonicalPath().replaceAll("\\\\", "/"));
+						_fileConfiguration.setProperty("wrapper.working.dir",
+								new File(getCache()).getCanonicalPath()
+										.replaceAll("\\\\", "/"));
 					}
 					catch (IOException e)
 					{
@@ -344,8 +364,9 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 		}
 
 		// load configuration from System Environement
-		//addConfiguration(getConfiguration(System.getenv()));
-		//_systemConfiguration.addConfiguration(new EnvironmentConfiguration());
+		// addConfiguration(getConfiguration(System.getenv()));
+		// _systemConfiguration.addConfiguration(new
+		// EnvironmentConfiguration());
 		_isStopper = this.getBoolean("wrapper.stopper", false);
 		try
 		{
@@ -355,38 +376,41 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 		{
 			ex.printStackTrace();
 		}
-		
-		for (Iterator it = getKeys("wrapper.config.script"); it.hasNext(); )
-		try
-		{
-			String key = (String) it.next();
-			String script = getString(key);
-			String bind = key.substring(key.lastIndexOf(".")+1);
-			_scriptUtils.put(bind, new GroovyScript(script, "", null, null, 0, log, null, false, 1));
-		}
-		catch (Exception e)
-		{
-			log.error("error reading script", e);
-		}
-		
+
+		for (Iterator it = getKeys("wrapper.config.script"); it.hasNext();)
+			try
+			{
+				String key = (String) it.next();
+				String script = getString(key);
+				String bind = key.substring(key.lastIndexOf(".") + 1);
+				_scriptUtils.put(bind, new GroovyScript(script, "", null, null,
+						0, log, null, false, 1));
+			}
+			catch (Exception e)
+			{
+				log.error("error reading script", e);
+			}
 
 		_init = true;
 	}
 
-	private Interpolator createGInterpolatornew(
-			Configuration conf, boolean b,
+	private Interpolator createGInterpolatornew(Configuration conf, boolean b,
 			String[] object, Map utils)
 	{
-		Interpolator result =  null;
+		Interpolator result = null;
 		try
 		{
-			Class clazz = conf.getClass().getClassLoader().loadClass("org.apache.commons.configuration.GInterpolator");
-			Constructor rc = clazz.getDeclaredConstructor(Configuration.class, boolean.class, String[].class, Map.class);
+			Class clazz = conf
+					.getClass()
+					.getClassLoader()
+					.loadClass("org.apache.commons.configuration.GInterpolator");
+			Constructor rc = clazz.getDeclaredConstructor(Configuration.class,
+					boolean.class, String[].class, Map.class);
 			result = (Interpolator) rc.newInstance(conf, b, object, utils);
 		}
 		catch (Exception e)
 		{
-			//e.printStackTrace();
+			// e.printStackTrace();
 			log.warn("WARNING: could not load configuration groovy interpolator");
 		}
 		return result;
@@ -396,14 +420,19 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 	{
 		try
 		{
-			// this hack is no longer required, changed VFS to init without providers.xm.
-			//String current = System.getProperty("javax.xml.parsers.DocumentBuilderFactory");
-			//System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
-			DefaultFileSystemManager fsManager = (DefaultFileSystemManager) VFS.getManager();
-			//if (current != null)
-			//	System.setProperty("javax.xml.parsers.DocumentBuilderFactory", current);
-			//else
-			//	System.clearProperty("javax.xml.parsers.DocumentBuilderFactory");
+			// this hack is no longer required, changed VFS to init without
+			// providers.xm.
+			// String current =
+			// System.getProperty("javax.xml.parsers.DocumentBuilderFactory");
+			// System.setProperty("javax.xml.parsers.DocumentBuilderFactory",
+			// "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
+			DefaultFileSystemManager fsManager = (DefaultFileSystemManager) VFS
+					.getManager();
+			// if (current != null)
+			// System.setProperty("javax.xml.parsers.DocumentBuilderFactory",
+			// current);
+			// else
+			// System.clearProperty("javax.xml.parsers.DocumentBuilderFactory");
 			FileObject f = VFSUtils.resolveFile(".", file);
 			return f.exists();
 		}
@@ -480,7 +509,8 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 		else
 			result = super.resolveContainerStore(key);
 
-		if (_interpolator != null && result != null && !result.equals(_interpolator.interpolate(result)))
+		if (_interpolator != null && result != null
+				&& !result.equals(_interpolator.interpolate(result)))
 			_interpolated.add(key);
 		return result;
 	}
@@ -489,14 +519,14 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 	{
 		return _interpolated;
 	}
-	
+
 	public Map<String, String> getEnvLookupSet()
 	{
 		if (_interpolator != null)
 		{
 			Map<String, String> result = _interpolator.getUsedEnvVars();
 			result.putAll(_interpolator.getFromBinding());
-		return result;
+			return result;
 		}
 		return new HashMap<String, String>();
 	}
@@ -507,10 +537,10 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 		c.setProperty("t1", "x");
 		c.setProperty("t2", "${t1}");
 		System.out.println(c.getString("t2"));
-		for (Iterator it = c.getInterpolator().prefixSet().iterator(); it.hasNext();)
+		for (Iterator it = c.getInterpolator().prefixSet().iterator(); it
+				.hasNext();)
 			System.out.println(it.next());
 	}
-
 
 	public CompositeConfiguration getSystemConfiguration()
 	{
@@ -534,7 +564,8 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 				return false;
 
 			FileObject f = VFSUtils.resolveFile(".", name);
-			// if we set cache to CacheStrategy.ON_CALL FileObjects are decorated to call refresh.
+			// if we set cache to CacheStrategy.ON_CALL FileObjects are
+			// decorated to call refresh.
 			// getContent().getFile() returns the decorated file
 			return VFSUtils.isLocal(f);
 		}
@@ -563,7 +594,8 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 		if (isLocalFile())
 			try
 			{
-				return new File(_fileConfiguration.getURL().toURI()).getCanonicalPath();
+				return new File(_fileConfiguration.getURL().toURI())
+						.getCanonicalPath();
 			}
 			catch (IOException e)
 			{
@@ -578,7 +610,8 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 		try
 		{
 			String cache = getCache() + "/conf";
-			String fileName = _fileConfiguration.getFileSystem().getFileName(_fileConfiguration.getFileName());
+			String fileName = _fileConfiguration.getFileSystem().getFileName(
+					_fileConfiguration.getFileName());
 			File cf = new File(cache);
 			if (!cf.exists())
 				cf.mkdirs();
@@ -590,7 +623,8 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 			if (save)
 			{
 				// interpolate the file so that no includes are required
-				PropertiesConfiguration c2 = (PropertiesConfiguration) _fileConfiguration.interpolatedConfiguration();
+				PropertiesConfiguration c2 = (PropertiesConfiguration) _fileConfiguration
+						.interpolatedConfiguration();
 
 				// save the file
 				c2.save(cn);
@@ -615,14 +649,14 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 	public String getString(String key)
 	{
 		String value = super.getString(key);
-		/* changed upon request, but should we really do this ? cross platform Portability of configurations ?
-		if (value != null && 
-				!key.contains("account") && 
-				!key.contains("wrapper.image")  && 
-				!key.contains("wrapper.app.env") &&
-				!key.contains("wrapper.java.monitor.gc"))
-			value = value.replaceAll("\\\\", "/");
-			*/
+		/*
+		 * changed upon request, but should we really do this ? cross platform
+		 * Portability of configurations ? if (value != null &&
+		 * !key.contains("account") && !key.contains("wrapper.image") &&
+		 * !key.contains("wrapper.app.env") &&
+		 * !key.contains("wrapper.java.monitor.gc")) value =
+		 * value.replaceAll("\\\\", "/");
+		 */
 		return value;
 	}
 
@@ -631,11 +665,10 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements Ya
 		// TODO Auto-generated method stub
 		return -1;
 	}
-	
+
 	public boolean isStopper()
 	{
 		return _isStopper;
 	}
-	
 
 }

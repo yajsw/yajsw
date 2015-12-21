@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.tray;
 
 import io.netty.util.internal.logging.SimpleLogger;
@@ -39,31 +45,31 @@ public class TrayIconMain
 {
 
 	/** The jmxc. */
-	volatile static MBeanServerConnection		jmxc		= null;
+	volatile static MBeanServerConnection jmxc = null;
 
 	/** The url. */
-	static JMXServiceURL						url			= null;
+	static JMXServiceURL url = null;
 
 	/** The user. */
-	static String								user		= null;
+	static String user = null;
 
 	/** The password. */
-	static String								password	= null;
+	static String password = null;
 
 	/** The proxy. */
-	volatile static AbstractWrappedProcessMBean	proxy		= null;
+	volatile static AbstractWrappedProcessMBean proxy = null;
 
 	/** The o name. */
-	static ObjectName							oName		= null;
+	static ObjectName oName = null;
 
 	/** The _tray icon. */
-	static WrapperTrayIconImpl					_trayIcon	= null;
+	static WrapperTrayIconImpl _trayIcon = null;
 
 	/** The lock. */
-	static FileLock								lock		= null;
+	static FileLock lock = null;
 
 	/** The _ahessian client. */
-	static AHessianJmxClient					_ahessianClient;
+	static AHessianJmxClient _ahessianClient;
 
 	private static String getName(Configuration _config)
 	{
@@ -90,7 +96,6 @@ public class TrayIconMain
 
 	}
 
-
 	/**
 	 * The main method.
 	 * 
@@ -116,10 +121,14 @@ public class TrayIconMain
 		if (config != null)
 		{
 			canonName = new File(config).getCanonicalPath();
-			String tmpDir = System.getProperty("jna_tmpdir", System.getProperty("java.io.tmpdir"));
-			File lockFile = new File(tmpDir + "/yajsw" + canonName.hashCode() + ".lck");
-			//System.out.println("system tray lock file: " + lockFile.getCanonicalPath());
-			FileChannel channel = new RandomAccessFile(lockFile, "rw").getChannel();
+			String tmpDir = System.getProperty("jna_tmpdir",
+					System.getProperty("java.io.tmpdir"));
+			File lockFile = new File(tmpDir + "/yajsw" + canonName.hashCode()
+					+ ".lck");
+			// System.out.println("system tray lock file: " +
+			// lockFile.getCanonicalPath());
+			FileChannel channel = new RandomAccessFile(lockFile, "rw")
+					.getChannel();
 			// Try acquiring the lock without blocking. This method returns
 			// null or throws an exception if the file is already locked.
 			try
@@ -140,8 +149,8 @@ public class TrayIconMain
 		Configuration localConf = new BaseConfiguration();
 		if (config != null)
 			localConf.addProperty("wrapper.config", config);
-		YajswConfigurationImpl _config = new YajswConfigurationImpl(localConf, true);
-
+		YajswConfigurationImpl _config = new YajswConfigurationImpl(localConf,
+				true);
 
 		try
 		{
@@ -152,9 +161,12 @@ public class TrayIconMain
 				name = "yajsw.noname";
 			name = ObjectName.quote(name);
 			oName = new ObjectName("org.rzo.yajsw", "name", name);
-			_trayIcon = (WrapperTrayIconImpl) WrapperTrayIconFactory.createTrayIcon(getName(_config), _config.getString("wrapper.tray.icon"), _config);
+			_trayIcon = (WrapperTrayIconImpl) WrapperTrayIconFactory
+					.createTrayIcon(getName(_config),
+							_config.getString("wrapper.tray.icon"), _config);
 			Utils.verifyIPv4IsPreferred(null);
-			_ahessianClient = new AHessianJmxClient(canonName, _config.getInt("wrapper.tray.port", 0), true, new SimpleLogger());
+			_ahessianClient = new AHessianJmxClient(canonName, _config.getInt(
+					"wrapper.tray.port", 0), true, new SimpleLogger());
 			_ahessianClient.setConnectListener(new Runnable()
 			{
 
@@ -167,22 +179,24 @@ public class TrayIconMain
 
 					try
 					{
-					jmxc = _ahessianClient.getMBeanServer();
-					if (jmxc != null)
-					{
-						proxy = (AbstractWrappedProcessMBean) MBeanServerInvocationHandler.newProxyInstance(jmxc, oName,
-								AbstractWrappedProcessMBean.class, false);
-						_trayIcon.setProcess(proxy);
-						_ahessianClient.open();
-					}
+						jmxc = _ahessianClient.getMBeanServer();
+						if (jmxc != null)
+						{
+							proxy = (AbstractWrappedProcessMBean) MBeanServerInvocationHandler
+									.newProxyInstance(jmxc, oName,
+											AbstractWrappedProcessMBean.class,
+											false);
+							_trayIcon.setProcess(proxy);
+							_ahessianClient.open();
+						}
 					}
 					catch (Exception ex)
 					{
 						ex.printStackTrace();
 					}
-					
+
 				}
-				
+
 			});
 			_ahessianClient.setDisconnectListener(new Runnable()
 			{
@@ -194,8 +208,8 @@ public class TrayIconMain
 					proxy = null;
 					try
 					{
-					_trayIcon.closeConsole();
-					_trayIcon.setProcess(null);
+						_trayIcon.closeConsole();
+						_trayIcon.setProcess(null);
 					}
 					catch (Exception ex)
 					{
@@ -203,7 +217,7 @@ public class TrayIconMain
 					}
 
 				}
-				
+
 			});
 			_ahessianClient.start();
 			while (!_trayIcon.isStop())
@@ -221,7 +235,7 @@ public class TrayIconMain
 					catch (Exception ex)
 					{
 						ex.printStackTrace();
-						
+
 						System.out.println("error accessing server " + ex);
 					}
 				// System.out.println(">> "+proxy);
@@ -251,7 +265,8 @@ public class TrayIconMain
 			return false;
 		if (_trayIcon._inquireMessage == null)
 		{
-			_trayIcon.message("Input Required", message + "\n enter data through response menue");
+			_trayIcon.message("Input Required", message
+					+ "\n enter data through response menue");
 			_trayIcon._inquireMessage = message;
 			return true;
 		}

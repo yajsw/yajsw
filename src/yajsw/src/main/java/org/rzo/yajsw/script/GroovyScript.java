@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.script;
 
 import groovy.lang.Binding;
@@ -40,34 +46,37 @@ import org.rzo.yajsw.wrapper.WrappedProcess;
 public class GroovyScript extends AbstractScript
 {
 
-	public static Map		context	= Collections.synchronizedMap(new HashMap());
+	public static Map context = Collections.synchronizedMap(new HashMap());
 	/** The binding. */
-	final Binding			binding;
+	final Binding binding;
 
 	final InternalLogger _logger;
 
-	volatile GroovyObject	_script;
-	
-	final boolean _reload;
-	
-	final String _encoding;
-	
+	volatile GroovyObject _script;
 
+	final boolean _reload;
+
+	final String _encoding;
 
 	/**
 	 * Instantiates a new groovy script.
 	 * 
 	 * @param script
 	 *            the script
-	 * @param timeout 
+	 * @param timeout
 	 * @throws IOException
 	 * @throws CompilationFailedException
 	 * @throws IllegalAccessException
 	 * @throws InstantiationException
-	 * @throws ClassNotFoundException 
+	 * @throws ClassNotFoundException
 	 */
-	public GroovyScript(final String script, final String id, final WrappedProcess process, final String[] args, final int timeout, final InternalLogger logger, String encoding, boolean reload, int maxConcInvocations) throws CompilationFailedException, IOException,
-			InstantiationException, IllegalAccessException, ClassNotFoundException
+	public GroovyScript(final String script, final String id,
+			final WrappedProcess process, final String[] args,
+			final int timeout, final InternalLogger logger, String encoding,
+			boolean reload, int maxConcInvocations)
+			throws CompilationFailedException, IOException,
+			InstantiationException, IllegalAccessException,
+			ClassNotFoundException
 	{
 		super(script, id, process, args, timeout, maxConcInvocations);
 		_reload = reload;
@@ -80,8 +89,8 @@ public class GroovyScript extends AbstractScript
 		binding.setVariable("callCount", 0);
 		binding.setVariable("context", context);
 		if (process != null && logger == null)
-		_logger = process.getInternalWrapperLogger();
-		else 
+			_logger = process.getInternalWrapperLogger();
+		else
 			_logger = logger;
 		binding.setVariable("logger", _logger);
 	}
@@ -89,62 +98,67 @@ public class GroovyScript extends AbstractScript
 	private void setGroovyClasspath(GroovyClassLoader loader)
 	{
 		ArrayList cp = WrapperLoader.getGroovyClasspath();
-		for (Iterator it = cp.listIterator(); it.hasNext(); )
-			loader.addURL((URL)it.next());
+		for (Iterator it = cp.listIterator(); it.hasNext();)
+			loader.addURL((URL) it.next());
 	}
 
-  static GroovyClassLoader groovyClassLoader;
+	static GroovyClassLoader groovyClassLoader;
 
-  private GroovyObject getScriptInstance(String scriptFileName, String encoding) throws IOException, InstantiationException,
-      IllegalAccessException, ClassNotFoundException
-  {
-    FileObject fileObject = VFSUtils.resolveFile(".", scriptFileName);
-    FileName fileName = fileObject.getName();
-    long lastModified = fileObject.getContent().getLastModifiedTime();
-    String scriptName = StringUtils.removeEnd(fileName.getBaseName(), "." + fileName.getExtension()) + "_"
-        + lastModified;
+	private GroovyObject getScriptInstance(String scriptFileName,
+			String encoding) throws IOException, InstantiationException,
+			IllegalAccessException, ClassNotFoundException
+	{
+		FileObject fileObject = VFSUtils.resolveFile(".", scriptFileName);
+		FileName fileName = fileObject.getName();
+		long lastModified = fileObject.getContent().getLastModifiedTime();
+		String scriptName = StringUtils.removeEnd(fileName.getBaseName(), "."
+				+ fileName.getExtension())
+				+ "_" + lastModified;
 
-    synchronized (GroovyScript.class)
-    {
-      if (groovyClassLoader == null)
-      {
-        groovyClassLoader = new GroovyClassLoader(getClass().getClassLoader());        
-        setGroovyClasspath(groovyClassLoader);
-      }
+		synchronized (GroovyScript.class)
+		{
+			if (groovyClassLoader == null)
+			{
+				groovyClassLoader = new GroovyClassLoader(getClass()
+						.getClassLoader());
+				setGroovyClasspath(groovyClassLoader);
+			}
 
-      try
-      {
-        Class clazz = Class.forName(scriptName, true, groovyClassLoader);
-        if (_script == null)
-        	return (GroovyObject) clazz.newInstance();
-        else
-        	return _script;
-      }
-      catch (ClassNotFoundException e)
-      {
-    	if (_script != null)
-    		log("script changed -> reloading");
-        InputStream in = null;
-        String scriptSrc = null;
-        try
-        {
-          in = fileObject.getContent().getInputStream();
-          if (encoding == null)
-        	  scriptSrc = IOUtils.toString(in);
-          else 
-        	  scriptSrc = IOUtils.toString(in, encoding);
-        }
-        finally
-        {
-          if (in != null)
-            in.close();
-        }
-        return (GroovyObject) groovyClassLoader.parseClass(scriptSrc, scriptName + ".groovy").newInstance();         
-      }
-    }
-  }
+			try
+			{
+				Class clazz = Class
+						.forName(scriptName, true, groovyClassLoader);
+				if (_script == null)
+					return (GroovyObject) clazz.newInstance();
+				else
+					return _script;
+			}
+			catch (ClassNotFoundException e)
+			{
+				if (_script != null)
+					log("script changed -> reloading");
+				InputStream in = null;
+				String scriptSrc = null;
+				try
+				{
+					in = fileObject.getContent().getInputStream();
+					if (encoding == null)
+						scriptSrc = IOUtils.toString(in);
+					else
+						scriptSrc = IOUtils.toString(in, encoding);
+				}
+				finally
+				{
+					if (in != null)
+						in.close();
+				}
+				return (GroovyObject) groovyClassLoader.parseClass(scriptSrc,
+						scriptName + ".groovy").newInstance();
+			}
+		}
+	}
 
-    /*
+	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.rzo.yajsw.script.AbstractScript#execute(java.lang.String,
@@ -154,7 +168,7 @@ public class GroovyScript extends AbstractScript
 	synchronized public Object execute(String line)
 	{
 		Object result = null;
-		
+
 		if (_script == null)
 		{
 			System.out.println("cannot execute script " + _name);
@@ -183,43 +197,47 @@ public class GroovyScript extends AbstractScript
 		binding.setVariable("id", _id);
 		if (_process != null)
 		{
-		binding.setVariable("state", _process.getStringState());
-		binding.setVariable("count", _process.getRestartCount());
-		binding.setVariable("pid", _process.getAppPid());
-		binding.setVariable("exitCode", _process.getExitCode());
-		binding.setVariable("line", line);
-		binding.setVariable("process", _process);
+			binding.setVariable("state", _process.getStringState());
+			binding.setVariable("count", _process.getRestartCount());
+			binding.setVariable("pid", _process.getAppPid());
+			binding.setVariable("exitCode", _process.getExitCode());
+			binding.setVariable("line", line);
+			binding.setVariable("process", _process);
 		}
 		try
 		{
-			result = _script.invokeMethod("run", new Object[]{});
+			result = _script.invokeMethod("run", new Object[] {});
 		}
 		catch (Throwable e)
 		{
 			if (_logger != null)
-			_logger.info("execption in script "+this._name, e);
+				_logger.info("execption in script " + this._name, e);
 			else
 				e.printStackTrace();
 		}
-		binding.setVariable("callCount", ((Integer) binding.getVariable("callCount")).intValue() + 1);
+		binding.setVariable("callCount",
+				((Integer) binding.getVariable("callCount")).intValue() + 1);
 		return result;
 	}
 
-	public static void main(String[] args) throws Exception, IOException, InstantiationException, IllegalAccessException
+	public static void main(String[] args) throws Exception, IOException,
+			InstantiationException, IllegalAccessException
 	{
 		WrappedJavaProcess w = new WrappedJavaProcess();
-		w.getLocalConfiguration().setProperty("wrapper.config", "conf/wrapper.helloworld.conf");
+		w.getLocalConfiguration().setProperty("wrapper.config",
+				"conf/wrapper.helloworld.conf");
 		w.init();
-		GroovyScript script = new GroovyScript("./scripts/timeCondition.gv", "id", w, new String[]
-		{ "11", "12" }, 0, null, null, false, 1);
+		GroovyScript script = new GroovyScript("./scripts/timeCondition.gv",
+				"id", w, new String[] { "11", "12" }, 0, null, null, false, 1);
 		script.execute();
 		script.execute();
-		script = new GroovyScript("./scripts/fileCondition.gv", "id", w, new String[]
-		{ "anchor.lck" }, 0, null, null, false, 1);
+		script = new GroovyScript("./scripts/fileCondition.gv", "id", w,
+				new String[] { "anchor.lck" }, 0, null, null, false, 1);
 		script.execute();
 		script.execute();
-		script = new GroovyScript("./scripts/snmpTrap.gv", "id", w, new String[]
-		{ "192.168.0.1", "1", "msg" }, 0, null, null, false, 1);
+		script = new GroovyScript("./scripts/snmpTrap.gv", "id", w,
+				new String[] { "192.168.0.1", "1", "msg" }, 0, null, null,
+				false, 1);
 		script.execute();
 
 	}
@@ -233,13 +251,13 @@ public class GroovyScript extends AbstractScript
 	{
 		executeWithTimeout("");
 	}
-	
+
 	public void interrupt()
 	{
 		if (_future != null)
 			_future.cancel(true);
 	}
-	
+
 	void log(String msg)
 	{
 		if (_logger != null)
@@ -247,8 +265,8 @@ public class GroovyScript extends AbstractScript
 		else
 			System.out.println(msg);
 	}
-	
-	public Object invoke(String method, Object ... x )
+
+	public Object invoke(String method, Object... x)
 	{
 		Object result = null;
 		try

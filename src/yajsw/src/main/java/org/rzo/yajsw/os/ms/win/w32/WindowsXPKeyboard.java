@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.os.ms.win.w32;
 
 import java.util.Collection;
@@ -32,7 +38,7 @@ public class WindowsXPKeyboard implements Keyboard
 {
 
 	/** The _instance. */
-	static Keyboard	_instance;
+	static Keyboard _instance;
 
 	/**
 	 * Instance.
@@ -53,7 +59,8 @@ public class WindowsXPKeyboard implements Keyboard
 	{
 
 		/** The INSTANCE. */
-		MyUser32	INSTANCE	= (MyUser32) Native.loadLibrary("User32", MyUser32.class);
+		MyUser32 INSTANCE = (MyUser32) Native.loadLibrary("User32",
+				MyUser32.class);
 
 		/*
 		 * LRESULT CALLBACK KeyboardProc( int code, WPARAM wParam, LPARAM lParam
@@ -118,10 +125,11 @@ public class WindowsXPKeyboard implements Keyboard
 		 * 
 		 * @return the pointer
 		 */
-		Pointer SetWindowsHookExA(int idHook, KeyboardProc lpfn, Pointer hMod, int dwThreadId);
+		Pointer SetWindowsHookExA(int idHook, KeyboardProc lpfn, Pointer hMod,
+				int dwThreadId);
 
 		/** The W h_ keyboard. */
-		int	WH_KEYBOARD	= 2;
+		int WH_KEYBOARD = 2;
 
 		/*
 		 * BOOL UnhookWindowsHookEx( HHOOK hhk );
@@ -190,19 +198,19 @@ public class WindowsXPKeyboard implements Keyboard
 	 */
 
 	/** The Constant WND_REGISTER_HOTKEY. */
-	public static final int	WND_REGISTER_HOTKEY		= 999;
+	public static final int WND_REGISTER_HOTKEY = 999;
 
 	/** The Constant WND_UNREGISTER_HOTKEY. */
-	public static final int	WND_UNREGISTER_HOTKEY	= 998;
+	public static final int WND_UNREGISTER_HOTKEY = 998;
 
 	/** The _dummy window. */
-	DummyWindow				_dummyWindow			= DummyWindow.instance();
+	DummyWindow _dummyWindow = DummyWindow.instance();
 
 	/** The _keys. */
-	MultiValueMap			_keys					= new MultiValueMap();
+	MultiValueMap _keys = new MultiValueMap();
 
 	/** The _listners. */
-	Map						_listners				= new HashMap();
+	Map _listners = new HashMap();
 
 	/**
 	 * Instantiates a new windows xp keyboard.
@@ -223,7 +231,8 @@ public class WindowsXPKeyboard implements Keyboard
 
 			public int execute(int uMsg, int wParam, int lParam)
 			{
-				HotKey k = (HotKey) DummyWindow._hotKeys.get(new Integer(wParam));
+				HotKey k = (HotKey) DummyWindow._hotKeys
+						.get(new Integer(wParam));
 				if (k == null)
 					return 0;
 				Collection listners = _keys.getCollection(k);
@@ -245,7 +254,8 @@ public class WindowsXPKeyboard implements Keyboard
 			}
 
 		};
-		_dummyWindow.addListner(new Integer(DummyWindow.MyUser32.WM_HOTKEY), hotKeyHandler);
+		_dummyWindow.addListner(new Integer(DummyWindow.MyUser32.WM_HOTKEY),
+				hotKeyHandler);
 
 	}
 
@@ -255,9 +265,11 @@ public class WindowsXPKeyboard implements Keyboard
 	 * @seeorg.rzo.yajsw.os.Keyboard#registerHotkey(org.rzo.yajsw.os.Keyboard.
 	 * HotKeyListner, int, int)
 	 */
-	public synchronized void registerHotkey(HotKeyListner listner, int mod, int key)
+	public synchronized void registerHotkey(HotKeyListner listner, int mod,
+			int key)
 	{
-		MyUser32.INSTANCE.PostMessageA(_dummyWindow._hWnd, WND_REGISTER_HOTKEY, mod, key);
+		MyUser32.INSTANCE.PostMessageA(_dummyWindow._hWnd, WND_REGISTER_HOTKEY,
+				mod, key);
 		try
 		{
 			_dummyWindow.waitTermination();
@@ -290,7 +302,8 @@ public class WindowsXPKeyboard implements Keyboard
 
 		if (listners == null || listners.isEmpty())
 		{
-			MyUser32.INSTANCE.PostMessageA(_dummyWindow._hWnd, WND_UNREGISTER_HOTKEY, k._wParam, k._lParam);
+			MyUser32.INSTANCE.PostMessageA(_dummyWindow._hWnd,
+					WND_UNREGISTER_HOTKEY, k._wParam, k._lParam);
 			try
 			{
 				_dummyWindow.waitTermination();

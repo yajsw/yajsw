@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.os.posix.bsd.macosx;
 
 import java.io.File;
@@ -27,16 +42,16 @@ import org.rzo.yajsw.util.Utils;
 
 public class MacOsXService extends AbstractService implements Constants
 {
-	String	_launchdDir;
-	String	_plistTemplate;
-	String	_plistFile;
-	int		_stopTimeout;
-	String	_plistName;
+	String _launchdDir;
+	String _plistTemplate;
+	String _plistFile;
+	int _stopTimeout;
+	String _plistName;
 
-	String	_execCmd;
+	String _execCmd;
 
-	String	_confFile;
-	PosixUtils	_utils	= new PosixUtils();
+	String _confFile;
+	PosixUtils _utils = new PosixUtils();
 
 	public void init()
 	{
@@ -45,7 +60,8 @@ public class MacOsXService extends AbstractService implements Constants
 			System.out.println("no name for daemon -> abort");
 			return;
 		}
-		_launchdDir = _config.getString("wrapper.launchd.dir", getDefaultLaunchDir());
+		_launchdDir = _config.getString("wrapper.launchd.dir",
+				getDefaultLaunchDir());
 		File daemonDir = new File(_launchdDir);
 		if (!daemonDir.exists())
 		{
@@ -54,14 +70,16 @@ public class MacOsXService extends AbstractService implements Constants
 		}
 		if (!daemonDir.isDirectory())
 		{
-			System.out.println("Error " + _launchdDir + " : is not a directory");
+			System.out
+					.println("Error " + _launchdDir + " : is not a directory");
 			return;
 		}
 		String wrapperJar = WrapperLoader.getWrapperJar().trim();
 		String wrapperHome = ".";
 		try
 		{
-			wrapperHome = new File(wrapperJar).getParentFile().getCanonicalPath();
+			wrapperHome = new File(wrapperJar).getParentFile()
+					.getCanonicalPath();
 		}
 		catch (IOException e1)
 		{
@@ -96,16 +114,19 @@ public class MacOsXService extends AbstractService implements Constants
 		{
 			e.printStackTrace();
 		}
-		_plistTemplate = _config.getString("wrapper.launchd.template", wrapperHome + "/templates/launchd.plist.vm");
+		_plistTemplate = _config.getString("wrapper.launchd.template",
+				wrapperHome + "/templates/launchd.plist.vm");
 		File daemonTemplate = new File(_plistTemplate);
 		if (!daemonTemplate.exists() || !daemonTemplate.isFile())
 		{
-			System.out.println("Error " + _plistTemplate + " : template file not found");
+			System.out.println("Error " + _plistTemplate
+					+ " : template file not found");
 			return;
 		}
 		File daemonScript = new File(daemonDir, "wrapper." + getName());
 		if (daemonScript.exists())
-			System.out.println(daemonScript.getAbsolutePath() + " already exists -> overwrite");
+			System.out.println(daemonScript.getAbsolutePath()
+					+ " already exists -> overwrite");
 
 		_plistName = getPlistPrefix() + _name;
 		File plistFile = new File(_launchdDir, _plistName + ".plist");
@@ -128,8 +149,8 @@ public class MacOsXService extends AbstractService implements Constants
 			e.printStackTrace();
 		}
 
-
-		String tmpDir = _config.getString("wrapper.tmp.path", System.getProperty("jna_tmpdir", null));
+		String tmpDir = _config.getString("wrapper.tmp.path",
+				System.getProperty("jna_tmpdir", null));
 		ArrayList<String> result = new ArrayList<String>();
 		String opt = null;
 		if (tmpDir != null)
@@ -138,7 +159,7 @@ public class MacOsXService extends AbstractService implements Constants
 			result.add(opt);
 		}
 		YajswConfigurationImpl config = (YajswConfigurationImpl) _config;
-		for (Iterator it=config.subset("wrapper").getKeys(); it.hasNext(); )
+		for (Iterator it = config.subset("wrapper").getKeys(); it.hasNext();)
 			try
 			{
 				config.getProperty((String) it.next());
@@ -151,7 +172,8 @@ public class MacOsXService extends AbstractService implements Constants
 		if (_config.getBoolean("wrapper.save_interpolated", true))
 		{
 
-			for (Map.Entry<String, String> e : config.getEnvLookupSet().entrySet())
+			for (Map.Entry<String, String> e : config.getEnvLookupSet()
+					.entrySet())
 			{
 				if (e.getKey().contains("password"))
 					continue;
@@ -161,7 +183,8 @@ public class MacOsXService extends AbstractService implements Constants
 			}
 		}
 
-		for (Iterator it = _config.getKeys("wrapper.ntservice.additional"); it.hasNext();)
+		for (Iterator it = _config.getKeys("wrapper.ntservice.additional"); it
+				.hasNext();)
 		{
 			String key = (String) it.next();
 			String value = _config.getString(key);
@@ -170,7 +193,9 @@ public class MacOsXService extends AbstractService implements Constants
 
 		String properties = StringUtils.join(result, " ");
 
-		_execCmd = String.format("\"%1$s\" -Dwrapper.service=true -Dwrapper.visible=false %2$s -jar \"%3$s\" -c \"%4$s\"", java, properties, wrapperJar, _confFile);
+		_execCmd = String
+				.format("\"%1$s\" -Dwrapper.service=true -Dwrapper.visible=false %2$s -jar \"%3$s\" -c \"%4$s\"",
+						java, properties, wrapperJar, _confFile);
 
 	}
 
@@ -196,21 +221,25 @@ public class MacOsXService extends AbstractService implements Constants
 			File daemonTemplate = new File(_plistTemplate);
 			VelocityEngine ve = new VelocityEngine();
 			ve.setProperty(VelocityEngine.RESOURCE_LOADER, "file");
-			ve.setProperty("file.resource.loader.path", daemonTemplate.getParent());
-			ve.setProperty("runtime.log.logsystem.class", VelocityLog.class.getCanonicalName());
+			ve.setProperty("file.resource.loader.path",
+					daemonTemplate.getParent());
+			ve.setProperty("runtime.log.logsystem.class",
+					VelocityLog.class.getCanonicalName());
 			ve.init();
 			Template t = ve.getTemplate(daemonTemplate.getName());
 			VelocityContext context = new VelocityContext();
 			context.put("name", _plistName);
 			context.put("command", splitCommandByWhitespace());
-			context.put("autoStart", "AUTOMATIC".equals(_config.getString("wrapper.ntservice.starttype", DEFAULT_SERVICE_START_TYPE)));
+			context.put("autoStart", "AUTOMATIC".equals(_config.getString(
+					"wrapper.ntservice.starttype", DEFAULT_SERVICE_START_TYPE)));
 			FileWriter writer = new FileWriter(_plistFile);
 
 			t.merge(context, writer);
 			writer.flush();
 			writer.close();
 			preload();
-			System.out.println(_utils.osCommand("launchctl load " + _plistFile, 5000));
+			System.out.println(_utils.osCommand("launchctl load " + _plistFile,
+					5000));
 
 		}
 		catch (Exception ex)
@@ -220,7 +249,7 @@ public class MacOsXService extends AbstractService implements Constants
 		}
 		boolean result = isInstalled();
 		int i = 0;
-		while (!result && i<10)
+		while (!result && i < 10)
 		{
 			try
 			{
@@ -240,12 +269,14 @@ public class MacOsXService extends AbstractService implements Constants
 	protected void preload()
 	{
 		// do nothing
-		
+
 	}
 
-	private List<String> splitCommandByWhitespace() {
+	private List<String> splitCommandByWhitespace()
+	{
 		List<String> list = new ArrayList<String>();
-		Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(_execCmd);
+		Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*")
+				.matcher(_execCmd);
 		while (m.find())
 			list.add(m.group(1).replace("\"", ""));
 		return list;
@@ -253,13 +284,13 @@ public class MacOsXService extends AbstractService implements Constants
 
 	public boolean isInstalled()
 	{
-		//String sp = String.format(".*\\d+.*%1$s.*", _plistName);
-		//Pattern p = Pattern.compile(sp, Pattern.DOTALL);
-		//String sp = String.format("^[(\\d+),-].*\\s*%1$s$", _plistName);
-		//Pattern p = Pattern.compile(sp, Pattern.MULTILINE);
+		// String sp = String.format(".*\\d+.*%1$s.*", _plistName);
+		// Pattern p = Pattern.compile(sp, Pattern.DOTALL);
+		// String sp = String.format("^[(\\d+),-].*\\s*%1$s$", _plistName);
+		// Pattern p = Pattern.compile(sp, Pattern.MULTILINE);
 		String list = _utils.osCommand("launchctl list", 5000);
-		//Matcher m = p.matcher(list);
-		//return m.matches();
+		// Matcher m = p.matcher(list);
+		// return m.matches();
 		return list.contains(_plistName);
 	}
 
@@ -279,7 +310,7 @@ public class MacOsXService extends AbstractService implements Constants
 		_utils.osCommand("launchctl start " + _plistName, 5000);
 		boolean result = isRunning();
 		int i = 0;
-		while (!result && i<10)
+		while (!result && i < 10)
 		{
 			try
 			{
@@ -303,7 +334,7 @@ public class MacOsXService extends AbstractService implements Constants
 			_utils.osCommand("launchctl stop " + _plistName, 5000);
 			boolean result = !isRunning();
 			int i = 0;
-			while (!result && i<10)
+			while (!result && i < 10)
 			{
 				try
 				{
@@ -330,7 +361,7 @@ public class MacOsXService extends AbstractService implements Constants
 		new File(_plistFile).delete();
 		boolean result = isInstalled();
 		int i = 0;
-		while (result && i<10)
+		while (result && i < 10)
 		{
 			try
 			{
@@ -361,7 +392,7 @@ public class MacOsXService extends AbstractService implements Constants
 	{
 		try
 		{
-            String sp = String.format("^(\\d+).*\\s*%1$s$", _plistName);
+			String sp = String.format("^(\\d+).*\\s*%1$s$", _plistName);
 			Pattern p = Pattern.compile(sp, Pattern.MULTILINE);
 			String list = _utils.osCommand("launchctl list", 5000);
 			Matcher m = p.matcher(list);

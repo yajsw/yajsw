@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.os.posix.bsd.macosx;
 
 import java.io.BufferedInputStream;
@@ -89,7 +104,7 @@ public class MacOsXProcess extends PosixProcess
 		{
 			_arrCmd = _cmd.split(" ");
 			if (_debug)
-			log("exec: " + _cmd);
+				log("exec: " + _cmd);
 		}
 		else
 		{
@@ -97,7 +112,7 @@ public class MacOsXProcess extends PosixProcess
 			for (String c : _arrCmd)
 				cmd += c + " ";
 			if (_debug)
-			log("exec:" + cmd);
+				log("exec:" + cmd);
 		}
 
 		log("starting ");
@@ -107,7 +122,8 @@ public class MacOsXProcess extends PosixProcess
 		String title = _title == null ? "yajsw" : _title;
 		_terminated = false;
 		if (_visible)
-			setCommand(String.format("xterm -hold -sb -T %1$s -e %2$s", title, getCommand()));
+			setCommand(String.format("xterm -hold -sb -T %1$s -e %2$s", title,
+					getCommand()));
 
 		// System.out.println("exec \n"+getCommand());
 		// System.out.println("working dir\n"+getWorkingDir());
@@ -219,7 +235,8 @@ public class MacOsXProcess extends PosixProcess
 				try
 				{
 					// System.out.println("opening tee streams out");
-					_inputStream = new CyclicBufferFileInputStream(createRWfile(_tmpPath, "out_" + _teeName));
+					_inputStream = new CyclicBufferFileInputStream(
+							createRWfile(_tmpPath, "out_" + _teeName));
 				}
 				catch (Exception e)
 				{
@@ -228,7 +245,8 @@ public class MacOsXProcess extends PosixProcess
 				try
 				{
 					// System.out.println("opening tee streams err");
-					_errorStream = new CyclicBufferFileInputStream(createRWfile(_tmpPath, "err_" + _teeName));
+					_errorStream = new CyclicBufferFileInputStream(
+							createRWfile(_tmpPath, "err_" + _teeName));
 				}
 				catch (Exception e)
 				{
@@ -237,7 +255,8 @@ public class MacOsXProcess extends PosixProcess
 				try
 				{
 					// System.out.println("opening tee streams in");
-					_outputStream = new CyclicBufferFilePrintStream(createRWfile(_tmpPath, "in_" + _teeName));
+					_outputStream = new CyclicBufferFilePrintStream(
+							createRWfile(_tmpPath, "in_" + _teeName));
 				}
 				catch (Exception e)
 				{
@@ -263,9 +282,12 @@ public class MacOsXProcess extends PosixProcess
 				writefd(out_fd, _outPipe[0]);
 				writefd(err_fd, _errPipe[0]);
 
-				_outputStream = new BufferedOutputStream(new FileOutputStream(in_fd));
-				_inputStream = new BufferedInputStream(new FileInputStream(out_fd));
-				_errorStream = new BufferedInputStream(new FileInputStream(err_fd));
+				_outputStream = new BufferedOutputStream(new FileOutputStream(
+						in_fd));
+				_inputStream = new BufferedInputStream(new FileInputStream(
+						out_fd));
+				_errorStream = new BufferedInputStream(new FileInputStream(
+						err_fd));
 
 				CLibrary.INSTANCE.close(_inPipe[0]);
 				CLibrary.INSTANCE.close(_outPipe[1]);
@@ -310,8 +332,10 @@ public class MacOsXProcess extends PosixProcess
 
 	private String getCurrentJava()
 	{
-		int myPid = OperatingSystem.instance().processManagerInstance().currentProcessId();
-		Process myProcess = OperatingSystem.instance().processManagerInstance().getProcess(myPid);
+		int myPid = OperatingSystem.instance().processManagerInstance()
+				.currentProcessId();
+		Process myProcess = OperatingSystem.instance().processManagerInstance()
+				.getProcess(myPid);
 		String cmd = myProcess.getCommand();
 		String jvm = null;
 		if (cmd.startsWith("\""))

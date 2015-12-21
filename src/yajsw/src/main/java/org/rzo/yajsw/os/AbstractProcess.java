@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.os;
 
 import java.io.FileDescriptor;
@@ -28,72 +34,72 @@ public abstract class AbstractProcess implements Process
 {
 
 	/** The _cmd. */
-	protected String				_cmd;
+	protected String _cmd;
 
-	protected String[]				_arrCmd;
+	protected String[] _arrCmd;
 
 	/** The _working dir. */
-	protected String				_workingDir;
+	protected String _workingDir;
 
 	/** The _priority. */
-	protected int					_priority				= PRIORITY_UNDEFINED;
+	protected int _priority = PRIORITY_UNDEFINED;
 
 	/** The _visible. */
-	protected boolean				_visible				= true;
+	protected boolean _visible = true;
 
 	/** The _pid. */
-	volatile protected int			_pid					= -1;
+	volatile protected int _pid = -1;
 
 	/** The _exit code. */
-	volatile protected int			_exitCode				= -1;
+	volatile protected int _exitCode = -1;
 
 	/** The _title. */
-	protected String				_title					= "";
+	protected String _title = "";
 
 	/** The _cpu affinity. */
-	protected int					_cpuAffinity			= AFFINITY_UNDEFINED;
+	protected int _cpuAffinity = AFFINITY_UNDEFINED;
 
 	/** The _pipe streams. */
-	protected boolean				_pipeStreams			= false;
+	protected boolean _pipeStreams = false;
 
 	/** The _redirect error stream. */
-	protected boolean				_redirectErrorStream	= false;
+	protected boolean _redirectErrorStream = false;
 
 	/** The _input stream. */
-	protected InputStream			_inputStream;
+	protected InputStream _inputStream;
 
 	/** The _output stream. */
-	protected OutputStream			_outputStream;
+	protected OutputStream _outputStream;
 
 	/** The _error stream. */
-	protected InputStream			_errorStream;
+	protected InputStream _errorStream;
 
 	/** The in_fd. */
-	protected final FileDescriptor	in_fd					= new FileDescriptor();
+	protected final FileDescriptor in_fd = new FileDescriptor();
 
 	/** The out_fd. */
-	protected final FileDescriptor	out_fd					= new FileDescriptor();
+	protected final FileDescriptor out_fd = new FileDescriptor();
 
 	/** The err_fd. */
-	protected final FileDescriptor	err_fd					= new FileDescriptor();
+	protected final FileDescriptor err_fd = new FileDescriptor();
 
 	/** The _tee name. */
-	protected String				_teeName;
+	protected String _teeName;
 
 	/** The _tmp path. */
-	protected String				_tmpPath;
+	protected String _tmpPath;
 
-	protected String				_user;
-	protected String				_password;
-	protected Logger				_logger;
-	protected List<String[]>		_environment			= new ArrayList<String[]>();
-	protected boolean				_debug					= false;
-	protected boolean 				_minimized				= false;
-	protected boolean 				_logonActiveSession		= false;
-	protected String				_desktop				= null;
-	protected int 					_umask					= -1;
-	protected boolean 				_useSpawn				= false;
-	protected boolean 				_linuxUseVfork		= false;
+	protected String _user;
+	protected String _password;
+	protected Logger _logger;
+	protected List<String[]> _environment = new ArrayList<String[]>();
+	protected boolean _debug = false;
+	protected boolean _minimized = false;
+	protected boolean _logonActiveSession = false;
+	protected String _desktop = null;
+	protected int _umask = -1;
+	protected boolean _useSpawn = false;
+	protected boolean _linuxUseVfork = false;
 
 	/*
 	 * (non-Javadoc)
@@ -442,7 +448,7 @@ public abstract class AbstractProcess implements Process
 	{
 		_logonActiveSession = logonActiveSession;
 	}
-	
+
 	public void setDesktop(String desktop)
 	{
 		_desktop = desktop;
@@ -482,6 +488,5 @@ public abstract class AbstractProcess implements Process
 	{
 		_linuxUseVfork = linuxUseVfork;
 	}
-
 
 }

@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.os.posix;
 
 import java.io.File;
@@ -16,14 +31,15 @@ import org.rzo.yajsw.util.DaemonThreadFactory;
 
 public class PosixUtils
 {
-	protected static final Executor	executor	= Executors.newCachedThreadPool(new DaemonThreadFactory("util.osCommand"));
-	protected Logger				_logger;
+	protected static final Executor executor = Executors
+			.newCachedThreadPool(new DaemonThreadFactory("util.osCommand"));
+	protected Logger _logger;
 
 	public void setLog(Logger logger)
 	{
 		_logger = logger;
 	}
-	
+
 	public String readFile(String file)
 	{
 		String result = "";
@@ -35,16 +51,16 @@ public class PosixUtils
 				byte[] buffer = new byte[10 * 1024];
 				int size = 0;
 				String rest = "";
-				
+
 				while ((size = in.read(buffer)) > 0)
 				{
-				// System.out.println("size "+size);
-				for (int i = 0; i < size; i++)
-					if (buffer[i] == 0)
-					{
-						buffer[i] = (byte)' ';
-					}
-				result += new String(buffer, 0, size);
+					// System.out.println("size "+size);
+					for (int i = 0; i < size; i++)
+						if (buffer[i] == 0)
+						{
+							buffer[i] = (byte) ' ';
+						}
+					result += new String(buffer, 0, size);
 				}
 				in.close();
 			}
@@ -63,7 +79,6 @@ public class PosixUtils
 
 	}
 
-
 	public String readFileQuoted(String file)
 	{
 		List<String> result = new ArrayList<String>();
@@ -75,19 +90,19 @@ public class PosixUtils
 				byte[] buffer = new byte[10 * 1024];
 				int size = 0;
 				String rest = "";
-				
+
 				while ((size = in.read(buffer)) > 0)
 				{
-				// System.out.println("size "+size);
-				int k = 0;
-				for (int i = 0; i < size; i++)
-					if (buffer[i] == 0)
-					{
-						result.add(rest + new String(buffer, k, i-k));
-						rest = "";
-						k = i+1;
-					}
-				rest = new String(buffer, k, size);
+					// System.out.println("size "+size);
+					int k = 0;
+					for (int i = 0; i < size; i++)
+						if (buffer[i] == 0)
+						{
+							result.add(rest + new String(buffer, k, i - k));
+							rest = "";
+							k = i + 1;
+						}
+					rest = new String(buffer, k, size);
 				}
 				if (rest.length() > 0)
 					result.add(rest);
@@ -111,7 +126,7 @@ public class PosixUtils
 	private String toQuotedString(List<String> strings)
 	{
 		StringBuffer sb = new StringBuffer();
-		for (int i=0; i<strings.size(); i++)
+		for (int i = 0; i < strings.size(); i++)
 		{
 			String x = strings.get(i);
 			if (x.contains(" ") && !(x.contains("\"") || x.contains("'")))

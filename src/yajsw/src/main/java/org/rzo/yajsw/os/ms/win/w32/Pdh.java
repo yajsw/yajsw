@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.os.ms.win.w32;
 
 import java.util.ArrayList;
@@ -46,7 +52,7 @@ public class Pdh
 	{
 
 		/** The INSTANCE. */
-		Pdhdll	INSTANCE	= (Pdhdll) Native.loadLibrary("pdh", Pdhdll.class);
+		Pdhdll INSTANCE = (Pdhdll) Native.loadLibrary("pdh", Pdhdll.class);
 
 		/*
 		 * PDH_STATUS PdhOpenQuery( __in LPCTSTR szDataSource, __in DWORD_PTR
@@ -64,7 +70,8 @@ public class Pdh
 		 * 
 		 * @return the int
 		 */
-		int PdhOpenQuery(Pointer szDataSource, Pointer dwUserData, PointerByReference phQuery);
+		int PdhOpenQuery(Pointer szDataSource, Pointer dwUserData,
+				PointerByReference phQuery);
 
 		/*
 		 * PDH_STATUS PdhValidatePath( __in LPCTSTR szFullCounterPath );
@@ -111,7 +118,8 @@ public class Pdh
 		 * 
 		 * @return the int
 		 */
-		int PdhGetFormattedCounterValue(Pointer hCounter, int dwFormat, IntByReference lpdwType, Pointer pValue);
+		int PdhGetFormattedCounterValue(Pointer hCounter, int dwFormat,
+				IntByReference lpdwType, Pointer pValue);
 
 		/*
 		 * typedef struct _PDH_FMT_COUNTERVALUE { DWORD CStatus; union { LONG
@@ -139,7 +147,8 @@ public class Pdh
 		 * 
 		 * @return the int
 		 */
-		int PdhAddCounterA(Pointer hQuery, String szFullCounterPath, int dwUserData, PointerByReference phCounter);
+		int PdhAddCounterA(Pointer hQuery, String szFullCounterPath,
+				int dwUserData, PointerByReference phCounter);
 
 		/*
 		 * PDH_STATUS PdhAddEnglishCounter( __in PDH_HQUERY hQuery, __in LPCTSTR
@@ -160,16 +169,17 @@ public class Pdh
 		 * 
 		 * @return the int
 		 */
-		int PdhAdd009CounterA(Pointer hQuery, String szFullCounterPath, int dwUserData, PointerByReference phCounter);
+		int PdhAdd009CounterA(Pointer hQuery, String szFullCounterPath,
+				int dwUserData, PointerByReference phCounter);
 
 		/** The ERRO r_ success. */
-		int	ERROR_SUCCESS	= 0;
+		int ERROR_SUCCESS = 0;
 
 		/** The PD h_ fm t_ double. */
-		int	PDH_FMT_DOUBLE	= 0x00000200;
+		int PDH_FMT_DOUBLE = 0x00000200;
 
 		/** The PD h_ fm t_ long. */
-		int	PDH_FMT_LONG	= 0x00000100;
+		int PDH_FMT_LONG = 0x00000100;
 
 		/*
 		 * PDH_STATUS PdhRemoveCounter( __in PDH_HCOUNTER hCounter );
@@ -228,14 +238,17 @@ public class Pdh
 		 * 
 		 * @return the int
 		 */
-		int PdhEnumObjectItemsA(String szDataSource, String szMachineName, String szObjectName, Memory mszCounterList,
-				IntByReference pcchCounterListLength, Memory mszInstanceList, IntByReference pcchInstanceListLength, int dwDetailLevel, int dwFlags);
+		int PdhEnumObjectItemsA(String szDataSource, String szMachineName,
+				String szObjectName, Memory mszCounterList,
+				IntByReference pcchCounterListLength, Memory mszInstanceList,
+				IntByReference pcchInstanceListLength, int dwDetailLevel,
+				int dwFlags);
 
 		/** The PER f_ detai l_ wizard. */
-		int	PERF_DETAIL_WIZARD	= 400;
+		int PERF_DETAIL_WIZARD = 400;
 
 		/** The PD h_ mor e_ data. */
-		int	PDH_MORE_DATA		= 0x800007D2;
+		int PDH_MORE_DATA = 0x800007D2;
 
 		/*
 		 * DH_STATUS PdhLookupPerfNameByIndex( __in LPCTSTR szMachineName, __in
@@ -256,7 +269,8 @@ public class Pdh
 		 * 
 		 * @return the int
 		 */
-		int PdhLookupPerfNameByIndexA(String szMachineName, int dwNameIndex, Memory szNameBuffer, IntByReference pcchNameBufferSize);
+		int PdhLookupPerfNameByIndexA(String szMachineName, int dwNameIndex,
+				Memory szNameBuffer, IntByReference pcchNameBufferSize);
 
 		/*
 		 * PDH_STATUS PdhParseCounterPath( __in LPCTSTR szFullPathBuffer, __out
@@ -277,7 +291,9 @@ public class Pdh
 		 * 
 		 * @return the int
 		 */
-		int PdhParseCounterPathA(String szFullPathBuffer, Pointer pCounterPathElements, IntByReference pdwBufferSize, int dwFlags);
+		int PdhParseCounterPathA(String szFullPathBuffer,
+				Pointer pCounterPathElements, IntByReference pdwBufferSize,
+				int dwFlags);
 
 	}// Pdhdll
 
@@ -288,8 +304,9 @@ public class Pdh
 	{
 
 		/** The INSTANCE. */
-		Advapi32	INSTANCE	= (Advapi32) Native.loadLibrary("Advapi32", Advapi32.class);	// ,
-																								// Options.UNICODE_OPTIONS);
+		Advapi32 INSTANCE = (Advapi32) Native.loadLibrary("Advapi32",
+				Advapi32.class); // ,
+									// Options.UNICODE_OPTIONS);
 
 		/*
 		 * LONG WINAPI RegOpenKeyEx( HKEY hKey, LPCTSTR lpSubKey, DWORD
@@ -311,13 +328,14 @@ public class Pdh
 		 * 
 		 * @return the int
 		 */
-		int RegOpenKeyExA(int hKey, String lpSubKey, int ulOptions, int samDesired, IntByReference phkResult);
+		int RegOpenKeyExA(int hKey, String lpSubKey, int ulOptions,
+				int samDesired, IntByReference phkResult);
 
 		/** The HKE y_ loca l_ machine. */
-		int	HKEY_LOCAL_MACHINE	= 0x80000002;
+		int HKEY_LOCAL_MACHINE = 0x80000002;
 
 		/** The KE y_ read. */
-		int	KEY_READ			= 0x20019;
+		int KEY_READ = 0x20019;
 
 		/*
 		 * LONG WINAPI RegCloseKey( HKEY hKey );
@@ -355,13 +373,14 @@ public class Pdh
 		 * 
 		 * @return the int
 		 */
-		int RegQueryValueExA(int hKey, String lpValueName, Pointer lpReserved, IntByReference lpType, Pointer lpData, IntByReference lpcbData);
+		int RegQueryValueExA(int hKey, String lpValueName, Pointer lpReserved,
+				IntByReference lpType, Pointer lpData, IntByReference lpcbData);
 
 		/** The HKE y_ performanc e_ data. */
-		int	HKEY_PERFORMANCE_DATA	= 0x80000004;
+		int HKEY_PERFORMANCE_DATA = 0x80000004;
 
 		/** The ERRO r_ mor e_ data. */
-		int	ERROR_MORE_DATA			= 234;
+		int ERROR_MORE_DATA = 234;
 
 	}
 
@@ -372,17 +391,15 @@ public class Pdh
 	{
 
 		/** The C status. */
-		public int			CStatus;
+		public int CStatus;
 
 		/** The Value. */
-		public ValueUnion	Value;
-		
+		public ValueUnion Value;
+
 		@Override
 		protected List getFieldOrder()
 		{
-			return Arrays.asList(new String[]{
-					"CStatus","Value"
-			});
+			return Arrays.asList(new String[] { "CStatus", "Value" });
 		}
 
 	}
@@ -394,19 +411,19 @@ public class Pdh
 	{
 
 		/** The long value. */
-		public int		longValue;
+		public int longValue;
 
 		/** The double value. */
-		public double	doubleValue;
+		public double doubleValue;
 
 		/** The large value. */
-		public long		largeValue;
+		public long largeValue;
 
 		/** The Ansi string value. */
-		public String	AnsiStringValue;
+		public String AnsiStringValue;
 
 		/** The Wide string value. */
-		public WString	WideStringValue;
+		public WString WideStringValue;
 	}
 
 	/**
@@ -416,33 +433,33 @@ public class Pdh
 	{
 
 		/** The sz machine name. */
-		public String	szMachineName;
+		public String szMachineName;
 
 		/** The sz object name. */
-		public String	szObjectName;
+		public String szObjectName;
 
 		/** The sz instance name. */
-		public String	szInstanceName;
+		public String szInstanceName;
 
 		/** The dw instance index. */
-		public int		dwInstanceIndex;
+		public int dwInstanceIndex;
 
 		/** The sz counter name. */
-		public String	szCounterName;
+		public String szCounterName;
 
 	}
 
 	/** The MA x_ counte r_ path. */
-	static int	MAX_COUNTER_PATH		= 256;	// Maximum counter path length
+	static int MAX_COUNTER_PATH = 256; // Maximum counter path length
 
 	/** The PD h_ ma x_ counte r_ name. */
-	static int	PDH_MAX_COUNTER_NAME	= 1024; // Maximum counter name length.
+	static int PDH_MAX_COUNTER_NAME = 1024; // Maximum counter name length.
 
 	/** The PD h_ ma x_ instanc e_ name. */
-	static int	PDH_MAX_INSTANCE_NAME	= 1024; // Maximum counter instance name
+	static int PDH_MAX_INSTANCE_NAME = 1024; // Maximum counter instance name
 	// length.
 	/** The PD h_ ma x_ counte r_ path. */
-	static int	PDH_MAX_COUNTER_PATH	= 2048; // Maximum full counter path
+	static int PDH_MAX_COUNTER_PATH = 2048; // Maximum full counter path
 
 	// length.
 
@@ -452,14 +469,14 @@ public class Pdh
 	static public class HddCounter implements PdhCounter
 	{
 		/** The _file. */
-		private String	_drive;
+		private String _drive;
 
 		private enum HDDInfoType
 		{
 			FreeSpaceInPercent, FreeSpaceInBytes, UsedSpaceInBytes, TotalSpaceinBytes, UnknownInfoType
 		}
 
-		private HDDInfoType	_infoType	= HDDInfoType.UnknownInfoType;
+		private HDDInfoType _infoType = HDDInfoType.UnknownInfoType;
 
 		/**
 		 * Instantiates a new hdd counter.
@@ -469,7 +486,8 @@ public class Pdh
 		 */
 		public HddCounter(String counter)
 		{
-			_drive = counter.substring(counter.indexOf('(') + 1, counter.indexOf(')'));
+			_drive = counter.substring(counter.indexOf('(') + 1,
+					counter.indexOf(')'));
 
 			if (counter.endsWith("\\% free space"))
 				_infoType = HDDInfoType.FreeSpaceInPercent;
@@ -499,13 +517,15 @@ public class Pdh
 		public double getDoubleValue()
 		{
 			if (!isValid())
-				throw new RuntimeException("Cannot find Harddisk drive " + _drive);
+				throw new RuntimeException("Cannot find Harddisk drive "
+						+ _drive);
 			File file = new File(_drive);
 
 			switch (_infoType)
 			{
 			case FreeSpaceInPercent:
-				return ((double) file.getFreeSpace() / (double) file.getTotalSpace()) * 100;
+				return ((double) file.getFreeSpace() / (double) file
+						.getTotalSpace()) * 100;
 			case FreeSpaceInBytes:
 				return file.getFreeSpace();
 			case TotalSpaceinBytes:
@@ -534,7 +554,8 @@ public class Pdh
 		 */
 		public boolean isValid()
 		{
-			return new File(_drive).exists() && !_infoType.equals(HDDInfoType.UnknownInfoType);
+			return new File(_drive).exists()
+					&& !_infoType.equals(HDDInfoType.UnknownInfoType);
 		}
 
 		public static void main(String[] args)
@@ -555,32 +576,43 @@ public class Pdh
 				System.out.println("Drive " + drive);
 				try
 				{
-					c = getEnglishCounter("\\HddCounter(" + drive + ")\\used space");
-					System.out.println("\t UsedSpace  " + ((long) c.getDoubleValue()) / (1024 * 1024) + " MB");
+					c = getEnglishCounter("\\HddCounter(" + drive
+							+ ")\\used space");
+					System.out.println("\t UsedSpace  "
+							+ ((long) c.getDoubleValue()) / (1024 * 1024)
+							+ " MB");
 				}
 				catch (Exception e)
 				{
 				}
 				try
 				{
-					c = getEnglishCounter("\\HddCounter(" + drive + ")\\free space");
-					System.out.println("\t FreeSpace  " + ((long) c.getDoubleValue()) / (1024 * 1024) + " MB");
+					c = getEnglishCounter("\\HddCounter(" + drive
+							+ ")\\free space");
+					System.out.println("\t FreeSpace  "
+							+ ((long) c.getDoubleValue()) / (1024 * 1024)
+							+ " MB");
 				}
 				catch (Exception e)
 				{
 				}
 				try
 				{
-					c = getEnglishCounter("\\HddCounter(" + drive + ")\\total space");
-					System.out.println("\t TotalSpace " + ((long) c.getDoubleValue()) / (1024 * 1024) + " MB");
+					c = getEnglishCounter("\\HddCounter(" + drive
+							+ ")\\total space");
+					System.out.println("\t TotalSpace "
+							+ ((long) c.getDoubleValue()) / (1024 * 1024)
+							+ " MB");
 				}
 				catch (Exception e)
 				{
 				}
 				try
 				{
-					c = getEnglishCounter("\\HddCounter(" + drive + ")\\% free space");
-					System.out.println("\t FreeSpace  " + ((long) c.getDoubleValue()) + " %");
+					c = getEnglishCounter("\\HddCounter(" + drive
+							+ ")\\% free space");
+					System.out.println("\t FreeSpace  "
+							+ ((long) c.getDoubleValue()) + " %");
 				}
 				catch (Exception e)
 				{
@@ -596,13 +628,13 @@ public class Pdh
 	{
 
 		/** The _h query. */
-		PointerByReference	_hQuery		= new PointerByReference();
+		PointerByReference _hQuery = new PointerByReference();
 
 		/** The _h counter. */
-		PointerByReference	_hCounter	= new PointerByReference();
+		PointerByReference _hCounter = new PointerByReference();
 
 		/** The _counter. */
-		String				_counter;
+		String _counter;
 
 		/**
 		 * Instantiates a new counter.
@@ -617,14 +649,18 @@ public class Pdh
 			int ret = Pdhdll.INSTANCE.PdhOpenQuery(null, null, _hQuery);
 			_counter = counter;
 			if (ret != Pdhdll.ERROR_SUCCESS)
-				System.out.println("Error in PdhOpenQuery "  + counter + ": "+ Integer.toHexString(ret));
+				System.out.println("Error in PdhOpenQuery " + counter + ": "
+						+ Integer.toHexString(ret));
 
 			if (english)
-				ret = Pdhdll.INSTANCE.PdhAdd009CounterA(_hQuery.getValue(), counter, 0, _hCounter);
+				ret = Pdhdll.INSTANCE.PdhAdd009CounterA(_hQuery.getValue(),
+						counter, 0, _hCounter);
 			else
-				ret = Pdhdll.INSTANCE.PdhAddCounterA(_hQuery.getValue(), counter, 0, _hCounter);
+				ret = Pdhdll.INSTANCE.PdhAddCounterA(_hQuery.getValue(),
+						counter, 0, _hCounter);
 			if (ret != Pdhdll.ERROR_SUCCESS)
-				throw new IllegalArgumentException("PdhCounter: " + counter + " " + ret);
+				throw new IllegalArgumentException("PdhCounter: " + counter
+						+ " " + ret);
 			// System.out.println("created counter: "+ _counter + " "+
 			// _hQuery.getPointer() + " " +_hCounter.getPointer()+ " "+
 			// _hQuery.getValue() + " " +_hCounter.getValue());
@@ -638,7 +674,9 @@ public class Pdh
 		 */
 		public boolean isValid()
 		{
-			return !(_hCounter == null || _hQuery == null || _hQuery.getValue().equals(null) || _hCounter.getValue().equals(null));
+			return !(_hCounter == null || _hQuery == null
+					|| _hQuery.getValue().equals(null) || _hCounter.getValue()
+					.equals(null));
 		}
 
 		/*
@@ -654,11 +692,15 @@ public class Pdh
 			pdhCounterValue.size();
 			int ret = Pdhdll.INSTANCE.PdhCollectQueryData(_hQuery.getValue());
 			if (ret != Pdhdll.ERROR_SUCCESS)
-				System.out.println("Error in PdhCollectQueryData " + _counter + ": " + Integer.toHexString(ret));
+				System.out.println("Error in PdhCollectQueryData " + _counter
+						+ ": " + Integer.toHexString(ret));
 			PointerByReference result = new PointerByReference();
-			ret = Pdhdll.INSTANCE.PdhGetFormattedCounterValue(_hCounter.getValue(), Pdhdll.PDH_FMT_DOUBLE, null, pdhCounterValue.getPointer());
+			ret = Pdhdll.INSTANCE.PdhGetFormattedCounterValue(
+					_hCounter.getValue(), Pdhdll.PDH_FMT_DOUBLE, null,
+					pdhCounterValue.getPointer());
 			if (ret != Pdhdll.ERROR_SUCCESS)
-				System.out.println("Error in PdhGetFormattedCounterValue " + _counter + ": " + Integer.toHexString(ret));
+				System.out.println("Error in PdhGetFormattedCounterValue "
+						+ _counter + ": " + Integer.toHexString(ret));
 			else
 			{
 				pdhCounterValue.read();
@@ -680,11 +722,15 @@ public class Pdh
 			pdhCounterValue.size();
 			int ret = Pdhdll.INSTANCE.PdhCollectQueryData(_hQuery.getValue());
 			if (ret != Pdhdll.ERROR_SUCCESS)
-				System.out.println("Error in PdhCollectQueryData "  + _counter + ": "+ Integer.toHexString(ret));
+				System.out.println("Error in PdhCollectQueryData " + _counter
+						+ ": " + Integer.toHexString(ret));
 			PointerByReference result = new PointerByReference();
-			ret = Pdhdll.INSTANCE.PdhGetFormattedCounterValue(_hCounter.getValue(), Pdhdll.PDH_FMT_LONG, null, pdhCounterValue.getPointer());
+			ret = Pdhdll.INSTANCE.PdhGetFormattedCounterValue(
+					_hCounter.getValue(), Pdhdll.PDH_FMT_LONG, null,
+					pdhCounterValue.getPointer());
 			if (ret != Pdhdll.ERROR_SUCCESS)
-				System.out.println("Error in PdhGetFormattedCounterValue " + _counter + ": " + Integer.toHexString(ret));
+				System.out.println("Error in PdhGetFormattedCounterValue "
+						+ _counter + ": " + Integer.toHexString(ret));
 			else
 			{
 				pdhCounterValue.read();
@@ -748,7 +794,7 @@ public class Pdh
 				szCounterListBuffer, // pass NULL and 0
 				dwCounterListSize, // to get length required
 				szInstanceListBuffer, // buffer size
-				dwInstanceListSize, // 
+				dwInstanceListSize, //
 				Pdhdll.PERF_DETAIL_WIZARD, // counter detail level
 				0);
 
@@ -756,7 +802,8 @@ public class Pdh
 		{
 			// Allocate the buffers and try the call again.
 			szCounterListBuffer = new Memory(dwCounterListSize.getValue() * 4);
-			szInstanceListBuffer = new Memory((dwInstanceListSize.getValue() * 4));
+			szInstanceListBuffer = new Memory(
+					(dwInstanceListSize.getValue() * 4));
 
 			if ((szCounterListBuffer != null) && (szInstanceListBuffer != null))
 			{
@@ -784,8 +831,10 @@ public class Pdh
 					// or more null-terminated strings. The last string
 					// is followed by a second null-terminator.
 					int i = 0;
-					for (szThisInstance = szInstanceListBuffer.getString(0); szThisInstance != null && szThisInstance.length() > 0; i += szThisInstance
-							.length() + 1, szThisInstance = szInstanceListBuffer.getString(i))
+					for (szThisInstance = szInstanceListBuffer.getString(0); szThisInstance != null
+							&& szThisInstance.length() > 0; i += szThisInstance
+							.length() + 1, szThisInstance = szInstanceListBuffer
+							.getString(i))
 					{
 						// System.out.println( szThisInstance);
 						bag.add(szThisInstance);
@@ -794,7 +843,8 @@ public class Pdh
 				}
 				else
 				{
-					System.out.println("PdhEnumObjectItems failed with " + Integer.toHexString(pdhStatus));
+					System.out.println("PdhEnumObjectItems failed with "
+							+ Integer.toHexString(pdhStatus));
 				}
 			}
 			else
@@ -806,7 +856,8 @@ public class Pdh
 		}
 		else
 		{
-			System.out.println("PdhEnumObjectItems failed with " + Integer.toHexString(pdhStatus));
+			System.out.println("PdhEnumObjectItems failed with "
+					+ Integer.toHexString(pdhStatus));
 		}
 
 		List result = new ArrayList();
@@ -826,7 +877,7 @@ public class Pdh
 	}
 
 	/** The _indexes. */
-	static Map	_indexes	= null;
+	static Map _indexes = null;
 
 	/**
 	 * Read index map.
@@ -839,8 +890,11 @@ public class Pdh
 		int ret = 0;
 		IntByReference hkey = new IntByReference();
 
-		ret = Advapi32.INSTANCE.RegOpenKeyExA(Advapi32.HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Perflib\\009", 0,
-				Advapi32.KEY_READ, hkey);
+		ret = Advapi32.INSTANCE
+				.RegOpenKeyExA(
+						Advapi32.HKEY_LOCAL_MACHINE,
+						"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Perflib\\009",
+						0, Advapi32.KEY_READ, hkey);
 		// System.out.println(">> "+ret + " " +
 		// Integer.toHexString(hkey.getValue()));
 
@@ -853,8 +907,10 @@ public class Pdh
 		PBufferSize.setValue(BufferSize);
 
 		// System.out.println("Allocating memory...");
-		for (ret = Advapi32.INSTANCE.RegQueryValueExA(hkey.getValue(), "Counter", null, null, PerfData, PBufferSize); ret == Advapi32.ERROR_MORE_DATA; ret = Advapi32.INSTANCE
-				.RegQueryValueExA(hkey.getValue(), "Counter", null, null, PerfData, PBufferSize))
+		for (ret = Advapi32.INSTANCE.RegQueryValueExA(hkey.getValue(),
+				"Counter", null, null, PerfData, PBufferSize); ret == Advapi32.ERROR_MORE_DATA; ret = Advapi32.INSTANCE
+				.RegQueryValueExA(hkey.getValue(), "Counter", null, null,
+						PerfData, PBufferSize))
 		{
 
 			// Get a buffer that is big enough.
@@ -867,7 +923,9 @@ public class Pdh
 		}
 		// System.out.println("Final buffer size is " +PBufferSize.getValue());
 		if (ret != Pdhdll.ERROR_SUCCESS)
-			System.out.println("Error reading Registry entry SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Perflib\\009: " + Integer.toHexString(ret));
+			System.out
+					.println("Error reading Registry entry SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Perflib\\009: "
+							+ Integer.toHexString(ret));
 		else
 		{
 			String key;
@@ -883,7 +941,8 @@ public class Pdh
 				if (counter.length() > 0 && key.length() > 0)
 					try
 					{
-						_indexes.put(counter, new Integer(Integer.parseInt(key)));
+						_indexes.put(counter,
+								new Integer(Integer.parseInt(key)));
 					}
 					catch (Exception ex)
 					{
@@ -913,7 +972,8 @@ public class Pdh
 		Memory buff = new Memory(256);
 		IntByReference buffSize = new IntByReference();
 		buffSize.setValue(256);
-		if (Pdhdll.INSTANCE.PdhLookupPerfNameByIndexA(null, index.intValue(), buff, buffSize) == Pdhdll.ERROR_SUCCESS)
+		if (Pdhdll.INSTANCE.PdhLookupPerfNameByIndexA(null, index.intValue(),
+				buff, buffSize) == Pdhdll.ERROR_SUCCESS)
 			return buff.getString(0);
 		return name;
 	}
@@ -930,7 +990,8 @@ public class Pdh
 		for (Iterator it = processes.iterator(); it.hasNext();)
 		{
 			String process = (String) it.next();
-			PdhCounter c = getEnglishCounter("\\Process(" + process + ")\\ID Process");
+			PdhCounter c = getEnglishCounter("\\Process(" + process
+					+ ")\\ID Process");
 			int pid = c.getIntValue();
 			c.close();
 			result.put(new Integer(pid), process);
@@ -987,7 +1048,8 @@ public class Pdh
 		String process = (String) m.get(new Integer(pid));
 		if (process == null)
 			return null;
-		//System.out.println("creating PdhCounter " + counter + " for Process " + process + " with pid " + pid);
+		// System.out.println("creating PdhCounter " + counter + " for Process "
+		// + process + " with pid " + pid);
 		return getEnglishCounter("\\Process(" + process + ")\\" + counter);
 	}
 
@@ -1008,8 +1070,10 @@ public class Pdh
 		String process = (String) m.get(new Integer(pid));
 		if (process == null)
 			return null;
-		//System.out.println("creating PdhCounter " + counter + " for Process " + process + " with pid " + pid);
-		return getLocaleCounter("\\" + processObject + "(" + process + ")\\" + counter);
+		// System.out.println("creating PdhCounter " + counter + " for Process "
+		// + process + " with pid " + pid);
+		return getLocaleCounter("\\" + processObject + "(" + process + ")\\"
+				+ counter);
 	}
 
 }

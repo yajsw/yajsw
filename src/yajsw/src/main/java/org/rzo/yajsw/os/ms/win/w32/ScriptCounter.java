@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.os.ms.win.w32;
 
 import io.netty.util.internal.logging.InternalLogger;
@@ -11,12 +26,13 @@ import org.rzo.yajsw.util.VFSUtils;
 
 public class ScriptCounter implements PdhCounter
 {
-	InternalLogger		_log	= InternalLoggerFactory.getInstance(getClass().getName());
-	Script				_script;
-	private String		_scriptFile;
-	String				_counterString;
-	private String[]	_args;
-	private long		_lastModified;
+	InternalLogger _log = InternalLoggerFactory.getInstance(getClass()
+			.getName());
+	Script _script;
+	private String _scriptFile;
+	String _counterString;
+	private String[] _args;
+	private long _lastModified;
 
 	/**
 	 * Format "\ScriptCounter(abc.groovy)\arg1,arg2,..."
@@ -42,20 +58,24 @@ public class ScriptCounter implements PdhCounter
 		long lastModified;
 		try
 		{
-			lastModified = VFSUtils.resolveFile(".", _scriptFile).getContent().getLastModifiedTime();
+			lastModified = VFSUtils.resolveFile(".", _scriptFile).getContent()
+					.getLastModifiedTime();
 		}
 		catch (FileSystemException e)
 		{
-			throw new IllegalArgumentException("Cannot find script " + _scriptFile + " ex=" + e.getMessage());
+			throw new IllegalArgumentException("Cannot find script "
+					+ _scriptFile + " ex=" + e.getMessage());
 		}
 		if (_lastModified == lastModified)
 			return;
 		else
 		{
 			_lastModified = lastModified;
-			_script = ScriptFactory.createScript(_scriptFile, _counterString, null, _args, _log, 0, null, false, 0, 1);
+			_script = ScriptFactory.createScript(_scriptFile, _counterString,
+					null, _args, _log, 0, null, false, 0, 1);
 			if (_script == null)
-				throw new IllegalArgumentException("Cannot find script " + _scriptFile);
+				throw new IllegalArgumentException("Cannot find script "
+						+ _scriptFile);
 		}
 	}
 

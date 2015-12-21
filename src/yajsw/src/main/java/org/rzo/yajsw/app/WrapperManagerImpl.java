@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.app;
 
 import io.netty.bootstrap.Bootstrap;
@@ -83,7 +89,7 @@ import org.rzo.yajsw.script.ScriptFactory;
 import org.rzo.yajsw.util.Cycler;
 import org.rzo.yajsw.util.DaemonThreadFactory;
 import org.rzo.yajsw.util.Utils;
-import org.rzo.yajsw.wrapper.AlphanumComparator;
+import org.rzo.yajsw.wrapper.AlphaNumericComparator;
 
 import com.sun.management.HotSpotDiagnosticMXBean;
 
@@ -201,7 +207,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 	MessageFormat gcFormat = null;
 
 	boolean _initGCBeans = false;
-	
+
 	volatile Runnable _shutdownListener;
 
 	private String getSystemProperty(String key)
@@ -1039,7 +1045,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 		{
 			keys.add(it.next());
 		}
-		Collections.sort(keys, new AlphanumComparator());
+		Collections.sort(keys, new AlphaNumericComparator());
 		for (Iterator it = keys.listIterator(); it.hasNext();)
 		{
 			String arg = config.getString((String) it.next());
@@ -1788,7 +1794,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 			Script script = ScriptFactory.createScript(shutdownScript,
 					"wrapper.app.shutdown.script", null, new String[0], log, 0,
 					_config.getString("wrapper.script.encoding"),
-					_config.getBoolean("wrapper.script.reload", false), _debug, 1);
+					_config.getBoolean("wrapper.script.reload", false), _debug,
+					1);
 			// make sure it is invoked only once
 			// stop may be invoke multiple times
 			shutdownScript = null;
@@ -1804,7 +1811,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 		}
 
 	}
-	
+
 	private void executeShutdownListener()
 	{
 		if (_shutdownListener == null)
@@ -1824,7 +1831,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 			Script script = ScriptFactory.createScript(scriptFileName, "",
 					null, (String[]) getMainMethodArgs(), null, 0,
 					_config.getString("wrapper.script.encoding"),
-					_config.getBoolean("wrapper.script.reload", false), _debug, 1);
+					_config.getBoolean("wrapper.script.reload", false), _debug,
+					1);
 			if (script != null)
 				script.execute();
 			else

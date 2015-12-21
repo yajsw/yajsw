@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.script;
 
 import io.netty.util.HashedWheelTimer;
@@ -34,26 +40,25 @@ public abstract class AbstractScript implements Script
 {
 
 	/** The _name. */
-	String					_name;
+	String _name;
 
 	/** The _timeout. */
-	int						_timeout	= 30000;
+	int _timeout = 30000;
 
-	WrappedProcess			_process;
+	WrappedProcess _process;
 
-	String					_id;
+	String _id;
 
-	String[]				_args;
-	
+	String[] _args;
+
 	final static Timer TIMER = new HashedWheelTimer();
-	static final ExecutorService	EXECUTOR		= (ThreadPoolExecutor) new ThreadPoolExecutor(0, 50, 120L, TimeUnit.SECONDS,
-			new SynchronousQueue<Runnable>(), new DaemonThreadFactory("scriptExecutorInternal"));
+	static final ExecutorService EXECUTOR = (ThreadPoolExecutor) new ThreadPoolExecutor(
+			0, 50, 120L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(),
+			new DaemonThreadFactory("scriptExecutorInternal"));
 	volatile Future _future;
 	volatile Timeout _timerTimeout;
-	
+
 	AtomicInteger _remainingConcInvocations;
-
-
 
 	/**
 	 * Instantiates a new abstract script.
@@ -62,7 +67,8 @@ public abstract class AbstractScript implements Script
 	 *            the script
 	 * @param timeout
 	 */
-	public AbstractScript(String script, String id, WrappedProcess process, String[] args, int timeout, int maxConcInvocations)
+	public AbstractScript(String script, String id, WrappedProcess process,
+			String[] args, int timeout, int maxConcInvocations)
 	{
 		_name = script;
 		_process = process;
@@ -81,14 +87,17 @@ public abstract class AbstractScript implements Script
 	 * java.lang.String, java.lang.Object)
 	 */
 	public abstract Object execute(String line);
+
 	public abstract void interrupt();
+
 	abstract void log(String msg);
 
 	synchronized public void executeWithTimeout(final String line)
 	{
 		if (!checkRemainConc())
 		{
-			log("script: "+_name+ " : too many concurrent invocations -> abort execution");
+			log("script: " + _name
+					+ " : too many concurrent invocations -> abort execution");
 			return;
 		}
 		Object result = null;
@@ -100,35 +109,36 @@ public abstract class AbstractScript implements Script
 				log("script takes too long -> interrupt");
 				try
 				{
-				interrupt();
+					interrupt();
 				}
 				catch (Throwable e)
 				{
-					
+
 				}
 			}
-			
-		}
-		, _timeout, TimeUnit.MILLISECONDS);
+
+		}, _timeout, TimeUnit.MILLISECONDS);
 		_future = EXECUTOR.submit(new Callable<Object>()
-				{
-					public Object call()
-					{
-						Object result = execute(line);
-						if (_timerTimeout != null)
-							_timerTimeout.cancel();
-						_timerTimeout = null;
-						_remainingConcInvocations.incrementAndGet();
-						log("executed script: "+_name+" "+_remainingConcInvocations);
-						return result;
-					}
-				});
+		{
+			public Object call()
+			{
+				Object result = execute(line);
+				if (_timerTimeout != null)
+					_timerTimeout.cancel();
+				_timerTimeout = null;
+				_remainingConcInvocations.incrementAndGet();
+				log("executed script: " + _name + " "
+						+ _remainingConcInvocations);
+				return result;
+			}
+		});
 		Thread.yield();
 	}
 
 	private boolean checkRemainConc()
 	{
-		System.out.println("checkRemainConc "+_name+" "+_remainingConcInvocations);
+		System.out.println("checkRemainConc " + _name + " "
+				+ _remainingConcInvocations);
 		if (_remainingConcInvocations.decrementAndGet() < 0)
 		{
 			_remainingConcInvocations.incrementAndGet();
@@ -167,7 +177,7 @@ public abstract class AbstractScript implements Script
 	{
 		_timeout = timeout;
 	}
-	
+
 	public String getId()
 	{
 		return _id;

@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.io;
 
 import java.io.BufferedReader;
@@ -30,16 +36,17 @@ public class TeeInputStream extends InputStream
 {
 
 	/** The sources. */
-	Source[]						sources			= new Source[0];
+	Source[] sources = new Source[0];
 
 	/** The lock. */
-	ReentrantLock					lock			= new MyReentrantLock();
+	ReentrantLock lock = new MyReentrantLock();
 
 	/** The data available. */
-	Condition						dataAvailable	= lock.newCondition();
+	Condition dataAvailable = lock.newCondition();
 
 	/** The Constant executor. */
-	static private final Executor	executor		= Executors.newCachedThreadPool(new DaemonThreadFactory("TeeInputStream"));
+	static private final Executor executor = Executors
+			.newCachedThreadPool(new DaemonThreadFactory("TeeInputStream"));
 
 	/**
 	 * Connect.
@@ -107,7 +114,7 @@ public class TeeInputStream extends InputStream
 	@Override
 	public int read() throws IOException
 	{
-		//System.out.println("do tee read ");
+		// System.out.println("do tee read ");
 		lock.lock();
 		while (true)
 		{
@@ -116,7 +123,7 @@ public class TeeInputStream extends InputStream
 				{
 					int result = sources[i].getBuffer().get();
 					lock.unlock();
-					//System.out.println("tee read "+result);
+					// System.out.println("tee read "+result);
 					return result;
 				}
 			try
@@ -139,7 +146,7 @@ public class TeeInputStream extends InputStream
 	@Override
 	public int read(byte b[], int off, int len) throws IOException
 	{
-		//System.out.println("do tee reads ");
+		// System.out.println("do tee reads ");
 
 		lock.lock();
 		try
@@ -147,11 +154,12 @@ public class TeeInputStream extends InputStream
 			while (true)
 			{
 				for (int i = 0; i < sources.length; i++)
-					if (!sources[i].isStop() && sources[i].getBuffer().size() > 0)
+					if (!sources[i].isStop()
+							&& sources[i].getBuffer().size() > 0)
 					{
 						int result = sources[i].getBuffer().get(b, off, len);
 						lock.unlock();
-						//System.out.println("tee reads "+result);
+						// System.out.println("tee reads "+result);
 						return result;
 					}
 				try
@@ -182,19 +190,19 @@ public class TeeInputStream extends InputStream
 	{
 
 		/** The in. */
-		InputStream		in;
+		InputStream in;
 
 		/** The buffer. */
-		CircularBuffer	buffer	= new CircularBuffer(512, true);
+		CircularBuffer buffer = new CircularBuffer(512, true);
 
 		/** The buff. */
-		byte[]			buff	= new byte[512];
+		byte[] buff = new byte[512];
 
 		/** The stop. */
-		volatile boolean			stop	= false;
+		volatile boolean stop = false;
 
 		/** The data available. */
-		Condition		dataAvailable;
+		Condition dataAvailable;
 
 		/**
 		 * Instantiates a new source.
@@ -238,8 +246,10 @@ public class TeeInputStream extends InputStream
 						}
 						catch (Exception ex)
 						{
-							//ex.printStackTrace();
-							System.err.println("could not read from InputStream "+ex.getMessage());
+							// ex.printStackTrace();
+							System.err
+									.println("could not read from InputStream "
+											+ ex.getMessage());
 						}
 						lock.unlock();
 					}
@@ -309,7 +319,8 @@ public class TeeInputStream extends InputStream
 		InputStream inp = System.in;
 		System.setIn(in);
 		in.connect(inp);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				System.in));
 		String line;
 		while ((line = reader.readLine()) != null)
 			System.out.println(">" + line);

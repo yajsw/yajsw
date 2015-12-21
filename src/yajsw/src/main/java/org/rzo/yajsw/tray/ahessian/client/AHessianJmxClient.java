@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.tray.ahessian.client;
 
 import io.netty.channel.Channel;
@@ -43,9 +58,9 @@ public class AHessianJmxClient
 	int _port;
 	boolean _debug = false;
 	InternalLogger _logger;
-	
-	
-	public AHessianJmxClient(String discoveryName, int port, boolean debug, InternalLogger logger) throws Exception
+
+	public AHessianJmxClient(String discoveryName, int port, boolean debug,
+			InternalLogger logger) throws Exception
 	{
 		_discoveryName = discoveryName;
 		_port = port;
@@ -59,7 +74,7 @@ public class AHessianJmxClient
 				.serviceThreads(10).reconnect(10)
 				.rpcServiceInterface(MBeanServerConnection.class)
 				.serviceOptions(options);
-		
+
 		builder.debug();
 		builder.serializerFactory(new JmxSerializerFactory());
 
@@ -68,7 +83,6 @@ public class AHessianJmxClient
 		channelOptions.add("TCP_NODELAY");
 		client = new DefaultClient<MBeanServerConnection>(
 				NioSocketChannel.class, builder, channelOptions);
-
 
 	}
 
@@ -92,7 +106,7 @@ public class AHessianJmxClient
 		if (_connectListener != null)
 			_connectListener.run();
 	}
-	
+
 	public void start() throws Exception
 	{
 		client.disconnectedListener(new ConnectListener()
@@ -123,7 +137,7 @@ public class AHessianJmxClient
 			public void run(Channel channel)
 			{
 				// TODO Auto-generated method stub
-				
+
 			}
 		});
 		client.connectedListener(new ConnectListener()
@@ -139,7 +153,7 @@ public class AHessianJmxClient
 			public void run(Channel channel)
 			{
 				// TODO Auto-generated method stub
-				
+
 			}
 
 		});
@@ -221,31 +235,34 @@ public class AHessianJmxClient
 	{
 		stop = true;
 	}
-	
+
 	public static void main(String[] args) throws Exception
 	{
-    	//InternalLoggerFactory.setDefaultFactory(new SimpleLoggerFactory());
+		// InternalLoggerFactory.setDefaultFactory(new SimpleLoggerFactory());
 
-    	AHessianJmxClient _ahessianClient = new AHessianJmxClient("test", 15009, false, null);
-    	_ahessianClient.start();
+		AHessianJmxClient _ahessianClient = new AHessianJmxClient("test",
+				15009, false, null);
+		_ahessianClient.start();
 		MBeanServerConnection jmxc = _ahessianClient.getMBeanServer();
-		MBeanServerDelegateMBean proxy = (MBeanServerDelegateMBean) MBeanServerInvocationHandler.newProxyInstance(jmxc, new ObjectName("JMImplementation:type=MBeanServerDelegate"),
-				MBeanServerDelegateMBean.class, false);
+		MBeanServerDelegateMBean proxy = (MBeanServerDelegateMBean) MBeanServerInvocationHandler
+				.newProxyInstance(jmxc, new ObjectName(
+						"JMImplementation:type=MBeanServerDelegate"),
+						MBeanServerDelegateMBean.class, false);
 		System.out.println(proxy.getMBeanServerId());
 		boolean ok = false;
 		while (true)
-		try
-		{
-		System.out.println(proxy.getMBeanServerId());
-		ok = true;
-		Thread.sleep(1000);
-		}
-		catch (Exception ex)
-		{
-			ex.printStackTrace();
-			Thread.sleep(1000);
-		}
-		
+			try
+			{
+				System.out.println(proxy.getMBeanServerId());
+				ok = true;
+				Thread.sleep(1000);
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+				Thread.sleep(1000);
+			}
+
 	}
 
 	public void setConnectListener(Runnable connectListener)

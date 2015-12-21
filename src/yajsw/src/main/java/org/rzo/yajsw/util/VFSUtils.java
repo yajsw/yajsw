@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.util;
 
 import io.netty.util.internal.logging.InternalLogger;
@@ -19,11 +34,10 @@ import org.apache.commons.vfs2.impl.DefaultFileSystemManager;
 import org.apache.commons.vfs2.provider.http.HttpFileSystemConfigBuilder;
 import org.apache.commons.vfs2.provider.local.LocalFile;
 
-
 public class VFSUtils
 {
-	static DefaultFileSystemManager	fsManager	= null;
-	static FileSystemOptions		opts		= new FileSystemOptions();
+	static DefaultFileSystemManager fsManager = null;
+	static FileSystemOptions opts = new FileSystemOptions();
 
 	public static void init() throws FileSystemException
 	{
@@ -35,7 +49,8 @@ public class VFSUtils
 		String httpPort = System.getProperty("http.proxyPort");
 		if (httpProxy != null)
 		{
-			HttpFileSystemConfigBuilder.getInstance().setProxyHost(opts, httpProxy);
+			HttpFileSystemConfigBuilder.getInstance().setProxyHost(opts,
+					httpProxy);
 
 			int port = 8080;
 			if (httpPort != null)
@@ -55,14 +70,16 @@ public class VFSUtils
 	{
 		fsManager.setLogger(new CommonsLoggingAdapter(logger));
 	}
-	
-	public static FileObject resolveFile(String file) throws FileSystemException
+
+	public static FileObject resolveFile(String file)
+			throws FileSystemException
 	{
 		init();
 		return fsManager.resolveFile(file);
 	}
 
-	public static FileObject resolveFile(String base, String file) throws FileSystemException
+	public static FileObject resolveFile(String base, String file)
+			throws FileSystemException
 	{
 		init();
 		FileObject basef = null;
@@ -70,7 +87,7 @@ public class VFSUtils
 			basef = fsManager.resolveFile(new File("."), base);
 		return resolveFile(basef, file);
 	}
-	
+
 	public static long getLastModifiedTime(FileObject file)
 	{
 		try
@@ -84,7 +101,8 @@ public class VFSUtils
 		}
 	}
 
-	public static FileObject resolveFile(FileObject basef, String file) throws FileSystemException
+	public static FileObject resolveFile(FileObject basef, String file)
+			throws FileSystemException
 	{
 		init();
 		if (basef != null)
@@ -92,20 +110,23 @@ public class VFSUtils
 		else
 			return fsManager.resolveFile(file, opts);
 	}
-	
+
 	public static List<FileObject> resolveFiles(String value) throws Exception
 	{
 		init();
-		return resolveFiles(fsManager.resolveFile(new File(".").getAbsolutePath()), value);
+		return resolveFiles(
+				fsManager.resolveFile(new File(".").getAbsolutePath()), value);
 	}
-	
-	public static List<FileObject> resolveFiles(FileObject basef, String value) throws Exception
+
+	public static List<FileObject> resolveFiles(FileObject basef, String value)
+			throws Exception
 	{
 		init();
 		return resolveFiles(basef, value, fsManager);
 	}
-	
-	public static List<FileObject> resolveFiles(FileObject basef, String value, DefaultFileSystemManager fsManager)
+
+	public static List<FileObject> resolveFiles(FileObject basef, String value,
+			DefaultFileSystemManager fsManager)
 	{
 		System.out.println("resolve files " + value);
 		try
@@ -157,18 +178,22 @@ public class VFSUtils
 				final int fdepth = depth;
 				FileSelector fs = new FileSelector()
 				{
-					public boolean includeFile(FileSelectInfo info) throws Exception
+					public boolean includeFile(FileSelectInfo info)
+							throws Exception
 					{
 						// files /x/x causes exceptions -> these are imaginary
 						// files -> ignore
 						if (info.getFile().getType() == FileType.IMAGINARY)
 							return false;
-						boolean result = pat.matcher(info.getFile().getName().getPath()).matches();
-						System.out.println(info.getFile().getName().getPath() + " " + result);
+						boolean result = pat.matcher(
+								info.getFile().getName().getPath()).matches();
+						System.out.println(info.getFile().getName().getPath()
+								+ " " + result);
 						return result;
 					}
 
-					public boolean traverseDescendents(FileSelectInfo info) throws Exception
+					public boolean traverseDescendents(FileSelectInfo info)
+							throws Exception
 					{
 						return info.getDepth() <= fdepth;
 					}
@@ -206,7 +231,7 @@ public class VFSUtils
 			{
 				e.printStackTrace();
 			}
-		return f instanceof LocalFile;	}
-
+		return f instanceof LocalFile;
+	}
 
 }

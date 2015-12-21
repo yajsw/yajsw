@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.os.posix;
 
 import java.util.HashSet;
@@ -6,14 +21,15 @@ import java.util.Set;
 public class UpdateRcParser
 {
 
-	Set<String>	_startLinks		= new HashSet<String>();
-	Set<String>	_stopLinks		= new HashSet<String>();
-	String		_runLevelDir;
-	String		_serviceName;
-	String		_stopLevels		= "";
-	String		_startLevels	= "";
+	Set<String> _startLinks = new HashSet<String>();
+	Set<String> _stopLinks = new HashSet<String>();
+	String _runLevelDir;
+	String _serviceName;
+	String _stopLevels = "";
+	String _startLevels = "";
 
-	public UpdateRcParser(String property, String runLevelDir, String serviceName)
+	public UpdateRcParser(String property, String runLevelDir,
+			String serviceName)
 	{
 		if (runLevelDir == null || "".equals(runLevelDir))
 			return;
@@ -45,14 +61,16 @@ public class UpdateRcParser
 
 	private void addStopLink(String level, int priority)
 	{
-		_stopLinks.add(_runLevelDir.replaceFirst("X", "" + level) + "/K" + priority + _serviceName);
-        _stopLevels += level + " ";
+		_stopLinks.add(_runLevelDir.replaceFirst("X", "" + level) + "/K"
+				+ priority + _serviceName);
+		_stopLevels += level + " ";
 	}
 
 	private void addStopLink(int level, int priority)
 	{
-		_stopLinks.add(_runLevelDir.replaceFirst("X", "" + level) + "/K" + priority + _serviceName);
-        _stopLevels += level + " ";
+		_stopLinks.add(_runLevelDir.replaceFirst("X", "" + level) + "/K"
+				+ priority + _serviceName);
+		_stopLevels += level + " ";
 
 	}
 
@@ -66,14 +84,16 @@ public class UpdateRcParser
 
 	private void addStartLink(String level, int priority)
 	{
-		_startLinks.add(_runLevelDir.replaceFirst("X", "" + level) + "/S" + priority + _serviceName);
-        _startLevels += level + " ";
+		_startLinks.add(_runLevelDir.replaceFirst("X", "" + level) + "/S"
+				+ priority + _serviceName);
+		_startLevels += level + " ";
 	}
 
 	private void addStartLink(int level, int priority)
 	{
-		_startLinks.add(_runLevelDir.replaceFirst("X", "" + level) + "/S" + priority + _serviceName);
-        _startLevels += level + " ";
+		_startLinks.add(_runLevelDir.replaceFirst("X", "" + level) + "/S"
+				+ priority + _serviceName);
+		_startLevels += level + " ";
 	}
 
 	private void setLinks(String property)
@@ -97,43 +117,43 @@ public class UpdateRcParser
 			else
 			{
 				int i = 0;
-				int priority=0;
-				String level="0";
+				int priority = 0;
+				String level = "0";
 				String txt;
 
-        while ( i < x.length )
-        {
-          txt = x[i++];
-          if ( txt.trim().equals( "start" ) )
-          {
-            priority = Integer.parseInt( x[i++] );
-            while ( i < x.length && !".".equals( x[i].trim() ) )
-            {
-              txt = x[i++].trim();
+				while (i < x.length)
+				{
+					txt = x[i++];
+					if (txt.trim().equals("start"))
+					{
+						priority = Integer.parseInt(x[i++]);
+						while (i < x.length && !".".equals(x[i].trim()))
+						{
+							txt = x[i++].trim();
 
-              // Allow S for Single User Mode ( Solaris )
-              if ( txt.equalsIgnoreCase( "S" ) )
-                level = "S";
-              else
-                level = "" + Integer.parseInt( txt );
+							// Allow S for Single User Mode ( Solaris )
+							if (txt.equalsIgnoreCase("S"))
+								level = "S";
+							else
+								level = "" + Integer.parseInt(txt);
 
-              addStartLink( level, priority );
-            }
-          }
-          else if ( txt.trim().equals( "stop" ) )
-          {
-            priority = Integer.parseInt( x[i++] );
-            while ( i < x.length && !".".equals( x[i].trim() ) )
-            {
-              txt = x[i++].trim();
+							addStartLink(level, priority);
+						}
+					}
+					else if (txt.trim().equals("stop"))
+					{
+						priority = Integer.parseInt(x[i++]);
+						while (i < x.length && !".".equals(x[i].trim()))
+						{
+							txt = x[i++].trim();
 
-              // Allow S for Single User Mode ( Solaris )
-              if ( txt.equalsIgnoreCase( "S" ) )
-                level = "S";
-              else
-                level = "" + Integer.parseInt( txt );
+							// Allow S for Single User Mode ( Solaris )
+							if (txt.equalsIgnoreCase("S"))
+								level = "S";
+							else
+								level = "" + Integer.parseInt(txt);
 
-              addStopLink( level, priority );
+							addStopLink(level, priority);
 
 						}
 					}
@@ -172,7 +192,8 @@ public class UpdateRcParser
 		System.out.println(p.getStartLinks());
 		System.out.println(p.getStopLinks());
 
-		p = new UpdateRcParser("start 20 2 3 4 . start 30 5 . stop 80 0 1 6", "/etc/rcX.d", "serviceName");
+		p = new UpdateRcParser("start 20 2 3 4 . start 30 5 . stop 80 0 1 6",
+				"/etc/rcX.d", "serviceName");
 		System.out.println(p.getStartLinks());
 		System.out.println(p.getStopLinks());
 

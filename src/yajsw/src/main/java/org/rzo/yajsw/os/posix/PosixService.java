@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.os.posix;
 
 import java.io.BufferedReader;
@@ -25,23 +40,23 @@ import org.rzo.yajsw.util.Utils;
 
 public class PosixService extends AbstractService implements Constants
 {
-	protected String	_daemonDir;
-	String				_daemonTemplate;
-	String				_daemonScript;
-	String				_wrapperPidFile;
-	String				_appPidFile;
-	String				_pidDir;
-	String				_confFile;
-	int					_stopTimeout;
+	protected String _daemonDir;
+	String _daemonTemplate;
+	String _daemonScript;
+	String _wrapperPidFile;
+	String _appPidFile;
+	String _pidDir;
+	String _confFile;
+	int _stopTimeout;
 
-	String[]			_startCmd;
-	String[]			_execCmd;
-	String[]			_stopCmd;
-	String[]			_statusCmd;
+	String[] _startCmd;
+	String[] _execCmd;
+	String[] _stopCmd;
+	String[] _statusCmd;
 
-	List<String>		_ksLinks	= new ArrayList<String>();
-	UpdateRcParser		_updateRcParser;
-	PosixUtils				_utils		= new PosixUtils();
+	List<String> _ksLinks = new ArrayList<String>();
+	UpdateRcParser _updateRcParser;
+	PosixUtils _utils = new PosixUtils();
 
 	@Override
 	public void setLogger(Logger logger)
@@ -49,7 +64,6 @@ public class PosixService extends AbstractService implements Constants
 		super.setLogger(logger);
 		_utils.setLog(logger);
 	}
-	
 
 	public void init()
 	{
@@ -58,14 +72,16 @@ public class PosixService extends AbstractService implements Constants
 			_logger.warning("no name for daemon -> abort");
 			return;
 		}
-		_daemonDir = _config.getString("wrapper.daemon.dir", getDefaultDaemonDir());
+		_daemonDir = _config.getString("wrapper.daemon.dir",
+				getDefaultDaemonDir());
 		File daemonDir = new File(_daemonDir);
 		if (!daemonDir.exists() || !daemonDir.isDirectory())
 		{
 			_logger.warning("Error " + _daemonDir + " : is not a directory");
 			return;
 		}
-		_pidDir = _config.getString("wrapper.daemon.pid.dir", Constants.DEFAULT_DAEMON_PID_DIR);
+		_pidDir = _config.getString("wrapper.daemon.pid.dir",
+				Constants.DEFAULT_DAEMON_PID_DIR);
 		File pidDir = new File(_pidDir);
 		if (!pidDir.exists() || !pidDir.isDirectory())
 		{
@@ -76,7 +92,8 @@ public class PosixService extends AbstractService implements Constants
 		String wrapperHome = ".";
 		try
 		{
-			wrapperHome = new File(wrapperJar).getParentFile().getCanonicalPath();
+			wrapperHome = new File(wrapperJar).getParentFile()
+					.getCanonicalPath();
 		}
 		catch (IOException e1)
 		{
@@ -90,9 +107,9 @@ public class PosixService extends AbstractService implements Constants
 			confFile = conf.getCachedPath();
 		}
 		else
-			{
+		{
 			confFile = _config.getString("wrapper.config");
-			}
+		}
 		String confDir = null;
 		if (confFile != null)
 		{
@@ -122,90 +139,103 @@ public class PosixService extends AbstractService implements Constants
 			_logger.throwing(this.getClass().getName(), "init", e);
 		}
 
-    // Find working java
-    JavaHome javaHome = OperatingSystem.instance().getJavaHome( _config );
-    String java = javaHome.findJava( null, null );
+		// Find working java
+		JavaHome javaHome = OperatingSystem.instance().getJavaHome(_config);
+		String java = javaHome.findJava(null, null);
 
-    boolean bDone = false;
-    File fJava = ((java == null) ? null : new File( java ));
+		boolean bDone = false;
+		File fJava = ((java == null) ? null : new File(java));
 
-    // Create symlink to Java Home for CustomProcName if necessary
-    String custProcName = _config.getString( "wrapper.java.customProcName" );
-    if ( custProcName != null && custProcName.length() > 0 )
-    {
-      File fcustom = new File( custProcName );
-      bDone = false;
+		// Create symlink to Java Home for CustomProcName if necessary
+		String custProcName = _config.getString("wrapper.java.customProcName");
+		if (custProcName != null && custProcName.length() > 0)
+		{
+			File fcustom = new File(custProcName);
+			bDone = false;
 
-      while ( !bDone )
-      {
-        // If customProcName File/Symlink already exists - continue, do nothing...
-        if ( fcustom.exists() && fcustom.canExecute() )
-        {
-          _config.setProperty( "wrapper.java.custProcName", fcustom.getAbsolutePath() );
-          bDone = true;
-          break;
-        }
-        else
-        {
-          // Find Path to Regular Java
-          if ( fJava == null )
-          {
-            // not found - exit with tears
-            bDone = true;
-            break;
-          }
+			while (!bDone)
+			{
+				// If customProcName File/Symlink already exists - continue, do
+				// nothing...
+				if (fcustom.exists() && fcustom.canExecute())
+				{
+					_config.setProperty("wrapper.java.custProcName",
+							fcustom.getAbsolutePath());
+					bDone = true;
+					break;
+				}
+				else
+				{
+					// Find Path to Regular Java
+					if (fJava == null)
+					{
+						// not found - exit with tears
+						bDone = true;
+						break;
+					}
 
-          // is CustProcName Complete Path
-          if ( fcustom.isAbsolute() && fcustom.getParentFile().exists() )
-          {
-            // Create Symlink for java at the specified location.
-            if ( CLibrary.INSTANCE.symlink( fJava.getAbsolutePath(), fcustom.getAbsolutePath() ) != 0 )
-            {
-              if ( _logger != null )
-                _logger.info( "error on creating script link " + fcustom );
-            }
-          }
-          else
-          {
-            // create Symlink in tmp Directory
-            File tmpPath = new File( _config.getString( "wrapper.tmp.path", "/tmp" ) );
-            if ( tmpPath.exists() )
-            {
-              File link = new File( tmpPath, fcustom.getName() );
-              if ( CLibrary.INSTANCE.symlink( fJava.getAbsolutePath(), link.getAbsolutePath() ) != 0 )
-              {
-                if ( _logger != null )
-                  _logger.info( "error on creating script link " + link );
-              }
-              else
-              {
-                _config.setProperty( "wrapper.java.custProcName", link.getAbsolutePath() );
-              }
+					// is CustProcName Complete Path
+					if (fcustom.isAbsolute()
+							&& fcustom.getParentFile().exists())
+					{
+						// Create Symlink for java at the specified location.
+						if (CLibrary.INSTANCE.symlink(fJava.getAbsolutePath(),
+								fcustom.getAbsolutePath()) != 0)
+						{
+							if (_logger != null)
+								_logger.info("error on creating script link "
+										+ fcustom);
+						}
+					}
+					else
+					{
+						// create Symlink in tmp Directory
+						File tmpPath = new File(_config.getString(
+								"wrapper.tmp.path", "/tmp"));
+						if (tmpPath.exists())
+						{
+							File link = new File(tmpPath, fcustom.getName());
+							if (CLibrary.INSTANCE.symlink(
+									fJava.getAbsolutePath(),
+									link.getAbsolutePath()) != 0)
+							{
+								if (_logger != null)
+									_logger.info("error on creating script link "
+											+ link);
+							}
+							else
+							{
+								_config.setProperty(
+										"wrapper.java.custProcName",
+										link.getAbsolutePath());
+							}
 
-            }
-            else
-            {
-              
-              if ( _logger != null )
-                _logger.info( "error on creating customProcName link - temp directory [" + tmpPath.getAbsolutePath()
-                    + "] does not exist" );
-            }
+						}
+						else
+						{
 
-          }
-        }
+							if (_logger != null)
+								_logger.info("error on creating customProcName link - temp directory ["
+										+ tmpPath.getAbsolutePath()
+										+ "] does not exist");
+						}
 
-        bDone = true; // do not want to loop
-      } // while( !bDone )
-      
+					}
+				}
+
+				bDone = true; // do not want to loop
+			} // while( !bDone )
+
 		}
-    
-    
-		_daemonTemplate = _config.getString("wrapper.daemon.template", wrapperHome + "/templates/daemon.vm");
+
+		_daemonTemplate = _config.getString("wrapper.daemon.template",
+				wrapperHome + "/templates/daemon.vm");
 		File daemonTemplate = new File(_daemonTemplate);
 		if (!daemonTemplate.exists() || !daemonTemplate.isFile())
 		{
 			if (_logger != null)
-				_logger.warning("Error " + _daemonTemplate + " : template file not found");
+				_logger.warning("Error " + _daemonTemplate
+						+ " : template file not found");
 			return;
 		}
 		File daemonScript = getDaemonScript();
@@ -215,7 +245,8 @@ public class PosixService extends AbstractService implements Constants
 		String pidName = null;
 		try
 		{
-			pidName = _config.getString("wrapper.pidfile", new File(pidDir, "wrapper." + getName() + ".pid").getCanonicalPath());
+			pidName = _config.getString("wrapper.pidfile", new File(pidDir,
+					"wrapper." + getName() + ".pid").getCanonicalPath());
 		}
 		catch (IOException e)
 		{
@@ -226,7 +257,9 @@ public class PosixService extends AbstractService implements Constants
 		String apidName = null;
 		try
 		{
-			apidName = _config.getString("wrapper.java.pidfile", new File(pidDir, "wrapper.java." + getName() + ".pid").getCanonicalPath());
+			apidName = _config.getString("wrapper.java.pidfile", new File(
+					pidDir, "wrapper.java." + getName() + ".pid")
+					.getCanonicalPath());
 		}
 		catch (IOException e)
 		{
@@ -246,10 +279,15 @@ public class PosixService extends AbstractService implements Constants
 			if (_logger != null)
 				_logger.throwing(this.getClass().getName(), "init", ex);
 		}
-		//JavaHome javaHome = OperatingSystem.instance().getJavaHome(_config);
-    //String java = javaHome.findJava(_config.getString("wrapper.ntservice.java.command"), _config.getString("wrapper.java.customProcName"));
-    java = javaHome.findJava(_config.getString("wrapper.ntservice.java.command"), _config.getString("wrapper.java.customProcName"));
-		String tmpDir = _config.getString("wrapper.tmp.path", System.getProperty("jna_tmpdir", null));
+		// JavaHome javaHome = OperatingSystem.instance().getJavaHome(_config);
+		// String java =
+		// javaHome.findJava(_config.getString("wrapper.ntservice.java.command"),
+		// _config.getString("wrapper.java.customProcName"));
+		java = javaHome.findJava(
+				_config.getString("wrapper.ntservice.java.command"),
+				_config.getString("wrapper.java.customProcName"));
+		String tmpDir = _config.getString("wrapper.tmp.path",
+				System.getProperty("jna_tmpdir", null));
 		ArrayList<String> result = new ArrayList<String>();
 		String opt = null;
 		if (tmpDir != null)
@@ -258,78 +296,82 @@ public class PosixService extends AbstractService implements Constants
 			result.add(opt);
 		}
 		YajswConfigurationImpl config = (YajswConfigurationImpl) _config;
-		for (Iterator it=config.subset("wrapper").getKeys(); it.hasNext(); )
-		try
-		{
-			config.getProperty((String) it.next());
-		}
-		catch (Exception ex)
-		{
-			
-		}
+		for (Iterator it = config.subset("wrapper").getKeys(); it.hasNext();)
+			try
+			{
+				config.getProperty((String) it.next());
+			}
+			catch (Exception ex)
+			{
+
+			}
 		// first add lookup vars eg ${lookup}
 		if (_config.getBoolean("wrapper.save_interpolated", true))
 		{
-		
-		for (Entry<String, String> e : config.getEnvLookupSet().entrySet())
-		{
-			if (e.getKey().contains("password"))
-				continue;
-			opt = Utils.getDOption(e.getKey(),e.getValue());
-			if (!result.contains(opt))
-			   result.add(opt);
+
+			for (Entry<String, String> e : config.getEnvLookupSet().entrySet())
+			{
+				if (e.getKey().contains("password"))
+					continue;
+				opt = Utils.getDOption(e.getKey(), e.getValue());
+				if (!result.contains(opt))
+					result.add(opt);
+			}
 		}
-		}
-		
-		for (Iterator it = _config.getKeys("wrapper.ntservice.additional"); it.hasNext();)
+
+		for (Iterator it = _config.getKeys("wrapper.ntservice.additional"); it
+				.hasNext();)
 		{
 			String key = (String) it.next();
 			String value = _config.getString(key);
 			result.add(value);
 		}
 		List configs = _config.getList("wrapperx.config");
-		
-		_startCmd = new String[10+result.size()+configs.size()];
+
+		_startCmd = new String[10 + result.size() + configs.size()];
 		_startCmd[0] = java;
 		_startCmd[1] = Utils.getDOption("wrapper.pidfile", _wrapperPidFile);
 		_startCmd[2] = "-Dwrapper.service=true";
 		_startCmd[3] = "-Dwrapper.visible=false";
-		for (int i=0; i<result.size(); i++)
+		for (int i = 0; i < result.size(); i++)
 		{
-			_startCmd[4+i] = result.get(i);			
+			_startCmd[4 + i] = result.get(i);
 		}
-		_startCmd[4+result.size()] = null;
-		_startCmd[5+result.size()] = null;
-		_startCmd[6+result.size()] = "-jar";
-		_startCmd[7+result.size()] = wrapperJar;
-		_startCmd[8+result.size()] = "-tx";
-		_startCmd[9+result.size()] = _confFile;
-		for (int i = 1; i< configs.size(); i++)
-			_startCmd[9+result.size()+i] = configs.get(i).toString();
-			
+		_startCmd[4 + result.size()] = null;
+		_startCmd[5 + result.size()] = null;
+		_startCmd[6 + result.size()] = "-jar";
+		_startCmd[7 + result.size()] = wrapperJar;
+		_startCmd[8 + result.size()] = "-tx";
+		_startCmd[9 + result.size()] = _confFile;
+		for (int i = 1; i < configs.size(); i++)
+			_startCmd[9 + result.size() + i] = configs.get(i).toString();
 
 		_execCmd = _startCmd.clone();
-		//_execCmd[4] = "-Xrs";
-		_execCmd[8+result.size()] = "-c";
+		// _execCmd[4] = "-Xrs";
+		_execCmd[8 + result.size()] = "-c";
 		if (_config.getBoolean("wrapper.ntservice.debug", false))
 		{
-			_execCmd[4+result.size()] = "-Xdebug";
-			_execCmd[5+result.size()] = "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=1044";
+			_execCmd[4 + result.size()] = "-Xdebug";
+			_execCmd[5 + result.size()] = "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=1044";
 		}
 
 		_stopCmd = _startCmd.clone();
-		_stopCmd[8+result.size()] = "-px";
+		_stopCmd[8 + result.size()] = "-px";
 
 		_statusCmd = _startCmd.clone();
-		_statusCmd[8+result.size()] = "-qx";
+		_statusCmd[8 + result.size()] = "-qx";
 
-		String defaultRunLevelDir = _daemonDir + "/" + DEFAULT_DAEMON_RUN_LEVEL_DIR;
-		String runLevelDir = _config.getString("wrapper.daemon.run_level_dir", defaultRunLevelDir);
+		String defaultRunLevelDir = _daemonDir + "/"
+				+ DEFAULT_DAEMON_RUN_LEVEL_DIR;
+		String runLevelDir = _config.getString("wrapper.daemon.run_level_dir",
+				defaultRunLevelDir);
 
-		_updateRcParser = new UpdateRcParser(_config.getString("wrapper.daemon.update_rc", null), runLevelDir, getName());
+		_updateRcParser = new UpdateRcParser(_config.getString(
+				"wrapper.daemon.update_rc", null), runLevelDir, getName());
 		_ksLinks.addAll(_updateRcParser.getStartLinks());
 		_ksLinks.addAll(_updateRcParser.getStopLinks());
-		_stopTimeout = _config.getInt("wrapper.shutdown.timeout", Constants.DEFAULT_SHUTDOWN_TIMEOUT) * 1000;
+		_stopTimeout = _config.getInt("wrapper.shutdown.timeout",
+				Constants.DEFAULT_SHUTDOWN_TIMEOUT) * 1000;
 
 	}
 
@@ -356,8 +398,10 @@ public class PosixService extends AbstractService implements Constants
 			File daemonTemplate = new File(_daemonTemplate);
 			VelocityEngine ve = new VelocityEngine();
 			ve.setProperty(VelocityEngine.RESOURCE_LOADER, "file");
-			ve.setProperty("file.resource.loader.path", daemonTemplate.getParent());
-			ve.setProperty("runtime.log.logsystem.class", VelocityLog.class.getCanonicalName());
+			ve.setProperty("file.resource.loader.path",
+					daemonTemplate.getParent());
+			ve.setProperty("runtime.log.logsystem.class",
+					VelocityLog.class.getCanonicalName());
 			// TODO find a way to set a non static logger
 			VelocityLog.setLogger(_logger);
 			ve.init();
@@ -390,19 +434,24 @@ public class PosixService extends AbstractService implements Constants
 			else
 			{
 				if (_logger != null)
-					_logger.warning("error creating daemon script: " + _daemonScript);
+					_logger.warning("error creating daemon script: "
+							+ _daemonScript);
 			}
 			// only jdk 1.6 daemonScript.setExecutable(true);
 			Runtime.getRuntime().exec("chmod 755 " + _daemonScript);
-			if ("AUTO_START".equals(_config.getString("wrapper.ntservice.starttype", DEFAULT_SERVICE_START_TYPE))
-					|| "DELAYED_AUTO_START".equals(_config.getString("wrapper.ntservice.starttype", DEFAULT_SERVICE_START_TYPE)))
+			if ("AUTO_START".equals(_config.getString(
+					"wrapper.ntservice.starttype", DEFAULT_SERVICE_START_TYPE))
+					|| "DELAYED_AUTO_START".equals(_config.getString(
+							"wrapper.ntservice.starttype",
+							DEFAULT_SERVICE_START_TYPE)))
 			{
 
 				for (String link : _ksLinks)
 					if (CLibrary.INSTANCE.symlink(_daemonScript, link) != 0)
 					{
 						if (_logger != null)
-							_logger.info("error on creating script link " + link);
+							_logger.info("error on creating script link "
+									+ link);
 					}
 					else
 					{
@@ -414,7 +463,8 @@ public class PosixService extends AbstractService implements Constants
 						else
 						{
 							if (_logger != null)
-								_logger.info("error on creating script link " + link);
+								_logger.info("error on creating script link "
+										+ link);
 						}
 					}
 
@@ -439,26 +489,24 @@ public class PosixService extends AbstractService implements Constants
 		String result = "";
 		String[] dependencies = super.getStopDependencies();
 		if (dependencies != null)
-		for (String dep : dependencies)
-			result = result + dep + " ";
+			for (String dep : dependencies)
+				result = result + dep + " ";
 		return result;
 	}
-
 
 	private String getStartDependencies()
 	{
 		String result = "";
 		String[] dependencies = super.getDependencies();
 		if (dependencies != null)
-		for (String dep : dependencies)
-			result = result + dep + " ";
+			for (String dep : dependencies)
+				result = result + dep + " ";
 		return result;
 	}
 
-
 	private String toStrCommand(String[] cmd)
 	{
-		StringBuffer  tmp = new StringBuffer();
+		StringBuffer tmp = new StringBuffer();
 		for (String s : cmd)
 		{
 			if (s != null && s.contains(" ") && !s.contains("\""))
@@ -471,7 +519,7 @@ public class PosixService extends AbstractService implements Constants
 			{
 				tmp.append(s);
 			}
-			if (s != null && s != cmd[cmd.length-1])
+			if (s != null && s != cmd[cmd.length - 1])
 				tmp.append(" ");
 
 		}
@@ -488,7 +536,8 @@ public class PosixService extends AbstractService implements Constants
 		int pid = getPid();
 		if (pid < 0)
 			return false;
-		org.rzo.yajsw.os.Process p = OperatingSystem.instance().processManagerInstance().getProcess(pid);
+		org.rzo.yajsw.os.Process p = OperatingSystem.instance()
+				.processManagerInstance().getProcess(pid);
 		return p != null && p.isRunning();
 	}
 
@@ -504,9 +553,12 @@ public class PosixService extends AbstractService implements Constants
 		if (!OperatingSystem.instance().setWorkingDir(f.getParent()))
 		{
 			if (_logger != null)
-				_logger.warning("could not set working dir. pls check configuration or user rights :"+f.getParent());
+				_logger.warning("could not set working dir. pls check configuration or user rights :"
+						+ f.getParent());
 			else
-				System.out.println("could not set working dir. pls check configuration or user rights :"+f.getParent());
+				System.out
+						.println("could not set working dir. pls check configuration or user rights :"
+								+ f.getParent());
 		}
 		String txt = _utils.osCommand(_daemonScript + " start", 45000);
 		if (_logger != null)
@@ -517,7 +569,8 @@ public class PosixService extends AbstractService implements Constants
 	public boolean stop()
 	{
 		if (_logger != null)
-			_logger.info(_utils.osCommand(_daemonScript + " stop", _stopTimeout));
+			_logger.info(_utils
+					.osCommand(_daemonScript + " stop", _stopTimeout));
 		return !isRunning();
 	}
 
@@ -557,7 +610,8 @@ public class PosixService extends AbstractService implements Constants
 			_logger.info("stop daemon with pid " + pid);
 		if (pid <= 0)
 			return false;
-		org.rzo.yajsw.os.Process p = OperatingSystem.instance().processManagerInstance().getProcess(pid);
+		org.rzo.yajsw.os.Process p = OperatingSystem.instance()
+				.processManagerInstance().getProcess(pid);
 		if (p == null)
 		{
 			if (_logger != null)
@@ -571,7 +625,8 @@ public class PosixService extends AbstractService implements Constants
 			_logger.info("stop daemon app with pid " + apid);
 		if (apid <= 0)
 			return false;
-		org.rzo.yajsw.os.Process ap = OperatingSystem.instance().processManagerInstance().getProcess(apid);
+		org.rzo.yajsw.os.Process ap = OperatingSystem.instance()
+				.processManagerInstance().getProcess(apid);
 
 		if (ap != null)
 			ap.kill(999);
@@ -600,12 +655,13 @@ public class PosixService extends AbstractService implements Constants
 
 	public int getPid()
 	{
-if ( _logger != null )
-		_logger.info("wrapper pid file: " + _wrapperPidFile);
+		if (_logger != null)
+			_logger.info("wrapper pid file: " + _wrapperPidFile);
 		if (_wrapperPidFile != null && new File(_wrapperPidFile).exists())
 			try
 			{
-				BufferedReader reader = new BufferedReader(new FileReader(_wrapperPidFile));
+				BufferedReader reader = new BufferedReader(new FileReader(
+						_wrapperPidFile));
 				String pid = reader.readLine();
 				reader.close();
 				return Integer.parseInt(pid);
@@ -625,7 +681,8 @@ if ( _logger != null )
 		if (_appPidFile != null && new File(_appPidFile).exists())
 			try
 			{
-				BufferedReader reader = new BufferedReader(new FileReader(_appPidFile));
+				BufferedReader reader = new BufferedReader(new FileReader(
+						_appPidFile));
 				String pid = reader.readLine();
 				reader.close();
 				return Integer.parseInt(pid);
@@ -654,6 +711,5 @@ if ( _logger != null )
 		return result;
 
 	}
-	
 
 }

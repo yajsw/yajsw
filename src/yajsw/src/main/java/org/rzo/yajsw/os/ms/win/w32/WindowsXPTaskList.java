@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.os.ms.win.w32;
 
 import java.util.ArrayList;
@@ -29,19 +35,19 @@ public class WindowsXPTaskList implements TaskList
 {
 
 	/** The _listners. */
-	List						_listners	= new ArrayList();
+	List _listners = new ArrayList();
 
 	/** The _maps. */
-	Map[]						_maps;
+	Map[] _maps;
 
 	/** The _maps lock. */
-	Map							_mapsLock	= new HashMap();
+	Map _mapsLock = new HashMap();
 
 	/** The _instance. */
-	static WindowsXPTaskList	_instance;
+	static WindowsXPTaskList _instance;
 
 	/** The _worker. */
-	Worker						_worker		= new Worker();
+	Worker _worker = new Worker();
 
 	/**
 	 * Instance.
@@ -95,17 +101,18 @@ public class WindowsXPTaskList implements TaskList
 	/**
 	 * The Class TaskListEvent.
 	 */
-	public class TaskListEvent implements org.rzo.yajsw.os.TaskList.TaskListEvent
+	public class TaskListEvent implements
+			org.rzo.yajsw.os.TaskList.TaskListEvent
 	{
 
 		/** The _new tasks. */
-		Collection	_newTasks;
+		Collection _newTasks;
 
 		/** The _removed tasks. */
-		Collection	_removedTasks;
+		Collection _removedTasks;
 
 		/** The _current tasks. */
-		Collection	_currentTasks;
+		Collection _currentTasks;
 
 		/**
 		 * Instantiates a new task list event.
@@ -117,7 +124,8 @@ public class WindowsXPTaskList implements TaskList
 		 * @param currentTasks
 		 *            the current tasks
 		 */
-		TaskListEvent(Collection newTasks, Collection removedTasks, Collection currentTasks)
+		TaskListEvent(Collection newTasks, Collection removedTasks,
+				Collection currentTasks)
 		{
 			_newTasks = newTasks;
 			_removedTasks = removedTasks;
@@ -204,13 +212,17 @@ public class WindowsXPTaskList implements TaskList
 						Set deleteSet = new HashSet(_maps[0].keySet());
 						deleteSet.removeAll(maps2[0].keySet());
 						_maps = maps2;
-						if ((newSet.size() > 0 || deleteSet.size() > 0) && _listners.size() > 0)
+						if ((newSet.size() > 0 || deleteSet.size() > 0)
+								&& _listners.size() > 0)
 						{
-							TaskListEvent event = new TaskListEvent(newSet, deleteSet, _maps[0].keySet());
-							for (Iterator it = _listners.iterator(); it.hasNext();)
+							TaskListEvent event = new TaskListEvent(newSet,
+									deleteSet, _maps[0].keySet());
+							for (Iterator it = _listners.iterator(); it
+									.hasNext();)
 								try
 								{
-									((TaskListListner) it.next()).changed(event);
+									((TaskListListner) it.next())
+											.changed(event);
 								}
 								catch (Exception ex)
 								{

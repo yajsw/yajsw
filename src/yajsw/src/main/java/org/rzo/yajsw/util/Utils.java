@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.util;
 
 import java.io.BufferedReader;
@@ -12,8 +27,8 @@ import com.sun.jna.PlatformEx;
 
 public class Utils
 {
-	WrappedProcess	_process;
-	WrappedService	_service;
+	WrappedProcess _process;
+	WrappedService _service;
 
 	public Utils(WrappedProcess process)
 	{
@@ -47,7 +62,7 @@ public class Utils
 		}
 		return result;
 	}
-	
+
 	public static void verifyIPv4IsPreferred(Logger log)
 	{
 		boolean ipv4Preferred = Boolean.getBoolean("java.net.preferIPv4Stack");
@@ -56,41 +71,39 @@ public class Utils
 		if (isWindows && isJDK7 && !ipv4Preferred)
 		{
 			if (log != null)
-			log.warning("!! WARNING !! Windows JDK7 should set -Djava.net.preferIPv4Stack=true (see java bug 7179799 )");
+				log.warning("!! WARNING !! Windows JDK7 should set -Djava.net.preferIPv4Stack=true (see java bug 7179799 )");
 			else
-				System.out.println("!! WARNING !! Windows JDK7 should set -Djava.net.preferIPv4Stack=true (see java bug 7179799 )");
+				System.out
+						.println("!! WARNING !! Windows JDK7 should set -Djava.net.preferIPv4Stack=true (see java bug 7179799 )");
 		}
 	}
-	
+
 	public static String getDOption(String key, String value)
 	{
-		//value = value.replace("\"", "\\\"");
-		//value = value.replace("\\", "\\\\");
+		// value = value.replace("\"", "\\\"");
+		// value = value.replace("\\", "\\\\");
 		value = value.replaceAll("\"", "");
 
-	//	if (value != null && !value.contains(" "))
-			return "-D" + key + "=" + value;
-	//	else
-	//		return "\"-D" + key.trim() + "=" + value.trim() + "\"";
+		// if (value != null && !value.contains(" "))
+		return "-D" + key + "=" + value;
+		// else
+		// return "\"-D" + key.trim() + "=" + value.trim() + "\"";
 	}
-	
+
 	public static int parseOctal(String txt)
 	{
 		int result = -1;
 		if (txt != null)
-		try
-		{
-			result = Integer.parseInt(txt, 8);
-		}
-		catch (Exception ex)
-		{
-			System.out.println(ex + " "+ex.getMessage());
-		}
+			try
+			{
+				result = Integer.parseInt(txt, 8);
+			}
+			catch (Exception ex)
+			{
+				System.out.println(ex + " " + ex.getMessage());
+			}
 		return result;
-		
+
 	}
-
-
-
 
 }

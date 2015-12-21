@@ -1,6 +1,5 @@
 package test;
 
-
 public class HelloWorld2 extends HelloWorld
 {
 
