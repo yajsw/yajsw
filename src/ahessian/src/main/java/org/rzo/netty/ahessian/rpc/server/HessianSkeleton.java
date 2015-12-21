@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.netty.ahessian.rpc.server;
 
 import io.netty.channel.Channel;
@@ -13,42 +28,50 @@ import org.rzo.netty.ahessian.rpc.stream.ServerInputStream;
 import org.rzo.netty.ahessian.rpc.stream.ServerInputStreamManager;
 
 /**
- * The Class HessianSkeleton, extends the original HessianSkeleton, 
- * so that it can be used in a non-servlet environment
+ * The Class HessianSkeleton, extends the original HessianSkeleton, so that it
+ * can be used in a non-servlet environment
  * 
- * TODO method name overloading. currently only overloading by number of arguments is supported
+ * TODO method name overloading. currently only overloading by number of
+ * arguments is supported
  */
-public abstract class HessianSkeleton extends com.caucho.hessian4.server.HessianSkeleton implements Service, Constants
+public abstract class HessianSkeleton extends
+		com.caucho.hessian4.server.HessianSkeleton implements Service,
+		Constants
 {
-	
+
 	/** The _service. */
 	volatile Object _service;
-	
+
 	/** The _factory. */
 	HessianRPCServiceHandler _factory;
-	
+
 	ServerInputStreamManager _serverInputStreamManager;
-	
+
 	public static ThreadLocal<Channel> threadLocalChannel = new ThreadLocal<Channel>();
+
 	/**
 	 * Instantiates a new hessian skeleton.
 	 * 
-	 * @param service the service
-	 * @param apiClass the api class
-	 * @param factory the factory
+	 * @param service
+	 *            the service
+	 * @param apiClass
+	 *            the api class
+	 * @param factory
+	 *            the factory
 	 */
-	public HessianSkeleton(Object service, Class apiClass, HessianRPCServiceHandler factory)
+	public HessianSkeleton(Object service, Class apiClass,
+			HessianRPCServiceHandler factory)
 	{
-	    super(apiClass);
+		super(apiClass);
 		_service = service;
 		_factory = factory;
 	}
-	
-	
+
 	/**
 	 * Gets the method.
 	 * 
-	 * @param message the message
+	 * @param message
+	 *            the message
 	 * 
 	 * @return the method
 	 */
@@ -56,66 +79,78 @@ public abstract class HessianSkeleton extends com.caucho.hessian4.server.Hessian
 	{
 		Object[] args = message.getArgs();
 		String methodName = message.getMethod();
-	    Method method = null;
-	    if (args == null || args.length == 0)
-	    	method = getMethod(mangleName(methodName, args));
-	    if (method == null)
-	      method = getMethod(message.getMethod());	    
-	    return method;
+		Method method = null;
+		if (args == null || args.length == 0)
+			method = getMethod(mangleName(methodName, args));
+		if (method == null)
+			method = getMethod(message.getMethod());
+		return method;
 	}
-	
-	  public static String mangleName(String method, Object[] args)
-	  {
-	    if (args != null && args.length > 0)
-	    {
-		StringBuffer sb = new StringBuffer();
-		sb.append(method);
-	    sb.append('_');
-	    sb.append(args.length);
-	    return sb.toString();
-	    }
-	    return method;
-	  }
+
+	public static String mangleName(String method, Object[] args)
+	{
+		if (args != null && args.length > 0)
+		{
+			StringBuffer sb = new StringBuffer();
+			sb.append(method);
+			sb.append('_');
+			sb.append(args.length);
+			return sb.toString();
+		}
+		return method;
+	}
 
 	/**
 	 * Write result.
 	 * 
-	 * @param message the message
+	 * @param message
+	 *            the message
 	 */
 	public void writeResult(HessianRPCReplyMessage message)
 	{
 		_factory.writeResult(message);
 	}
-	
-	public void handleDefaultResult(Object fault, Object result, HessianRPCCallMessage message)
+
+	public void handleDefaultResult(Object fault, Object result,
+			HessianRPCCallMessage message)
 	{
-		HessianRPCReplyMessage reply = new HessianRPCReplyMessage(result, fault, message);
+		HessianRPCReplyMessage reply = new HessianRPCReplyMessage(result,
+				fault, message);
 		reply.setCompleted(true);
 		reply.setCallId((Long) message.getHeaders().get(CALL_ID_HEADER_KEY));
 		reply.setGroup((Integer) message.getHeaders().get(GROUP_HEADER_KEY));
 		writeResult(reply);
 	}
-	
-	public void handleInputStreamResult(Object fault, Object result, HessianRPCCallMessage message)
+
+	public void handleInputStreamResult(Object fault, Object result,
+			HessianRPCCallMessage message)
 	{
-		ServerInputStream serverInputStream = _serverInputStreamManager.createServerInputStream((InputStream) result, message.getChannel());
+		ServerInputStream serverInputStream = _serverInputStreamManager
+				.createServerInputStream((InputStream) result,
+						message.getChannel());
 		InputStreamReplyMessage internalReply = new InputStreamReplyMessage();
 		internalReply.setId(serverInputStream.getId());
 		internalReply.setCreated(true);
-		HessianRPCReplyMessage reply = new HessianRPCReplyMessage(result, fault, message);
+		HessianRPCReplyMessage reply = new HessianRPCReplyMessage(result,
+				fault, message);
 		reply.setCompleted(true);
 		reply.setCallId((Long) message.getHeaders().get(CALL_ID_HEADER_KEY));
 		reply.setGroup((Integer) message.getHeaders().get(GROUP_HEADER_KEY));
 		writeResult(reply);
 		serverInputStream.start();
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.rzo.netty.ahessian.rpc.server.Service#messageReceived(org.rzo.netty.ahessian.rpc.HessianRPCCallMessage)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.rzo.netty.ahessian.rpc.server.Service#messageReceived(org.rzo.netty
+	 * .ahessian.rpc.HessianRPCCallMessage)
 	 */
 	abstract public void messageReceived(HessianRPCCallMessage message);
-	
-	public void setServerInputStreamManager(ServerInputStreamManager serverInputStreamManager)
+
+	public void setServerInputStreamManager(
+			ServerInputStreamManager serverInputStreamManager)
 	{
 		_serverInputStreamManager = serverInputStreamManager;
 	}

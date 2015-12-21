@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.netty.ahessian.rpc.stream;
 
 public class InputStreamReplyMessage
@@ -6,31 +21,37 @@ public class InputStreamReplyMessage
 	private byte[] _data = null;
 	private boolean _closed = false;
 	private boolean _created = false;
-	
+
 	public void setId(long id)
 	{
 		_id = id;
 	}
+
 	public void setData(byte[] data)
 	{
 		_data = data;
 	}
+
 	public void setClosed(boolean b)
 	{
 		_closed = b;
 	}
+
 	public boolean isClosed()
 	{
 		return _closed;
 	}
+
 	public byte[] getData()
 	{
 		return _data;
 	}
+
 	public long getId()
 	{
 		return _id;
 	}
+
 	public void setCreated(boolean b)
 	{
 		_created = b;

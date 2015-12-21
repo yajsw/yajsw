@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.netty.ahessian.io;
 
 import io.netty.buffer.ByteBuf;
@@ -20,16 +35,16 @@ public class InputStreamBuffer extends InputStream
 
 	/** Buffer for storing incoming bytes */
 	// private ByteBuf _buf = dynamicBuffer();
-	final LinkedList<ByteBuf>	_bufs			= new LinkedList<ByteBuf>();
+	final LinkedList<ByteBuf> _bufs = new LinkedList<ByteBuf>();
 
 	/** Indicates if the stream has been closed */
-	private volatile boolean		_closed			= false;
-	final private Lock				_lock			= new MyReentrantLock();
+	private volatile boolean _closed = false;
+	final private Lock _lock = new MyReentrantLock();
 	/** Sync condition indicating that buffer is not empty. */
-	final private Condition			_notEmpty		= _lock.newCondition();
-	private volatile int			_available		= 0;
-	boolean							blocking		= false;
-	long							_readTimeout	= 3000;
+	final private Condition _notEmpty = _lock.newCondition();
+	private volatile int _available = 0;
+	boolean blocking = false;
+	long _readTimeout = 3000;
 	// close stream on empty buffer
 	boolean _closeOnEmpty = false;
 
@@ -53,7 +68,8 @@ public class InputStreamBuffer extends InputStream
 				{
 					if (_readTimeout > 0)
 					{
-						if (!_notEmpty.await(_readTimeout, TimeUnit.MILLISECONDS))
+						if (!_notEmpty.await(_readTimeout,
+								TimeUnit.MILLISECONDS))
 							throw new IOException("read timeout");
 					}
 					else
@@ -78,9 +94,9 @@ public class InputStreamBuffer extends InputStream
 		{
 			_lock.unlock();
 		}
-		
-		//System.out.println("read "+_available);
-		checkCloseOnEmpty();				 
+
+		// System.out.println("read "+_available);
+		checkCloseOnEmpty();
 		return result;
 	}
 
@@ -101,7 +117,7 @@ public class InputStreamBuffer extends InputStream
 	@Override
 	public void close() throws IOException
 	{
-		//System.out.println("close input stream buffer");
+		// System.out.println("close input stream buffer");
 		_lock.lock();
 		try
 		{
@@ -185,7 +201,8 @@ public class InputStreamBuffer extends InputStream
 				if (_readTimeout > 0)
 				{
 					if (!_notEmpty.await(_readTimeout, TimeUnit.MILLISECONDS))
-						throw new IOException("read timeout: "+_readTimeout + " ms");
+						throw new IOException("read timeout: " + _readTimeout
+								+ " ms");
 				}
 				else
 					_notEmpty.awaitUninterruptibly();
@@ -239,13 +256,13 @@ public class InputStreamBuffer extends InputStream
 	{
 		this.blocking = blocking;
 	}
-	
+
 	private void checkCloseOnEmpty() throws IOException
 	{
 		if (_closeOnEmpty && !_closed && available() == 0)
 			close();
 	}
-	
+
 	public void closeOnEmpty() throws IOException
 	{
 		_closeOnEmpty = true;

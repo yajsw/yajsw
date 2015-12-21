@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.netty.ahessian.application.cluster.client;
 
 import io.netty.channel.Channel;
@@ -45,7 +60,7 @@ public class ClusterClient
 	public ClusterClient(String clusterName, String myName,
 			InetSocketAddress... seeds) throws Exception
 	{
-		//InternalLoggerFactory.setDefaultFactory(new SimpleLoggerFactory());
+		// InternalLoggerFactory.setDefaultFactory(new SimpleLoggerFactory());
 		_clusterName = clusterName;
 		_clientName = myName;
 		if (seeds == null || seeds.length == 0)
@@ -55,7 +70,7 @@ public class ClusterClient
 			_discovery = new DiscoveryClient();
 			_discovery.setName(clusterName);
 			_discovery.setDebug(true);
-			//_discovery.setLogger(new SimpleLogger());
+			// _discovery.setLogger(new SimpleLogger());
 			_discovery.addListener(new DiscoveryListener()
 			{
 
@@ -237,8 +252,7 @@ public class ClusterClient
 				.serviceThreads(10)
 				// .reconnect(10)
 				.rpcServiceInterface(ClusterService.class)
-				.clientHeartbeat(30000)
-				.serviceOptions(options);
+				.clientHeartbeat(30000).serviceOptions(options);
 
 		builder.debug();
 
@@ -256,8 +270,8 @@ public class ClusterClient
 			{
 				try
 				{
-					client.proxy()
-							.join(_clusterName, _clientName, _data, _listener);
+					client.proxy().join(_clusterName, _clientName, _data,
+							_listener);
 					_remoteClient.compareAndSet(null, client);
 				}
 				catch (Exception e)
@@ -270,7 +284,7 @@ public class ClusterClient
 			public void run(Channel channel)
 			{
 				// TODO Auto-generated method stub
-				
+
 			}
 		});
 		client.disconnectedListener(new ConnectListener()
@@ -296,7 +310,7 @@ public class ClusterClient
 			public void run(Channel channel)
 			{
 				// TODO Auto-generated method stub
-				
+
 			}
 		});
 		try
@@ -352,34 +366,29 @@ public class ClusterClient
 			return;
 		_discovery.stop();
 	}
-	
+
 	public static void main(String[] args) throws Exception
 	{
 		System.out.println(createName());
-		ClusterClient cluster = new ClusterClient( new InetSocketAddress(
-				"127.0.0.1", 15010), new InetSocketAddress(
-						"127.0.0.1", 15011), new InetSocketAddress(
-								"127.0.0.1", 15012));
+		ClusterClient cluster = new ClusterClient(new InetSocketAddress(
+				"127.0.0.1", 15010), new InetSocketAddress("127.0.0.1", 15011),
+				new InetSocketAddress("127.0.0.1", 15012));
 		cluster.join();
 		while (!cluster.isConnected())
 			Thread.sleep(100);
-		System.out.println("my name "+cluster._clientName);
-		System.out.println("members "+cluster.getMembers());
-/*		cluster.leave();
-		ClusterClient cluster2 = new ClusterClient(new InetSocketAddress(
-				"127.0.0.1", 15010));
-		cluster2.join();
-		while (!cluster2.isConnected())
-			Thread.sleep(100);
-		System.out.println("my name "+cluster2._clientName);
-		System.out.println("members "+cluster2.getMembers());
-		cluster2.leave();
-		*/
-		
+		System.out.println("my name " + cluster._clientName);
+		System.out.println("members " + cluster.getMembers());
+		/*
+		 * cluster.leave(); ClusterClient cluster2 = new ClusterClient(new
+		 * InetSocketAddress( "127.0.0.1", 15010)); cluster2.join(); while
+		 * (!cluster2.isConnected()) Thread.sleep(100);
+		 * System.out.println("my name "+cluster2._clientName);
+		 * System.out.println("members "+cluster2.getMembers());
+		 * cluster2.leave();
+		 */
+
 		Thread.sleep(10000);
 		System.exit(0);
 	}
-
-
 
 }

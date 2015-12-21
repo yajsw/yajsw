@@ -1,5 +1,19 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.netty.ahessian.io;
-
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -39,14 +53,16 @@ import org.rzo.netty.ahessian.stopable.StopableHandler;
  * 
  * <pre>
  * // synchronized for multithreaded environment to avoid messages mixing
- * synchronized public void writeRequested(ChannelHandlerContext ctx, MessageEvent e) throws Exception
+ * synchronized public void writeRequested(ChannelHandlerContext ctx,
+ * 		MessageEvent e) throws Exception
  * {
  * 	byte[] message = (byte[]) e.getMessage();
  * 	OutputStream out = OutputStreamEncoder.getOutputStream(ctx);
  * 	out.write(message);
  * 	// if this is the last chunk of bytes we should flush the output
  * 	out.flush();
- * 	// netty seems to require this, so that the boss thread may read input from the channel
+ * 	// netty seems to require this, so that the boss thread may read input from
+ * 	// the channel
  * 	Thread.yield();
  * }
  * 
@@ -72,7 +88,8 @@ import org.rzo.netty.ahessian.stopable.StopableHandler;
  * }
  * </pre>
  */
-public class InputStreamHandler extends ChannelInboundHandlerAdapter implements StopableHandler
+public class InputStreamHandler extends ChannelInboundHandlerAdapter implements
+		StopableHandler
 {
 
 	/** Thread pool for getting a thread for calling the next handler */
@@ -80,14 +97,14 @@ public class InputStreamHandler extends ChannelInboundHandlerAdapter implements 
 	boolean _stopEnabled = true;
 	boolean _crcCheck = false;
 	private volatile Runnable _disconnectListener = null;
-	private static AttributeKey<InputStreamBuffer> INSTREAM = AttributeKey.valueOf("INSTREAM");
+	private static AttributeKey<InputStreamBuffer> INSTREAM = AttributeKey
+			.valueOf("INSTREAM");
 
-	
 	public InputStreamHandler()
 	{
 	}
-	
-	public InputStreamHandler (boolean crcCheck)
+
+	public InputStreamHandler(boolean crcCheck)
 	{
 		_crcCheck = crcCheck;
 	}
@@ -107,38 +124,38 @@ public class InputStreamHandler extends ChannelInboundHandlerAdapter implements 
 	 * org.jboss.netty.channel.MessageEvent)
 	 */
 	@Override
-	public void channelRead(final ChannelHandlerContext ctx, final Object e) throws Exception
+	public void channelRead(final ChannelHandlerContext ctx, final Object e)
+			throws Exception
 	{
-		//System.out.println(System.currentTimeMillis()+" InputStreamHanlder.messageReceived +");
-					_in.write(((ByteBuf) e));
-					ctx.fireChannelReadComplete();
-					ctx.fireChannelRead(_in);
-		//System.out.println(System.currentTimeMillis()+" InputStreamHanlder.messageReceived -");
+		// System.out.println(System.currentTimeMillis()+" InputStreamHanlder.messageReceived +");
+		_in.write(((ByteBuf) e));
+		ctx.fireChannelReadComplete();
+		ctx.fireChannelRead(_in);
+		// System.out.println(System.currentTimeMillis()+" InputStreamHanlder.messageReceived -");
 	}
-	
+
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception
 	{
 		if (_in == null)
 		{
-			//System.out.println("new input stream buffer");
+			// System.out.println("new input stream buffer");
 			if (_crcCheck)
 				_in = new CRCInputStream();
 			else
 				_in = new InputStreamBuffer();
 			ctx.channel().attr(INSTREAM).set(_in);
-		}		
-		//ctx.fireChannelActive();
+		}
+		// ctx.fireChannelActive();
 		super.channelActive(ctx);
 	}
-	
+
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception
 	{
-		if (_disconnectListener !=null)
-		_disconnectListener.run();
+		if (_disconnectListener != null)
+			_disconnectListener.run();
 		ctx.fireChannelInactive();
 	}
-
 
 	public static InputStreamBuffer getInputStream(ChannelHandlerContext ctx)
 	{
@@ -168,7 +185,7 @@ public class InputStreamHandler extends ChannelInboundHandlerAdapter implements 
 		}
 		_in = null;
 	}
-	
+
 	public void setDisconnectListener(Runnable disconnectListener)
 	{
 		_disconnectListener = disconnectListener;
@@ -178,7 +195,5 @@ public class InputStreamHandler extends ChannelInboundHandlerAdapter implements 
 	{
 		return ctx.pipeline().get(InputStreamHandler.class);
 	}
-
-
 
 }

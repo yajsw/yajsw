@@ -1,6 +1,5 @@
 package io.netty.util.internal.logging;
 
-
 public class SimpleLogger implements InternalLogger
 {
 
@@ -227,6 +226,5 @@ public class SimpleLogger implements InternalLogger
 	{
 		info(paramString, paramArrayOfObject);
 	}
-
 
 }

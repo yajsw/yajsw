@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.netty.ahessian.io;
 
 import io.netty.channel.ChannelHandlerContext;
@@ -35,15 +50,17 @@ import org.rzo.netty.ahessian.stopable.StopableHandler;
  * 
  * <pre>
  * // synchronized for multithreaded environment to avoid messages mixing
- * synchronized public void writeRequested(ChannelHandlerContext ctx, MessageEvent e) throws Exception
+ * synchronized public void writeRequested(ChannelHandlerContext ctx,
+ * 		MessageEvent e) throws Exception
  * {
- * byte[] message = (byte[]) e.getMessage();
- * OutputStream out = OutputStreamEncoder.getOutputStream(ctx);
- * out.write(message);
- * // if this is the last chunk of bytes we should flush the output
- * out.flush();
- * // netty seems to require this, so that the boss thread may read input from the channel
- * Thread.yield();
+ * 	byte[] message = (byte[]) e.getMessage();
+ * 	OutputStream out = OutputStreamEncoder.getOutputStream(ctx);
+ * 	out.write(message);
+ * 	// if this is the last chunk of bytes we should flush the output
+ * 	out.flush();
+ * 	// netty seems to require this, so that the boss thread may read input from
+ * 	// the channel
+ * 	Thread.yield();
  * }
  * 
  * </pre>
@@ -54,43 +71,47 @@ import org.rzo.netty.ahessian.stopable.StopableHandler;
  * <pre>
  * void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
  * {
- * // message received is called only once to deliver the input stream
- * // it is called in a separate thread and not in the netty worker thread.
- * // incoming bytes are consumed in this method.
- * // the stream is closed once the channel is disconnected
- * InputStream in = (InputStream) evt.getMessage();
+ * 	// message received is called only once to deliver the input stream
+ * 	// it is called in a separate thread and not in the netty worker thread.
+ * 	// incoming bytes are consumed in this method.
+ * 	// the stream is closed once the channel is disconnected
+ * 	InputStream in = (InputStream) evt.getMessage();
  * 
- * while (ctx.getChannel().isConnected())
- * {
- * // parse the incoming stream and forward the result to the next handler
- * Channels.fireMessageReceived(ctx, parseReply(in));
- * }
+ * 	while (ctx.getChannel().isConnected())
+ * 	{
+ * 		// parse the incoming stream and forward the result to the next handler
+ * 		Channels.fireMessageReceived(ctx, parseReply(in));
+ * 	}
  * }
  * </pre>
  */
-public class OutputStreamHandler extends ChannelInboundHandlerAdapter implements StopableHandler, ChannelOutboundHandler
+public class OutputStreamHandler extends ChannelInboundHandlerAdapter implements
+		StopableHandler, ChannelOutboundHandler
 {
 	volatile OutputStreamBuffer _buffer = null;
-	private boolean	_stopEnabled = true;
+	private boolean _stopEnabled = true;
 	boolean _crcCheck = false;
-	public static AttributeKey<OutputStreamBuffer> OUTSTREAM = AttributeKey.valueOf("OUTSTREAM");
-	private static AttributeKey<OutputStreamHandler> OUTENCODER = AttributeKey.valueOf("OUTENCODER");
-	
+	public static AttributeKey<OutputStreamBuffer> OUTSTREAM = AttributeKey
+			.valueOf("OUTSTREAM");
+	private static AttributeKey<OutputStreamHandler> OUTENCODER = AttributeKey
+			.valueOf("OUTENCODER");
+
 	public OutputStreamHandler()
 	{
-		
+
 	}
-	
+
 	public OutputStreamHandler(boolean crcCheck)
 	{
 		_crcCheck = crcCheck;
 	}
-	
 
 	/**
-	 * Helper method: Gets the output stream from the pipeline of a given context.
+	 * Helper method: Gets the output stream from the pipeline of a given
+	 * context.
 	 * 
-	 * @param ctx the context
+	 * @param ctx
+	 *            the context
 	 * 
 	 * @return the output stream
 	 */
@@ -98,20 +119,20 @@ public class OutputStreamHandler extends ChannelInboundHandlerAdapter implements
 	{
 		return (OutputStream) ctx.channel().attr(OUTSTREAM).get();
 	}
-	
+
 	public static OutputStreamHandler getOutputEncoder(ChannelHandlerContext ctx)
 	{
 		return (OutputStreamHandler) ctx.channel().attr(OUTENCODER).get();
 	}
-	
+
 	public OutputStreamBuffer getBuffer()
 	{
 		return _buffer;
 	}
-	
+
 	public boolean isStopEnabled()
 	{
-		return _stopEnabled ;
+		return _stopEnabled;
 	}
 
 	public void setStopEnabled(boolean stopEnabled)
@@ -226,8 +247,5 @@ public class OutputStreamHandler extends ChannelInboundHandlerAdapter implements
 	{
 		ctx.flush();
 	}
-
-
-
 
 }

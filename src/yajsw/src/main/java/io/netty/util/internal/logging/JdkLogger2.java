@@ -19,76 +19,92 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * <a href="http://java.sun.com/javase/6/docs/technotes/guides/logging/index.html">java.util.logging</a>
- * logger.
- *
+ * <a href=
+ * "http://java.sun.com/javase/6/docs/technotes/guides/logging/index.html"
+ * >java.util.logging</a> logger.
+ * 
  * @author <a href="http://www.jboss.org/netty/">The Netty Project</a>
  * @author <a href="http://gleamynode.net/">Trustin Lee</a>
- *
+ * 
  * @version $Rev: 2080 $, $Date: 2010-01-26 18:04:19 +0900 (Tue, 26 Jan 2010) $
- *
+ * 
  */
-class JdkLogger2 implements InternalLogger {
+class JdkLogger2 implements InternalLogger
+{
 
-    private final Logger logger;
+	private final Logger logger;
 
-    JdkLogger2(Logger logger) {
-    	
-        this.logger = logger;
-    }
+	JdkLogger2(Logger logger)
+	{
 
-    public void debug(String msg) {
-        logger.log(Level.FINE, msg);
-    }
+		this.logger = logger;
+	}
 
-    public void debug(String msg, Throwable cause) {
-        logger.log(Level.FINE, msg, cause);
-    }
+	public void debug(String msg)
+	{
+		logger.log(Level.FINE, msg);
+	}
 
-    public void error(String msg) {
-        logger.log(Level.SEVERE, msg);
-    }
+	public void debug(String msg, Throwable cause)
+	{
+		logger.log(Level.FINE, msg, cause);
+	}
 
-    public void error(String msg, Throwable cause) {
-        logger.log(Level.SEVERE, msg, cause);
-    }
+	public void error(String msg)
+	{
+		logger.log(Level.SEVERE, msg);
+	}
 
-    public void info(String msg) {
-        logger.log(Level.INFO, msg);
-    }
+	public void error(String msg, Throwable cause)
+	{
+		logger.log(Level.SEVERE, msg, cause);
+	}
 
-    public void info(String msg, Throwable cause) {
-        logger.log(Level.INFO, msg, cause);
-    }
+	public void info(String msg)
+	{
+		logger.log(Level.INFO, msg);
+	}
 
-    public boolean isDebugEnabled() {
-        return logger.isLoggable(Level.FINE);
-    }
+	public void info(String msg, Throwable cause)
+	{
+		logger.log(Level.INFO, msg, cause);
+	}
 
-    public boolean isErrorEnabled() {
-        return logger.isLoggable(Level.SEVERE);
-    }
+	public boolean isDebugEnabled()
+	{
+		return logger.isLoggable(Level.FINE);
+	}
 
-    public boolean isInfoEnabled() {
-        return logger.isLoggable(Level.INFO);
-    }
+	public boolean isErrorEnabled()
+	{
+		return logger.isLoggable(Level.SEVERE);
+	}
 
-    public boolean isWarnEnabled() {
-        return logger.isLoggable(Level.WARNING);
-    }
+	public boolean isInfoEnabled()
+	{
+		return logger.isLoggable(Level.INFO);
+	}
 
-    public void warn(String msg) {
-        logger.log(Level.WARNING, msg);
-    }
+	public boolean isWarnEnabled()
+	{
+		return logger.isLoggable(Level.WARNING);
+	}
 
-    public void warn(String msg, Throwable cause) {
-        logger.log(Level.WARNING, msg, cause);
-    }
+	public void warn(String msg)
+	{
+		logger.log(Level.WARNING, msg);
+	}
 
-    @Override
-    public String toString() {
-        return logger.toString();
-    }
+	public void warn(String msg, Throwable cause)
+	{
+		logger.log(Level.WARNING, msg, cause);
+	}
+
+	@Override
+	public String toString()
+	{
+		return logger.toString();
+	}
 
 	@Override
 	public void debug(String msg, Object paramObject)
@@ -103,48 +119,46 @@ class JdkLogger2 implements InternalLogger {
 	}
 
 	@Override
-	public void debug(String msg, Object paramObject1,
-			Object paramObject2)
+	public void debug(String msg, Object paramObject1, Object paramObject2)
 	{
-		logger.log(Level.FINE, msg, new Object[]{paramObject1, paramObject2});
+		logger.log(Level.FINE, msg, new Object[] { paramObject1, paramObject2 });
 	}
 
 	@Override
 	public void error(String msg, Object paramObject)
 	{
-        logger.log(Level.SEVERE, msg, paramObject);
+		logger.log(Level.SEVERE, msg, paramObject);
 	}
 
 	@Override
 	public void error(String msg, Object... paramArrayOfObject)
 	{
-        logger.log(Level.SEVERE, msg, paramArrayOfObject);
+		logger.log(Level.SEVERE, msg, paramArrayOfObject);
 	}
 
 	@Override
-	public void error(String msg, Object paramObject1,
-			Object paramObject2)
+	public void error(String msg, Object paramObject1, Object paramObject2)
 	{
-        logger.log(Level.SEVERE, msg, new Object[]{paramObject1, paramObject2});
+		logger.log(Level.SEVERE, msg,
+				new Object[] { paramObject1, paramObject2 });
 	}
 
 	@Override
 	public void info(String msg, Object paramObject)
 	{
-        logger.log(Level.INFO, msg, paramObject);
+		logger.log(Level.INFO, msg, paramObject);
 	}
 
 	@Override
 	public void info(String msg, Object... paramArrayOfObject)
 	{
-        logger.log(Level.INFO, msg, paramArrayOfObject);
+		logger.log(Level.INFO, msg, paramArrayOfObject);
 	}
 
 	@Override
-	public void info(String msg, Object paramObject1,
-			Object paramObject2)
+	public void info(String msg, Object paramObject1, Object paramObject2)
 	{
-        logger.log(Level.INFO, msg, new Object[]{paramObject1, paramObject2});
+		logger.log(Level.INFO, msg, new Object[] { paramObject1, paramObject2 });
 	}
 
 	@Override
@@ -178,8 +192,7 @@ class JdkLogger2 implements InternalLogger {
 	}
 
 	@Override
-	public void trace(String msg, Object paramObject1,
-			Object paramObject2)
+	public void trace(String msg, Object paramObject1, Object paramObject2)
 	{
 		info(msg, paramObject1, paramObject2);
 	}
@@ -197,8 +210,7 @@ class JdkLogger2 implements InternalLogger {
 	}
 
 	@Override
-	public void warn(String msg, Object paramObject1,
-			Object paramObject2)
+	public void warn(String msg, Object paramObject1, Object paramObject2)
 	{
 		error(msg, paramObject1, paramObject2);
 	}
@@ -220,7 +232,7 @@ class JdkLogger2 implements InternalLogger {
 	public void log(InternalLogLevel paramInternalLogLevel, String paramString)
 	{
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -228,7 +240,7 @@ class JdkLogger2 implements InternalLogger {
 			Object paramObject)
 	{
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -236,7 +248,7 @@ class JdkLogger2 implements InternalLogger {
 			Object paramObject1, Object paramObject2)
 	{
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -244,7 +256,7 @@ class JdkLogger2 implements InternalLogger {
 			Object... paramArrayOfObject)
 	{
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -252,7 +264,7 @@ class JdkLogger2 implements InternalLogger {
 			Throwable paramThrowable)
 	{
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

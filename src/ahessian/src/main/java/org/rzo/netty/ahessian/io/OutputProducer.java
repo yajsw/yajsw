@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.netty.ahessian.io;
 
 import io.netty.channel.ChannelHandlerContext;
@@ -19,15 +34,15 @@ import org.rzo.netty.ahessian.stopable.StopableHandler;
 import org.rzo.netty.ahessian.utils.MyReentrantLock;
 import org.rzo.netty.ahessian.utils.TimedBlockingPriorityQueue;
 
-
-abstract public class OutputProducer extends ChannelOutboundHandlerAdapter implements StopableHandler, ChannelInboundHandler
+abstract public class OutputProducer extends ChannelOutboundHandlerAdapter
+		implements StopableHandler, ChannelInboundHandler
 {
-	
+
 	class MessageEvent
 	{
 		Object _msg;
 		ChannelPromise _future;
-		
+
 		public MessageEvent(Object msg, ChannelPromise future)
 		{
 			_msg = msg;
@@ -44,9 +59,10 @@ abstract public class OutputProducer extends ChannelOutboundHandlerAdapter imple
 			return _future;
 		}
 	}
-	private TimedBlockingPriorityQueue<MessageEvent>		_pendingCalls = new TimedBlockingPriorityQueue("OutputProducer");
-	
-	
+
+	private TimedBlockingPriorityQueue<MessageEvent> _pendingCalls = new TimedBlockingPriorityQueue(
+			"OutputProducer");
+
 	AtomicInteger _producerThreadsCount = new AtomicInteger(0);
 	Lock _lock = new MyReentrantLock();
 
@@ -54,25 +70,28 @@ abstract public class OutputProducer extends ChannelOutboundHandlerAdapter imple
 	Timer _timer;
 	List<MessageEvent> _pendingTermination = new ArrayList<MessageEvent>();
 	ChannelHandlerContext _ctx;
-	
+
 	volatile boolean _stop = false;
-	
+
 	public OutputProducer(Executor executor)
 	{
 		_executor = executor;
 	}
-	
-	public void write(final ChannelHandlerContext ctx, Object e, ChannelPromise promise) throws Exception
+
+	public void write(final ChannelHandlerContext ctx, Object e,
+			ChannelPromise promise) throws Exception
 	{
-		//System.out.println(Thread.currentThread()+ " OutputProducer writeRequesed "+promise);
+		// System.out.println(Thread.currentThread()+
+		// " OutputProducer writeRequesed "+promise);
 		if (e instanceof GroupedMessage)
 		{
-		GroupedMessage m = (GroupedMessage) e;
-		_pendingCalls.put(new MessageEvent(e, promise), m.getGroup());
+			GroupedMessage m = (GroupedMessage) e;
+			_pendingCalls.put(new MessageEvent(e, promise), m.getGroup());
 		}
 		else
 			_pendingCalls.put(new MessageEvent(e, promise));
-		//System.out.println(System.currentTimeMillis() + " "+"output producer added task");
+		// System.out.println(System.currentTimeMillis() +
+		// " "+"output producer added task");
 		if (_producerThreadsCount.get() < 2)
 			_executor.execute(new Runnable()
 			{
@@ -81,23 +100,26 @@ abstract public class OutputProducer extends ChannelOutboundHandlerAdapter imple
 				{
 					produce(ctx);
 				}
-				
+
 			});
-		
+
 	}
+
 	@Override
-	public void connect(final ChannelHandlerContext ctx, SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise)
-		     throws Exception
+	public void connect(final ChannelHandlerContext ctx,
+			SocketAddress remoteAddress, SocketAddress localAddress,
+			ChannelPromise promise) throws Exception
 	{
 		doChannelActive(ctx);
 		super.connect(ctx, remoteAddress, localAddress, promise);
 	}
-	
-	 @Override
-	    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-		 doChannelActive(ctx);
-	        ctx.fireChannelActive();
-	    }
+
+	@Override
+	public void channelActive(ChannelHandlerContext ctx) throws Exception
+	{
+		doChannelActive(ctx);
+		ctx.fireChannelActive();
+	}
 
 	private void doChannelActive(final ChannelHandlerContext ctx)
 	{
@@ -106,21 +128,21 @@ abstract public class OutputProducer extends ChannelOutboundHandlerAdapter imple
 		{
 			public void run()
 			{
-				for (Iterator it = _pendingTermination.iterator(); it.hasNext(); )
+				for (Iterator it = _pendingTermination.iterator(); it.hasNext();)
 				{
 					_lock.lock();
 					try
 					{
 						if (_stop)
 							return;
-					MessageEvent e = (MessageEvent) it.next();
-					if (e.getMsg() instanceof GroupedMessage)
-					{
-					GroupedMessage m = (GroupedMessage) e.getMsg();
-					_pendingCalls.put(e, m.getGroup());
-					}
-					else
-						_pendingCalls.put(e);
+						MessageEvent e = (MessageEvent) it.next();
+						if (e.getMsg() instanceof GroupedMessage)
+						{
+							GroupedMessage m = (GroupedMessage) e.getMsg();
+							_pendingCalls.put(e, m.getGroup());
+						}
+						else
+							_pendingCalls.put(e);
 					}
 					catch (Exception ex)
 					{
@@ -135,7 +157,7 @@ abstract public class OutputProducer extends ChannelOutboundHandlerAdapter imple
 			}
 		});
 	}
-	
+
 	private void produce(ChannelHandlerContext ctx)
 	{
 		if (_stop)
@@ -143,58 +165,63 @@ abstract public class OutputProducer extends ChannelOutboundHandlerAdapter imple
 
 		if (_producerThreadsCount.incrementAndGet() > 2)
 		{
-			// there is already a thread consuming and another at the gate to consume the last chunk
+			// there is already a thread consuming and another at the gate to
+			// consume the last chunk
 			_producerThreadsCount.decrementAndGet();
 			return;
 		}
-		//System.out.println(Thread.currentThread()+" produce");
+		// System.out.println(Thread.currentThread()+" produce");
 		boolean produced = false;
 		_lock.lock();
 		try
 		{
 			MessageEvent toSend = null;
-		while (ctx.channel().isActive() && _pendingCalls.size() > 0)
-		{
-			if (_stop)
-				return;
-
-		try
-		{
-			toSend = _pendingCalls.take();
-			//System.out.println(System.currentTimeMillis() + " "+Thread.currentThread()+ " OutputProducer sendMessage "+toSend.getMsg());
-			produceOutput(ctx, toSend.getMsg(), toSend.getFuture());
-			_pendingTermination.add(toSend);
-			produced = true;
-		}
-		catch (Exception ex)
-		{
-			ex.printStackTrace();
-			_pendingCalls.put(toSend, ((GroupedMessage) toSend.getMsg()).getGroup());
-		}
-		}
-		if (produced && _pendingCalls.size() == 0)
-		{
-			//System.out.println(System.currentTimeMillis() + " "+Thread.currentThread()+ " OutputProducer flush");
-			flashOutput(ctx);
-			for (Iterator it = _pendingTermination.iterator(); it.hasNext(); )
+			while (ctx.channel().isActive() && _pendingCalls.size() > 0)
 			{
 				if (_stop)
 					return;
 
 				try
 				{
-				MessageEvent e = (MessageEvent) it.next();
-				//GroupedMessage m = (GroupedMessage) e.getMsg();
-				it.remove();
-				e.getFuture().setSuccess();
-				//System.out.println("set success "+e.getFuture());
+					toSend = _pendingCalls.take();
+					// System.out.println(System.currentTimeMillis() +
+					// " "+Thread.currentThread()+
+					// " OutputProducer sendMessage "+toSend.getMsg());
+					produceOutput(ctx, toSend.getMsg(), toSend.getFuture());
+					_pendingTermination.add(toSend);
+					produced = true;
 				}
 				catch (Exception ex)
 				{
 					ex.printStackTrace();
+					_pendingCalls.put(toSend,
+							((GroupedMessage) toSend.getMsg()).getGroup());
 				}
 			}
-		}
+			if (produced && _pendingCalls.size() == 0)
+			{
+				// System.out.println(System.currentTimeMillis() +
+				// " "+Thread.currentThread()+ " OutputProducer flush");
+				flashOutput(ctx);
+				for (Iterator it = _pendingTermination.iterator(); it.hasNext();)
+				{
+					if (_stop)
+						return;
+
+					try
+					{
+						MessageEvent e = (MessageEvent) it.next();
+						// GroupedMessage m = (GroupedMessage) e.getMsg();
+						it.remove();
+						e.getFuture().setSuccess();
+						// System.out.println("set success "+e.getFuture());
+					}
+					catch (Exception ex)
+					{
+						ex.printStackTrace();
+					}
+				}
+			}
 
 		}
 		catch (Exception ex)
@@ -209,9 +236,11 @@ abstract public class OutputProducer extends ChannelOutboundHandlerAdapter imple
 
 	}
 
-	 protected abstract void flashOutput(ChannelHandlerContext ctx) throws Exception;
+	protected abstract void flashOutput(ChannelHandlerContext ctx)
+			throws Exception;
 
-	 protected abstract void produceOutput(ChannelHandlerContext ctx, Object msg, ChannelPromise future) throws Exception;
+	protected abstract void produceOutput(ChannelHandlerContext ctx,
+			Object msg, ChannelPromise future) throws Exception;
 
 	public boolean isStopEnabled()
 	{
@@ -230,11 +259,12 @@ abstract public class OutputProducer extends ChannelOutboundHandlerAdapter imple
 			event.getFuture().cancel(true);
 		}
 	}
-	
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        ctx.fireChannelInactive();
-    }
+
+	@Override
+	public void channelInactive(ChannelHandlerContext ctx) throws Exception
+	{
+		ctx.fireChannelInactive();
+	}
 
 	@Override
 	public void channelRegistered(ChannelHandlerContext ctx) throws Exception
@@ -274,7 +304,5 @@ abstract public class OutputProducer extends ChannelOutboundHandlerAdapter imple
 	{
 		ctx.fireChannelWritabilityChanged();
 	}
-
-
 
 }

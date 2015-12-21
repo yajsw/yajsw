@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.netty.ahessian.rpc.message;
 
 import io.netty.channel.Channel;
@@ -9,13 +24,13 @@ import org.rzo.netty.ahessian.Constants;
  */
 public class HessianRPCReplyMessage implements Constants, GroupedMessage
 {
-	
+
 	/** The _value. */
 	Object _value;
-	
+
 	/** The _fault. */
 	Throwable _fault;
-	
+
 	Long _callId;
 	Object[] _callbackArgs;
 	Boolean _callbackDone;
@@ -24,31 +39,30 @@ public class HessianRPCReplyMessage implements Constants, GroupedMessage
 	Integer _group;
 	Boolean _completed;
 	protected int _headersCount = 0;
-	
+
 	private Long _callbackCallId = null;
 
-	
-	
-	
 	transient HessianRPCCallMessage _call;
-	
+
 	/**
 	 * Instantiates a new hessian rpc reply message.
 	 * 
-	 * @param value the value
-	 * @param fault the fault
-	 * @param headers the headers
-	 * @param channel the channel
+	 * @param value
+	 *            the value
+	 * @param fault
+	 *            the fault
+	 * @param headers
+	 *            the headers
+	 * @param channel
+	 *            the channel
 	 */
-	public HessianRPCReplyMessage(Object value, Object fault, HessianRPCCallMessage call)
+	public HessianRPCReplyMessage(Object value, Object fault,
+			HessianRPCCallMessage call)
 	{
 		_value = value;
 		_fault = (Throwable) fault;
 		_call = call;
 	}
-	
-
-
 
 	public HessianRPCReplyMessage()
 	{
@@ -79,16 +93,16 @@ public class HessianRPCReplyMessage implements Constants, GroupedMessage
 	{
 		StringBuffer sb = new StringBuffer();
 		sb.append("HessianRPCReplyMessage");
-			sb.append('#');
-			sb.append(_callId);
+		sb.append('#');
+		sb.append(_callId);
 		return sb.toString();
 	}
-	
+
 	public Channel getChannel()
 	{
-			return _call.getChannel();
+		return _call.getChannel();
 	}
-	
+
 	public boolean isValid()
 	{
 		return _call.isValid();
@@ -201,12 +215,12 @@ public class HessianRPCReplyMessage implements Constants, GroupedMessage
 			_headersCount++;
 		}
 	}
-	
+
 	public int getHeadersCount()
 	{
 		return _headersCount;
 	}
-	
+
 	public void setCallbackCallId(Long callId)
 	{
 		if (callId != null)
@@ -215,15 +229,10 @@ public class HessianRPCReplyMessage implements Constants, GroupedMessage
 			_headersCount++;
 		}
 	}
-	
+
 	public Long getCallbackCallId()
 	{
 		return _callbackCallId;
 	}
-
-
-	
-	
-
 
 }

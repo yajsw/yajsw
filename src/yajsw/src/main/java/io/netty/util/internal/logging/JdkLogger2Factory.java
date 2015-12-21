@@ -15,31 +15,31 @@
  */
 package io.netty.util.internal.logging;
 
-
-
 /**
- * Logger factory which creates a
- * <a href="http://java.sun.com/javase/6/docs/technotes/guides/logging/index.html">java.util.logging</a>
- * logger.
- *
+ * Logger factory which creates a <a href=
+ * "http://java.sun.com/javase/6/docs/technotes/guides/logging/index.html"
+ * >java.util.logging</a> logger.
+ * 
  * @author <a href="http://www.jboss.org/netty/">The Netty Project</a>
  * @author <a href="http://gleamynode.net/">Trustin Lee</a>
- *
+ * 
  * @version $Rev: 2080 $, $Date: 2010-01-26 18:04:19 +0900 (Tue, 26 Jan 2010) $
- *
+ * 
  */
-public class JdkLogger2Factory extends InternalLoggerFactory {
-	
+public class JdkLogger2Factory extends InternalLoggerFactory
+{
+
 	java.util.logging.Logger logger;
-	
+
 	public JdkLogger2Factory(java.util.logging.Logger logger)
 	{
 		this.logger = logger;
 	}
 
-    @Override
-    public InternalLogger newInstance(String name) {
-        return new JdkLogger2(logger);
-    }
-    
+	@Override
+	public InternalLogger newInstance(String name)
+	{
+		return new JdkLogger2(logger);
+	}
+
 }

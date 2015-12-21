@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.netty.mcast.discovery;
 
 import io.netty.buffer.ByteBuf;
@@ -41,26 +56,30 @@ public class DiscoveryServer extends MulticastEndpoint
 						{
 
 							@Override
-							public void channelRead(ChannelHandlerContext ctx, Object e)
-									throws Exception
+							public void channelRead(ChannelHandlerContext ctx,
+									Object e) throws Exception
 							{
-								//System.out.println("discovery server received "+e);
-								String request = getStringMessage(((DatagramPacket) e).content());
-								InetSocketAddress remoteAddress = ((DatagramPacket) e).sender();
+								// System.out.println("discovery server received "+e);
+								String request = getStringMessage(((DatagramPacket) e)
+										.content());
+								InetSocketAddress remoteAddress = ((DatagramPacket) e)
+										.sender();
 								if (debug && logger != null)
-									logger.info("discoveryServer messageReceived "+request+"/"+remoteAddress);
+									logger.info("discoveryServer messageReceived "
+											+ request + "/" + remoteAddress);
 								if (request == null)
 									return;
 								if (name != null && name.equals(request)
 										&& host != null && port > 0)
 								{
-									if (validate(((DatagramPacket) e).content(), remoteAddress))
+									if (validate(
+											((DatagramPacket) e).content(),
+											remoteAddress))
 										send(Unpooled.wrappedBuffer((name + "&"
 												+ host + "&" + port).getBytes()));
 								}
-								else
-									if (debug && logger != null)
-										logger.info("discoveryServer request rejected");
+								else if (debug && logger != null)
+									logger.info("discoveryServer request rejected");
 							}
 
 						});
@@ -105,7 +124,7 @@ public class DiscoveryServer extends MulticastEndpoint
 	{
 		this.firewall = ipSet;
 	}
-	
+
 	private String whatIsMyIp()
 	{
 		String result = null;
@@ -147,7 +166,8 @@ public class DiscoveryServer extends MulticastEndpoint
 			return true;
 		else
 		{
-			InetAddress inetAddress = ((InetSocketAddress) socketAddress).getAddress();
+			InetAddress inetAddress = ((InetSocketAddress) socketAddress)
+					.getAddress();
 			Iterator<IpFilterRule> iterator = firewall.iterator();
 			IpFilterRule ipFilterRule = null;
 			while (iterator.hasNext())
@@ -158,7 +178,8 @@ public class DiscoveryServer extends MulticastEndpoint
 					// Match founds, is it a ALLOW or DENY rule
 					boolean result = ipFilterRule.isAllowRule();
 					if (debug && logger != null)
-						logger.info("DiscoverServer firewall ip allowed: "+result);
+						logger.info("DiscoverServer firewall ip allowed: "
+								+ result);
 					return result;
 				}
 			}
@@ -169,7 +190,7 @@ public class DiscoveryServer extends MulticastEndpoint
 			return true;
 		}
 	}
-	
+
 	public static void main(String[] args)
 	{
 		DiscoveryServer server = new DiscoveryServer();

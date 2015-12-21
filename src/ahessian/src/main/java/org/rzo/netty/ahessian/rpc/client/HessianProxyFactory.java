@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.netty.ahessian.rpc.client;
 
 import io.netty.channel.Channel;
@@ -84,41 +99,43 @@ import com.caucho.hessian4.io.HessianRemoteObject;
  * </pre>
  */
 @Sharable
-public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements Constants
+public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements
+		Constants
 {
 	private static final int MAX_OPEN_CALLS = 50000;
-	private volatile Map<Long, Future<Object>>						_openCalls				= Collections
-																									.synchronizedMap(new HashMap<Long, Future<Object>>());
-	private volatile int											_id						= 0;
-	private volatile Channel										_channel				= null;
-	private volatile com.caucho.hessian4.client.HessianProxyFactory	_factory				= null;
-	private volatile MyBlockingQueue<HessianRPCCallMessage>			_pendingCalls;
+	private volatile Map<Long, Future<Object>> _openCalls = Collections
+			.synchronizedMap(new HashMap<Long, Future<Object>>());
+	private volatile int _id = 0;
+	private volatile Channel _channel = null;
+	private volatile com.caucho.hessian4.client.HessianProxyFactory _factory = null;
+	private volatile MyBlockingQueue<HessianRPCCallMessage> _pendingCalls;
 
 	/** The _done listener. */
-	Runnable														_doneListener;
+	Runnable _doneListener;
 
 	/** The _executor. */
-	Executor														_executor;
-	private Lock													_lock					= new MyReentrantLock();
-	private Condition												_connected				= _lock.newCondition();
+	Executor _executor;
+	private Lock _lock = new MyReentrantLock();
+	private Condition _connected = _lock.newCondition();
 
 	/** The _stop. */
-	boolean															_stop					= false;
-	private String													_name;
-	private boolean													_sessionListenerAdded	= false;
-	volatile private Runnable												_closedSessionListener;
-	volatile private Runnable												_newSessionListener;
-	volatile private Runnable												_disconnectedListener;
-	volatile private Runnable												_connectedListener;
+	boolean _stop = false;
+	private String _name;
+	private boolean _sessionListenerAdded = false;
+	volatile private Runnable _closedSessionListener;
+	volatile private Runnable _newSessionListener;
+	volatile private Runnable _disconnectedListener;
+	volatile private Runnable _connectedListener;
 
-	Map<Object, InvocationHandler>									_proxies				= Collections
-																									.synchronizedMap(new HashMap<Object, InvocationHandler>());
+	Map<Object, InvocationHandler> _proxies = Collections
+			.synchronizedMap(new HashMap<Object, InvocationHandler>());
 
-	Timer															_timer					= new HashedWheelTimer();
+	Timer _timer = new HashedWheelTimer();
 
-	private volatile boolean										_blocked				= false;
+	private volatile boolean _blocked = false;
 
 	ClientStreamManager _clientStreamManager;
+
 	/**
 	 * Instantiates a new hessian proxy factory.
 	 * 
@@ -135,78 +152,45 @@ public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements
 		this(executor, name, null, options);
 	}
 
-	public HessianProxyFactory(Executor executor, String name, ClassLoader loader, Map options)
+	public HessianProxyFactory(Executor executor, String name,
+			ClassLoader loader, Map options)
 	{
 		_executor = executor;
 		_name = name;
 		if (options != null)
-			_pendingCalls = new TimedBlockingPriorityQueue<HessianRPCCallMessage>(options, null, "HessianProxyFactory-PendingCalls");
+			_pendingCalls = new TimedBlockingPriorityQueue<HessianRPCCallMessage>(
+					options, null, "HessianProxyFactory-PendingCalls");
 		else
 			_pendingCalls = new MyLinkedBlockingQueue();
 		if (loader == null)
 			_factory = new com.caucho.hessian4.client.HessianProxyFactory();
 		else
-			_factory = new com.caucho.hessian4.client.HessianProxyFactory(loader);
+			_factory = new com.caucho.hessian4.client.HessianProxyFactory(
+					loader);
 		/*
-		_executor.execute(new Runnable()
-		{
-			public void run()
-			{
-				Thread.currentThread().setName("HessianProxyFactory-Call-Tx");
-				HessianRPCCallMessage message = null;
-				while (!_stop)
-				{
-					// if previous message sent
-					if (message == null)
-						try
-						{
-							message = _pendingCalls.take();
-						}
-						catch (InterruptedException e1)
-						{
-							Constants.ahessianLogger.warn("", e1);
-						}
-					if (message == null)
-						continue;
-					_lock.lock();
-					Channel channel = getChannel();
-					while (channel == null || !channel.isConnected() && !_stop)
-						try
-						{
-							_connected.await(1000, TimeUnit.MILLISECONDS);
-							channel = getChannel();
-						}
-						catch (InterruptedException e)
-						{
-							Constants.ahessianLogger.warn("", e);
-						}
-					_lock.unlock();
-					if (!_stop && message != null && message.getMethod() != null)
-						try
-						{
-							ChannelFuture future = channel.write(message);
-							future.await();
-							if (future.isSuccess())
-							{
-//								if (_pendingCalls.size() == 0)
-//									channel.write(new Integer(0));
-								message = null;
-							}
-							else
-								ahessianLogger.warn("cannot send message, will retry");
-						}
-						catch (Exception ex)
-						{
-							Constants.ahessianLogger.warn("", ex);
-						}
-						else if (message.getMethod() == null)
-							message = null;
-
-				}
-
-			}
-		});
-		*/
+		 * _executor.execute(new Runnable() { public void run() {
+		 * Thread.currentThread().setName("HessianProxyFactory-Call-Tx");
+		 * HessianRPCCallMessage message = null; while (!_stop) { // if previous
+		 * message sent if (message == null) try { message =
+		 * _pendingCalls.take(); } catch (InterruptedException e1) {
+		 * Constants.ahessianLogger.warn("", e1); } if (message == null)
+		 * continue; _lock.lock(); Channel channel = getChannel(); while
+		 * (channel == null || !channel.isConnected() && !_stop) try {
+		 * _connected.await(1000, TimeUnit.MILLISECONDS); channel =
+		 * getChannel(); } catch (InterruptedException e) {
+		 * Constants.ahessianLogger.warn("", e); } _lock.unlock(); if (!_stop &&
+		 * message != null && message.getMethod() != null) try { ChannelFuture
+		 * future = channel.write(message); future.await(); if
+		 * (future.isSuccess()) { // if (_pendingCalls.size() == 0) //
+		 * channel.write(new Integer(0)); message = null; } else
+		 * ahessianLogger.warn("cannot send message, will retry"); } catch
+		 * (Exception ex) { Constants.ahessianLogger.warn("", ex); } else if
+		 * (message.getMethod() == null) message = null;
+		 * 
+		 * }
+		 * 
+		 * } });
+		 */
 	}
 
 	/**
@@ -254,7 +238,8 @@ public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements
 	 * @throws InterruptedException
 	 *             the interrupted exception
 	 */
-	synchronized Future<Object> sendRequest(String methodName, Object[] args, Map options) throws InterruptedException
+	synchronized Future<Object> sendRequest(String methodName, Object[] args,
+			Map options) throws InterruptedException
 	{
 		long t = System.currentTimeMillis();
 		if (_blocked)
@@ -267,11 +252,12 @@ public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements
 		headers.put(CALL_ID_HEADER_KEY, id);
 		final HessianProxyFuture future = new HessianProxyFuture();
 		future.handleCallbacks(args);
-		final HessianRPCCallMessage message = new HessianRPCCallMessage(methodName, args, headers, null);
+		final HessianRPCCallMessage message = new HessianRPCCallMessage(
+				methodName, args, headers, null);
 		int i = 0;
 		while (_openCalls.size() > MAX_OPEN_CALLS && getChannel() != null)
 		{
-			//System.out.println("too many open calls -> wait "+i++);
+			// System.out.println("too many open calls -> wait "+i++);
 			Thread.sleep(10);
 		}
 		_openCalls.put(id, future);
@@ -290,34 +276,26 @@ public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements
 				}
 
 			};
-			future.setTimeout(_timer.newTimeout(task, timeout, TimeUnit.MILLISECONDS));
+			future.setTimeout(_timer.newTimeout(task, timeout,
+					TimeUnit.MILLISECONDS));
 		}
 		Channel channel = null;
 		/*
-		while ((channel = getChannel()) == null)
-		{
-			_lock.lock();
-			try
-			{
-			_connected.await(100, TimeUnit.MILLISECONDS);
-			}
-			finally
-			{
-			_lock.unlock();
-			}
-		}
-		*/
+		 * while ((channel = getChannel()) == null) { _lock.lock(); try {
+		 * _connected.await(100, TimeUnit.MILLISECONDS); } finally {
+		 * _lock.unlock(); } }
+		 */
 		channel = getChannel();
 		if (channel == null)
 			throw new RuntimeException("channel closed");
 		while (!channel.isWritable() && channel.isActive())
 		{
-			//System.out.println("channel wait call "+Thread.currentThread().getName());
+			// System.out.println("channel wait call "+Thread.currentThread().getName());
 			Thread.sleep(100);
 		}
 		channel.write(message);
-		//System.out.println("sendRequest "+(System.currentTimeMillis()-t));
-	
+		// System.out.println("sendRequest "+(System.currentTimeMillis()-t));
+
 		return future;
 	}
 
@@ -330,7 +308,8 @@ public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements
 	 * org.jboss.netty.channel.MessageEvent)
 	 */
 	@Override
-	public void channelRead(final ChannelHandlerContext ctx, Object e) throws Exception
+	public void channelRead(final ChannelHandlerContext ctx, Object e)
+			throws Exception
 	{
 		if (e instanceof HessianRPCReplyMessage)
 		{
@@ -339,13 +318,16 @@ public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements
 				final Long id = message.getCallId();
 				if (id != null)
 				{
-					final HessianProxyFuture future = (HessianProxyFuture) _openCalls.get(id);
+					final HessianProxyFuture future = (HessianProxyFuture) _openCalls
+							.get(id);
 					if (future == null)
 					{
-						ahessianLogger.warn("no future found for call-id " + id);
+						ahessianLogger
+								.warn("no future found for call-id " + id);
 						return;
 					}
-					if (message.getCompleted() == null || Boolean.TRUE.equals(message.getCompleted()))
+					if (message.getCompleted() == null
+							|| Boolean.TRUE.equals(message.getCompleted()))
 						if ((!future.hasCallbacks()))
 						{
 							_openCalls.remove(id);
@@ -359,23 +341,26 @@ public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements
 						{
 							public void run()
 							{
-								//System.out.println("executing callback");
+								// System.out.println("executing callback");
 								try
 								{
-								if (message.getValue() instanceof InputStreamReplyMessage)
-								{
-									InputStream stream = _clientStreamManager.newInputStream(((InputStreamReplyMessage)message.getValue()).getId());
-									// caller should get a stream, not the reply
-									message.setValue(stream);
-								}
-								future.set(message, ctx);
-								// check in case this was a callback
-								if (future.isDone())
-									if (!future.hasCallbacks())
+									if (message.getValue() instanceof InputStreamReplyMessage)
 									{
-										_openCalls.remove(id);
-
+										InputStream stream = _clientStreamManager
+												.newInputStream(((InputStreamReplyMessage) message
+														.getValue()).getId());
+										// caller should get a stream, not the
+										// reply
+										message.setValue(stream);
 									}
+									future.set(message, ctx);
+									// check in case this was a callback
+									if (future.isDone())
+										if (!future.hasCallbacks())
+										{
+											_openCalls.remove(id);
+
+										}
 								}
 								catch (Throwable e)
 								{
@@ -384,7 +369,8 @@ public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements
 							}
 						});
 					else
-						ahessianLogger.warn("no future for call reply " + id + " " + message.getValue());
+						ahessianLogger.warn("no future for call reply " + id
+								+ " " + message.getValue());
 				}
 				else
 					ahessianLogger.warn("message missing id " + message);
@@ -393,9 +379,9 @@ public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements
 		}
 		else if (e instanceof InputStreamReplyMessage)
 		{
-			_clientStreamManager.messageReceived((InputStreamReplyMessage)e);
+			_clientStreamManager.messageReceived((InputStreamReplyMessage) e);
 		}
-		//ctx.fireChannelRead(e);
+		// ctx.fireChannelRead(e);
 		ctx.fireChannelReadComplete();
 	}
 
@@ -414,7 +400,8 @@ public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements
 	public Object create(Class api, ClassLoader loader, Map options)
 	{
 		if (api == null)
-			throw new NullPointerException("api must not be null for HessianProxyFactory.create()");
+			throw new NullPointerException(
+					"api must not be null for HessianProxyFactory.create()");
 		InvocationHandler handler = null;
 		if (options == null)
 			options = new HashMap();
@@ -422,8 +409,8 @@ public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements
 		if (options.get("sync") != null)
 			handler = new SyncHessianProxy(handler);
 
-		Object result = Proxy.newProxyInstance(loader, new Class[]
-		{ api, HessianRemoteObject.class }, handler);
+		Object result = Proxy.newProxyInstance(loader, new Class[] { api,
+				HessianRemoteObject.class }, handler);
 		_proxies.put(result, handler);
 		return result;
 
@@ -464,7 +451,7 @@ public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements
 		_channel = ctx.channel();
 		if (_connectedListener != null)
 			_executor.execute(new Runnable()
-			{				
+			{
 				@Override
 				public void run()
 				{
@@ -481,62 +468,63 @@ public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements
 		_lock.lock();
 		try
 		{
-		if (!_sessionListenerAdded)
-		{
-			if (ctx.pipeline().get(ClientSessionFilter.class) != null)
+			if (!_sessionListenerAdded)
 			{
-				ClientSessionFilter sessionHandler = (ClientSessionFilter) ctx.pipeline().get(ClientSessionFilter.class);
-				sessionHandler.addSessionClosedListener(new Runnable()
+				if (ctx.pipeline().get(ClientSessionFilter.class) != null)
 				{
-					public void run()
+					ClientSessionFilter sessionHandler = (ClientSessionFilter) ctx
+							.pipeline().get(ClientSessionFilter.class);
+					sessionHandler.addSessionClosedListener(new Runnable()
 					{
-						_lock.lock();
-						try
+						public void run()
 						{
-						invalidateProxies();
-						_openCalls.clear();
+							_lock.lock();
+							try
+							{
+								invalidateProxies();
+								_openCalls.clear();
 
-						_pendingCalls.clear();
-						}
-						finally
-						{
-						_lock.unlock();
-						}
-						if (_closedSessionListener != null)
-							try
-							{
-								_closedSessionListener.run();
+								_pendingCalls.clear();
 							}
-							catch (Throwable ex)
+							finally
 							{
-								Constants.ahessianLogger.warn("", ex);
+								_lock.unlock();
 							}
-					}
-				});
-				sessionHandler.addSessionNewListener(new Runnable()
-				{
-					public void run()
+							if (_closedSessionListener != null)
+								try
+								{
+									_closedSessionListener.run();
+								}
+								catch (Throwable ex)
+								{
+									Constants.ahessianLogger.warn("", ex);
+								}
+						}
+					});
+					sessionHandler.addSessionNewListener(new Runnable()
 					{
-						if (_newSessionListener != null)
-							try
-							{
-								_newSessionListener.run();
-							}
-							catch (Throwable ex)
-							{
-								Constants.ahessianLogger.warn("", ex);
-							}
-					}
-				});
-				_sessionListenerAdded = true;
+						public void run()
+						{
+							if (_newSessionListener != null)
+								try
+								{
+									_newSessionListener.run();
+								}
+								catch (Throwable ex)
+								{
+									Constants.ahessianLogger.warn("", ex);
+								}
+						}
+					});
+					_sessionListenerAdded = true;
+				}
 			}
-		}
 		}
 		finally
 		{
-		_connected.signal();
-		_lock.unlock();
-		super.channelActive(ctx);
+			_connected.signal();
+			_lock.unlock();
+			super.channelActive(ctx);
 		}
 	}
 
@@ -555,18 +543,18 @@ public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements
 		_lock.lock();
 		try
 		{
-		_connected.signal();
+			_connected.signal();
 		}
 		finally
 		{
-		_lock.unlock();
+			_lock.unlock();
 		}
 		// put something in the queue in case the worker thread hangs in
 		// _pendingCalls.take()
 		_pendingCalls.offer(new HessianRPCCallMessage(null, null, null, null));
 		if (_disconnectedListener != null)
 			_executor.execute(new Runnable()
-			{				
+			{
 				@Override
 				public void run()
 				{
@@ -577,7 +565,7 @@ public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements
 					catch (Throwable ex)
 					{
 						Constants.ahessianLogger.warn("", ex);
-					}					
+					}
 				}
 			});
 
@@ -600,7 +588,8 @@ public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable e)
 	{
-		ahessianLogger.warn("error accessing service " + _name + " Exception " + e.getClass() + " " + e.getCause().getMessage());
+		ahessianLogger.warn("error accessing service " + _name + " Exception "
+				+ e.getClass() + " " + e.getCause().getMessage());
 		ctx.channel().disconnect();
 		ctx.channel().close();
 		if (!_stop)
@@ -610,15 +599,16 @@ public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements
 			_lock.lock();
 			try
 			{
-			_connected.signal();
+				_connected.signal();
 			}
 			finally
 			{
-			_lock.unlock();
+				_lock.unlock();
 			}
 			// put something in the queue in case the worker thread hangs in
 			// _pendingCalls.take()
-			_pendingCalls.offer(new HessianRPCCallMessage(null, null, null, null));
+			_pendingCalls.offer(new HessianRPCCallMessage(null, null, null,
+					null));
 		}
 	}
 
@@ -653,7 +643,8 @@ public class HessianProxyFactory extends ChannelInboundHandlerAdapter implements
 	public void invalidateAllPendingCalls()
 	{
 
-		final HessianRPCReplyMessage message = new HessianRPCReplyMessage(null, new RuntimeException("connection closed"), null);
+		final HessianRPCReplyMessage message = new HessianRPCReplyMessage(null,
+				new RuntimeException("connection closed"), null);
 		for (Future future : new ArrayList<Future>(_openCalls.values()))
 		{
 			((HessianProxyFuture) future).set(message);

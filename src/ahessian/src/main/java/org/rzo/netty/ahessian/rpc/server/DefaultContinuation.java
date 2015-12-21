@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.netty.ahessian.rpc.server;
 
 import java.util.Date;
@@ -14,32 +29,34 @@ import org.rzo.netty.ahessian.session.Session;
  */
 class DefaultContinuation implements Continuation, Constants
 {
-	
+
 	/** The service. */
 	private ContinuationService _service;
-	
+
 	/** The call request message. */
 	private HessianRPCCallMessage _message;
-	
+
 	/** The headers for reply message. */
 	private Map _headers;
-	
+
 	/** Indicates if the continuation has been completed. */
 	private boolean _completed = false;
-	
+
 	/** Time to live. */
 	private Date _ttl;
-	
+
 	private Session _session = null;
-	
 
 	/**
 	 * Instantiates a new default continuation.
 	 * 
-	 * @param message the message
-	 * @param service the service
+	 * @param message
+	 *            the message
+	 * @param service
+	 *            the service
 	 */
-	 DefaultContinuation(HessianRPCCallMessage message, ContinuationService service, Session session)
+	DefaultContinuation(HessianRPCCallMessage message,
+			ContinuationService service, Session session)
 	{
 		_service = service;
 		_message = message;
@@ -55,10 +72,13 @@ class DefaultContinuation implements Continuation, Constants
 		_session = session;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.rzo.netty.ahessian.rpc.server.Continuation#complete(java.lang.Object)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.rzo.netty.ahessian.rpc.server.Continuation#complete(java.lang.Object)
 	 */
-	
+
 	public void complete(Object result)
 	{
 		checkCompleted();
@@ -66,10 +86,13 @@ class DefaultContinuation implements Continuation, Constants
 		sendReply(result, null);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.rzo.netty.ahessian.rpc.server.Continuation#fault(java.lang.Throwable)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.rzo.netty.ahessian.rpc.server.Continuation#fault(java.lang.Throwable)
 	 */
-	
+
 	public void fault(Throwable result)
 	{
 		checkCompleted();
@@ -77,19 +100,24 @@ class DefaultContinuation implements Continuation, Constants
 		sendReply(null, result);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.rzo.netty.ahessian.rpc.server.Continuation#getTTL()
 	 */
-	
+
 	public Date getTTL()
 	{
 		return _ttl;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.rzo.netty.ahessian.rpc.server.Continuation#send(java.lang.Object)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.rzo.netty.ahessian.rpc.server.Continuation#send(java.lang.Object)
 	 */
-	
+
 	public void send(Object result)
 	{
 		checkCompleted();
@@ -99,7 +127,7 @@ class DefaultContinuation implements Continuation, Constants
 
 	private void checkCompleted()
 	{
-		if (_completed )
+		if (_completed)
 			throw new RuntimeException("Continuation already completed");
 		if (System.currentTimeMillis() > _ttl.getTime())
 		{
@@ -107,12 +135,12 @@ class DefaultContinuation implements Continuation, Constants
 			throw new RuntimeException("Continuation already completed");
 		}
 	}
-	
+
 	private void sendReply(Object result, Object fault)
 	{
 		if (_completed)
 			_headers.put(COMPLETED_HEADER_KEY, Boolean.TRUE);
-		//TODO set reply headers
+		// TODO set reply headers
 		_service.writeResult(new HessianRPCReplyMessage(result, fault, _message));
 	}
 
@@ -120,8 +148,5 @@ class DefaultContinuation implements Continuation, Constants
 	{
 		return _session;
 	}
-	
-
-
 
 }

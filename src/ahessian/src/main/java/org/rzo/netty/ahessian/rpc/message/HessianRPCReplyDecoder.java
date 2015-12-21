@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.netty.ahessian.rpc.message;
 
 import io.netty.channel.ChannelHandlerContext;
@@ -21,8 +36,8 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 {
 
 	/** The _factory. */
-	HessianProxyFactory		_factory;
-	volatile Hessian2Input	in	= null;
+	HessianProxyFactory _factory;
+	volatile Hessian2Input in = null;
 	volatile AbstractSerializerFactory _serializerFactory;
 
 	/**
@@ -36,7 +51,8 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 		_factory = factory;
 	}
 
-	public HessianRPCReplyDecoder(HessianProxyFactory factory, AbstractSerializerFactory serializerFactory)
+	public HessianRPCReplyDecoder(HessianProxyFactory factory,
+			AbstractSerializerFactory serializerFactory)
 	{
 		_factory = factory;
 		_serializerFactory = serializerFactory;
@@ -48,14 +64,14 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 		{
 			HessianRPCReplyMessage m = parseReply(in);
 			if (m != null)
-			ctx.fireChannelRead(m);
+				ctx.fireChannelRead(m);
 
 			in.resetReferences();
 
-				if (isBufferEmpty())
-				{
-					break;
-				}
+			if (isBufferEmpty())
+			{
+				break;
+			}
 		}
 
 	}
@@ -85,7 +101,9 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 		{
 			if ((code = in.read()) != 'H')
 			{
-				throw new HessianProtocolException("H expected got " + "0x" + Integer.toHexString(code & 0xff) + " (" + (char) + code + ")");
+				throw new HessianProtocolException("H expected got " + "0x"
+						+ Integer.toHexString(code & 0xff) + " ("
+						+ (char) +code + ")");
 			}
 			in.read();
 			in.read();
@@ -102,12 +120,12 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 				Object hvalue = in.readObject();
 				switch (key)
 				{
-				
+
 				case ICALLBACK_ID_HEADER_KEY:
-					callbackId = (Long)hvalue;
+					callbackId = (Long) hvalue;
 					break;
 				case ICALLBACK_CALL_ID_HEADER_KEY:
-					callbackCallId = (Long)hvalue;
+					callbackCallId = (Long) hvalue;
 					break;
 				case ICALLBACK_METHOD_HEADER_KEY:
 					callbackMethod = (String) hvalue;
@@ -131,7 +149,8 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 			}
 			if ((code = in.read()) != 'H')
 			{
-				throw new HessianProtocolException("'" + (char) code + "' is an unknown code");
+				throw new HessianProtocolException("'" + (char) code
+						+ "' is an unknown code");
 			}
 			in.read();
 			in.read();
@@ -143,8 +162,9 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 			}
 			catch (Throwable e)
 			{
-				HessianRPCReplyMessage result = new HessianRPCReplyMessage(null, e, null);
-				result .setCallId(callId);
+				HessianRPCReplyMessage result = new HessianRPCReplyMessage(
+						null, e, null);
+				result.setCallId(callId);
 				result.setGroup(group);
 				result.setCallbackId(callbackId);
 				return result;
@@ -158,8 +178,9 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 
 			if (callbackId != null)
 			{
-				
-				CallbackReplyMessage result =  new CallbackReplyMessage(callbackMethod, callbackArgs, null, null);
+
+				CallbackReplyMessage result = new CallbackReplyMessage(
+						callbackMethod, callbackArgs, null, null);
 				result.setCallbackDone(callbackDone);
 				result.setCallbackId(callbackId);
 				result.setCallId(callId);
@@ -170,7 +191,8 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 			}
 			else
 			{
-				HessianRPCReplyMessage result =  new HessianRPCReplyMessage(obj, null, null);
+				HessianRPCReplyMessage result = new HessianRPCReplyMessage(obj,
+						null, null);
 				result.setCallId(callId);
 				result.setCompleted(completed);
 				result.setGroup(group);
@@ -180,13 +202,15 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 		}
 		catch (Throwable ex)
 		{
-			if (ex.getMessage() != null && ex.getMessage().startsWith("H expected got 0x0"))
+			if (ex.getMessage() != null
+					&& ex.getMessage().startsWith("H expected got 0x0"))
 				Constants.ahessianLogger.info("received Ping");
 			else
 				Constants.ahessianLogger.warn("", ex);
 			if (callId != null)
 			{
-				HessianRPCReplyMessage result = new HessianRPCReplyMessage(null, ex, null);
+				HessianRPCReplyMessage result = new HessianRPCReplyMessage(
+						null, ex, null);
 				result.setCallId(callId);
 				result.setGroup(group);
 				result.setCallbackId(callbackId);
@@ -202,7 +226,7 @@ public class HessianRPCReplyDecoder implements InputStreamConsumer, Constants
 	{
 		return in != null && in.bufferEmpty();
 	}
-	
+
 	public void setContext(ChannelHandlerContext ctx)
 	{
 		if (in == null)

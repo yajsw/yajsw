@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.netty.ahessian.rpc.client;
 
 import io.netty.channel.ChannelHandlerContext;
@@ -24,44 +39,50 @@ import org.rzo.netty.ahessian.rpc.message.HessianRPCReplyMessage;
 import org.rzo.netty.ahessian.utils.MyReentrantLock;
 
 /**
- * Future object returned when executing a remote method invocation.
- * <br>
- * Note: within a continuation scenario, get() will return the last result received.
- * Results sent by the server will override the result available on the client.
+ * Future object returned when executing a remote method invocation. <br>
+ * Note: within a continuation scenario, get() will return the last result
+ * received. Results sent by the server will override the result available on
+ * the client.
  */
 public class HessianProxyFuture implements Future<Object>, Constants
 {
-	
-	/** indicates if the invocation has been completed */
-	private boolean					_done			= false;
-	
-	/** TODO indicates if the invocation has been canceled or timed out. */
-	private boolean					_canceled		= false;
-	
-	/** result of the invocation. */
-	private HessianRPCReplyMessage	_result			= null;
 
-	private Lock			_lock			= new MyReentrantLock();
-	private Condition		_resultReceived	= _lock.newCondition();
-	private Collection<Runnable> _listeners = Collections.synchronizedCollection(new ArrayList<Runnable>());
-	private volatile Map<Long, ClientCallback> _callbacks = Collections.synchronizedMap(new HashMap());
+	/** indicates if the invocation has been completed */
+	private boolean _done = false;
+
+	/** TODO indicates if the invocation has been canceled or timed out. */
+	private boolean _canceled = false;
+
+	/** result of the invocation. */
+	private HessianRPCReplyMessage _result = null;
+
+	private Lock _lock = new MyReentrantLock();
+	private Condition _resultReceived = _lock.newCondition();
+	private Collection<Runnable> _listeners = Collections
+			.synchronizedCollection(new ArrayList<Runnable>());
+	private volatile Map<Long, ClientCallback> _callbacks = Collections
+			.synchronizedMap(new HashMap());
 	private volatile Timeout _timeout = null;
 	private volatile HessianRPCCallMessage _callbackResult;
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.util.concurrent.Future#cancel(boolean)
 	 */
-	
+
 	public boolean cancel(boolean mayInterruptIfRunning)
 	{
 		_canceled = true;
 		return true;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.util.concurrent.Future#get()
 	 */
-	
+
 	public Object get() throws InterruptedException, ExecutionException
 	{
 		Object result = null;
@@ -83,7 +104,8 @@ public class HessianProxyFuture implements Future<Object>, Constants
 		}
 	}
 
-	public Object getCallbackResult() throws InterruptedException, ExecutionException
+	public Object getCallbackResult() throws InterruptedException,
+			ExecutionException
 	{
 		_lock.lock();
 		try
@@ -114,11 +136,14 @@ public class HessianProxyFuture implements Future<Object>, Constants
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.util.concurrent.Future#get(long, java.util.concurrent.TimeUnit)
 	 */
-	
-	public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException
+
+	public Object get(long timeout, TimeUnit unit) throws InterruptedException,
+			ExecutionException, TimeoutException
 	{
 		Object result = null;
 		_lock.lock();
@@ -139,30 +164,35 @@ public class HessianProxyFuture implements Future<Object>, Constants
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.util.concurrent.Future#isCancelled()
 	 */
-	
+
 	public boolean isCancelled()
 	{
 		return _canceled;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.util.concurrent.Future#isDone()
 	 */
-	
+
 	public boolean isDone()
 	{
 		return _done;
 	}
-	
+
 	protected synchronized void set(HessianRPCReplyMessage message)
 	{
-		set( message, null);
+		set(message, null);
 	}
-	
-	public synchronized void set(HessianRPCReplyMessage message, ChannelHandlerContext ctx)
+
+	public synchronized void set(HessianRPCReplyMessage message,
+			ChannelHandlerContext ctx)
 	{
 		_lock.lock();
 		if (_timeout != null)
@@ -171,14 +201,14 @@ public class HessianProxyFuture implements Future<Object>, Constants
 		{
 			if (message instanceof CallbackReplyMessage)
 			{
-				handleCallbackReply((CallbackReplyMessage)message, ctx);					
+				handleCallbackReply((CallbackReplyMessage) message, ctx);
 			}
 			else
 			{
-			_done = true;
-			_result = message;
-			_resultReceived.signal();
-			callListners();
+				_done = true;
+				_result = message;
+				_resultReceived.signal();
+				callListners();
 			}
 		}
 		finally
@@ -186,7 +216,7 @@ public class HessianProxyFuture implements Future<Object>, Constants
 			_lock.unlock();
 		}
 	}
-	
+
 	public synchronized void setCallbackResult(HessianRPCCallMessage result)
 	{
 		_lock.lock();
@@ -204,8 +234,9 @@ public class HessianProxyFuture implements Future<Object>, Constants
 			_lock.unlock();
 		}
 	}
-	
-	private void handleCallbackReply(CallbackReplyMessage message, ChannelHandlerContext ctx)
+
+	private void handleCallbackReply(CallbackReplyMessage message,
+			ChannelHandlerContext ctx)
 	{
 		Long callbackId = message.getCallbackId();
 		if (callbackId == null)
@@ -213,21 +244,21 @@ public class HessianProxyFuture implements Future<Object>, Constants
 		ClientCallback callback = _callbacks.get(callbackId);
 		if (callback == null)
 		{
-			System.out.println("no callback found for "+callbackId);
+			System.out.println("no callback found for " + callbackId);
 			return;
 		}
 		callback.invoke(message, ctx);
 		if (message.isDone())
 		{
 			_callbacks.remove(callbackId);
-			//System.out.println("removed callback "+callbackId);
+			// System.out.println("removed callback "+callbackId);
 		}
-		
+
 	}
 
 	private void callListners()
 	{
-		synchronized(_listeners)
+		synchronized (_listeners)
 		{
 			for (Runnable listener : _listeners)
 				listener.run();
@@ -237,28 +268,30 @@ public class HessianProxyFuture implements Future<Object>, Constants
 	/**
 	 * Adds the listener.
 	 * 
-	 * @param listener the listener
+	 * @param listener
+	 *            the listener
 	 */
 	public void addListener(Runnable listener)
 	{
 		_lock.lock();
 		try
 		{
-		if (isDone())
-			listener.run();
-		else
-			_listeners.add(listener);
+			if (isDone())
+				listener.run();
+			else
+				_listeners.add(listener);
 		}
 		finally
 		{
-		_lock.unlock();
+			_lock.unlock();
 		}
 	}
 
 	/**
 	 * Removes the listener.
 	 * 
-	 * @param listener the listener
+	 * @param listener
+	 *            the listener
 	 */
 	public void removeListener(Runnable listener)
 	{
@@ -269,18 +302,18 @@ public class HessianProxyFuture implements Future<Object>, Constants
 	{
 		if (args == null)
 			return;
-		for (int i=0; i<args.length; i++)
+		for (int i = 0; i < args.length; i++)
 		{
 			if (args[i] instanceof Callback)
 			{
-				ClientCallback c = new ClientCallback((Callback)args[i]);
+				ClientCallback c = new ClientCallback((Callback) args[i]);
 				_callbacks.put(c.getId(), c);
 				args[i] = c;
 			}
 		}
-			
+
 	}
-	
+
 	public boolean hasCallbacks()
 	{
 		return _callbacks.size() != 0;
@@ -297,7 +330,8 @@ public class HessianProxyFuture implements Future<Object>, Constants
 		_timeout = null;
 		try
 		{
-			this.set(new HessianRPCReplyMessage(null, new TimeoutException(), null));
+			this.set(new HessianRPCReplyMessage(null, new TimeoutException(),
+					null));
 		}
 		finally
 		{

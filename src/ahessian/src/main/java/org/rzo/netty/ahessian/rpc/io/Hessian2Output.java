@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.netty.ahessian.rpc.io;
 
 import java.io.IOException;
@@ -14,7 +29,8 @@ import org.rzo.netty.ahessian.rpc.message.HessianRPCReplyMessage;
 /**
  * The Class HessianOutput.
  */
-public class Hessian2Output extends com.caucho.hessian4.io.Hessian2Output implements Constants
+public class Hessian2Output extends com.caucho.hessian4.io.Hessian2Output
+		implements Constants
 {
 
 	/**
@@ -57,12 +73,15 @@ public class Hessian2Output extends com.caucho.hessian4.io.Hessian2Output implem
 				InvocationTargetException invi = (InvocationTargetException) fault;
 				Throwable inviFault = invi.getTargetException();
 				if (inviFault != null)
-					this.writeFault(inviFault.getClass().getSimpleName(), inviFault.getMessage(), inviFault);
+					this.writeFault(inviFault.getClass().getSimpleName(),
+							inviFault.getMessage(), inviFault);
 				else
-					this.writeFault(fault.getClass().getSimpleName(), fault.getMessage(), fault);
+					this.writeFault(fault.getClass().getSimpleName(),
+							fault.getMessage(), fault);
 			}
 			else
-				this.writeFault(fault.getClass().getSimpleName(), fault.getMessage(), fault);
+				this.writeFault(fault.getClass().getSimpleName(),
+						fault.getMessage(), fault);
 		}
 
 		completeEnvelope();
@@ -99,24 +118,24 @@ public class Hessian2Output extends com.caucho.hessian4.io.Hessian2Output implem
 		// endPacket();
 		completeEnvelope();
 	}
-	
+
 	private void writeHeaders(Map headers)
 	{
 		try
 		{
 			writeInt(headers.size());
-			for (Iterator it = headers.entrySet().iterator(); it.hasNext(); )
+			for (Iterator it = headers.entrySet().iterator(); it.hasNext();)
 			{
 				Entry entry = (Entry) it.next();
-				writeInt((Integer)entry.getKey());
+				writeInt((Integer) entry.getKey());
 				writeObject(entry.getValue());
 			}
 		}
-			catch (Exception ex)
-			{
-				Constants.ahessianLogger.warn("", ex);
-			}
-		
+		catch (Exception ex)
+		{
+			Constants.ahessianLogger.warn("", ex);
+		}
+
 	}
 
 	private void writeHeaders(HessianRPCReplyMessage message)
@@ -132,37 +151,37 @@ public class Hessian2Output extends com.caucho.hessian4.io.Hessian2Output implem
 			if (message.getCallbackDone() != null)
 			{
 				writeInt(CALLBACK_DONE_HEADER_KEY);
-				writeObject(message.getCallbackDone());				
+				writeObject(message.getCallbackDone());
 			}
 			if (message.getCallbackId() != null)
 			{
 				writeInt(CALLBACK_ID_HEADER_KEY);
-				writeObject(message.getCallbackId());				
+				writeObject(message.getCallbackId());
 			}
 			if (message.getCallbackMethod() != null)
 			{
 				writeInt(CALLBACK_METHOD_HEADER_KEY);
-				writeObject(message.getCallbackMethod());				
+				writeObject(message.getCallbackMethod());
 			}
 			if (message.getCallId() != null)
 			{
 				writeInt(CALL_ID_HEADER_KEY);
-				writeObject(message.getCallId());				
+				writeObject(message.getCallId());
 			}
 			if (message.getCallbackCallId() != null)
 			{
 				writeInt(CALLBACK_CALL_ID_HEADER_KEY);
-				writeObject(message.getCallbackCallId());				
+				writeObject(message.getCallbackCallId());
 			}
 			if (message.getCompleted() != null)
 			{
 				writeInt(COMPLETED_HEADER_KEY);
-				writeObject(message.getCompleted());				
+				writeObject(message.getCompleted());
 			}
 			if (message.getGroup() != null)
 			{
 				writeInt(GROUP_HEADER_KEY);
-				writeObject(message.getGroup());				
+				writeObject(message.getGroup());
 			}
 		}
 		catch (Exception ex)

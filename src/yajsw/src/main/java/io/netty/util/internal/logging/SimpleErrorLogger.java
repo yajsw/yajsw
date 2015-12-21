@@ -7,6 +7,7 @@ public class SimpleErrorLogger extends SimpleLogger
 	{
 		return false;
 	}
+
 	@Override
 	public boolean isInfoEnabled()
 	{
@@ -18,22 +19,27 @@ public class SimpleErrorLogger extends SimpleLogger
 	{
 		return false;
 	}
+
 	@Override
 	public void debug(String arg0)
 	{
 	}
+
 	@Override
 	public void info(String arg0)
 	{
 	}
+
 	@Override
 	public void warn(String arg0)
 	{
 	}
+
 	@Override
 	public void trace(String arg0)
 	{
 	}
+
 	@Override
 	public void trace(String paramString, Object paramObject)
 	{
@@ -64,9 +70,5 @@ public class SimpleErrorLogger extends SimpleLogger
 	public void debug(String paramString, Object... paramArrayOfObject)
 	{
 	}
-
-
-
-
 
 }

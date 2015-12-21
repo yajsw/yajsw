@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.netty.ahessian.rpc.callback;
 
 import io.netty.util.HashedWheelTimer;
@@ -30,9 +45,9 @@ public class ServerCallbackProxy implements InvocationHandler, Constants
 	static private AtomicLong _idCounter = new AtomicLong();
 	static private Map<Long, HessianProxyFuture> _openCallbackCalls = new ConcurrentHashMap<Long, HessianProxyFuture>();
 	static private Timer _timer = new HashedWheelTimer();
-	
 
-	public ServerCallbackProxy(HessianRPCServiceHandler handler, HessianRPCCallMessage message, ClientCallback clientCallback)
+	public ServerCallbackProxy(HessianRPCServiceHandler handler,
+			HessianRPCCallMessage message, ClientCallback clientCallback)
 	{
 		_message = message;
 		_clientCallback = clientCallback;
@@ -43,7 +58,8 @@ public class ServerCallbackProxy implements InvocationHandler, Constants
 				_returnMethods.add(method);
 	}
 
-	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
+	public Object invoke(Object proxy, Method method, Object[] args)
+			throws Throwable
 	{
 		return invoke(method.getName(), args);
 	}
@@ -51,21 +67,23 @@ public class ServerCallbackProxy implements InvocationHandler, Constants
 	public Object invoke(String method, Object[] args)
 	{
 		if (_closed)
-			throw new RuntimeException("cannot invoke callback after call to setDone(true)");
+			throw new RuntimeException(
+					"cannot invoke callback after call to setDone(true)");
 		String methodName = method;
-		if ("setDone".equals(methodName) && args.length == 1 && (args[0] instanceof Boolean))
+		if ("setDone".equals(methodName) && args.length == 1
+				&& (args[0] instanceof Boolean))
 		{
-			_done = ((Boolean)args[0]).booleanValue();
+			_done = ((Boolean) args[0]).booleanValue();
 			return null;
 		}
 		if ("isDone".equals(method) && (args == null || args.length == 0))
 		{
-			return (Boolean)_done;
+			return (Boolean) _done;
 		}
 
 		if ("isValid".equals(method) && (args == null || args.length == 0))
 		{
-			return (Boolean)_message.isValid();
+			return (Boolean) _message.isValid();
 		}
 
 		if ("toString".equals(method) && (args == null || args.length == 0))
@@ -83,7 +101,8 @@ public class ServerCallbackProxy implements InvocationHandler, Constants
 			return this.equals(args[0]);
 		}
 
-		CallbackReplyMessage reply = new CallbackReplyMessage(methodName, args, null, _message);
+		CallbackReplyMessage reply = new CallbackReplyMessage(methodName, args,
+				null, _message);
 		reply.setCallId((Long) _message.getHeaders().get(CALL_ID_HEADER_KEY));
 		reply.setGroup((Integer) _message.getHeaders().get(GROUP_HEADER_KEY));
 		reply.setCallbackId(_clientCallback.getId());
@@ -92,27 +111,29 @@ public class ServerCallbackProxy implements InvocationHandler, Constants
 		reply.setCallbackCallId(_idCounter.incrementAndGet());
 		if (_done)
 			reply.setCallbackDone(true);
-		
+
 		HessianProxyFuture future = null;
 		if (_returnMethods.contains(methodName))
 		{
-		future = new HessianProxyFuture();
-		//System.out.println("put _openCallbackCalls "+ reply.getCallbackCallId() + " "+future);
-		_openCallbackCalls.put(reply.getCallbackCallId(), future);
+			future = new HessianProxyFuture();
+			// System.out.println("put _openCallbackCalls "+
+			// reply.getCallbackCallId() + " "+future);
+			_openCallbackCalls.put(reply.getCallbackCallId(), future);
 		}
 
 		_handler.writeResult(reply);
-		
+
 		if (_done)
 			_closed = true;
-		
+
 		Object result = null;
 		if (_returnMethods.contains(methodName))
 			result = waitForCallbackResult(reply.getCallbackCallId(), future);
 		return result;
 	}
 
-	private Object waitForCallbackResult(final Long id, final HessianProxyFuture future)
+	private Object waitForCallbackResult(final Long id,
+			final HessianProxyFuture future)
 	{
 		long timeout = 10000;
 		if (timeout > 0)
@@ -127,9 +148,10 @@ public class ServerCallbackProxy implements InvocationHandler, Constants
 				}
 
 			};
-			future.setTimeout(_timer.newTimeout(task, timeout, TimeUnit.MILLISECONDS));
+			future.setTimeout(_timer.newTimeout(task, timeout,
+					TimeUnit.MILLISECONDS));
 		}
-	
+
 		try
 		{
 			return future.getCallbackResult();
@@ -140,7 +162,7 @@ public class ServerCallbackProxy implements InvocationHandler, Constants
 		}
 		return null;
 	}
-	
+
 	public static void setCallbackResult(HessianRPCCallMessage reply)
 	{
 		Long id = (Long) reply.getHeaders().get(CALLBACK_CALL_ID_HEADER_KEY);
@@ -150,10 +172,10 @@ public class ServerCallbackProxy implements InvocationHandler, Constants
 		}
 
 		HessianProxyFuture future = _openCallbackCalls.get(id);
-		//System.out.println("get _openCallbackCalls "+ id + " "+future);
+		// System.out.println("get _openCallbackCalls "+ id + " "+future);
 		if (future == null)
 			return;
-		future.setCallbackResult(reply);		
+		future.setCallbackResult(reply);
 	}
 
 }

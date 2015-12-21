@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.netty.ahessian.application.jmx.remote.service;
 
 import java.io.IOException;
@@ -26,56 +41,71 @@ import javax.management.ReflectionException;
 public class MBeanServerConnectionAsyncAdapter implements MBeanServerConnection
 {
 	AsyncMBeanServerConnection root;
+
 	public MBeanServerConnectionAsyncAdapter(AsyncMBeanServerConnection root)
 	{
 		this.root = root;
 	}
-	
-	public void addNotificationListener(ObjectName name, NotificationListener listener, NotificationFilter filter, Object handback)
+
+	public void addNotificationListener(ObjectName name,
+			NotificationListener listener, NotificationFilter filter,
+			Object handback) throws InstanceNotFoundException, IOException
+	{
+		root.addNotificationListener(name, listener, filter, handback);
+	}
+
+	public void addNotificationListener(ObjectName name, ObjectName listener,
+			NotificationFilter filter, Object handback)
 			throws InstanceNotFoundException, IOException
 	{
 		root.addNotificationListener(name, listener, filter, handback);
 	}
 
-	public void addNotificationListener(ObjectName name, ObjectName listener, NotificationFilter filter, Object handback)
-			throws InstanceNotFoundException, IOException
-	{
-		root.addNotificationListener(name, listener, filter, handback);
-	}
-
-	public ObjectInstance createMBean(String className, ObjectName name) throws ReflectionException, InstanceAlreadyExistsException,
-			MBeanRegistrationException, MBeanException, NotCompliantMBeanException, IOException
+	public ObjectInstance createMBean(String className, ObjectName name)
+			throws ReflectionException, InstanceAlreadyExistsException,
+			MBeanRegistrationException, MBeanException,
+			NotCompliantMBeanException, IOException
 	{
 		return (ObjectInstance) root.createMBean(className, name);
 	}
 
-	public ObjectInstance createMBean(String className, ObjectName name, ObjectName loaderName) throws ReflectionException,
-			InstanceAlreadyExistsException, MBeanRegistrationException, MBeanException, NotCompliantMBeanException, InstanceNotFoundException,
-			IOException
+	public ObjectInstance createMBean(String className, ObjectName name,
+			ObjectName loaderName) throws ReflectionException,
+			InstanceAlreadyExistsException, MBeanRegistrationException,
+			MBeanException, NotCompliantMBeanException,
+			InstanceNotFoundException, IOException
 	{
 		return (ObjectInstance) root.createMBean(className, name, loaderName);
 	}
 
-	public ObjectInstance createMBean(String className, ObjectName name, Object[] params, String[] signature) throws ReflectionException,
-			InstanceAlreadyExistsException, MBeanRegistrationException, MBeanException, NotCompliantMBeanException, IOException
+	public ObjectInstance createMBean(String className, ObjectName name,
+			Object[] params, String[] signature) throws ReflectionException,
+			InstanceAlreadyExistsException, MBeanRegistrationException,
+			MBeanException, NotCompliantMBeanException, IOException
 	{
-		return (ObjectInstance) root.createMBean(className, name, params, signature);
+		return (ObjectInstance) root.createMBean(className, name, params,
+				signature);
 	}
 
-	public ObjectInstance createMBean(String className, ObjectName name, ObjectName loaderName, Object[] params, String[] signature)
-			throws ReflectionException, InstanceAlreadyExistsException, MBeanRegistrationException, MBeanException, NotCompliantMBeanException,
-			InstanceNotFoundException, IOException
+	public ObjectInstance createMBean(String className, ObjectName name,
+			ObjectName loaderName, Object[] params, String[] signature)
+			throws ReflectionException, InstanceAlreadyExistsException,
+			MBeanRegistrationException, MBeanException,
+			NotCompliantMBeanException, InstanceNotFoundException, IOException
 	{
-		return (ObjectInstance) root.createMBean(className, name, loaderName, params, signature);
+		return (ObjectInstance) root.createMBean(className, name, loaderName,
+				params, signature);
 	}
 
-	public Object getAttribute(ObjectName name, String attribute) throws MBeanException, AttributeNotFoundException, InstanceNotFoundException,
-			ReflectionException, IOException
+	public Object getAttribute(ObjectName name, String attribute)
+			throws MBeanException, AttributeNotFoundException,
+			InstanceNotFoundException, ReflectionException, IOException
 	{
 		return root.getAttribute(name, attribute);
 	}
 
-	public AttributeList getAttributes(ObjectName name, String[] attributes) throws InstanceNotFoundException, ReflectionException, IOException
+	public AttributeList getAttributes(ObjectName name, String[] attributes)
+			throws InstanceNotFoundException, ReflectionException, IOException
 	{
 		return (AttributeList) root.getAttributes(name, attributes);
 	}
@@ -95,78 +125,97 @@ public class MBeanServerConnectionAsyncAdapter implements MBeanServerConnection
 		return (Integer) root.getMBeanCount();
 	}
 
-	public MBeanInfo getMBeanInfo(ObjectName name) throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException
+	public MBeanInfo getMBeanInfo(ObjectName name)
+			throws InstanceNotFoundException, IntrospectionException,
+			ReflectionException, IOException
 	{
 		return (MBeanInfo) root.getMBeanInfo(name);
 	}
 
-	public ObjectInstance getObjectInstance(ObjectName name) throws InstanceNotFoundException, IOException
+	public ObjectInstance getObjectInstance(ObjectName name)
+			throws InstanceNotFoundException, IOException
 	{
-		return (ObjectInstance)root.getObjectInstance(name);
+		return (ObjectInstance) root.getObjectInstance(name);
 	}
 
-	public Object invoke(ObjectName name, String operationName, Object[] params, String[] signature) throws InstanceNotFoundException,
-			MBeanException, ReflectionException, IOException
+	public Object invoke(ObjectName name, String operationName,
+			Object[] params, String[] signature)
+			throws InstanceNotFoundException, MBeanException,
+			ReflectionException, IOException
 	{
 		return root.invoke(name, operationName, params, signature);
 	}
 
-	public boolean isInstanceOf(ObjectName name, String className) throws InstanceNotFoundException, IOException
+	public boolean isInstanceOf(ObjectName name, String className)
+			throws InstanceNotFoundException, IOException
 	{
-		return ((Boolean)root.isInstanceOf(name, className)).booleanValue();
+		return ((Boolean) root.isInstanceOf(name, className)).booleanValue();
 	}
 
 	public boolean isRegistered(ObjectName name) throws IOException
 	{
-		return ((Boolean)root.isRegistered(name)).booleanValue();
+		return ((Boolean) root.isRegistered(name)).booleanValue();
 	}
 
-	public Set<ObjectInstance> queryMBeans(ObjectName name, QueryExp query) throws IOException
+	public Set<ObjectInstance> queryMBeans(ObjectName name, QueryExp query)
+			throws IOException
 	{
-		return (Set<ObjectInstance>)root.queryMBeans(name, query);
+		return (Set<ObjectInstance>) root.queryMBeans(name, query);
 	}
 
-	public Set<ObjectName> queryNames(ObjectName name, QueryExp query) throws IOException
+	public Set<ObjectName> queryNames(ObjectName name, QueryExp query)
+			throws IOException
 	{
-		return (Set<ObjectName>)root.queryNames(name, query);
+		return (Set<ObjectName>) root.queryNames(name, query);
 	}
 
-	public void removeNotificationListener(ObjectName name, ObjectName listener) throws InstanceNotFoundException, ListenerNotFoundException,
+	public void removeNotificationListener(ObjectName name, ObjectName listener)
+			throws InstanceNotFoundException, ListenerNotFoundException,
 			IOException
 	{
 		root.removeNotificationListener(name, listener);
 	}
 
-	public void removeNotificationListener(ObjectName name, NotificationListener listener) throws InstanceNotFoundException,
+	public void removeNotificationListener(ObjectName name,
+			NotificationListener listener) throws InstanceNotFoundException,
 			ListenerNotFoundException, IOException
 	{
 		root.removeNotificationListener(name, listener);
 	}
 
-	public void removeNotificationListener(ObjectName name, ObjectName listener, NotificationFilter filter, Object handback)
-			throws InstanceNotFoundException, ListenerNotFoundException, IOException
+	public void removeNotificationListener(ObjectName name,
+			ObjectName listener, NotificationFilter filter, Object handback)
+			throws InstanceNotFoundException, ListenerNotFoundException,
+			IOException
 	{
 		root.removeNotificationListener(name, listener, filter, handback);
 	}
 
-	public void removeNotificationListener(ObjectName name, NotificationListener listener, NotificationFilter filter, Object handback)
-			throws InstanceNotFoundException, ListenerNotFoundException, IOException
+	public void removeNotificationListener(ObjectName name,
+			NotificationListener listener, NotificationFilter filter,
+			Object handback) throws InstanceNotFoundException,
+			ListenerNotFoundException, IOException
 	{
 		root.removeNotificationListener(name, listener, filter, handback);
 	}
 
-	public void setAttribute(ObjectName name, Attribute attribute) throws InstanceNotFoundException, AttributeNotFoundException,
-			InvalidAttributeValueException, MBeanException, ReflectionException, IOException
+	public void setAttribute(ObjectName name, Attribute attribute)
+			throws InstanceNotFoundException, AttributeNotFoundException,
+			InvalidAttributeValueException, MBeanException,
+			ReflectionException, IOException
 	{
 		root.setAttribute(name, attribute);
 	}
 
-	public AttributeList setAttributes(ObjectName name, AttributeList attributes) throws InstanceNotFoundException, ReflectionException, IOException
+	public AttributeList setAttributes(ObjectName name, AttributeList attributes)
+			throws InstanceNotFoundException, ReflectionException, IOException
 	{
-		return (AttributeList)root.setAttributes(name, attributes);
+		return (AttributeList) root.setAttributes(name, attributes);
 	}
 
-	public void unregisterMBean(ObjectName name) throws InstanceNotFoundException, MBeanRegistrationException, IOException
+	public void unregisterMBean(ObjectName name)
+			throws InstanceNotFoundException, MBeanRegistrationException,
+			IOException
 	{
 		root.unregisterMBean(name);
 	}

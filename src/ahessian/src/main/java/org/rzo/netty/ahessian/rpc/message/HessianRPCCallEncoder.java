@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.netty.ahessian.rpc.message;
 
 import io.netty.channel.ChannelHandlerContext;
@@ -31,7 +46,8 @@ public class HessianRPCCallEncoder extends OutputProducer
 		this(inverseServer, null, executor);
 	}
 
-	public HessianRPCCallEncoder(AbstractSerializerFactory serializerFactory, Executor executor)
+	public HessianRPCCallEncoder(AbstractSerializerFactory serializerFactory,
+			Executor executor)
 	{
 		this(false, serializerFactory, executor);
 	}
@@ -41,7 +57,8 @@ public class HessianRPCCallEncoder extends OutputProducer
 		this(false, null, executor);
 	}
 
-	public HessianRPCCallEncoder(boolean inverseServer, AbstractSerializerFactory serializerFactory, Executor executor)
+	public HessianRPCCallEncoder(boolean inverseServer,
+			AbstractSerializerFactory serializerFactory, Executor executor)
 	{
 		super(executor);
 		if (serializerFactory != null)
@@ -59,44 +76,42 @@ public class HessianRPCCallEncoder extends OutputProducer
 	 * org.jboss.netty.channel.MessageEvent)
 	 */
 	@Override
-	public void produceOutput(ChannelHandlerContext ctx, Object e, ChannelPromise promise) throws Exception
+	public void produceOutput(ChannelHandlerContext ctx, Object e,
+			ChannelPromise promise) throws Exception
 	{
 		if (!ctx.channel().isActive())
 			throw new RuntimeException("channel not active");
- 		try
- 		{
- 			/*Object msg = e;
- 			if (msg instanceof FlushRequestMessage)
- 			{
- 				ChannelPromise future = ctx.newPromise();
- 				hOut.flush(future);
- 				//future.sync();
- 				return;
- 			}
- 			no longer required
- 			*/
- 		HessianRPCCallMessage message = (HessianRPCCallMessage) e;
-		message.setHasSessionFilter(_hasSessionFilter);
-		hOut.resetReferences();
-		hOut.call(message);
-		if (_inverseServer)
-			hOut.flush(promise);
- 		}
+		try
+		{
+			/*
+			 * Object msg = e; if (msg instanceof FlushRequestMessage) {
+			 * ChannelPromise future = ctx.newPromise(); hOut.flush(future);
+			 * //future.sync(); return; } no longer required
+			 */
+			HessianRPCCallMessage message = (HessianRPCCallMessage) e;
+			message.setHasSessionFilter(_hasSessionFilter);
+			hOut.resetReferences();
+			hOut.call(message);
+			if (_inverseServer)
+				hOut.flush(promise);
+		}
 		catch (Exception ex)
 		{
 			Constants.ahessianLogger.warn("", ex);
 			promise.setFailure(ex);
 		}
-		
+
 	}
 
 	private OutputStream getOutputStream(ChannelHandlerContext ctx)
 	{
-		return (OutputStream) ctx.channel().attr(OutputStreamHandler.OUTSTREAM).get();
+		return (OutputStream) ctx.channel().attr(OutputStreamHandler.OUTSTREAM)
+				.get();
 	}
 
 	@Override
-	public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise)
+	public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress,
+			SocketAddress localAddress, ChannelPromise promise)
 			throws Exception
 	{
 		super.connect(ctx, remoteAddress, localAddress, promise);
