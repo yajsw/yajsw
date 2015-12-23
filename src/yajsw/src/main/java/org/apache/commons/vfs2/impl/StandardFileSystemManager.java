@@ -131,8 +131,9 @@ public class StandardFileSystemManager extends DefaultFileSystemManager
 		configure(configUri);
 
 		// Configure Plugins
-		// do not use configured plugins. issues when including cifs jars in classpath
-		//configurePlugins();
+		// do not use configured plugins. issues when including cifs jars in
+		// classpath
+		// configurePlugins();
 		setCacheStrategy(CacheStrategy.ON_CALL);
 
 		// Initialise super-class
@@ -268,18 +269,19 @@ public class StandardFileSystemManager extends DefaultFileSystemManager
 				false);
 		try
 		{
-		addProvider("org.rzo.vfs.dropbox.DropboxFileProvider",
-				new String[] { "dbx" },
-				new String[] { "com.dropbox.core.DbxClient" }, null,
-				false);
+			addProvider("org.rzo.vfs.dropbox.DropboxFileProvider",
+					new String[] { "dbx" },
+					new String[] { "com.dropbox.core.DbxClient" }, null, false);
 		}
 		catch (Error ex)
 		{
-			getLogger().info("could not load vfs-dbx provider: " + ex.getMessage());
+			getLogger().info(
+					"could not load vfs-dbx provider: " + ex.getMessage());
 		}
 		catch (Exception ex)
 		{
-			getLogger().info("could not load vfs-dbx provider: " + ex.getMessage());
+			getLogger().info(
+					"could not load vfs-dbx provider: " + ex.getMessage());
 		}
 		addProvider("org.apache.commons.vfs2.provider.ftps.FtpsFileProvider",
 				new String[] { "ftps" },
