@@ -24,10 +24,12 @@ import org.rzo.yajsw.os.Mouse;
 
 import com.sun.jna.Native;
 import com.sun.jna.Platform;
+import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import com.sun.jna.platform.win32.BaseTSD.ULONG_PTR;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.User32;
+import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.LRESULT;
 import com.sun.jna.platform.win32.WinDef.POINT;
@@ -163,7 +165,7 @@ public class WindowsXPMouse implements Mouse
 					MOUSEHOOKSTRUCT info)
 			{
 				LRESULT result = USER32INST.CallNextHookEx(hhk, nCode, wParam,
-						info.getPointer());
+						new WinDef.LPARAM(Pointer.nativeValue(info.getPointer())));
 				if (nCode >= 0)
 				{
 					int action = wParam.intValue();
