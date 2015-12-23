@@ -1,13 +1,19 @@
-/* This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * <p/>
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.  
- */
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.rzo.yajsw.app;
 
 import java.net.URL;
@@ -23,7 +29,7 @@ public class WrapperManagerProxy
 {
 
 	/** The wrapper class loader. */
-	static ClassLoader	wrapperClassLoader;
+	static ClassLoader wrapperClassLoader;
 
 	/**
 	 * Gets the wrapper manager.
@@ -41,7 +47,8 @@ public class WrapperManagerProxy
 		WrapperManager result = null;
 		try
 		{
-			wrapperManagerClass = wrapperClassLoader.loadClass("org.rzo.yajsw.app.WrapperManagerImpl");
+			wrapperManagerClass = wrapperClassLoader
+					.loadClass("org.rzo.yajsw.app.WrapperManagerImpl");
 			wm = (WrapperManager) wrapperManagerClass.newInstance();
 			wm.init(args, wrapperClassLoader);
 			// start the wrapper manager in a separate thread
@@ -66,11 +73,12 @@ public class WrapperManagerProxy
 			// give the manager.start a chance.
 			Thread.yield();
 			result = wm;
-			String preScript = System.getProperty("wrapper.app.pre_main.script");
+			String preScript = System
+					.getProperty("wrapper.app.pre_main.script");
 			if (preScript != null & !"".equals(preScript))
 			{
-				//Logger logger = new MyLogger();
-				//logger.addHandler(new ConsoleHandler());
+				// Logger logger = new MyLogger();
+				// logger.addHandler(new ConsoleHandler());
 				wm.executeScript(preScript, wrapperClassLoader);
 			}
 
@@ -93,8 +101,9 @@ public class WrapperManagerProxy
 		URL[] urlsArr = WrapperLoader.getWrapperClasspath("App", true);
 		if (urlsArr == null)
 			return Thread.currentThread().getContextClassLoader();
-		URL[] extended = WrapperLoader.getWrapperClasspath("App-Extended", false);
-		URL[] urls = new URL[urlsArr.length+ extended.length];
+		URL[] extended = WrapperLoader.getWrapperClasspath("App-Extended",
+				false);
+		URL[] urls = new URL[urlsArr.length + extended.length];
 		System.arraycopy(urlsArr, 0, urls, 0, urlsArr.length);
 		System.arraycopy(extended, 0, urls, urlsArr.length, extended.length);
 

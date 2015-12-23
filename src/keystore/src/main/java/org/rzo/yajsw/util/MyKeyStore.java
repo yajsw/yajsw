@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.util;
 
 import java.io.File;
@@ -29,7 +44,7 @@ import javax.crypto.spec.PBEKeySpec;
 public class MyKeyStore implements MyKeyStoreInterface
 {
 	final private KeyStore ks;
-	final private AtomicReference<FileLock> lock  = new AtomicReference<FileLock>();
+	final private AtomicReference<FileLock> lock = new AtomicReference<FileLock>();
 	final private AtomicReference<FileChannel> channel = new AtomicReference<FileChannel>();
 	private String file;
 	final private char[] pwd;
@@ -40,7 +55,7 @@ public class MyKeyStore implements MyKeyStoreInterface
 		this.file = file;
 		this.pwd = pwd;
 	}
-	
+
 	public void init() throws Exception
 	{
 		File f = new File(file);
@@ -50,12 +65,13 @@ public class MyKeyStore implements MyKeyStoreInterface
 			readStore();
 		lockFile();
 	}
-	
+
 	public void start() throws Exception
 	{
-		String newFile = file+".xxx";
+		String newFile = file + ".xxx";
 		if (!new File(file).exists() && !new File(newFile).exists())
-			throw new RuntimeException("keystore not found: "+new File(file).getAbsolutePath());
+			throw new RuntimeException("keystore not found: "
+					+ new File(file).getAbsolutePath());
 
 		if (!new File(newFile).exists())
 		{
@@ -66,7 +82,8 @@ public class MyKeyStore implements MyKeyStoreInterface
 		file = newFile;
 
 		if (!new File(file).exists())
-			throw new RuntimeException("keystore not found: "+new File(file).getAbsolutePath());
+			throw new RuntimeException("keystore not found: "
+					+ new File(file).getAbsolutePath());
 
 		init();
 	}
@@ -140,37 +157,35 @@ public class MyKeyStore implements MyKeyStoreInterface
 
 	private void restrictAccess() throws Exception
 	{
-		
+
 		UserPrincipal user = getDefaultFileOwner();
-		
+
 		Path path = Paths.get(file);
 		AclFileAttributeView aclAttr = Files.getFileAttributeView(path,
 				AclFileAttributeView.class);
-		
-		System.out.println("owner: "+aclAttr.getOwner());
+
+		System.out.println("owner: " + aclAttr.getOwner());
 
 		UserPrincipalLookupService upls = path.getFileSystem()
 				.getUserPrincipalLookupService();
-		//UserPrincipal user = upls.lookupPrincipalByName(System
-		//		.getProperty("user.name"));// aclAttr.getOwner();//upls.lookupPrincipalByName("OWNER@");//System.getProperty("user.name"));
+		// UserPrincipal user = upls.lookupPrincipalByName(System
+		// .getProperty("user.name"));//
+		// aclAttr.getOwner();//upls.lookupPrincipalByName("OWNER@");//System.getProperty("user.name"));
 		AclEntry.Builder builder = AclEntry.newBuilder();
-		builder.setPermissions(EnumSet.of(
-				AclEntryPermission.READ_DATA,
-				AclEntryPermission.WRITE_DATA, 
-				AclEntryPermission.APPEND_DATA,
+		builder.setPermissions(EnumSet.of(AclEntryPermission.READ_DATA,
+				AclEntryPermission.WRITE_DATA, AclEntryPermission.APPEND_DATA,
 				AclEntryPermission.READ_NAMED_ATTRS,
 				AclEntryPermission.WRITE_NAMED_ATTRS,
 				AclEntryPermission.READ_ATTRIBUTES,
 				AclEntryPermission.WRITE_ATTRIBUTES,
-				AclEntryPermission.READ_ACL, 
-				AclEntryPermission.SYNCHRONIZE));
+				AclEntryPermission.READ_ACL, AclEntryPermission.SYNCHRONIZE));
 
 		builder.setPrincipal(user);
 		builder.setType(AclEntryType.ALLOW);
 		aclAttr.setOwner(user);
 		aclAttr.setAcl(Collections.singletonList(builder.build()));
 	}
-	
+
 	private UserPrincipal getDefaultFileOwner() throws Exception
 	{
 		new File("x.tmp").createNewFile();
@@ -179,7 +194,7 @@ public class MyKeyStore implements MyKeyStoreInterface
 				AclFileAttributeView.class);
 		UserPrincipal result = aclAttr.getOwner();
 		new File("x.tmp").delete();
-		//System.out.println("owner: "+aclAttr.getOwner());
+		// System.out.println("owner: "+aclAttr.getOwner());
 
 		return result;
 	}
@@ -189,11 +204,13 @@ public class MyKeyStore implements MyKeyStoreInterface
 		MyKeyStore ks = new MyKeyStore("mykeystore2.dat", "test".toCharArray());
 		while (true)
 		{
-			//ks.put("pwd1", ("gehjeim-"+System.currentTimeMillis()).toCharArray());
-			//ks.put("pwd2", ("gehjeim2-"+System.currentTimeMillis()).toCharArray());
+			// ks.put("pwd1",
+			// ("gehjeim-"+System.currentTimeMillis()).toCharArray());
+			// ks.put("pwd2",
+			// ("gehjeim2-"+System.currentTimeMillis()).toCharArray());
 			System.out.println(new String(ks.get("pwd1")));
 			System.out.println(new String(ks.get("pwd2")));
-		Thread.sleep(1000);
+			Thread.sleep(1000);
 		}
 	}
 

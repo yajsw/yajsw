@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright  2015 rzorzorzo@users.sf.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.rzo.yajsw.app;
 
 import java.io.BufferedReader;
@@ -83,7 +98,8 @@ public class RuntimeJavaMain
 		{
 			public void run()
 			{
-					System.err.println("ShutdownHook started: stopping application");
+				System.err
+						.println("ShutdownHook started: stopping application");
 				if (p.isOSProcessRunning())
 				{
 					if (_debug)
@@ -112,7 +128,7 @@ public class RuntimeJavaMain
 				});
 
 		p.start();
-		
+
 		startTestThreadIfNeeded();
 
 	}
@@ -130,7 +146,8 @@ public class RuntimeJavaMain
 				{
 					b = new BufferedReader(new FileReader(f));
 					pid = Integer.parseInt(b.readLine());
-				} catch (Exception ex)
+				}
+				catch (Exception ex)
 				{
 					ex.printStackTrace();
 				}
@@ -138,7 +155,8 @@ public class RuntimeJavaMain
 				try
 				{
 					b.close();
-				} catch (IOException e)
+				}
+				catch (IOException e)
 				{
 					e.printStackTrace();
 				}
@@ -146,7 +164,8 @@ public class RuntimeJavaMain
 			if (pid == -1)
 				return;
 
-			Process p = OperatingSystem.instance().processManagerInstance().getProcess(pid);
+			Process p = OperatingSystem.instance().processManagerInstance()
+					.getProcess(pid);
 			if (p == null)
 				return;
 
@@ -158,8 +177,11 @@ public class RuntimeJavaMain
 			if (!cmd.contains(image))
 				return;
 
-			int timeout = conf.getInt("wrapper.shutdown.timeout", Constants.DEFAULT_SHUTDOWN_TIMEOUT) * 1000;
-			System.out.println("process with pid " + pid + " and cmd " + cmd + " is still running,stopping process with timeout of " + timeout + "ms");
+			int timeout = conf.getInt("wrapper.shutdown.timeout",
+					Constants.DEFAULT_SHUTDOWN_TIMEOUT) * 1000;
+			System.out.println("process with pid " + pid + " and cmd " + cmd
+					+ " is still running,stopping process with timeout of "
+					+ timeout + "ms");
 			sleep(3000);
 			p.stop(timeout, 999);
 			sleep(2000);
