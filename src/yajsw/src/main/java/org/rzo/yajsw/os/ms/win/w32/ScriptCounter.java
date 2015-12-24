@@ -105,6 +105,16 @@ public class ScriptCounter implements PdhCounter
 			return Integer.parseInt((String) result);
 	}
 
+	public long getLongValue()
+	{
+		checkScript();
+		Object result = _script.execute();
+		if (result instanceof Number)
+			return ((Number) result).intValue();
+		else
+			return Long.parseLong((String) result);
+	}
+
 	public boolean isValid()
 	{
 		try

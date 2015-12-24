@@ -36,6 +36,7 @@ public interface PdhCounter
 	 * @return the int value
 	 */
 	public int getIntValue();
+	public long getLongValue();
 
 	/**
 	 * Checks if is valid.

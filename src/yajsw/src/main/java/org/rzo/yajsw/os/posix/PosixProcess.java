@@ -711,15 +711,15 @@ public class PosixProcess extends AbstractProcess
 		return 0;
 	}
 
-	public int getCurrentPhysicalMemory()
+	public long getCurrentPhysicalMemory()
 	{
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
-	public int getCurrentVirtualMemory()
+	public long getCurrentVirtualMemory()
 	{
-		int result = -1;
+		long result = -1;
 		if (!isRunning())
 			return result;
 
@@ -734,7 +734,7 @@ public class PosixProcess extends AbstractProcess
 				Matcher m = p.matcher(stat);
 				m.find();
 				// get threads
-				result = Integer.parseInt(m.group(1).trim());
+				result = Long.parseLong(m.group(1).trim());
 			}
 			catch (Exception ex)
 			{

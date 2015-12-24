@@ -180,7 +180,8 @@ public class Pdh
 
 		/** The PD h_ fm t_ long. */
 		int PDH_FMT_LONG = 0x00000100;
-
+		int PDH_FMT_LARGE = 0x00000400;
+		
 		/*
 		 * PDH_STATUS PdhRemoveCounter( __in PDH_HCOUNTER hCounter );
 		 */
@@ -547,6 +548,11 @@ public class Pdh
 			return (int) getDoubleValue();
 		}
 
+		public long getLongValue()
+		{
+			return (long) getDoubleValue();
+		}
+
 		/*
 		 * (non-Javadoc)
 		 * 
@@ -735,6 +741,31 @@ public class Pdh
 			{
 				pdhCounterValue.read();
 				return pdhCounterValue.Value.longValue;
+			}
+			return -1;
+		}
+
+		public long getLongValue()
+		{
+			if (!isValid())
+				return -1;
+			PDH_FMT_COUNTERVALUE pdhCounterValue = new PDH_FMT_COUNTERVALUE();
+			pdhCounterValue.size();
+			int ret = Pdhdll.INSTANCE.PdhCollectQueryData(_hQuery.getValue());
+			if (ret != Pdhdll.ERROR_SUCCESS)
+				System.out.println("Error in PdhCollectQueryData " + _counter
+						+ ": " + Integer.toHexString(ret));
+			PointerByReference result = new PointerByReference();
+			ret = Pdhdll.INSTANCE.PdhGetFormattedCounterValue(
+					_hCounter.getValue(), Pdhdll.PDH_FMT_LARGE, null,
+					pdhCounterValue.getPointer());
+			if (ret != Pdhdll.ERROR_SUCCESS)
+				System.out.println("Error in PdhGetFormattedCounterValue "
+						+ _counter + ": " + Integer.toHexString(ret));
+			else
+			{
+				pdhCounterValue.read();
+				return pdhCounterValue.Value.largeValue;
 			}
 			return -1;
 		}

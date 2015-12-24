@@ -71,7 +71,7 @@ public class MacOsXProcess extends PosixProcess
 	 * 
 	 * @return the current physical memory
 	 */
-	public int getCurrentPhysicalMemory()
+	public long getCurrentPhysicalMemory()
 	{
 		return -1;
 	}
@@ -81,7 +81,7 @@ public class MacOsXProcess extends PosixProcess
 	 * 
 	 * @return the current virtual memory
 	 */
-	public int getCurrentVirtualMemory()
+	public long getCurrentVirtualMemory()
 	{
 		return -1;
 	}

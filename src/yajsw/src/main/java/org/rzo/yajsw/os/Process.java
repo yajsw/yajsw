@@ -221,14 +221,14 @@ public interface Process
 	 * 
 	 * @return the current physical memory
 	 */
-	public int getCurrentPhysicalMemory();
+	public long getCurrentPhysicalMemory();
 
 	/**
 	 * Gets the current virtual memory.
 	 * 
 	 * @return the current virtual memory
 	 */
-	public int getCurrentVirtualMemory();
+	public long getCurrentVirtualMemory();
 
 	/**
 	 * Gets the current page faults.

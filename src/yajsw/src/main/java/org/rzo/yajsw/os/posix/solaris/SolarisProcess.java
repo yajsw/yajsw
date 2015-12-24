@@ -27,6 +27,7 @@ import org.rzo.yajsw.os.Process;
 import org.rzo.yajsw.os.posix.PosixProcess;
 
 import com.sun.jna.Memory;
+import com.sun.jna.Platform;
 
 public class SolarisProcess extends PosixProcess
 {
@@ -87,8 +88,10 @@ public class SolarisProcess extends PosixProcess
 			return (int) (((double) _b.getShort(60)) * 100) / 0x8000;
 		}
 
-		int getPr_size()
+		long getPr_size()
 		{
+			if (Platform.is64Bit())
+				return _b.getLong(44);
 			return _b.getInt(44);
 		}
 
@@ -216,7 +219,7 @@ public class SolarisProcess extends PosixProcess
 		return s.getNlwp();
 	}
 
-	public int getCurrentVirtualMemory()
+	public long getCurrentVirtualMemory()
 	{
 		int result = -1;
 		if (!isRunning())

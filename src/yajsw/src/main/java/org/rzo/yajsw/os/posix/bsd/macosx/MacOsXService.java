@@ -139,7 +139,10 @@ public class MacOsXService extends AbstractService implements Constants
 			e.printStackTrace();
 		}
 		JavaHome javaHome = OperatingSystem.instance().getJavaHome(_config);
-		String java = System.getProperty("java.home") + "/bin/java";
+		
+		String java = _config.getString("wrapper.ntservice.java.command");
+		if (java == null)
+			java = System.getProperty("java.home") + "/bin/java";
 		try
 		{
 			java = new File(java).getCanonicalPath();
@@ -230,7 +233,7 @@ public class MacOsXService extends AbstractService implements Constants
 			VelocityContext context = new VelocityContext();
 			context.put("name", _plistName);
 			context.put("command", splitCommandByWhitespace());
-			context.put("autoStart", "AUTOMATIC".equals(_config.getString(
+			context.put("autoStart", "AUTO_START".equals(_config.getString(
 					"wrapper.ntservice.starttype", DEFAULT_SERVICE_START_TYPE)));
 			FileWriter writer = new FileWriter(_plistFile);
 
@@ -268,8 +271,14 @@ public class MacOsXService extends AbstractService implements Constants
 
 	protected void preload()
 	{
-		// do nothing
-
+		try
+		{
+		System.out.println(_utils.osCommand("chmod 644 " + _plistFile, 5000));
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
 	}
 
 	private List<String> splitCommandByWhitespace()

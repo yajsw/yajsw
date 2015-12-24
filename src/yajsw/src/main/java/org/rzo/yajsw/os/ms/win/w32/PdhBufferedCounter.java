@@ -103,6 +103,11 @@ public class PdhBufferedCounter implements PdhCounter
 		return _counter.getIntValue();
 	}
 
+	public long getLongValue()
+	{
+		return _counter.getLongValue();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

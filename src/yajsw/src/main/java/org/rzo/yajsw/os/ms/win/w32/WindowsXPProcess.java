@@ -60,6 +60,7 @@ import com.sun.jna.Callback;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
+import com.sun.jna.Platform;
 import com.sun.jna.PlatformEx;
 import com.sun.jna.Pointer;
 import com.sun.jna.StringBlock;
@@ -3720,11 +3721,13 @@ public class WindowsXPProcess extends AbstractProcess
 	 * 
 	 * @see org.rzo.yajsw.os.Process#getCurrentPhysicalMemory()
 	 */
-	public int getCurrentPhysicalMemory()
+	public long getCurrentPhysicalMemory()
 	{
 		if (!isRunning())
 			return -1;
 		PdhCounter c = getPMemCounter();
+		if (Platform.is64Bit())
+			return c.getLongValue();
 		return c.getIntValue();
 	}
 
@@ -3745,12 +3748,12 @@ public class WindowsXPProcess extends AbstractProcess
 	 * 
 	 * @see org.rzo.yajsw.os.Process#getCurrentVirtualMemory()
 	 */
-	public int getCurrentVirtualMemory()
+	public long getCurrentVirtualMemory()
 	{
 		if (!isRunning() || getVMemCounter() == null)
 			return -1;
 		PdhCounter c = getVMemCounter();
-		return c.getIntValue();
+		return c.getLongValue();
 	}
 
 	/**
