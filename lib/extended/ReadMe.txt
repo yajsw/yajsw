@@ -1,7 +1,7 @@
 The following libraries provide extended functionalites to YAJSW:
 
 Timers require:
-	* quartz
+	* yacron4j
 	
 Posix Installation of daemons requires:
 	* velocity
@@ -23,8 +23,14 @@ Network loading in general
 Network loading per webdav
 	* vfs-webdav
 
+Network loading per dropbox
+	* vfs-dbx
+
 Groovy support in configuration files or wrapping groovy
 	* groovy
 	
 Trigger with regular expressions
 	* regex
+	
+Storing configuration data in an encrypted store
+  * keystore

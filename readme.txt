@@ -1,16 +1,20 @@
-yajsw-beta-12.03
+yajsw-beta-12.04
 
-    * Bug: windows service: add quotes to java command if it contains blank
-    * Bug: genConfig: error parsing java command line
-    * Bug: JVMController: use parameter instead of fixed timeout when reconnecting
-    * Bug: wrapper hangs if tray port in use
-    * Bug: bad quotes in java options
-    * Bug: Randomly: killed sub-process does not close channel to wrapper thus not allowing restart of application
-    * Change: Log an error if folder listing returns null (in java this may be a network hdd error)
-    * Change: update ahessian
-    * Change: updated groovy scripts: logging 
-    * Change: property: wrapper.posix_spawn is now default for all posix OS
-    * Change: MyFileHandler due to license conflict
-    * Change: log if a folder listing returns null (java: error accessing a network drive)
+    * Bug: windows service: bad quotes in java service command line.
+    * Bug: script not executed: too many concurrent executions
+    * Bug: posix_spawn: application does not set working dir.
+    * Bug: Windows 10: Exception in service install
+    * Bug: query daemon must be executed with root priv
+    * Bug: process does not start if space char in folder or environment
+    * Bug: Mac OS X Yosemite: service install fails
+    * Bug: 'java -jar wrapper.jar -c http://../wrapper.conf' throws class not found exception
+    * Bug: error writing from system tray icon to stdin of wrapped process
+    * Bug: some pdh should return long instead of int
+    * New: support app shutdown listener, similar to JSW
+    * New: keystore function. See documentation for details.
+    * Change: update to netty 4.0.33 and jna 4.2.1
+    * Change: fix APL license header, format source, organize imports
 
-NOTE: property: wrapper.posix_spawn is now default for all posix OS
+NOTE: Windows: If you have installed java 7 and 8 on the same machine: set the configuration properties 
+				wrapper.java.command = <full path to java>
+				wrapper.ntservice.java.command = <full path to java>
