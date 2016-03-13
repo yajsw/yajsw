@@ -1,175 +1,157 @@
-/**
- * Copyright 2005-2014 Restlet
+/*
+ * Copyright 2014 Daniel Sawano
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  * 
- * The contents of this file are subject to the terms of one of the following
- * open source licenses: Apache 2.0 or or EPL 1.0 (the "Licenses"). You can
- * select the license that you prefer but you may not use this file except in
- * compliance with one of these Licenses.
- * 
- * You can obtain a copy of the Apache 2.0 license at
- * http://www.opensource.org/licenses/apache-2.0
- * 
- * You can obtain a copy of the EPL 1.0 license at
- * http://www.opensource.org/licenses/eclipse-1.0
- * 
- * See the Licenses for the specific language governing permissions and
- * limitations under the Licenses.
- * 
- * Alternatively, you can obtain a royalty free commercial license with less
- * limitations, transferable or non-transferable, directly at
- * http://restlet.com/products/restlet-framework
- * 
- * Restlet is a registered trademark of Restlet S.A.S.
+ * https://github.com/sawano/alphanumeric-comparator
  */
 
 package org.rzo.yajsw.wrapper;
 
+import java.nio.CharBuffer;
+import java.text.Collator;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
 
-/**
- * Optimized public-domain implementation of a Java alphanumeric sort.
- * <p>
- * 
- * This implementation uses a single comparison pass over the characters in a
- * CharSequence, and returns as soon as a differing character is found, unless
- * the difference occurs in a series of numeric characters, in which case that
- * series is followed to its end. Numeric series of equal length are compared
- * numerically, that is, according to the most significant (leftmost) differing
- * digit. Series of unequal length are compared by their length.
- * <p>
- * 
- * This implementation appears to be 2-5 times faster than alphanumeric
- * comparators based based on substring analysis, with a lighter memory
- * footprint.
- * <p>
- * 
- * This alphanumeric comparator has approximately 20%-50% the performance of the
- * lexical String.compareTo() operation. Character sequences without numeric
- * data are compared more quickly.
- * <p>
- * 
- * Dedicated to the public domain by the original author:
- * http://creativecommons.org/licenses/publicdomain/
- * 
- * @author Rob Heittman, <a href="http://www.solertium.com">Solertium
- *         Corporation</a>
- */
-public class AlphaNumericComparator implements Comparator
-{
-	private static final long serialVersionUID = 1L;
+import static java.nio.CharBuffer.wrap;
+import static java.util.Objects.requireNonNull;
 
-	@Override
-	public int compare(final Object o1, final Object o2)
+public class AlphaNumericComparator implements Comparator<CharSequence> {
+
+    private final Collator collator;
+
+    /**
+     * Creates a comparator that will use lexicographical sorting of the non-numerical parts of the compared strings.
+     */
+    public AlphaNumericComparator() {
+        collator = null;
+    }
+
+    /**
+     * Creates a comparator that will use locale-sensitive sorting of the non-numerical parts of the compared strings.
+     *
+     * @param locale
+     *         the locale to use
+     */
+    public AlphaNumericComparator(final Locale locale) {
+        this(Collator.getInstance(requireNonNull(locale)));
+    }
+
+    /**
+     * Creates a comparator that will use the given collator to sort the non-numerical parts of the compared strings.
+     *
+     * @param collator
+     *         the collator to use
+     */
+    public AlphaNumericComparator(final Collator collator) {
+        this.collator = requireNonNull(collator);
+    }
+
+    @Override
+    public int compare(final CharSequence s1, final CharSequence s2) {
+        final CharBuffer b1 = wrap(s1);
+        final CharBuffer b2 = wrap(s2);
+
+        while (b1.hasRemaining() && b2.hasRemaining()) {
+            moveWindow(b1);
+            moveWindow(b2);
+
+            final int result = compare(b1, b2);
+            if (result != 0) {
+                return result;
+            }
+
+            prepareForNextIteration(b1);
+            prepareForNextIteration(b2);
+        }
+
+        return s1.length() - s2.length();
+    }
+
+    private void moveWindow(final CharBuffer buffer) {
+        int start = buffer.position();
+        int end = buffer.position();
+        final boolean isNumerical = isDigit(buffer.get(start));
+        while (end < buffer.limit() && isNumerical == isDigit(buffer.get(end))) {
+            ++end;
+            if (isNumerical && (start + 1 < buffer.limit()) && isZero(buffer.get(start)) && isDigit(buffer.get(end))) {
+                ++start; // trim leading zeros
+            }
+        }
+
+        buffer.position(start)
+              .limit(end);
+    }
+
+    private int compare(final CharBuffer b1, final CharBuffer b2) {
+        if (isNumerical(b1) && isNumerical(b2)) {
+            return compareNumerically(b1, b2);
+        }
+
+        return compareAsStrings(b1, b2);
+    }
+
+    private boolean isNumerical(final CharBuffer buffer) {
+        return isDigit(buffer.charAt(0));
+    }
+
+    private boolean isDigit(final char c) {
+        if (collator == null) {
+            final int intValue = (int) c;
+            return intValue >= 48 && intValue <= 57;
+        }
+        return Character.isDigit(c);
+    }
+
+    private int compareNumerically(final CharBuffer b1, final CharBuffer b2) {
+        final int diff = b1.length() - b2.length();
+        if (diff != 0) {
+            return diff;
+        }
+        for (int i = 0; i < b1.remaining() && i < b2.remaining(); ++i) {
+            final int result = Character.compare(b1.charAt(i), b2.charAt(i));
+            if (result != 0) {
+                return result;
+            }
+        }
+        return 0;
+    }
+
+    private void prepareForNextIteration(final CharBuffer buffer) {
+        buffer.position(buffer.limit())
+              .limit(buffer.capacity());
+    }
+
+    private int compareAsStrings(final CharBuffer b1, final CharBuffer b2) {
+        if (collator != null) {
+            return collator.compare(b1.toString(), b2.toString());
+        }
+        return b1.toString().compareTo(b2.toString());
+    }
+
+    private boolean isZero(final char c) {
+        return c == '0';
+    }
+
+
+	public static void main(String[] args)
 	{
-		int ptr = 0;
-		int msd = 0;
-		int diff = 0;
-		char a, b;
-
-		if (!(o1 instanceof String) || !(o2 instanceof String))
-		{
-			return 0;
-		}
-		String uri0 = (String) o1;
-		String uri1 = (String) o2;
-
-		final int llength = uri0.length();
-		final int rlength = uri1.length();
-		final int min;
-
-		if (rlength < llength)
-		{
-			min = rlength;
-		}
-		else
-		{
-			min = llength;
-		}
-
-		boolean rAtEnd, rHasNoMoreDigits;
-
-		while (ptr < min)
-		{
-			a = uri0.charAt(ptr);
-			b = uri1.charAt(ptr);
-			diff = a - b;
-
-			if ((a >= '9') || (b >= '9') || (a <= '0') || (b <= '0'))
-			{
-				if (diff != 0)
-				{
-					return diff;
-				}
-
-				msd = 0;
-			}
-			else
-			{
-				if (msd == 0)
-				{
-					msd = diff;
-				}
-
-				rAtEnd = rlength - ptr < 2;
-
-				if (llength - ptr < 2)
-				{
-					if (rAtEnd)
-					{
-						return msd;
-					}
-
-					if (!isNotDigit(a) && !isNotDigit(b))
-						return diff;
-
-					return -1;
-				}
-
-				if (rAtEnd)
-				{
-					if (!isNotDigit(a) && !isNotDigit(b))
-						return diff;
-
-					return -1;
-				}
-
-				rHasNoMoreDigits = isNotDigit(uri1.charAt(ptr + 1));
-
-				if (isNotDigit(uri0.charAt(ptr + 1)))
-				{
-					if (rHasNoMoreDigits && (msd != 0))
-					{
-						return msd;
-					}
-
-					if (!rHasNoMoreDigits)
-					{
-						return -1;
-					}
-				}
-				else
-				{
-					if (rHasNoMoreDigits)
-					{
-						return 1;
-					}
-				}
-			}
-			ptr++;
-		}
-		return llength - rlength;
-	}
-
-	/**
-	 * Indicates if the character is a digit.
-	 * 
-	 * @param x
-	 *            The character to test.
-	 * @return True if the character is a digit.
-	 */
-	protected boolean isNotDigit(final char x)
-	{
-		return (x > '9') || (x < '0');
+		List x = Arrays.asList("a.20","a.1", "a.10", "a.2", "a.03" );
+		Collections.sort(x, new AlphaNumericComparator());
+		System.out.println(x);
 	}
 
 }
