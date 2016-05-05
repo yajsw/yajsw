@@ -26,10 +26,11 @@ import jnacontrib.jna.Advapi32.SC_ACTION;
 import jnacontrib.jna.Advapi32.SERVICE_FAILURE_ACTIONS;
 import jnacontrib.win32.Win32Service;
 
-import org.apache.commons.configuration.Configuration;
 import org.rzo.yajsw.os.AbstractService;
 import org.rzo.yajsw.os.Service;
 import org.rzo.yajsw.os.ServiceInfo;
+
+import org.apache.commons.configuration2.Configuration;
 
 public class WindowsXPService extends AbstractService
 {

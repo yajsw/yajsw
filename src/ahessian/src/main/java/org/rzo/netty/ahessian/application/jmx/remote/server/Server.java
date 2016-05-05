@@ -18,7 +18,9 @@ package org.rzo.netty.ahessian.application.jmx.remote.server;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.oio.OioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.channel.socket.oio.OioServerSocketChannel;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executor;
@@ -30,10 +32,10 @@ public class Server
 	{
 		Executor executor = Executors.newFixedThreadPool(200);
 		ServerBootstrap bootstrap = new ServerBootstrap();
-		EventLoopGroup bossGroup = new NioEventLoopGroup();
-		EventLoopGroup childGroup = new NioEventLoopGroup();
+		EventLoopGroup bossGroup = new OioEventLoopGroup();
+		EventLoopGroup childGroup = new OioEventLoopGroup();
 		bootstrap.group(bossGroup, childGroup);
-		bootstrap.channel(NioServerSocketChannel.class);
+		bootstrap.channel(OioServerSocketChannel.class);
 
 		bootstrap.childHandler(new RPCServerSessionPipelineFactory(
 				new RPCServerMixinPipelineFactory(executor, childGroup)));

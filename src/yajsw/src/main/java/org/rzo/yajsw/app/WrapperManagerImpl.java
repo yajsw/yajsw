@@ -25,8 +25,10 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.oio.OioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.channel.socket.oio.OioSocketChannel;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.Delimiters;
 import io.netty.util.internal.logging.InternalLogger;
@@ -66,7 +68,7 @@ import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
 
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.logging.LogFactory;
 import org.rzo.yajsw.Constants;
 import org.rzo.yajsw.YajswVersion;
@@ -1107,10 +1109,10 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 		}
 
 		connector = new Bootstrap();
-		EventLoopGroup workerGroup = new NioEventLoopGroup();
+		EventLoopGroup workerGroup = new OioEventLoopGroup();
 		// workerGroup.setIoRatio(99);
 		connector.group(workerGroup);
-		connector.channel(NioSocketChannel.class);
+		connector.channel(OioSocketChannel.class);
 
 		connector.remoteAddress(new InetSocketAddress("127.0.0.1", _port));
 		connector.option(ChannelOption.SO_REUSEADDR, true);

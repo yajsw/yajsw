@@ -24,7 +24,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.rzo.yajsw.os.ms.win.w32.Cluster.Clusapi.ClusterGroupState;
 import org.rzo.yajsw.os.ms.win.w32.WindowsXPProcess.MyKernel32;
 

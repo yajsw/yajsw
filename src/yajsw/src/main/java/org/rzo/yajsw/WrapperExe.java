@@ -18,26 +18,21 @@ package org.rzo.yajsw;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.apache.commons.cli2.Argument;
-import org.apache.commons.cli2.CommandLine;
-import org.apache.commons.cli2.Group;
-import org.apache.commons.cli2.Option;
-import org.apache.commons.cli2.builder.ArgumentBuilder;
-import org.apache.commons.cli2.builder.DefaultOptionBuilder;
-import org.apache.commons.cli2.builder.GroupBuilder;
-import org.apache.commons.cli2.commandline.Parser;
-import org.apache.commons.cli2.option.DefaultOption;
-import org.apache.commons.cli2.util.HelpFormatter;
-import org.apache.commons.cli2.validation.FileValidator;
-import org.apache.commons.cli2.validation.NumberValidator;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.MapConfiguration;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.MapConfiguration;
 import org.rzo.yajsw.boot.WrapperLoader;
 import org.rzo.yajsw.config.YajswConfiguration;
 import org.rzo.yajsw.config.YajswConfigurationImpl;
@@ -46,7 +41,6 @@ import org.rzo.yajsw.os.ms.win.w32.WindowsXPProcess;
 import org.rzo.yajsw.tools.ConfigGenerator;
 import org.rzo.yajsw.tray.TrayIconMain;
 import org.rzo.yajsw.util.MyKeyStoreInterface;
-import org.rzo.yajsw.util.VFSFileValidator;
 import org.rzo.yajsw.wrapper.WrappedProcess;
 import org.rzo.yajsw.wrapper.WrappedProcessFactory;
 import org.rzo.yajsw.wrapper.WrappedProcessList;
@@ -60,12 +54,6 @@ import com.sun.jna.PlatformEx;
  */
 public class WrapperExe
 {
-
-	/** The group. */
-	static Group group;
-
-	/** The cl. */
-	static CommandLine cl;
 
 	/** The conf file. */
 	static String confFile;
@@ -84,65 +72,6 @@ public class WrapperExe
 	/** The pid. */
 	static String defaultFile;
 
-	/** The Constant OPTION_C. */
-	static final int OPTION_C = 0;
-
-	/** The Constant OPTION_T. */
-	static final int OPTION_T = 1;
-
-	/** The Constant OPTION_P. */
-	static final int OPTION_P = 2;
-
-	/** The Constant OPTION_T. */
-	static final int OPTION_TX = 91;
-
-	/** The Constant OPTION_P. */
-	static final int OPTION_PX = 92;
-
-	/** The Constant OPTION_I. */
-	static final int OPTION_I = 3;
-
-	/** The Constant OPTION_R. */
-	static final int OPTION_R = 4;
-
-	/** The Constant OPTION_N. */
-	static final int OPTION_N = 5;
-
-	/** The Constant OPTION_G. */
-	static final int OPTION_G = 6;
-
-	/** The Constant OPTION_D. */
-	static final int OPTION_D = 7;
-
-	/** The Constant OPTION_Q. */
-	static final int OPTION_Q = 8;
-
-	/** The Constant OPTION_QS. */
-	static final int OPTION_QS = 9;
-
-	/** The Constant OPTION_Y. */
-	static final int OPTION_Y = 10;
-
-	/** The Constant OPTION_QX. */
-	static final int OPTION_QX = 11;
-	static final int OPTION_RW = 12;
-	static final int OPTION_K = 13;
-
-	/** The Constant CONF_FILE. */
-	// static final String CONF_FILE = "confFile";
-
-	/** The Constant PROPERTIES. */
-	// static final String PROPERTIES = "properties";
-	static final String ARGS = "arguments";
-
-	/** The Constant PID. */
-	static final String PID = "pid";
-
-	static final String KS_KEY_VALUE = "ksKeyValue";
-
-	/** The Constant DEFAULT_FILE. */
-	static final String DEFAULT_FILE = "default configuration file";
-
 	static WrappedService _service = null;
 
 	static boolean _exitOnTerminate = true;
@@ -152,6 +81,10 @@ public class WrapperExe
 	static Map<String, Object> _properties = new HashMap<String, Object>();
 
 	static List keyValue;
+	
+	static Options options = new Options();
+	static CommandLine cl;
+
 
 	private static WrappedService getService()
 	{
@@ -187,6 +120,9 @@ public class WrapperExe
 		// System.out.println(System.getProperty("java.class.path"));
 		buildOptions();
 		parseCommand(args);
+		for (Option option : cl.getOptions())
+			executeCommand(option);
+		/*
 		if (cmds != null && cmds.size() > 0)
 			for (Iterator it = cmds.iterator(); it.hasNext();)
 			{
@@ -196,6 +132,7 @@ public class WrapperExe
 			}
 		else
 			executeCommand(group.findOption("c"));
+			*/
 		if (_exitOnTerminate)
 			Runtime.getRuntime().halt(_exitCode);
 	}
@@ -214,7 +151,45 @@ public class WrapperExe
 	 */
 	private static void executeCommand(Option cmd)
 	{
-		switch (cmd.getId())
+		String opt = cmd.getOpt();
+		if ("c".equals(opt))
+			doConsole();
+		else if ("t".equals(opt))
+			doStart();
+		else if ("p".equals(opt))
+			doStop();
+		else if ("tx".equals(opt))
+			doStartPosix();
+		else if ("px".equals(opt))
+			doStopPosix();
+		else if ("i".equals(opt))
+			doInstall();
+		else if ("r".equals(opt))
+			doRemove();
+		else if ("rw".equals(opt))
+			doRemoveWait();
+		else if ("n".equals(opt))
+			doReconnect();
+		else if ("g".equals(opt))
+			doGenerate();
+		else if ("q".equals(opt))
+			doState();
+		else if ("qs".equals(opt))
+			doStateSilent();
+		else if ("qx".equals(opt))
+			doStatePosix();
+		else if ("y".equals(opt))
+			doStartTrayIcon();
+		else if ("k".equals(opt))
+		{
+			keyValue = Arrays.asList(cl.getOptionValues("k"));
+			doAddKey();
+		}
+		else
+			System.out
+			.println("unimplemented option ");
+
+/*		switch ()
 		{
 		case OPTION_C:
 			doConsole();
@@ -269,6 +244,7 @@ public class WrapperExe
 			System.out
 					.println("unimplemented option " + cmd.getPreferredName());
 		}
+		*/
 	}
 
 	private static void doAddKey()
@@ -688,6 +664,14 @@ public class WrapperExe
 			ConfigGenerator.generate(pid, null, new File(confFile));
 
 	}
+	
+	private static void doHelp(String reason)
+	{
+		HelpFormatter formatter = new HelpFormatter();
+		String header = reason != null ? "Error: "+reason : "";
+		String footer = "";
+		formatter.printHelp("java -jar wrapper.jar", header, options, footer, true);
+	}
 
 	/**
 	 * Prepare properties.
@@ -716,35 +700,33 @@ public class WrapperExe
 	 */
 	private static void parseCommand(String[] args)
 	{
-		Parser parser = new Parser();
-
-		// configure a HelpFormatter
-		HelpFormatter hf = new HelpFormatter();
-		DefaultOptionBuilder oBuilder = new DefaultOptionBuilder();
-		;
-
-		// configure a parser
-		Parser p = new Parser();
-		p.setGroup(group);
-		p.setHelpFormatter(hf);
-		p.setHelpOption(oBuilder.withLongName("help").withShortName("?")
-				.create());
-		cl = p.parseAndHelp(args);
+		CommandLineParser parser = new DefaultParser();
+		try
+		{
+		cl = parser.parse( options, args);
+		}
+		catch (Exception ex)
+		{
+			doHelp(ex.getMessage());
+		}
 
 		// abort application if no CommandLine was parsed
 		if (cl == null)
 		{
 			System.exit(-1);
 		}
-		cmds = cl.getOptions();
 		try
 		{
-			List arguments = cl.getValues(ARGS);
-			properties = new ArrayList();
 			confFileList = new ArrayList();
-			for (Object obj : arguments)
+			for (Option option : cl.getOptions())
 			{
-				String arg = (String) obj;
+				if (option.hasArgName() && option.getArgName().equals("configFile"))
+					confFileList.addAll(Arrays.asList(option.getValues()));
+				else if (option.hasArgName() && option.getArgName().equals("PID"))
+					pid = Integer.parseInt(option.getValue());
+			}
+			for (String arg : cl.getArgs())
+			{
 				if (Pattern.matches("wrapper\\..*=.*", arg))
 					properties.add(arg);
 				else
@@ -752,7 +734,7 @@ public class WrapperExe
 			}
 			if (confFileList.isEmpty())
 			{
-				if (((Option) cmds.get(0)).getId() != OPTION_K)
+				if (!cl.getOptions()[0].getOpt().equals("k"))
 					System.out.println("no wrapper config file found ");
 			}
 			else
@@ -770,7 +752,7 @@ public class WrapperExe
 		}
 		try
 		{
-			defaultFile = (String) cl.getValue(cl.getOption("-d"));
+			defaultFile = (String) cl.getOptionValue("d");
 			if (defaultFile != null)
 				defaultFile = new File(defaultFile).getCanonicalPath();
 		}
@@ -787,11 +769,146 @@ public class WrapperExe
 	 */
 	private static void buildOptions()
 	{
-		DefaultOptionBuilder oBuilder = new DefaultOptionBuilder("-", "--",
-				true);
-		ArgumentBuilder aBuilder = new ArgumentBuilder();
-		GroupBuilder gBuilder = new GroupBuilder();
+		
+		options = new Options();
+		options.addOption(Option.builder("c")
+				.argName("configFile")
+				.longOpt("console")
+				.desc("run as a Console application")
+				.hasArgs()
+				.build()				
+				);		
+		
+		options.addOption(Option.builder("t")
+				.argName("configFile")
+				.longOpt("start")
+				.desc("starT an NT service or Unix daemon")
+				.hasArgs()
+				.build()				
+				);		
+		
+		options.addOption(Option.builder("p")
+				.argName("configFile")
+				.longOpt("stop")
+				.desc("stoP a running NT service or Unix daemon")
+				.hasArgs()
+				.build()				
+				);		
+		
+		options.addOption(Option.builder("tx")
+				.argName("configFile")
+				.longOpt("startx")
+				.desc("starT -internal a Posix daemon")
+				.hasArgs()
+				.build()				
+				);		
+		
+		options.addOption(Option.builder("px")
+				.argName("configFile")
+				.longOpt("stopx")
+				.desc("stoP -internal- a running Posix daemon")
+				.hasArgs()
+				.build()				
+				);		
+		
+		options.addOption(Option.builder("i")
+				.argName("configFile")
+				.longOpt("install")
+				.desc("Install an NT service or Unix daemon")
+				.hasArgs()
+				.build()				
+				);		
+		
+		options.addOption(Option.builder("r")
+				.argName("configFile")
+				.longOpt("remove")
+				.desc("Remove an NT service or Unix daemon")
+				.hasArg()
+				.build()				
+				);		
+		
+		options.addOption(Option.builder("rw")
+				.argName("configFile")
+				.longOpt("removeWait")
+				.desc("Remove an NT service or Unix daemon and wait until it is removed")
+				.hasArgs()
+				.build()				
+				);		
+		
+		options.addOption(Option.builder("q")
+				.argName("configFile")
+				.longOpt("query")
+				.desc("Query the status of an NT service or Unix daemon")
+				.hasArgs()
+				.build()				
+				);		
+		
+		options.addOption(Option.builder("y")
+				.argName("configFile")
+				.longOpt("tray")
+				.desc("Start System Tray Icon")
+				.hasArgs()
+				.build()				
+				);		
+		
+		options.addOption(Option.builder("k")
+				.argName("key value")
+				.numberOfArgs(2)
+				.longOpt("addKey")
+				.desc("Add Key/Value to Keystore")
+				.build()				
+				);		
+		
+		options.addOption(Option.builder("qs")
+				.argName("configFile")
+				.hasArgs()
+				.longOpt("querysilent")
+				.desc("Silent Query the status of an NT service or Unix daemon")
+				.build()				
+				);		
+		
+		options.addOption(Option.builder("qx")
+				.argName("configFile")
+				.hasArgs()
+				.longOpt("queryposix")
+				.desc("Query the status of a posix daemon. Return status as exit code")
+				.build()				
+				);		
+		
+		options.addOption(Option.builder("n")
+				.argName("PID")
+				.longOpt("reconnect")
+				.desc("recoNnect to existing application")
+				.hasArg()
+				.type(Integer.class)
+				.build()				
+				);		
+		
+		options.addOption(Option.builder("d")
+				.argName("defConfFile")
+				.hasArg()
+				.longOpt("defaultConf")
+				.desc("Default Configuration File")
+				.build()				
+				);		
+		
+		options.addOption(Option.builder("g")
+				.argName("PID")
+				.longOpt("genconfig")
+				.desc("Generate configuration file from pid")
+				.hasArg()
+				.type(Integer.class)
+				.build()				
+				);		
 
+		options.addOption(Option.builder("h")
+				.longOpt("help")
+				.desc("help")
+				.build()				
+				);		
+
+		
+		/*		
 		gBuilder.withOption(oBuilder.reset().withId(OPTION_C)
 				.withShortName("c").withLongName("console")
 				.withDescription("run as a Console application").create());
@@ -903,8 +1020,7 @@ public class WrapperExe
 		 * "Generate configuration file from pid"
 		 * ).withArgument(pid2).withChildren(childGbuilder.create()).create());
 		 */
-
-		gBuilder.withOption(oBuilder.reset().withId(OPTION_D)
+/*		gBuilder.withOption(oBuilder.reset().withId(OPTION_D)
 				.withShortName("d").withLongName("defaultConf")
 				.withDescription("Default Configuration File")
 				.withArgument(defaultFile).create());
@@ -926,7 +1042,7 @@ public class WrapperExe
 				.withMinimum(0).create());
 
 		gBuilder.withMaximum(3);
-
+*/
 		/*
 		 * Validator pValidator = new Validator() {
 		 * 
@@ -944,7 +1060,8 @@ public class WrapperExe
 		 * ).withMinimum(0).withValidator(pValidator) .create());
 		 */
 
-		group = gBuilder.create();
+		//group = gBuilder.create();
+		
 
 	}
 

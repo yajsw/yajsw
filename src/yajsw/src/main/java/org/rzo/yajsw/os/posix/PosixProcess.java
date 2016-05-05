@@ -45,6 +45,7 @@ import org.rzo.yajsw.io.CyclicBufferFilePrintStream;
 import org.rzo.yajsw.os.AbstractProcess;
 import org.rzo.yajsw.os.OperatingSystem;
 import org.rzo.yajsw.os.Process;
+import org.rzo.yajsw.os.posix.PosixProcess.CLibrary.Sysinfo;
 import org.rzo.yajsw.util.DaemonThreadFactory;
 
 import com.sun.jna.FromNativeConverter;
@@ -52,6 +53,7 @@ import com.sun.jna.Library;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLibrary;
+import com.sun.jna.NativeLong;
 import com.sun.jna.Platform;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
@@ -82,7 +84,7 @@ public class PosixProcess extends AbstractProcess
 	Pointer posix_spawn_file_actions;
 	Pointer posix_spawnattr;
 
-	public interface CLibrary extends Library
+	public interface CLibrary extends com.sun.jna.Library
 	{
 
 		// CLibrary INSTANCE = (CLibrary) Native.loadLibrary(Platform.isLinux()
@@ -642,6 +644,43 @@ public class PosixProcess extends AbstractProcess
 		public static final int F_SETFL = 4;
 
 		public static int O_NONBLOCK = Platform.isMac() ? 0x0004 : 2048;
+		
+	    static final class Sysinfo extends Structure {
+	        public NativeLong uptime; // Seconds since boot
+
+	        public NativeLong[] loads = new NativeLong[3];
+
+	        public NativeLong totalram; // Total usable main memory size
+
+	        public NativeLong freeram; // Available memory size
+
+	        public NativeLong sharedram; // Amount of shared memory
+
+	        public NativeLong bufferram; // Memory used by buffers
+
+	        public NativeLong totalswap; // Total swap space size
+
+	        public NativeLong freeswap; // swap space still available
+
+	        public short procs; // Number of current processes
+
+	        public NativeLong totalhigh; // Total high memory size
+
+	        public NativeLong freehigh; // Available high memory size
+
+	        public int mem_unit; // Memory unit size in bytes
+
+	        public byte[] _f = new byte[8]; // Won't be written for 64-bit systems
+
+	        @Override
+	        protected List<String> getFieldOrder() {
+	            return Arrays.asList(new String[] { "uptime", "loads", "totalram", "freeram", "sharedram", "bufferram",
+	                    "totalswap", "freeswap", "procs", "totalhigh", "freehigh", "mem_unit", "_f" });
+	        }
+	    }
+
+	    int sysinfo(Sysinfo info);
+
 
 	}// CLibrary
 
@@ -2275,6 +2314,23 @@ public class PosixProcess extends AbstractProcess
 	{
 		int result = CLibrary.INSTANCE.umask(mask);
 		return result;
+	}
+
+	public long getUptime()
+	{
+        try {
+            Sysinfo info = new Sysinfo();
+            if (0 != CLibrary.INSTANCE.sysinfo(info)) {
+            	if (_logger != null)
+            		_logger.severe("error getting uptime: " + Native.getLastError());
+                return 0L;
+            }
+            return info.uptime.longValue();
+        } catch (Exception ex) {
+        	if (_logger != null)
+        		_logger.severe("error getting uptime: " + ex);
+        }
+        return 0L;
 	}
 
 }

@@ -18,6 +18,7 @@ package org.rzo.yajsw.config.jnlp;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -26,9 +27,10 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.vfs2.FileObject;
+import org.rzo.yajsw.config.FilePropertiesConfiguration;
 import org.rzo.yajsw.util.Utils;
 import org.rzo.yajsw.util.VFSUtils;
 import org.w3c.dom.Document;
@@ -50,11 +52,11 @@ public class JnlpSupport
 		in.close();
 	}
 
-	public PropertiesConfiguration toConfiguration(String defaultsFile)
+	public FilePropertiesConfiguration toConfiguration(String defaultsFile)
 			throws ConfigurationException, IOException
 	{
 		int i = 1;
-		PropertiesConfiguration jnlpConf = new PropertiesConfiguration();
+		FilePropertiesConfiguration jnlpConf = new FilePropertiesConfiguration();
 
 		List jars = getJars(_doc);
 		for (Iterator it = jars.listIterator(); it.hasNext();)
@@ -94,8 +96,8 @@ public class JnlpSupport
 		{
 			PropertiesConfiguration defaultsConf = new PropertiesConfiguration();
 			FileObject fo = VFSUtils.resolveFile(".", defaultsFile);
-			InputStream in = fo.getContent().getInputStream();
-			defaultsConf.load(in);
+			InputStreamReader in = new InputStreamReader(fo.getContent().getInputStream());
+			defaultsConf.read(in);
 			in.close();
 			for (Iterator it = defaultsConf.getKeys(); it.hasNext();)
 			{

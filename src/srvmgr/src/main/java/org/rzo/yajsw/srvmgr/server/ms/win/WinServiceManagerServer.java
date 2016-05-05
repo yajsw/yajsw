@@ -18,10 +18,10 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.apache.commons.configuration.BaseConfiguration;
-import org.apache.commons.configuration.Configuration;
 import org.rzo.yajsw.Constants;
 import org.rzo.yajsw.config.YajswConfigurationImpl;
+import org.rzo.yajsw.config.groovy.BaseConfiguration;
+import org.rzo.yajsw.config.groovy.Configuration;
 import org.rzo.yajsw.os.OperatingSystem;
 import org.rzo.yajsw.os.Service;
 import org.rzo.yajsw.os.Process;

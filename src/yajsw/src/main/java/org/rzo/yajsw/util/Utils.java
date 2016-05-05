@@ -80,6 +80,11 @@ public class Utils
 
 	public static String getDOption(String key, String value)
 	{
+		if (value == null)
+		{
+			System.out.println("null d option: "+key);
+			return null;
+		}
 		// value = value.replace("\"", "\\\"");
 		// value = value.replace("\\", "\\\\");
 		value = value.replaceAll("\"", "");

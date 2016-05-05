@@ -19,7 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.vfs2.AllFileSelector;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;

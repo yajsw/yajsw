@@ -25,7 +25,7 @@ import java.util.Map;
 
 import org.apache.commons.collections.Bag;
 import org.apache.commons.collections.bag.HashBag;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.rzo.yajsw.util.File;
 
 import com.sun.jna.Memory;

@@ -13,9 +13,9 @@ dependencies {
 dependencies {
     compile group: 'commons-cli', 				name: 'commons-cli', 							version: "$commons_cli_version"
     compile group: 'commons-collections', name: 'commons-collections', 			version: "$commons_collections_version"
-    compile group: 'commons-configuration', name: 'commons-configuration', 	version: "$commons_configuration_version"
+    compile group: 'commons-configuration2', name: 'commons-configuration2', 	version: "$commons_configuration_version"
     compile group: 'commons-io', 					name: 'commons-io', 							version: "$commons_io_version"
-    compile group: 'commons-lang', 				name: 'commons-lang', 						version: "$commons_lang_version"
+    compile group: 'commons-lang3', 				name: 'commons-lang3', 						version: "$commons_lang_version"
     compile group: 'commons-logging', 		name: 'commons-logging', 					version: "$commons_logging_version"
     compile group: 'commons-vfs2', 				name: 'commons-vfs2', 						version: "$commons_vfs2_version"
     compile group: 'groovy-all', 					name: 'groovy-all', 							version: "$groovy_all_version"
@@ -30,11 +30,11 @@ dependencies {
     compile group: 'joda-time', 					name: 'joda-time', 								version: "$joda_time_version"
 }
 
-//println '---------------------------'
-//println 'dependency jars:'
-//println '---------------------------'
-//configurations.compile.each { File file -> println file.absolutePath }
-//println '---------------------------'
+println '---------------------------'
+println 'dependency jars:'
+println '---------------------------'
+configurations.compile.each { File file -> println file.absolutePath }
+println '---------------------------'
 
 // name of jar file
 jar.baseName = 'wrapper'

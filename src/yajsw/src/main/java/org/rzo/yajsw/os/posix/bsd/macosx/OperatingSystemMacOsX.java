@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.rzo.yajsw.os.posix.bsd.macosx;
 
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.Configuration;
 import org.rzo.yajsw.os.ErrorHandler;
 import org.rzo.yajsw.os.FileManager;
 import org.rzo.yajsw.os.JavaHome;
@@ -85,6 +85,19 @@ public class OperatingSystemMacOsX extends OperatingSystemPosix
 		if (_fileManagerInstance == null)
 			_fileManagerInstance = new MacOsXFileManager();
 		return _fileManagerInstance;
+	}
+
+	@Override
+	public long getUptime()
+	{
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void reboot()
+	{
+		throw new RuntimeException("not yet implemented");
 	}
 
 }

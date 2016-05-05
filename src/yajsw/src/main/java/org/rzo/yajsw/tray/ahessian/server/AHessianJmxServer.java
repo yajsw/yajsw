@@ -17,6 +17,7 @@ package org.rzo.yajsw.tray.ahessian.server;
 
 import io.netty.channel.Channel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.channel.socket.oio.OioServerSocketChannel;
 import io.netty.handler.ipfilter.IpFilterRuleList;
 import io.netty.util.internal.logging.InternalLogger;
 
@@ -59,7 +60,7 @@ public class AHessianJmxServer
 
 		int serverPort = port;
 
-		DefaultServer server = new DefaultServer(NioServerSocketChannel.class,
+		DefaultServer server = new DefaultServer(OioServerSocketChannel.class,
 				builder, channelOptions, serverPort);
 
 		server.start();

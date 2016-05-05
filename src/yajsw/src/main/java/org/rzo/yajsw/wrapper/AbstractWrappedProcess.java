@@ -71,8 +71,8 @@ import javax.security.auth.Subject;
 
 import org.apache.commons.collections.MultiMap;
 import org.apache.commons.collections.map.MultiValueMap;
-import org.apache.commons.configuration.BaseConfiguration;
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.BaseConfiguration;
+import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.rzo.yajsw.Constants;
@@ -3656,7 +3656,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	{
 		if (_config == null)
 			return 0;
-		long startDelay = _config.getLong("wrapper.startup.delay", 0);
+		long startDelay = _config.getInt("wrapper.startup.delay", 0)*1000;
 		long startupTimeout = _config.getInt("wrapper.startup.timeout",
 				DEFAULT_STARTUP_TIMEOUT) * 1000;
 		if (startDelay < Integer.MAX_VALUE

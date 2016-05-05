@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.rzo.yajsw.os.posix;
 
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.Configuration;
 import org.rzo.yajsw.os.Mouse;
 import org.rzo.yajsw.os.OperatingSystem;
 

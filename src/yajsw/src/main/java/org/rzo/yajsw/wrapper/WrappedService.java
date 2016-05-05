@@ -33,9 +33,9 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.logging.Logger;
 
-import org.apache.commons.configuration.BaseConfiguration;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.ConfigurationUtils;
+import org.apache.commons.configuration2.BaseConfiguration;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.ConfigurationUtils;
 import org.rzo.yajsw.Constants;
 import org.rzo.yajsw.boot.WrapperServiceBooter;
 import org.rzo.yajsw.cache.Cache;

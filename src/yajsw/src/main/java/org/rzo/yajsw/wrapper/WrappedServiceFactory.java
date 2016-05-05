@@ -18,8 +18,8 @@ package org.rzo.yajsw.wrapper;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.MapConfiguration;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.MapConfiguration;
 
 public class WrappedServiceFactory
 {

@@ -17,7 +17,7 @@ package org.rzo.yajsw.os;
 
 import java.util.logging.Logger;
 
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.Configuration;;
 
 abstract public class AbstractService implements Service
 {

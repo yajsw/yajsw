@@ -158,12 +158,30 @@ public class WrapperMainServiceWin extends Win32Service implements
 		// max timeout
 		// but return as soon as possible to the windows service controller
 		final long maxStartTime = w.getMaxStartTime();
+		long startDelay = _config.getLong("wrapper.ntservice.delay", 0);
+		w.getWrapperLogger().info("start delay: "+startDelay);
+		long bootDelay = 0;
+		if (startDelay > 0)
+		{
+			long uptime = OperatingSystem.instance().getUptime();
+			long d = startDelay - uptime;
+			w.getWrapperLogger().info("d: "+d+" uptime " + uptime);
+			if (d > 0)
+				bootDelay = d*1000;
+		}
+		final long delay = bootDelay;
+
 		final Future future = pool.submit(new Runnable()
 		{
 			public void run()
 			{
 				try
 				{
+					if (delay > 0)
+					{
+						w.getWrapperLogger().info("delay app startup: "+delay/1000+" sec");
+						Thread.sleep(delay);
+					}
 					Thread.yield();
 					wList.startAll();
 				}
@@ -183,14 +201,14 @@ public class WrapperMainServiceWin extends Win32Service implements
 			{
 				try
 				{
-					future.get(maxStartTime, TimeUnit.MILLISECONDS);
+					future.get(maxStartTime+delay, TimeUnit.MILLISECONDS);
 				}
 				catch (Exception ex)
 				{
 					ex.printStackTrace();
 					w.getWrapperLogger().info(
 							"Win Service: wrapper did not start within "
-									+ maxStartTime + " ms " + ex.getMessage());
+									+ (maxStartTime+delay) + " ms " + ex.getMessage());
 					Runtime.getRuntime().halt(999);
 				}
 			}

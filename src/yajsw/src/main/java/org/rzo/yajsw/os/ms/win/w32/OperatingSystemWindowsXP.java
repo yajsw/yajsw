@@ -16,7 +16,7 @@
 
 package org.rzo.yajsw.os.ms.win.w32;
 
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.Configuration;
 import org.rzo.yajsw.os.ErrorHandler;
 import org.rzo.yajsw.os.FileManager;
 import org.rzo.yajsw.os.JavaHome;
@@ -131,6 +131,25 @@ public class OperatingSystemWindowsXP extends OperatingSystem
 	public Object getServiceFailureActions(Configuration config)
 	{
 		return WindowsXPService.getServiceFailureActions(config);
+	}
+
+	@Override
+	public long getUptime()
+	{
+		return new WindowsXPProcess().getUptime();
+	}
+	
+	@Override
+	public void reboot()
+	{
+		try
+		{
+		 new WindowsXPProcess().reboot();
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
 	}
 
 }

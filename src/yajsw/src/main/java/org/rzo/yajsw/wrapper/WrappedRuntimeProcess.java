@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.Configuration;
 import org.rzo.yajsw.controller.AbstractController.ControllerListener;
 import org.rzo.yajsw.controller.runtime.RuntimeController;
 import org.rzo.yajsw.os.OperatingSystem;

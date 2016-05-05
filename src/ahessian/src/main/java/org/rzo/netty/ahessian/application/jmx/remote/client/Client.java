@@ -21,7 +21,9 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.oio.OioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.channel.socket.oio.OioSocketChannel;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -48,10 +50,10 @@ public class Client
 		final ExecutorService executor = Executors.newCachedThreadPool();
 
 		Bootstrap bootstrap = new Bootstrap();
-		EventLoopGroup workerGroup = new NioEventLoopGroup();
+		EventLoopGroup workerGroup = new OioEventLoopGroup();
 		// workerGroup.setIoRatio(99);
 		bootstrap.group(workerGroup);
-		bootstrap.channel(NioSocketChannel.class);
+		bootstrap.channel(OioSocketChannel.class);
 
 		bootstrap.remoteAddress(new InetSocketAddress("localhost", 15009));
 		bootstrap.option(ChannelOption.SO_REUSEADDR, true);

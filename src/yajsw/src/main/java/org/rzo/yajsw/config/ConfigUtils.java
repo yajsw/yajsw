@@ -18,7 +18,7 @@ package org.rzo.yajsw.config;
 import java.util.Iterator;
 import java.util.Properties;
 
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.Configuration;
 
 public class ConfigUtils
 {

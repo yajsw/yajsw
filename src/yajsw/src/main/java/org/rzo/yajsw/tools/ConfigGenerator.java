@@ -19,7 +19,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.rzo.yajsw.config.FilePropertiesConfiguration;
 import org.rzo.yajsw.os.OperatingSystem;
 import org.rzo.yajsw.os.Process;
 
@@ -155,11 +156,11 @@ public class ConfigGenerator
 			 */
 
 			// System.out.println("cmd " +MonitoredVmUtil.commandLine(vm));
-			PropertiesConfiguration conf;
+			FilePropertiesConfiguration conf;
 			if (input == null)
-				conf = new PropertiesConfiguration();
+				conf = new FilePropertiesConfiguration();
 			else
-				conf = new PropertiesConfiguration(input);
+				conf = new FilePropertiesConfiguration(input);
 
 			JCLParser parsedCmd = JCLParser.parse(cmd);
 			/*

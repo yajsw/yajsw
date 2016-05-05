@@ -29,8 +29,8 @@ import javax.management.MBeanServerInvocationHandler;
 import javax.management.ObjectName;
 import javax.management.remote.JMXServiceURL;
 
-import org.apache.commons.configuration.BaseConfiguration;
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.BaseConfiguration;
+import org.apache.commons.configuration2.Configuration;
 import org.rzo.yajsw.config.YajswConfigurationImpl;
 import org.rzo.yajsw.tray.ahessian.client.AHessianJmxClient;
 import org.rzo.yajsw.util.Utils;

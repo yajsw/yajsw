@@ -16,7 +16,7 @@
 package org.rzo.yajsw.tray.ahessian.client;
 
 import io.netty.channel.Channel;
-import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.channel.socket.oio.OioSocketChannel;
 import io.netty.util.internal.logging.InternalLogger;
 
 import java.util.HashMap;
@@ -82,7 +82,7 @@ public class AHessianJmxClient
 		channelOptions.add("SO_REUSE");
 		channelOptions.add("TCP_NODELAY");
 		client = new DefaultClient<MBeanServerConnection>(
-				NioSocketChannel.class, builder, channelOptions);
+				OioSocketChannel.class, builder, channelOptions);
 
 	}
 

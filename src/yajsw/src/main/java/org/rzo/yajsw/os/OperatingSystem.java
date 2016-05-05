@@ -16,7 +16,7 @@
 
 package org.rzo.yajsw.os;
 
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.Configuration;
 import org.rzo.yajsw.os.ms.win.w32.OperatingSystemWindowsXP;
 import org.rzo.yajsw.os.posix.bsd.OperatingSystemBSD;
 import org.rzo.yajsw.os.posix.bsd.macosx.OperatingSystemMacOsX;
@@ -123,5 +123,10 @@ public abstract class OperatingSystem
 	public abstract SystemInformation systemInformation();
 
 	public abstract boolean setWorkingDir(String name);
+	
+	// returns seconds since boot, on windows max value is apprx 49 days
+	public abstract long getUptime();
+	
+	public abstract void reboot();
 
 }

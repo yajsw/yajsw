@@ -24,12 +24,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
-import org.apache.commons.configuration.AbstractConfiguration;
-import org.apache.commons.configuration.BaseConfiguration;
-import org.apache.commons.configuration.CompositeConfiguration;
-import org.apache.commons.configuration.ConfigurationConverter;
-import org.apache.commons.configuration.EnvironmentConfiguration;
+import org.apache.commons.configuration2.AbstractConfiguration;
+import org.apache.commons.configuration2.BaseConfiguration;
+import org.apache.commons.configuration2.CompositeConfiguration;
+import org.apache.commons.configuration2.ConfigurationConverter;
+import org.apache.commons.configuration2.EnvironmentConfiguration;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+
 
 import com.sun.jna.Platform;
 

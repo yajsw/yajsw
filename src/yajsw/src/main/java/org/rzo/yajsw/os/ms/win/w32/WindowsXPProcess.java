@@ -66,9 +66,14 @@ import com.sun.jna.Pointer;
 import com.sun.jna.StringBlock;
 import com.sun.jna.Structure;
 import com.sun.jna.WString;
+import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.Kernel32Util;
 import com.sun.jna.platform.win32.User32;
+import com.sun.jna.platform.win32.WinDef;
+import com.sun.jna.platform.win32.WinDef.DWORD;
 import com.sun.jna.platform.win32.WinDef.HWND;
+import com.sun.jna.platform.win32.WinDef.UINT;
+import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
 import com.sun.jna.platform.win32.WinUser.WINDOWINFO;
 import com.sun.jna.ptr.IntByReference;
@@ -278,6 +283,13 @@ public class WindowsXPProcess extends AbstractProcess
 		}
 
 		boolean EnumWindows(WNDENUMPROC lpEnumFunc, int data);
+		
+		 final static int EWX_LOGOFF = 0x00;
+	     final static int EWX_POWEROFF = 0x08;
+	     final static int EWX_REBOOT = 0x02;
+	     final static int EWX_FORCE = 0x04;
+	     final static int EWX_FORCEIFHUNG = 0x10;
+	     final static int SHTDN_REASON_FLAG_PLANNED = 0x80000000;
 
 	}
 
@@ -4409,6 +4421,33 @@ public class WindowsXPProcess extends AbstractProcess
 		else
 			System.out.println("no window found");
 
+	}
+
+	public long getUptime()
+	{
+		return MyKernel32.INSTANCE.GetTickCount()/1000;
+	}
+	
+	private static void setShutdownPrivileges() {
+        final WinNT.HANDLEByReference token = new WinNT.HANDLEByReference();
+        Advapi32.INSTANCE.OpenProcessToken(Kernel32.INSTANCE.GetCurrentProcess(), WinNT.TOKEN_ADJUST_PRIVILEGES, token);
+
+        final WinNT.LUID luid = new WinNT.LUID();
+        Advapi32.INSTANCE.LookupPrivilegeValue(null, WinNT.SE_SHUTDOWN_NAME, luid);
+
+        final WinNT.TOKEN_PRIVILEGES tp = new WinNT.TOKEN_PRIVILEGES(1);
+        tp.Privileges[0] = new WinNT.LUID_AND_ATTRIBUTES(luid, new WinDef.DWORD(WinNT.SE_PRIVILEGE_ENABLED));
+        Advapi32.INSTANCE.AdjustTokenPrivileges(token.getValue(), false, tp, 0, null, new IntByReference(0));
+    }
+
+	public void reboot()
+	{
+		setShutdownPrivileges();
+		if (!MyUser32.INSTANCE.ExitWindowsEx(new UINT(MyUser32.INSTANCE.EWX_REBOOT + MyUser32.INSTANCE.EWX_FORCE), new DWORD(MyUser32.INSTANCE.SHTDN_REASON_FLAG_PLANNED)).booleanValue())
+		{
+			int err = MyKernel32.INSTANCE.GetLastError();
+			System.out.println("error executing reboot "+err+ " "+Kernel32Util.formatMessageFromLastErrorCode(err));
+		}
 	}
 
 }

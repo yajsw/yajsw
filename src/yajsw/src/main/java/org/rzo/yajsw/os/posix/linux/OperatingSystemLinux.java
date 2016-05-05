@@ -16,7 +16,7 @@
 
 package org.rzo.yajsw.os.posix.linux;
 
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.Configuration;
 import org.rzo.yajsw.os.ErrorHandler;
 import org.rzo.yajsw.os.FileManager;
 import org.rzo.yajsw.os.JavaHome;
@@ -85,5 +85,18 @@ public class OperatingSystemLinux extends OperatingSystemPosix
 		if (_fileManagerInstance == null)
 			_fileManagerInstance = new LinuxFileManager();
 		return _fileManagerInstance;
+	}
+
+	@Override
+	public long getUptime()
+	{
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void reboot()
+	{
+		throw new RuntimeException("not yet implemented");
 	}
 }

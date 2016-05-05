@@ -21,7 +21,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.Configuration;
 import org.rzo.yajsw.Constants;
 import org.rzo.yajsw.os.OperatingSystem;
 import org.rzo.yajsw.os.Process;

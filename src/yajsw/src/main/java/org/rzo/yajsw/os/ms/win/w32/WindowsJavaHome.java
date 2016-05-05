@@ -27,8 +27,8 @@ import java.nio.channels.FileChannel;
 import jnacontrib.win32.Registry;
 import jnacontrib.win32.Registry.REGISTRY_ROOT_KEY;
 
-import org.apache.commons.configuration.BaseConfiguration;
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.BaseConfiguration;
+import org.apache.commons.configuration2.Configuration;
 import org.rzo.yajsw.boot.WrapperLoader;
 import org.rzo.yajsw.os.JavaHome;
 
