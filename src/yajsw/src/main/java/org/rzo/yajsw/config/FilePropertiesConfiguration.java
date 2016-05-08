@@ -25,9 +25,10 @@ public class FilePropertiesConfiguration extends PropertiesConfiguration
 	FileSystem _fileSystem;
 	String _encoding;
 
-	public FilePropertiesConfiguration(File file)
+	public FilePropertiesConfiguration(File file) throws Exception
 	{
 		_fileName = file.getAbsolutePath();
+		load();
 	}
 
 	public FilePropertiesConfiguration()
