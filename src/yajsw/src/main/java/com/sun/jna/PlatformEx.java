@@ -10,9 +10,16 @@ public class PlatformEx
 		String osName = System.getProperty("os.name").toLowerCase();
 		if (osName.startsWith("windows"))
 		{
-			winVista = osName.contains("vista") || osName.contains(" 7")
-					|| osName.contains("2008") || osName.contains("2012")
-					|| osName.contains(" 8");
+			winVista = !(osName.contains(" 1.")
+					|| osName.contains(" 2.")
+					|| osName.contains(" 3.")
+					|| osName.contains(" NT")
+					|| osName.contains(" 98")
+					|| osName.contains(" 95")
+					|| osName.contains(" 2000")
+					|| osName.contains(" ME")
+					|| osName.contains(" XP")
+					);
 		}
 	}
 
