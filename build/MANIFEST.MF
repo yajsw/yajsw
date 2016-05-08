@@ -10,6 +10,7 @@ Class-Path-Wrapper-Core:
  ./lib/core/commons/commons-collections-3.2.2.jar 
  ./lib/core/commons/commons-io-1.3.1.jar 
  ./lib/core/commons/commons-lang3-3.4.jar 
+ ./lib/core/commons/commons-lang-2.4.jar 
  ./lib/core/commons/commons-logging-1.1.jar 
  ./lib/core/commons/commons-cli-1.3.1.jar
   
