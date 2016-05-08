@@ -561,7 +561,7 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements
 			return true;
 		try
 		{
-			String name = _fileConfiguration.getFileName();
+			String name = _fileConfiguration.getURL();
 			if (name.endsWith(".jnlp"))
 				return false;
 
@@ -603,8 +603,7 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements
 		try
 		{
 			String cache = getCache() + "/conf";
-			String fileName = _fileConfiguration.getFileSystem().getFileName(
-					_fileConfiguration.getFileName());
+			String fileName = _fileConfiguration.getFileName();
 			File cf = new File(cache);
 			if (!cf.exists())
 				cf.mkdirs();

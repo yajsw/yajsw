@@ -15,6 +15,7 @@ import java.net.URL;
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.io.FileSystem;
 import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
 import org.rzo.yajsw.util.VFSUtils;
 
 public class FilePropertiesConfiguration extends PropertiesConfiguration
@@ -36,18 +37,19 @@ public class FilePropertiesConfiguration extends PropertiesConfiguration
 
 	public String getFileName()
 	{
-		return _fileName;
-	}
-
-	public URL getURL() throws Exception
-	{
+		//return _fileName;
 		try {
-			return _fileSystem.getURL(".", _fileName);
-		} catch (MalformedURLException e) {
+			return VFSUtils.resolveFile(".", _fileName).getName().getBaseName();
+		} catch (FileSystemException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return new File(_fileName).toURL();
+		return _fileName;
+	}
+
+	public String getURL() throws Exception
+	{
+		return _fileName;
 	}
 
 	public FileSystem getFileSystem()
