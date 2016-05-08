@@ -890,7 +890,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 		if (OperatingSystem.instance().isPosix())
 		{
 			String absPath = result.getAbsolutePath();
-			System.out.println("createRWfile " + absPath);
+			//System.out.println("createRWfile " + absPath);
 			try
 			{
 				if (!result.exists())
@@ -899,8 +899,19 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 				}
 				result.deleteOnExit();
 				Process p = Runtime.getRuntime().exec("chmod 777 " + absPath);
-				// p.waitFor();
-				Thread.sleep(500);
+				int i=0;
+				boolean ok = false;
+				// wait timeout 20 secs
+				while (!ok && i < 200)
+				try
+				{
+					i++;
+					Thread.yield();
+					p.exitValue();
+					ok = true;
+				}
+				catch(IllegalThreadStateException ex){ Thread.sleep(100);};
+				//p.waitFor(); NOTE: we need waitFor(timeout) 
 				p.destroy();
 			}
 			catch (Exception ex)
