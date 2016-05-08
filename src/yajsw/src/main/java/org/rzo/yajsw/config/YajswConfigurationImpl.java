@@ -595,7 +595,7 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements
 			return null;
 		if (isLocalFile())
 			try {
-				return new File(_fileConfiguration.getFileName()).getCanonicalPath();
+				return new File(_fileConfiguration.getPath()).getCanonicalPath();
 			} catch (IOException e) {
 				e.printStackTrace();
 				return null;

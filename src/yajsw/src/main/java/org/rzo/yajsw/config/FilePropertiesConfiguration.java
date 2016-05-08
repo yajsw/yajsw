@@ -34,6 +34,11 @@ public class FilePropertiesConfiguration extends PropertiesConfiguration
 	{
 		// TODO Auto-generated constructor stub
 	}
+	
+	public String getPath()
+	{
+		return _fileName;
+	}
 
 	public String getFileName()
 	{
