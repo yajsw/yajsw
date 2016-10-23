@@ -1338,7 +1338,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	{
 		System.out.println("system.env " + System.getenv().size());
 		// if user did not set env properties: use default.
-		if (!config.getKeys("wrapper.app.env").hasNext())
+		if (!config.getKeys("wrapper.app.env").hasNext() && Platform.isWindows())
 		{
 			return null;
 		}
