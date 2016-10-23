@@ -1042,6 +1042,7 @@ public class WindowsXPProcess extends AbstractProcess
 		 * BOOL WINAPI SetCurrentDirectory( __in LPCTSTR lpPathName );
 		 */
 		boolean SetCurrentDirectoryA(String lpPathName);
+		boolean SetCurrentDirectoryW(WString lpPathName);
 
 		/*
 		 * typedef struct _MEMORY_BASIC_INFORMATION { PVOID BaseAddress; PVOID
@@ -4144,7 +4145,7 @@ public class WindowsXPProcess extends AbstractProcess
 				e.printStackTrace();
 				return false;
 			}
-		boolean result = MyKernel32.INSTANCE.SetCurrentDirectoryA(dir);
+		boolean result = MyKernel32.INSTANCE.SetCurrentDirectoryW(new WString(dir));
 		if (result)
 			System.setProperty("user.dir", dir);
 		return result;
