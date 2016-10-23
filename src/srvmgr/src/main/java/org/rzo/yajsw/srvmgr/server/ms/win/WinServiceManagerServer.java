@@ -18,10 +18,10 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.apache.commons.configuration2.BaseConfiguration;
+import org.apache.commons.configuration2.Configuration;
 import org.rzo.yajsw.Constants;
 import org.rzo.yajsw.config.YajswConfigurationImpl;
-import org.rzo.yajsw.config.groovy.BaseConfiguration;
-import org.rzo.yajsw.config.groovy.Configuration;
 import org.rzo.yajsw.os.OperatingSystem;
 import org.rzo.yajsw.os.Service;
 import org.rzo.yajsw.os.Process;
@@ -234,6 +234,7 @@ public class WinServiceManagerServer implements ServiceManagerServer
 			xname = _config.getString("wrapper.ntservice.name");
 		if (xname == null)
 			xname = "yajsw.noname";
+		name = ObjectName.quote(xname);
 		ObjectName oName = new ObjectName("org.rzo.yajsw", "name", xname);
 		JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:"+port+"/server");
 		 jmxc = JMXConnectorFactory.connect(url, null);

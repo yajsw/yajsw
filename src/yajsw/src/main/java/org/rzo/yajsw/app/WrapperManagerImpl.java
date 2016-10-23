@@ -748,6 +748,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 					name = config.getString("wrapper.ntservice.name");
 				if (name == null)
 					name = "yajsw.noname";
+				name = ObjectName.quote(name);
 				ObjectName oName = new ObjectName("Wrapper", "name", name);
 				server.registerMBean(this, oName);
 				// System.out.println("found mbean server: " +
