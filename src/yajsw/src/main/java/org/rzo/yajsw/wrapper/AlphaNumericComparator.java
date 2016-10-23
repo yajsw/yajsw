@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Locale;
 
 import static java.nio.CharBuffer.wrap;
-import static java.util.Objects.requireNonNull;
 
 public class AlphaNumericComparator implements Comparator<CharSequence> {
 
@@ -113,7 +112,7 @@ public class AlphaNumericComparator implements Comparator<CharSequence> {
             final int intValue = (int) c;
             return intValue >= 48 && intValue <= 57;
         }
-        return Character.isDigit(c);
+        return isDigit(c);
     }
 
     private int compareNumerically(final CharBuffer b1, final CharBuffer b2) {
@@ -122,7 +121,7 @@ public class AlphaNumericComparator implements Comparator<CharSequence> {
             return diff;
         }
         for (int i = 0; i < b1.remaining() && i < b2.remaining(); ++i) {
-            final int result = Character.compare(b1.charAt(i), b2.charAt(i));
+            final int result = compare(b1.charAt(i), b2.charAt(i));
             if (result != 0) {
                 return result;
             }
@@ -153,5 +152,17 @@ public class AlphaNumericComparator implements Comparator<CharSequence> {
 		Collections.sort(x, new AlphaNumericComparator());
 		System.out.println(x);
 	}
+	
+    public static <T> T requireNonNull(T obj) {
+        if (obj == null)
+            throw new NullPointerException();
+        return obj;
+    }
+    
+    public static int compare(char x, char y) {
+        return x - y;
+    }
+
+
 
 }
