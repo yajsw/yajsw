@@ -35,6 +35,7 @@ import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.ConfigurationConverter;
 import org.apache.commons.configuration2.MapConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.interpol.ConfigurationInterpolator;
 import org.apache.commons.configuration2.io.ConfigurationLogger;
@@ -158,6 +159,11 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements
 		 * in.getDefaultLookup(); in.setDefaultLookup(new
 		 * MyStrLookup(orgLookup));
 		 */
+		
+		this.setListDelimiterHandler(new DefaultListDelimiterHandler(','));
+		_systemConfiguration.setListDelimiterHandler(new DefaultListDelimiterHandler(','));
+
+		
 		if (_scriptUtils == null)
 			_scriptUtils = new HashMap();
 		try
@@ -190,6 +196,7 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements
 			_systemProperties = ConfigurationConverter
 					.getConfiguration((Properties) System.getProperties()
 							.clone());
+			
 			_systemConfiguration.addConfiguration(_systemProperties);
 			if (debug)
 				log.debug("added system configuration ");

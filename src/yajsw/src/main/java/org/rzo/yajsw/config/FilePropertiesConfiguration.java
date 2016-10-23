@@ -13,6 +13,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
+import org.apache.commons.configuration2.io.FileLocationStrategy;
+import org.apache.commons.configuration2.io.FileLocator;
+import org.apache.commons.configuration2.io.FileLocator.FileLocatorBuilder;
+import org.apache.commons.configuration2.io.FileLocatorUtils;
 import org.apache.commons.configuration2.io.FileSystem;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
@@ -24,16 +29,47 @@ public class FilePropertiesConfiguration extends PropertiesConfiguration
 	File _url;
 	FileSystem _fileSystem;
 	String _encoding;
+	
+	 public class MyFileLocationStrategy implements FileLocationStrategy{
+
+		@Override
+		public URL locate(FileSystem fileSystem, FileLocator locator) {
+			try {
+				FileObject file = VFSUtils.resolveFile(_fileName);
+				String base = VFSUtils.isLocal(file) ? new File(_fileName).getParent() : file.getParent().getURL().toString();
+				return VFSUtils.resolveFile(base, locator.getFileName()).getURL();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+	}
+
 
 	public FilePropertiesConfiguration(File file) throws Exception
 	{
 		_fileName = file.getAbsolutePath();
+		init();
 		load();
 	}
 
 	public FilePropertiesConfiguration()
 	{
-		// TODO Auto-generated constructor stub
+		init();
+	}
+	
+	private void init()
+	{
+		this.setListDelimiterHandler(new DefaultListDelimiterHandler(','));
+		FileLocationStrategy strategy = new MyFileLocationStrategy();
+		String basePath = _fileName == null ? "." : new File(_fileName).getParent();
+		FileLocator locator = FileLocatorUtils.fileLocator()
+				.locationStrategy(strategy)
+				.basePath(basePath)
+				.create();
+		this.initFileLocator(locator);
 	}
 	
 	public String getPath()
