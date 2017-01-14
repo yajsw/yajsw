@@ -1,9 +1,7 @@
-yajsw-beta-12.07
+yajsw-stable-12.08
 
-    	* bug: Cannot specify colon in wrapper.console.title
-	* bug: error in AlphaNumericComparator when sorting parameters and classpath
-	* bug: posix: env vars are not inherited by subprocess if created with posix_spawn
-	* bug: configuration include does not work
-	* bug: configuration does not correctly read lists
-	* change: support working dir with non latin chars
-	* change: windows: change drive or UNC path when executing batch files
+    * Bug: Unix supplemental groups
+    * Bug: setting jna_tmp has no effect
+    * Change: update to jna-4.2.2 + aix64 lib
+
+For those still using yajsw-stable-11.08 it is recommended to update to this release.
