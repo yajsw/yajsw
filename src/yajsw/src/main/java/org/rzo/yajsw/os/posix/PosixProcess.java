@@ -59,8 +59,7 @@ import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import com.sun.jna.ptr.IntByReference;
 
-public class PosixProcess extends AbstractProcess
-{
+public class PosixProcess extends AbstractProcess {
 	protected int[] _inPipe = new int[2];
 	protected int[] _outPipe = new int[2];
 	protected int[] _errPipe = new int[2];
@@ -84,8 +83,7 @@ public class PosixProcess extends AbstractProcess
 	Pointer posix_spawn_file_actions;
 	Pointer posix_spawnattr;
 
-	public interface CLibrary extends com.sun.jna.Library
-	{
+	public interface CLibrary extends com.sun.jna.Library {
 
 		// CLibrary INSTANCE = (CLibrary) Native.loadLibrary(Platform.isLinux()
 		// ? "CLibrary.INSTANCE.so.6" : "c", CLibrary.class);
@@ -219,8 +217,7 @@ public class PosixProcess extends AbstractProcess
 		 * struct dirent64 { __u64 d_ino; __s64 d_off; unsigned short d_reclen;
 		 * unsigned char d_type; char d_name[256]; };
 		 */
-		class dirent64 extends Structure
-		{
+		class dirent64 extends Structure {
 			public long d_ino;
 			public long d_off;
 			public short d_reclen;
@@ -228,15 +225,13 @@ public class PosixProcess extends AbstractProcess
 			public char[] d_name = new char[256];
 
 			@Override
-			protected List getFieldOrder()
-			{
+			protected List getFieldOrder() {
 				return Arrays.asList(new String[] {
 
 				"d_ino", "d_off", "d_reclen", "d_type", "d_name" });
 			}
 
-			public String getName()
-			{
+			public String getName() {
 				return getPointer().getString(8 + 8 + 2 + 1);
 			}
 		};
@@ -245,16 +240,14 @@ public class PosixProcess extends AbstractProcess
 		 * struct dirent { long d_ino; off_t d_off; unsigned short d_reclen;
 		 * char d_name[NAME_MAX+1]; };
 		 */
-		class dirent extends Structure
-		{
+		class dirent extends Structure {
 			public int d_ino;
 			public int d_off;
 			public short d_reclen;
 			public String d_name;
 
 			@Override
-			protected List getFieldOrder()
-			{
+			protected List getFieldOrder() {
 				return Arrays.asList(new String[] { "d_ino", "d_off",
 						"d_reclen", "d_name" });
 			}
@@ -314,13 +307,10 @@ public class PosixProcess extends AbstractProcess
 		 * be a null pointer, indicating that the system default should be used.
 		 */
 
-		public static class passwd extends Structure
-		{
-			public passwd(Pointer p)
-			{
+		public static class passwd extends Structure {
+			public passwd(Pointer p) {
 				super();
-				if (p != null)
-				{
+				if (p != null) {
 					this.useMemory(p);
 					this.read();
 				}
@@ -335,24 +325,20 @@ public class PosixProcess extends AbstractProcess
 			public String pw_shell;
 
 			@Override
-			protected List getFieldOrder()
-			{
+			protected List getFieldOrder() {
 				return Arrays.asList(new String[] { "pw_name", "pw_passwd",
 						"pw_uid", "pw_gid", "pw_gecos", "pw_dir", "pw_shell" });
 			}
 
-			public String getName()
-			{
+			public String getName() {
 				return pw_name;
 			}
 
-			public int getUid()
-			{
+			public int getUid() {
 				return pw_uid;
 			}
 
-			public int getGid()
-			{
+			public int getGid() {
 				return pw_gid;
 			}
 		}
@@ -393,6 +379,15 @@ public class PosixProcess extends AbstractProcess
 		int setreuid(int ruid, int euid);
 
 		/*
+		 * 
+		 * Function: int initgroups (const char *user, gid_t gid) The initgroups
+		 * function effectively calls setgroups to set the process's
+		 * supplementary group IDs to be the normal default for the user name
+		 * user. The group ID gid is also included.
+		 */
+		int initgroups(String user, int group);
+
+		/*
 		 * struct group * getgrgid (gid_t gid) This function returns a pointer
 		 * to a statically-allocated structure containing information about the
 		 * group whose group ID is gid. This structure may be overwritten by
@@ -415,13 +410,10 @@ public class PosixProcess extends AbstractProcess
 		 * names of users in the group. Each user name is a null-terminated
 		 * string, and the vector itself is terminated by a null pointer.
 		 */
-		public static class group extends Structure
-		{
-			public group(Pointer p)
-			{
+		public static class group extends Structure {
+			public group(Pointer p) {
 				super();
-				if (p != null)
-				{
+				if (p != null) {
 					this.useMemory(p);
 					this.read();
 				}
@@ -435,19 +427,16 @@ public class PosixProcess extends AbstractProcess
 			public Pointer gr_mem = null;
 
 			@Override
-			protected List getFieldOrder()
-			{
+			protected List getFieldOrder() {
 				return Arrays.asList(new String[] { "gr_name", "gr_password",
 						"gr_gid", "gr_mem" });
 			}
 
-			public String getName()
-			{
+			public String getName() {
 				return gr_name;
 			}
 
-			public int getGid()
-			{
+			public int getGid() {
 				return gr_gid;
 			}
 
@@ -548,8 +537,7 @@ public class PosixProcess extends AbstractProcess
 		public static final int ALL_WRITE = S_IWUSR | S_IWGRP | S_IWOTH;
 		public static final int S_IXUGO = S_IXUSR | S_IXGRP | S_IXOTH;
 
-		public static class stat64 extends Structure
-		{
+		public static class stat64 extends Structure {
 			public long st_dev;
 			public long st_ino;
 			public long st_nlink;
@@ -573,8 +561,7 @@ public class PosixProcess extends AbstractProcess
 			public long __unused6;
 
 			@Override
-			protected List getFieldOrder()
-			{
+			protected List getFieldOrder() {
 				return Arrays
 						.asList(new String[] { "st_dev", "st_ino", "st_nlink",
 								"st_mode", "st_uid", "st_gid", "st_rdev",
@@ -584,14 +571,12 @@ public class PosixProcess extends AbstractProcess
 								"__unused4", "__unused5", "__unused6" });
 			}
 
-			public boolean isSocket()
-			{
+			public boolean isSocket() {
 				return (st_mode & S_IFMT) == S_IFSOCK;
 			}
 		}
 
-		public static class stat extends Structure
-		{
+		public static class stat extends Structure {
 			public long st_dev;
 			public short __pad1;
 			public int st_ino;
@@ -618,8 +603,7 @@ public class PosixProcess extends AbstractProcess
 			public int __unused5;
 
 			@Override
-			protected List getFieldOrder()
-			{
+			protected List getFieldOrder() {
 				return Arrays.asList(new String[] { "st_dev", "__pad1",
 						"st_ino", "st_mode", "st_nlink", "st_uid", "st_gid",
 						"st_rdev", "__pad2", "st_size", "st_blksize",
@@ -628,8 +612,7 @@ public class PosixProcess extends AbstractProcess
 						"__unused4", "__unused5" });
 			}
 
-			public boolean isSocket()
-			{
+			public boolean isSocket() {
 				return (st_mode & S_IFMT) == S_IFSOCK;
 			}
 
@@ -644,73 +627,65 @@ public class PosixProcess extends AbstractProcess
 		public static final int F_SETFL = 4;
 
 		public static int O_NONBLOCK = Platform.isMac() ? 0x0004 : 2048;
-		
-	    static final class Sysinfo extends Structure {
-	        public NativeLong uptime; // Seconds since boot
 
-	        public NativeLong[] loads = new NativeLong[3];
+		static final class Sysinfo extends Structure {
+			public NativeLong uptime; // Seconds since boot
 
-	        public NativeLong totalram; // Total usable main memory size
+			public NativeLong[] loads = new NativeLong[3];
 
-	        public NativeLong freeram; // Available memory size
+			public NativeLong totalram; // Total usable main memory size
 
-	        public NativeLong sharedram; // Amount of shared memory
+			public NativeLong freeram; // Available memory size
 
-	        public NativeLong bufferram; // Memory used by buffers
+			public NativeLong sharedram; // Amount of shared memory
 
-	        public NativeLong totalswap; // Total swap space size
+			public NativeLong bufferram; // Memory used by buffers
 
-	        public NativeLong freeswap; // swap space still available
+			public NativeLong totalswap; // Total swap space size
 
-	        public short procs; // Number of current processes
+			public NativeLong freeswap; // swap space still available
 
-	        public NativeLong totalhigh; // Total high memory size
+			public short procs; // Number of current processes
 
-	        public NativeLong freehigh; // Available high memory size
+			public NativeLong totalhigh; // Total high memory size
 
-	        public int mem_unit; // Memory unit size in bytes
+			public NativeLong freehigh; // Available high memory size
 
-	        public byte[] _f = new byte[8]; // Won't be written for 64-bit systems
+			public int mem_unit; // Memory unit size in bytes
 
-	        @Override
-	        protected List<String> getFieldOrder() {
-	            return Arrays.asList(new String[] { "uptime", "loads", "totalram", "freeram", "sharedram", "bufferram",
-	                    "totalswap", "freeswap", "procs", "totalhigh", "freehigh", "mem_unit", "_f" });
-	        }
-	    }
+			public byte[] _f = new byte[8]; // Won't be written for 64-bit
+											// systems
 
-	    int sysinfo(Sysinfo info);
+			@Override
+			protected List<String> getFieldOrder() {
+				return Arrays.asList(new String[] { "uptime", "loads",
+						"totalram", "freeram", "sharedram", "bufferram",
+						"totalswap", "freeswap", "procs", "totalhigh",
+						"freehigh", "mem_unit", "_f" });
+			}
+		}
 
+		int sysinfo(Sysinfo info);
 
 	}// CLibrary
 
-	public void destroy()
-	{
+	public void destroy() {
 		if (_outputStream != null)
-			try
-			{
+			try {
 				_outputStream.close();
-			}
-			catch (IOException e)
-			{
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		if (_inputStream != null)
-			try
-			{
+			try {
 				_inputStream.close();
-			}
-			catch (IOException e)
-			{
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		if (_errorStream != null)
-			try
-			{
+			try {
 				_errorStream.close();
-			}
-			catch (IOException e)
-			{
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 
@@ -726,8 +701,7 @@ public class PosixProcess extends AbstractProcess
 		if (posix_spawn_file_actions != null)
 			CLibrary.INSTANCE
 					.posix_spawn_file_actions_destroy(posix_spawn_file_actions);
-		if (Platform.isLinux())
-		{
+		if (Platform.isLinux()) {
 			if (posix_spawn_file_actions != null)
 				Native.free(Pointer.nativeValue(posix_spawn_file_actions));
 			if (posix_spawnattr != null)
@@ -738,26 +712,22 @@ public class PosixProcess extends AbstractProcess
 
 	}
 
-	public Collection getChildren()
-	{
+	public Collection getChildren() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public int getCurrentPageFaults()
-	{
+	public int getCurrentPageFaults() {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
-	public long getCurrentPhysicalMemory()
-	{
+	public long getCurrentPhysicalMemory() {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
-	public long getCurrentVirtualMemory()
-	{
+	public long getCurrentVirtualMemory() {
 		long result = -1;
 		if (!isRunning())
 			return result;
@@ -765,8 +735,7 @@ public class PosixProcess extends AbstractProcess
 		String stat = _utils.readFile("/proc/" + _pid + "/stat");
 		// System.out.println("status "+status);
 		if (status != null)
-			try
-			{
+			try {
 				// vsize (23th)
 				String sp = "(?:[^\\s]+[\\s]+){22}(\\d+).+";
 				Pattern p = Pattern.compile(sp, Pattern.DOTALL);
@@ -774,9 +743,7 @@ public class PosixProcess extends AbstractProcess
 				m.find();
 				// get threads
 				result = Long.parseLong(m.group(1).trim());
-			}
-			catch (Exception ex)
-			{
+			} catch (Exception ex) {
 				if (_logger != null)
 					_logger.info("Error in getCurrentVirtualMemory() "
 							+ ex.getMessage());
@@ -785,49 +752,39 @@ public class PosixProcess extends AbstractProcess
 		return result;
 	}
 
-	public boolean isRunning()
-	{
+	public boolean isRunning() {
 		if (_pid < 1)
 			return false;
 		return _exitCode < 0;
 	}
 
-	public int getExitCode()
-	{
+	public int getExitCode() {
 		if (_exitCodeKill >= 0)
 			return _exitCodeKill;
 		return _exitCode;
 
 	}
 
-	public boolean kill(int code)
-	{
+	public boolean kill(int code) {
 		if (_logger != null)
 			_logger.info("killing " + _pid);
 		int count = 0;
-		while (_exitCode < 0 && count < 3)
-		{
+		while (_exitCode < 0 && count < 3) {
 			count++;
 			if (_logger != null)
 				_logger.info("send kill sig");
 			int r = CLibrary.INSTANCE.kill(_pid, CLibrary.SIGKILL);
-			if (r == 0)
-			{
+			if (r == 0) {
 				_exitCodeKill = code;
 				return true;
-			}
-			else
-			{
+			} else {
 				if (_logger != null)
 					_logger.fine("error calling kill: " + r);
 			}
 			if (_exitCode < 0)
-				try
-				{
+				try {
 					Thread.sleep(100);
-				}
-				catch (InterruptedException e)
-				{
+				} catch (InterruptedException e) {
 					e.printStackTrace();
 					Thread.currentThread().interrupt();
 				}
@@ -835,30 +792,23 @@ public class PosixProcess extends AbstractProcess
 		return false;
 	}
 
-	public boolean killTree(int code)
-	{
+	public boolean killTree(int code) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
-	public boolean start()
-	{
+	public boolean start() {
 		// log(">> env 1 " +_environment.size());
 
 		if (_arrCmd == null && _cmd == null)
 			return false;
-		if (_arrCmd == null)
-		{
+		if (_arrCmd == null) {
 			_arrCmd = _cmd.split(" ");
 			log("exec: " + _cmd);
-		}
-		else
-		{
+		} else {
 			String cmd = "";
-			for (String c : _arrCmd)
-			{
-				if (c != null)
-				{
+			for (String c : _arrCmd) {
+				if (c != null) {
 					if (c != null && c.indexOf(' ') > -1
 							&& c.indexOf('"') == -1)
 						;
@@ -870,21 +820,18 @@ public class PosixProcess extends AbstractProcess
 			log("exec:" + cmd);
 		}
 		//
-		if (stdout == -1)
-		{
+		if (stdout == -1) {
 			stdout = getStdOutNo();
 			stderr = getStdErrNo();
 			stdin = getStdInNo();
 		}
 
-		if (_environment.size() > 0)
-		{
+		if (_environment.size() > 0) {
 			_env = new String[_environment.size()];
 			int i = 0;
 			for (String[] entry : _environment)
 				_env[i++] = entry[0] + "=" + entry[1];
-		}
-		else
+		} else
 			_env = null;
 
 		int pid = 0;
@@ -911,15 +858,13 @@ public class PosixProcess extends AbstractProcess
 
 		String forkLogName = "forkLog" + System.currentTimeMillis() + ".log";
 
-		if (_useSpawn)
-		{
+		if (_useSpawn) {
 
 			return doSpawn();
 		}
 
 		// fork a child process
-		if ((pid = CLibrary.INSTANCE.fork()) == 0)
-		{
+		if ((pid = CLibrary.INSTANCE.fork()) == 0) {
 			if (_umask != -1)
 				umask(_umask);
 			System.out.println("fork 0");
@@ -934,23 +879,16 @@ public class PosixProcess extends AbstractProcess
 			System.out.println("fork 1");
 
 			// set priority
-			if (_priority == PRIORITY_BELOW_NORMAL)
-			{
+			if (_priority == PRIORITY_BELOW_NORMAL) {
 				if (CLibrary.INSTANCE.nice(1) == -1)
 					log("could not set priority ");
-			}
-			else if (_priority == PRIORITY_LOW)
-			{
+			} else if (_priority == PRIORITY_LOW) {
 				if (CLibrary.INSTANCE.nice(2) == -1)
 					log("could not set priority ");
-			}
-			else if (_priority == PRIORITY_ABOVE_NORMAL)
-			{
+			} else if (_priority == PRIORITY_ABOVE_NORMAL) {
 				if (CLibrary.INSTANCE.nice(-1) == -1)
 					log("could not set priority ");
-			}
-			else if (_priority == PRIORITY_HIGH)
-			{
+			} else if (_priority == PRIORITY_HIGH) {
 				if (CLibrary.INSTANCE.nice(-2) == -1)
 					log("could not set priority ");
 			}
@@ -982,20 +920,16 @@ public class PosixProcess extends AbstractProcess
 				moveDescriptor(_errPipe[1], stderr);
 			}
 
-			try
-			{
+			try {
 				int res;
 
 				// disconect from parent
 				CLibrary.INSTANCE.umask(0);
 				if (CLibrary.INSTANCE.setsid() < 0)
 					CLibrary.INSTANCE.exit(-1);
-				if (_env != null)
-				{
+				if (_env != null) {
 					res = CLibrary.INSTANCE.execvpe(_arrCmd[0], _arrCmd, _env);
-				}
-				else
-				{
+				} else {
 					res = CLibrary.INSTANCE.execvp(_arrCmd[0], _arrCmd);
 				}
 				int err = Native.getLastError();
@@ -1003,29 +937,22 @@ public class PosixProcess extends AbstractProcess
 						+ CLibrary.INSTANCE.strerror(err));
 				log("exec res " + res);
 
-			}
-			catch (Exception ex)
-			{
+			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 			lock = false;
 			// CLibrary.INSTANCE.exit(-1);
 		} // child code
-		else if (pid > 0)
-		{
+		else if (pid > 0) {
 			_pid = pid;
-			try
-			{
+			try {
 				Thread.sleep(500);
-			}
-			catch (InterruptedException e1)
-			{
+			} catch (InterruptedException e1) {
 			}
 			doPostStart();
 			return true;
 		} // parent process
-		else if (pid < 0)
-		{
+		else if (pid < 0) {
 			if (_logger != null)
 				_logger.info("failed to fork: " + pid);
 			return false;
@@ -1034,53 +961,39 @@ public class PosixProcess extends AbstractProcess
 
 	}
 
-	private void doPostStart()
-	{
+	private void doPostStart() {
 		// or pipe streams to cyclic buffer files
-		if (_teeName != null && _tmpPath != null)
-		{
+		if (_teeName != null && _tmpPath != null) {
 			// System.out.println("opening tee streams");
 			File f = new File(_tmpPath);
-			try
-			{
+			try {
 				if (!f.exists())
 					f.mkdir();
-			}
-			catch (Exception ex)
-			{
+			} catch (Exception ex) {
 				if (_logger != null)
 					_logger.throwing(PosixProcess.class.getName(), "start", ex);
 				Thread.currentThread().interrupt();
 			}
-			try
-			{
+			try {
 				// System.out.println("opening tee streams out");
 				_inputStream = new CyclicBufferFileInputStream(createRWfile(
 						_tmpPath, "out_" + _teeName));
-			}
-			catch (Exception e)
-			{
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			try
-			{
+			try {
 				// System.out.println("opening tee streams err");
 				_errorStream = new CyclicBufferFileInputStream(createRWfile(
 						_tmpPath, "err_" + _teeName));
-			}
-			catch (Exception e)
-			{
+			} catch (Exception e) {
 				if (_logger != null)
 					_logger.throwing(PosixProcess.class.getName(), "start", e);
 			}
-			try
-			{
+			try {
 				// System.out.println("opening tee streams in");
 				_outputStream = new CyclicBufferFilePrintStream(createRWfile(
 						_tmpPath, "in_" + _teeName));
-			}
-			catch (Exception e)
-			{
+			} catch (Exception e) {
 				if (_logger != null)
 					_logger.throwing(PosixProcess.class.getName(), "start", e);
 			}
@@ -1099,8 +1012,7 @@ public class PosixProcess extends AbstractProcess
 
 		// System.out.println("parent");
 		System.out.println("post start " + _pipeStreams + " " + _teeName);
-		if (_pipeStreams && _teeName == null)
-		{
+		if (_pipeStreams && _teeName == null) {
 			System.out.println("setting fd");
 			writefd(in_fd, _inPipe[1]);
 			writefd(out_fd, _outPipe[0]);
@@ -1116,28 +1028,23 @@ public class PosixProcess extends AbstractProcess
 			CLibrary.INSTANCE.close(_errPipe[1]);
 
 		}
-		if (_cpuAffinity != AFFINITY_UNDEFINED)
-		{
+		if (_cpuAffinity != AFFINITY_UNDEFINED) {
 			IntByReference affinity = new IntByReference();
 			affinity.setValue(_cpuAffinity);
 			if (CLibrary.INSTANCE.sched_setaffinity(_pid, 4, affinity) == -1)
 				log("error setting affinity");
 		}
 		_stopWaiter = true;
-		executor.execute(new Runnable()
-		{
+		executor.execute(new Runnable() {
 
-			public void run()
-			{
+			public void run() {
 				int r = 0;
-				while (r != _pid && r != -1)
-				{
+				while (r != _pid && r != -1) {
 					r = CLibrary.INSTANCE.waitpid(_pid, status, 0);
 					if (_logger != null)
 						_logger.info("waitpid " + r + " " + status.getValue());
 				}
-				if (r == _pid)
-				{
+				if (r == _pid) {
 					int code = status.getValue();
 
 					// Exited Normally
@@ -1159,33 +1066,26 @@ public class PosixProcess extends AbstractProcess
 			_logger.info("started process " + _pid);
 	}
 
-	private boolean doSpawn()
-	{
-		try
-		{
+	private boolean doSpawn() {
+		try {
 			IntByReference refpid = new IntByReference();
 			posix_spawn_file_actions = getSpawnPipes();
 			posix_spawnattr = getSpawnAttr();
 			String[] spawnCmd = getSpawnCmdLine();
 			int result = CLibrary.INSTANCE.posix_spawnp(refpid, spawnCmd[0],
 					posix_spawn_file_actions, posix_spawnattr, spawnCmd, _env);
-			if (result == 0)
-			{
+			if (result == 0) {
 				_pid = refpid.getValue();
 				log("posix_spawn pid " + _pid);
 				doPostStart();
-			}
-			else
+			} else
 				log("posix spawn error: " + result);
 			return result == 0;
-		}
-		finally
-		{
+		} finally {
 		}
 	}
 
-	private String getDOption(String key, String value)
-	{
+	private String getDOption(String key, String value) {
 		// posix: setting quotes does not work (cmd is str array). windows:
 		// quotes are set in Process class.
 		// if (value != null && !value.contains(" "))
@@ -1194,8 +1094,7 @@ public class PosixProcess extends AbstractProcess
 		// return "-D"+key+"=\""+value+"\"";
 	}
 
-	private String getCurrentJava()
-	{
+	private String getCurrentJava() {
 		int myPid = OperatingSystem.instance().processManagerInstance()
 				.currentProcessId();
 		Process myProcess = OperatingSystem.instance().processManagerInstance()
@@ -1204,8 +1103,7 @@ public class PosixProcess extends AbstractProcess
 		String jvm = null;
 		if (cmd.startsWith("\""))
 			jvm = cmd.substring(0, cmd.indexOf("\" ") + 1);
-		else
-		{
+		else {
 			int firstSpace = cmd.indexOf(" ");
 			if (firstSpace > -1)
 				jvm = cmd.substring(0, firstSpace);
@@ -1215,11 +1113,9 @@ public class PosixProcess extends AbstractProcess
 		return jvm;
 	}
 
-	private boolean checkPath(String path)
-	{
+	private boolean checkPath(String path) {
 		int ix = path.indexOf("!");
-		if (ix == -1)
-		{
+		if (ix == -1) {
 			log("<yajsw>/lib/core/jna/jna-xxx.jar not found, please check classpath. aborting wrapper !");
 			// Runtime.getRuntime().halt(999);// -> groovy eclipse plugin
 			// crashes
@@ -1229,29 +1125,23 @@ public class PosixProcess extends AbstractProcess
 
 	}
 
-	private String getStartClasspath()
-	{
+	private String getStartClasspath() {
 		String wrapperJar = WrapperLoader.getWrapperJar();
 		File wrapperHome = new File(wrapperJar).getParentFile();
 		File jnaFile = new File(getJNAJar());
-		try
-		{
+		try {
 			return wrapperJar + ":" + jnaFile.getCanonicalPath();
-		}
-		catch (IOException e)
-		{
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 
-	private String getJNAJar()
-	{
+	private String getJNAJar() {
 		String cn = FromNativeConverter.class.getCanonicalName();
 		String rn = cn.replace('.', '/') + ".class";
 		String path = ".";
-		try
-		{
+		try {
 			path = FromNativeConverter.class.getClassLoader().getResource(rn)
 					.getPath();
 			if (!checkPath(path))
@@ -1260,23 +1150,18 @@ public class PosixProcess extends AbstractProcess
 			path = new URI(path).getPath();
 			path.replaceAll("%20", " ");
 			return path;
-		}
-		catch (Exception e1)
-		{
+		} catch (Exception e1) {
 			log("could not find jna jar", e1);
 		}
 		return null;
 	}
 
-	private String[] getXEnv()
-	{
+	private String[] getXEnv() {
 		List<String[]> env = getEnvironment();
-		if (env != null && !env.isEmpty())
-		{
+		if (env != null && !env.isEmpty()) {
 			String[] result = new String[env.size()];
 			int i = 0;
-			for (String[] x : env)
-			{
+			for (String[] x : env) {
 				result[i] = x[0] + "=" + x[1];
 				if (_debug)
 					log("posix spawn setting env var " + result[i]);
@@ -1287,15 +1172,13 @@ public class PosixProcess extends AbstractProcess
 		return null;
 	}
 
-	private String[] getSpawnCmdLine()
-	{
+	private String[] getSpawnCmdLine() {
 		ArrayList<String> cmdList = new ArrayList();
 		cmdList.add(getCurrentJava());
 		String tmpDir = _tmpPath;
 		if (tmpDir == null)
 			tmpDir = System.getProperty("jna_tmpdir", null);
-		if (tmpDir != null)
-		{
+		if (tmpDir != null) {
 			String opt = getDOption("jna_tmpdir", tmpDir);
 			if (!cmdList.contains(opt))
 				cmdList.add(opt);
@@ -1309,25 +1192,17 @@ public class PosixProcess extends AbstractProcess
 		if (_umask != -1)
 			cmdList.add("-Dwrapperx.umask=" + _umask);
 
-		if (_priority == PRIORITY_BELOW_NORMAL)
-		{
+		if (_priority == PRIORITY_BELOW_NORMAL) {
 			cmdList.add("-Dwrapperx.nice=1");
-		}
-		else if (_priority == PRIORITY_LOW)
-		{
+		} else if (_priority == PRIORITY_LOW) {
 			cmdList.add("-Dwrapperx.nice=2");
-		}
-		else if (_priority == PRIORITY_ABOVE_NORMAL)
-		{
+		} else if (_priority == PRIORITY_ABOVE_NORMAL) {
 			cmdList.add("-Dwrapperx.nice=-1");
-		}
-		else if (_priority == PRIORITY_HIGH)
-		{
+		} else if (_priority == PRIORITY_HIGH) {
 			cmdList.add("-Dwrapperx.nice=-2");
 		}
 
-		if (getWorkingDir() != null && getWorkingDir().length() > 0)
-		{
+		if (getWorkingDir() != null && getWorkingDir().length() > 0) {
 			String wdir = getWorkingDir();
 			wdir = wdir.replaceAll("\"", "");
 			// if (wdir.contains(" "))
@@ -1343,8 +1218,7 @@ public class PosixProcess extends AbstractProcess
 			cmdList.add(_arrCmd[i]);
 		String[] cmd = new String[cmdList.size()];
 		StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < cmd.length; i++)
-		{
+		for (int i = 0; i < cmd.length; i++) {
 			cmd[i] = cmdList.get(i);
 			// if (cmd[i].indexOf(' ')>-1 && cmd[i].indexOf('"') == -1)
 			// cmd[i] = "\""+cmd[i]+"\"";
@@ -1357,32 +1231,24 @@ public class PosixProcess extends AbstractProcess
 
 	}
 
-	private Pointer getSpawnAttr()
-	{
+	private Pointer getSpawnAttr() {
 		Pointer result = null;
-		if (Platform.isLinux())
-		{
+		if (Platform.isLinux()) {
 			long peer = Native.malloc(340);
 			result = new Pointer(peer);
-		}
-		else
-		{
+		} else {
 			result = new Memory(Pointer.SIZE);
 		}
 
-		try
-		{
+		try {
 			int rc = CLibrary.INSTANCE.posix_spawnattr_init(result);
 			checkReturnCode(rc,
 					"Internal call to posix_spawnattr_init() failed");
 
 			short flags = 0;
-			if (Platform.isLinux() && _linuxUseVfork)
-			{
+			if (Platform.isLinux() && _linuxUseVfork) {
 				flags = 0x40; // POSIX_SPAWN_USEVFORK
-			}
-			else if (Platform.isMac())
-			{
+			} else if (Platform.isMac()) {
 				// Start the spawned process in suspended mode
 				// do we really need this ?
 				flags = 0;// CLibrary.POSIX_SPAWN_START_SUSPENDED |
@@ -1393,33 +1259,26 @@ public class PosixProcess extends AbstractProcess
 			rc = CLibrary.INSTANCE.posix_spawnattr_setflags(result, flags);
 			checkReturnCode(rc,
 					"Internal call to posix_spawnattr_setflags() failed");
-		}
-		catch (Exception ex)
-		{
+		} catch (Exception ex) {
 			log("error in getSpawnAttr ", ex);
 			return null;
 		}
 		return result;
 	}
 
-	private Pointer getSpawnPipes()
-	{
+	private Pointer getSpawnPipes() {
 		int rc = 0;
 
 		Pointer result = null;
-		if (Platform.isLinux())
-		{
+		if (Platform.isLinux()) {
 			long peer = Native.malloc(80);
 			result = new Pointer(peer);
-		}
-		else
-		{
+		} else {
 			result = new Memory(Pointer.SIZE);
 		}
 
 		// Create spawn file actions
-		try
-		{
+		try {
 			rc = CLibrary.INSTANCE.posix_spawn_file_actions_init(result);
 			checkReturnCode(rc,
 					"Internal call to posix_spawn_file_actions_init() failed");
@@ -1492,9 +1351,7 @@ public class PosixProcess extends AbstractProcess
 			 * "fnctl on stderr handle failed"); }
 			 */
 			return result;
-		}
-		catch (RuntimeException e)
-		{
+		} catch (RuntimeException e) {
 			log("Error in posix_spawn", e);
 
 			CLibrary.INSTANCE
@@ -1504,54 +1361,44 @@ public class PosixProcess extends AbstractProcess
 		}
 	}
 
-	private void initFailureCleanup(int[] in, int[] out, int[] err)
-	{
+	private void initFailureCleanup(int[] in, int[] out, int[] err) {
 		Set<Integer> unique = new HashSet<Integer>();
-		if (in != null)
-		{
+		if (in != null) {
 			unique.add(in[0]);
 			unique.add(in[1]);
 		}
 
-		if (out != null)
-		{
+		if (out != null) {
 			unique.add(out[0]);
 			unique.add(out[1]);
 		}
 
-		if (err != null)
-		{
+		if (err != null) {
 			unique.add(err[0]);
 			unique.add(err[1]);
 		}
 
-		for (int fildes : unique)
-		{
-			if (fildes != 0)
-			{
+		for (int fildes : unique) {
+			if (fildes != 0) {
 				CLibrary.INSTANCE.close(fildes);
 			}
 		}
 	}
 
-	private void checkReturnCode(int rc, String string)
-	{
+	private void checkReturnCode(int rc, String string) {
 		if (rc != 0)
 			log(string);
 	}
 
-	public int WIFEXITED(int code)
-	{
+	public int WIFEXITED(int code) {
 		return (code & 0xFF);
 	}
 
-	public int WEXITSTATUS(int code)
-	{
+	public int WEXITSTATUS(int code) {
 		return ((code >> 8) & 0xFF);
 	}
 
-	protected File createRWfile(String path, String fname) throws IOException
-	{
+	protected File createRWfile(String path, String fname) throws IOException {
 		File result = new File(path, fname);
 		result.deleteOnExit();
 		/*
@@ -1568,8 +1415,7 @@ public class PosixProcess extends AbstractProcess
 		return result;
 	}
 
-	public boolean stop(int timeout, int code)
-	{
+	public boolean stop(int timeout, int code) {
 		if (_logger != null)
 			_logger.info("killing " + _pid);
 		if (!isRunning())
@@ -1577,16 +1423,12 @@ public class PosixProcess extends AbstractProcess
 		int r = CLibrary.INSTANCE.kill(_pid, CLibrary.SIGTERM);
 		waitFor(timeout);
 		int count = 0;
-		while (isRunning() && count++ < 4)
-		{
+		while (isRunning() && count++ < 4) {
 			CLibrary.INSTANCE.kill(_pid, CLibrary.SIGKILL);
 			if (isRunning())
-				try
-				{
+				try {
 					Thread.sleep(100);
-				}
-				catch (InterruptedException e)
-				{
+				} catch (InterruptedException e) {
 					if (_logger != null)
 						_logger.throwing(PosixProcess.class.getName(), "stop",
 								e);
@@ -1596,18 +1438,15 @@ public class PosixProcess extends AbstractProcess
 		return !isRunning();
 	}
 
-	protected void moveDescriptor(int fd_from, int fd_to)
-	{
+	protected void moveDescriptor(int fd_from, int fd_to) {
 		// System.out.println("move desc "+fd_from+" "+fd_to);
-		if (fd_from != fd_to)
-		{
+		if (fd_from != fd_to) {
 			CLibrary.INSTANCE.dup2(fd_from, fd_to);
 			CLibrary.INSTANCE.close(fd_from);
 		}
 	}
 
-	int closeDescriptors(int[] avoid)
-	{
+	int closeDescriptors(int[] avoid) {
 		// Pointer dir;
 		// CLibrary.dirent64 dirp;
 		// int from_fd = FAIL_FILENO + 1;
@@ -1687,28 +1526,21 @@ public class PosixProcess extends AbstractProcess
 		return 1;
 	}
 
-	public void waitFor()
-	{
+	public void waitFor() {
 		waitFor(Long.MAX_VALUE);
 	}
 
-	public void waitFor(long timeout)
-	{
+	public void waitFor(long timeout) {
 		long start = System.currentTimeMillis();
 		File f = new File("/proc/" + _pid);
 
-		while (System.currentTimeMillis() - start < timeout)
-		{
-			if (!isRunning() || !f.exists())
-			{
+		while (System.currentTimeMillis() - start < timeout) {
+			if (!isRunning() || !f.exists()) {
 				return;
 			}
-			try
-			{
+			try {
 				Thread.sleep(100);
-			}
-			catch (InterruptedException e)
-			{
+			} catch (InterruptedException e) {
 				if (_logger != null)
 					_logger.throwing(PosixProcess.class.getName(), "waitFor", e);
 				Thread.currentThread().interrupt();
@@ -1727,12 +1559,10 @@ public class PosixProcess extends AbstractProcess
 	 * @throws InterruptedException
 	 */
 	public static void main(String[] args) throws IOException,
-			InterruptedException
-	{
+			InterruptedException {
 		PosixProcess[] p = new PosixProcess[1];
 		boolean pipe = true;
-		for (int i = 0; i < p.length; i++)
-		{
+		for (int i = 0; i < p.length; i++) {
 			p[i] = new PosixProcess();
 
 			// p[i].setPipeStreams(true, false);
@@ -1754,14 +1584,12 @@ public class PosixProcess extends AbstractProcess
 		}
 		boolean doit = true;
 		int k = 0;
-		while (doit)
-		{
+		while (doit) {
 			doit = k++ < 3;
 			// doit = false;
 			// System.out.println("START");
 			// doit = false;
-			for (int i = 0; i < p.length; i++)
-			{
+			for (int i = 0; i < p.length; i++) {
 
 				p[i].start();
 				// p[i].getPid();
@@ -1781,25 +1609,19 @@ public class PosixProcess extends AbstractProcess
 				// }
 				// }
 				// return;
-				try
-				{
+				try {
 					Thread.yield();
 					Thread.sleep(1000);
-				}
-				catch (InterruptedException e1)
-				{
+				} catch (InterruptedException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				if (pipe)
-				{
+				if (pipe) {
 					final Process pp = p[i];
-					new Thread(new Runnable()
-					{
+					new Thread(new Runnable() {
 
 						@Override
-						public void run()
-						{
+						public void run() {
 							InputStreamReader isr = new InputStreamReader(pp
 									.getInputStream());
 							// System.out.println("in stream " +
@@ -1809,18 +1631,14 @@ public class PosixProcess extends AbstractProcess
 							BufferedReader br = new BufferedReader(isr);
 							String line = "?";
 							int k = 0;
-							try
-							{
+							try {
 
-								while ((line = br.readLine()) != null)
-								{
+								while ((line = br.readLine()) != null) {
 									System.out.println(new Date() + " " + line);
 									k++;
 								}
 
-							}
-							catch (Exception e)
-							{
+							} catch (Exception e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 								return;
@@ -1834,20 +1652,16 @@ public class PosixProcess extends AbstractProcess
 			// System.out.println("exit code "+p[0].getExitCode());
 			System.out.println("KILL");
 
-			for (int i = 0; i < p.length; i++)
-			{
+			for (int i = 0; i < p.length; i++) {
 				// System.out.println(p[i].isRunning());
 				p[i].kill(999);
 				System.out.println("exit code " + p[i].getExitCode());
 				// System.out.println(p[i].isRunning());
 				p[i].destroy();
 			}
-			try
-			{
+			try {
 				Thread.sleep(1000);
-			}
-			catch (InterruptedException e)
-			{
+			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -1864,10 +1678,8 @@ public class PosixProcess extends AbstractProcess
 	 * @param pointer
 	 *            the pointer
 	 */
-	protected void writefd(FileDescriptor fd, int pointer)
-	{
-		try
-		{
+	protected void writefd(FileDescriptor fd, int pointer) {
+		try {
 			// Field[] fields = FileDescriptor.class.getDeclaredFields();
 			// System.out.println("fields");
 			// for (Field field : fields){
@@ -1888,19 +1700,15 @@ public class PosixProcess extends AbstractProcess
 			// sync.setAccessible(true);
 			// sync.invoke(fd, new Object[0]);
 
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 	}
 
-	public boolean reconnectStreams()
-	{
+	public boolean reconnectStreams() {
 		if (_teeName != null)
-			try
-			{
+			try {
 				_inputStream = new CyclicBufferFileInputStream(new File(
 						_tmpPath, "out_" + _teeName));
 				_errorStream = new CyclicBufferFileInputStream(new File(
@@ -1908,17 +1716,14 @@ public class PosixProcess extends AbstractProcess
 				_outputStream = new CyclicBufferFilePrintStream(new File(
 						_tmpPath, "in_" + _teeName));
 				return true;
-			}
-			catch (Exception ex)
-			{
+			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 
 		return false;
 	}
 
-	private String getCommandInternal()
-	{
+	private String getCommandInternal() {
 		String result = _utils.readFileQuoted("/proc/" + getPid() + "/cmdline");
 		if (result == null || result.length() == 0)
 			result = "?";
@@ -1926,25 +1731,21 @@ public class PosixProcess extends AbstractProcess
 		return result;
 	}
 
-	private List<String[]> getEnvironmentInternal()
-	{
+	private List<String[]> getEnvironmentInternal() {
 		String result = _utils.readFile("/proc/" + getPid() + "/environ");
 		return parseEnvironment(result);
 	}
 
-	private List<String[]> parseEnvironment(String env)
-	{
+	private List<String[]> parseEnvironment(String env) {
 		List<String[]> result = new ArrayList<String[]>();
 		if (env == null || "".equals(env))
 			return result;
 		String sp = "(\\S+)=([^=.]+)( |$)";
 		Pattern p = Pattern.compile(sp, Pattern.DOTALL);
 		Matcher m = p.matcher(env);
-		while (m.find())
-		{
+		while (m.find()) {
 			String[] str = m.group().trim().split("=", 2);
-			if (str.length == 2)
-			{
+			if (str.length == 2) {
 				result.add(new String[] { str[0], str[1] });
 			}
 		}
@@ -1952,33 +1753,26 @@ public class PosixProcess extends AbstractProcess
 
 	}
 
-	protected String getWorkingDirInternal()
-	{
+	protected String getWorkingDirInternal() {
 		String result = null;
 		File f = new File("/proc/" + getPid() + "/cwd");
-		try
-		{
+		try {
 			result = f.getCanonicalPath();
-		}
-		catch (IOException e)
-		{
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return result;
 
 	}
 
-	public String getWorkingDir()
-	{
+	public String getWorkingDir() {
 		return _workingDir;
 	}
 
-	public static Process getProcess(int pid)
-	{
+	public static Process getProcess(int pid) {
 		PosixProcess result = null;
 		File f = new File("/proc/" + pid);
-		if (f.exists())
-		{
+		if (f.exists()) {
 			// TODO this may not always work
 			result = (PosixProcess) OperatingSystem.instance()
 					.processManagerInstance().createProcess();
@@ -1992,13 +1786,11 @@ public class PosixProcess extends AbstractProcess
 		return result;
 	}
 
-	public static int currentProcessId()
-	{
+	public static int currentProcessId() {
 		return CLibrary.INSTANCE.getpid();
 	}
 
-	public String currentUser()
-	{
+	public String currentUser() {
 		int euid = CLibrary.INSTANCE.geteuid();
 		// log("current user euid "+ euid);
 		Pointer p = CLibrary.INSTANCE.getpwuid(euid);
@@ -2008,32 +1800,27 @@ public class PosixProcess extends AbstractProcess
 
 	}
 
-	public String currentGroup()
-	{
+	public String currentGroup() {
 		int egid = CLibrary.INSTANCE.getegid();
 		// System.out.println("current group egid "+ egid);
 		Pointer pg = CLibrary.INSTANCE.getgrgid(egid);
-		if (pg == null)
-		{
+		if (pg == null) {
 			log("could not get current group");
 			return null;
 		}
 		return new CLibrary.group(pg).getName();
 	}
 
-	public String defaultGroup(String user)
-	{
+	public String defaultGroup(String user) {
 		Pointer p = CLibrary.INSTANCE.getpwnam(user);
-		if (p == null)
-		{
+		if (p == null) {
 			log("could not get user " + user);
 			return null;
 		}
 		int gid = new CLibrary.passwd(p).getGid();
 		// System.out.println("default group gid " + gid);
 		Pointer pg = CLibrary.INSTANCE.getgrgid(gid);
-		if (pg == null)
-		{
+		if (pg == null) {
 			log("could not get default group for user " + user);
 			return null;
 		}
@@ -2041,8 +1828,7 @@ public class PosixProcess extends AbstractProcess
 
 	}
 
-	public void switchUser(String name, String password)
-	{
+	public void switchUser(String name, String password) {
 		if (name == null || "".equals(name))
 			return;
 		String[] x = name.split("\\\\");
@@ -2057,8 +1843,7 @@ public class PosixProcess extends AbstractProcess
 
 		log("switch group " + currentGroup + " -> " + group);
 
-		if (currentGroup != null && !currentGroup.equals(group))
-		{
+		if (currentGroup != null && !currentGroup.equals(group)) {
 			Pointer p = CLibrary.INSTANCE.getgrnam(group);
 			CLibrary.group g = new CLibrary.group(p);
 			int newGid = g.getGid();
@@ -2069,12 +1854,20 @@ public class PosixProcess extends AbstractProcess
 			int res = CLibrary.INSTANCE.setregid(newGid, newGid);
 			if (res != 0)
 				log("could not change to group " + group);
+			else
+				try {
+					res = CLibrary.INSTANCE.initgroups(user, newGid);
+					if (res != 0)
+						log("could not set supplement group for user " + group
+								+ "/" + user);
+				} catch (Throwable ex) {
+					log("error invoking initgroups " + ex.getMessage());
+				}
 		}
 
 		log("switch user " + currentUser + " -> " + user);
 
-		if (currentUser != null && !currentUser.equals(user))
-		{
+		if (currentUser != null && !currentUser.equals(user)) {
 			Pointer p = CLibrary.INSTANCE.getpwnam(user);
 			int newUid = new CLibrary.passwd(p).getUid();
 			if (newUid == 0)
@@ -2094,13 +1887,11 @@ public class PosixProcess extends AbstractProcess
 
 	}
 
-	public String getUserInternal()
-	{
+	public String getUserInternal() {
 		String status = _utils.readFile("/proc/" + _pid + "/status");
 		// System.out.println("status "+status);
 		if (status != null)
-			try
-			{
+			try {
 				// ruid, euid, suid fuid
 				String sp = ".*[U|u]id:\\s*(\\d+)\\s*(\\d+)\\s*(\\d+)\\s*(\\d+).*";
 				Pattern p = Pattern.compile(sp, Pattern.DOTALL);
@@ -2113,9 +1904,7 @@ public class PosixProcess extends AbstractProcess
 				if (po == null)
 					System.out.println("could not get user");
 				return new CLibrary.passwd(po).getName().trim();
-			}
-			catch (Exception ex)
-			{
+			} catch (Exception ex) {
 				log("Error in getUser() " + ex.getMessage());
 			}
 
@@ -2123,70 +1912,53 @@ public class PosixProcess extends AbstractProcess
 
 	}
 
-	public String getUser()
-	{
+	public String getUser() {
 		return _user;
 	}
 
-	public String getStdInName()
-	{
+	public String getStdInName() {
 		return "stdin";
 	}
 
-	public String getStdOutName()
-	{
+	public String getStdOutName() {
 		return "stdout";
 	}
 
-	public String getStdErrName()
-	{
+	public String getStdErrName() {
 		return "stderr";
 	}
 
-	public int getStdOutNo()
-	{
-		try
-		{
+	public int getStdOutNo() {
+		try {
 			return CLibrary.INSTANCE.fileno(NativeLibrary.getInstance("c")
 					.getFunction(getStdOutName()).getPointer(0));
-		}
-		catch (Throwable ex)
-		{
+		} catch (Throwable ex) {
 			log("error getting stdout no -> return default. " + ex.getMessage());
 		}
 		return 1;
 	}
 
-	public int getStdErrNo()
-	{
-		try
-		{
+	public int getStdErrNo() {
+		try {
 			return CLibrary.INSTANCE.fileno(NativeLibrary.getInstance("c")
 					.getFunction(getStdErrName()).getPointer(0));
-		}
-		catch (Throwable ex)
-		{
+		} catch (Throwable ex) {
 			log("error getting stderr no -> return default. " + ex.getMessage());
 		}
 		return 2;
 	}
 
-	public int getStdInNo()
-	{
-		try
-		{
+	public int getStdInNo() {
+		try {
 			return CLibrary.INSTANCE.fileno(NativeLibrary.getInstance("c")
 					.getFunction(getStdInName()).getPointer(0));
-		}
-		catch (Throwable ex)
-		{
+		} catch (Throwable ex) {
 			log("error getting stdin no -> return default. " + ex.getMessage());
 		}
 		return 0;
 	}
 
-	public int getCurrentHandles()
-	{
+	public int getCurrentHandles() {
 		if (!isRunning())
 			return -1;
 		File f = new File("/proc/" + _pid + "/fd");
@@ -2195,16 +1967,14 @@ public class PosixProcess extends AbstractProcess
 		return f.list().length;
 	}
 
-	public int getCurrentThreads()
-	{
+	public int getCurrentThreads() {
 		int result = -1;
 		if (!isRunning())
 			return result;
 		String status = _utils.readFile("/proc/" + _pid + "/status");
 		// System.out.println("status "+status);
 		if (status != null)
-			try
-			{
+			try {
 				// thread count
 				String sp = ".*[T|t]hreads:\\s*(\\d+).*";
 				Pattern p = Pattern.compile(sp, Pattern.DOTALL);
@@ -2212,9 +1982,7 @@ public class PosixProcess extends AbstractProcess
 				m.find();
 				// get threads
 				result = Integer.parseInt(m.group(1));
-			}
-			catch (Exception ex)
-			{
+			} catch (Exception ex) {
 				if (_logger != null)
 					_logger.info("Error in getCurrentThreads() "
 							+ ex.getMessage());
@@ -2227,8 +1995,7 @@ public class PosixProcess extends AbstractProcess
 	long _oldTotalCPU = -1;
 	long _lastCPUReadTime = Long.MAX_VALUE;
 
-	public int getCurrentCpu()
-	{
+	public int getCurrentCpu() {
 		int result = -1;
 		if (!isRunning())
 			return result;
@@ -2236,8 +2003,7 @@ public class PosixProcess extends AbstractProcess
 		String stat = _utils.readFile("/proc/" + _pid + "/stat");
 		// System.out.println("status "+status);
 		if (status != null)
-			try
-			{
+			try {
 				// ucpu scpu (13th)
 				String sp = "(?:[^\\s]+[\\s]+){13}(\\d+)\\s+(\\d+).+";
 				Pattern p = Pattern.compile(sp, Pattern.DOTALL);
@@ -2256,9 +2022,7 @@ public class PosixProcess extends AbstractProcess
 					result = (int) (used / elapsed);
 				_lastCPUReadTime = System.currentTimeMillis();
 
-			}
-			catch (Exception ex)
-			{
+			} catch (Exception ex) {
 				if (_logger != null)
 					_logger.info("Error in getCurrentCPU() " + ex.getMessage());
 			}
@@ -2266,27 +2030,20 @@ public class PosixProcess extends AbstractProcess
 		return result;
 	}
 
-	public boolean isTerminated()
-	{
+	public boolean isTerminated() {
 		return _terminated;
 	}
 
-	public boolean changeWorkingDir(String name)
-	{
+	public boolean changeWorkingDir(String name) {
 		File f = new File(name);
 		String dir;
-		if (!f.exists() || !f.isDirectory())
-		{
+		if (!f.exists() || !f.isDirectory()) {
 			log("changeWorkingDirectory failed. file not found " + name);
 			return false;
-		}
-		else
-			try
-			{
+		} else
+			try {
 				dir = f.getCanonicalPath();
-			}
-			catch (IOException e)
-			{
+			} catch (IOException e) {
 				if (_logger != null)
 					_logger.throwing(PosixProcess.class.getName(),
 							"setWorkingDirectory", e);
@@ -2298,39 +2055,36 @@ public class PosixProcess extends AbstractProcess
 		return result;
 	}
 
-	public void setTerminated(boolean terminated)
-	{
+	public void setTerminated(boolean terminated) {
 		_terminated = terminated;
 	}
 
 	@Override
-	public void setLogger(Logger logger)
-	{
+	public void setLogger(Logger logger) {
 		super.setLogger(logger);
 		_utils.setLog(logger);
 	}
 
-	public static int umask(int mask)
-	{
+	public static int umask(int mask) {
 		int result = CLibrary.INSTANCE.umask(mask);
 		return result;
 	}
 
-	public long getUptime()
-	{
-        try {
-            Sysinfo info = new Sysinfo();
-            if (0 != CLibrary.INSTANCE.sysinfo(info)) {
-            	if (_logger != null)
-            		_logger.severe("error getting uptime: " + Native.getLastError());
-                return 0L;
-            }
-            return info.uptime.longValue();
-        } catch (Exception ex) {
-        	if (_logger != null)
-        		_logger.severe("error getting uptime: " + ex);
-        }
-        return 0L;
+	public long getUptime() {
+		try {
+			Sysinfo info = new Sysinfo();
+			if (0 != CLibrary.INSTANCE.sysinfo(info)) {
+				if (_logger != null)
+					_logger.severe("error getting uptime: "
+							+ Native.getLastError());
+				return 0L;
+			}
+			return info.uptime.longValue();
+		} catch (Exception ex) {
+			if (_logger != null)
+				_logger.severe("error getting uptime: " + ex);
+		}
+		return 0L;
 	}
 
 }
