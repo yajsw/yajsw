@@ -1013,7 +1013,7 @@ public final class Native implements Version {
     */
     static File getTempDir() throws IOException {
         File jnatmp;
-        String prop = System.getProperty("jna.tmpdir");
+        String prop = System.getProperty("jna_tmpdir");
         if (prop != null) {
         	prop = prop.replaceAll("\"", "");
             jnatmp = new File(prop);
