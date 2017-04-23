@@ -1394,7 +1394,7 @@ public class WrapperTrayIconImpl implements WrapperTrayIcon
 		if (_console != null)
 			return;
 		_console = new Console(this);
-		this.showState(_currentState);
+		//this.showState(_currentState); -> performance of open console
 		_console.setWrapperPid(_process.getWrapperPid());
 		_console.setWrapperStarted(_process.getWrapperStarted());
 		_console.setWrapperType(_process.getType());
