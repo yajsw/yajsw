@@ -65,6 +65,7 @@ public class ClusterServer
 	Member _me;
 	InetSocketAddress _myAddress;
 	String _myHost;
+	InetAddress _address;
 
 	public class ServerListener implements ClusterEventListener
 	{
@@ -102,13 +103,13 @@ public class ClusterServer
 
 	public ClusterServer() throws Exception
 	{
-		this(0, true, true, null, "DefaultCluster", ClusterClient.getHostName()
+		this(null, 0, true, true, null, "DefaultCluster", ClusterClient.getHostName()
 				+ "-" + System.currentTimeMillis(), new InetSocketAddress[0]);
 	}
 
 	public ClusterServer(int port) throws Exception
 	{
-		this(port, false, false, null, "DefaultCluster", ClusterClient
+		this(null, port, false, false, null, "DefaultCluster", ClusterClient
 				.getHostName() + "-" + System.currentTimeMillis(),
 				new InetSocketAddress[0]);
 
@@ -116,17 +117,18 @@ public class ClusterServer
 
 	public ClusterServer(int port, InetSocketAddress... seeds) throws Exception
 	{
-		this(port, false, false, null, "DefaultCluster", ClusterClient
+		this(null, port, false, false, null, "DefaultCluster", ClusterClient
 				.getHostName() + "-" + System.currentTimeMillis(), seeds);
 
 	}
 
-	public ClusterServer(int port, boolean useDiscoveryServer,
+	public ClusterServer(InetAddress address, int port, boolean useDiscoveryServer,
 			boolean useClientDiscovery, String ipFilter, String clusterName,
 			String clientName, InetSocketAddress... seeds) throws Exception
 	{
 		// InternalLoggerFactory.setDefaultFactory(new SimpleLoggerFactory());
 		_serverPort = port;
+		_address = address;
 		_ipFilter = ipFilter;
 		_clusterName = clusterName;
 		_clientName = clientName;
@@ -168,7 +170,7 @@ public class ClusterServer
 		_serverPort = port;
 
 		DefaultServer server = new DefaultServer(NioServerSocketChannel.class,
-				builder, channelOptions, _serverPort);
+				builder, channelOptions, _serverPort, _address);
 
 		server.start();
 		Channel channel = server.getChannel();

@@ -24,6 +24,7 @@ import io.netty.channel.oio.OioEventLoopGroup;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Set;
 
@@ -35,13 +36,14 @@ public class DefaultServer extends DefaultEndpoint
 	EventLoopGroup childGroup;
 	EventExecutorGroup internalGroup;
 	int _port;
+	InetAddress _address;
 
 	private static final int IPTOS_THROUGHPUT = 0x08;
 	private static final int IPTOS_LOWDELAY = 0x10;
 
 	public DefaultServer(Class serverChannelClass,
 			ChannelPipelineFactoryFactory factory, Set<String> channelOptions,
-			int port)
+			int port, InetAddress address)
 	{
 		if (!ServerChannel.class.isAssignableFrom(serverChannelClass))
 			throw new RuntimeException(
@@ -50,6 +52,7 @@ public class DefaultServer extends DefaultEndpoint
 		// Configure the server.
 		bootstrap = new ServerBootstrap();
 		_port = port;
+		_address = address;
 		internalGroup = new DefaultEventExecutorGroup(10);
 
 		if (isNio(serverChannelClass))
@@ -99,8 +102,13 @@ public class DefaultServer extends DefaultEndpoint
 	@Override
 	public void start() throws Exception
 	{
-		_channel = bootstrap.bind(new InetSocketAddress(_port)).sync()
+		if (_address == null)
+			_channel = bootstrap.bind(new InetSocketAddress(_port)).sync()
 				.channel();
+		else
+			_channel = bootstrap.bind(new InetSocketAddress(_address, _port)).sync()
+			.channel();
+			
 	}
 
 	@Override

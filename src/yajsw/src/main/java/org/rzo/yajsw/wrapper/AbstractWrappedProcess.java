@@ -32,6 +32,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.rmi.registry.LocateRegistry;
@@ -770,7 +771,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			_ahessianServer = new AHessianJmxServer(_mbeanServer,
 					"+n:localhost, -n:*", canonName, _config.getInt(
 							"wrapper.tray.port", 0),
-					getInternalWrapperLogger(), _debug);
+					getInternalWrapperLogger(), _debug, Utils.getLoopbackAddress());
 		}
 		catch (Exception e)
 		{

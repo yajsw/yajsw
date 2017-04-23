@@ -70,7 +70,7 @@ public class ServerMain
     	Set<String> channelOptions = new HashSet();
     	channelOptions.add("TCP_NODELAY");
 
-    	DefaultServer server = new DefaultServer(NioServerSocketChannel.class, builder, channelOptions, serverPort);
+    	DefaultServer server = new DefaultServer(NioServerSocketChannel.class, builder, channelOptions, serverPort, null);
 
         server.start();
        Channel channel = server.getChannel();

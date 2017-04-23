@@ -648,6 +648,14 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 				{
 					fullGCBeanX = gcBean;
 				}
+				else if (gcBean.getName().toLowerCase().contains("young"))
+				{
+					minorGCBeanX = gcBean;
+				}
+				else if (gcBean.getName().toLowerCase().contains("old"))
+				{
+					fullGCBeanX = gcBean;
+				}
 				else
 				{
 					System.err

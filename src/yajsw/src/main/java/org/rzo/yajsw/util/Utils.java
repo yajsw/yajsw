@@ -18,12 +18,18 @@ package org.rzo.yajsw.util;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.logging.Logger;
 
 import org.rzo.yajsw.wrapper.WrappedProcess;
 import org.rzo.yajsw.wrapper.WrappedService;
 
 import com.sun.jna.PlatformEx;
+
+import sun.net.InetAddressCachePolicy;
 
 public class Utils
 {
@@ -61,6 +67,17 @@ public class Utils
 				Thread.sleep(2000);
 		}
 		return result;
+	}
+	
+	public static InetAddress getLoopbackAddress() throws Exception
+	{
+		if (Boolean.getBoolean("java.net.preferIPv6Stack")) {
+			byte[] arg0 = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
+			return InetAddress.getByAddress("localhost", arg0);
+		} else {
+			byte[] arg0 = new byte[] { 127, 0, 0, 1 };
+			 return InetAddress.getByAddress("localhost", arg0);
+		}
 	}
 
 	public static void verifyIPv4IsPreferred(Logger log)

@@ -201,7 +201,7 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		String gcPattern = _config.getString("wrapper.java.monitor.gc", null);
 		if ((gcPattern != null) && (gcPattern.length() > 0))
 		{
-			gcPattern = gcPattern.replaceAll(",", "\\\\,");
+			//gcPattern = gcPattern.replaceAll(",", "\\\\,");
 			result.add(Utils.getDOption("wrapper.java.monitor.gc", gcPattern));
 		}
 

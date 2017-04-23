@@ -21,6 +21,7 @@ import io.netty.channel.socket.oio.OioServerSocketChannel;
 import io.netty.handler.ipfilter.IpFilterRuleList;
 import io.netty.util.internal.logging.InternalLogger;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Set;
@@ -40,7 +41,7 @@ public class AHessianJmxServer
 {
 	public AHessianJmxServer(MBeanServer mbeanServer, String ipFilter,
 			String serviceDiscoveryName, int port, InternalLogger logger,
-			int debug) throws Exception
+			int debug, InetAddress address) throws Exception
 	{
 
 		// InternalLoggerFactory.setDefaultFactory(new SimpleLoggerFactory());
@@ -61,7 +62,7 @@ public class AHessianJmxServer
 		int serverPort = port;
 
 		DefaultServer server = new DefaultServer(OioServerSocketChannel.class,
-				builder, channelOptions, serverPort);
+				builder, channelOptions, serverPort, address);
 
 		server.start();
 		Channel channel = server.getChannel();
@@ -89,7 +90,7 @@ public class AHessianJmxServer
 	{
 		MBeanServer _mbeanServer = MBeanServerFactory.createMBeanServer();
 		AHessianJmxServer _ahessianServer = new AHessianJmxServer(_mbeanServer,
-				"+n:localhost, -n:*", "test", 15009, null, 4);
+				"+n:localhost, -n:*", "test", 15009, null, 4, null);
 
 	}
 

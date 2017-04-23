@@ -24,6 +24,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.oio.OioEventLoopGroup;
 import io.netty.channel.socket.oio.OioServerSocketChannel;
 
+import java.net.InetAddress;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
@@ -39,6 +40,7 @@ import org.rzo.yajsw.controller.AbstractController;
 import org.rzo.yajsw.controller.Message;
 import org.rzo.yajsw.util.Cycler;
 import org.rzo.yajsw.util.DaemonThreadFactory;
+import org.rzo.yajsw.util.Utils;
 import org.rzo.yajsw.wrapper.WrappedJavaProcess;
 import org.rzo.yajsw.wrapper.WrappedProcess;
 
@@ -220,6 +222,15 @@ public class JVMController extends AbstractController
 			return true;
 		}
 		int myPort = -1;
+		InetAddress address = null;
+		try
+		{
+			address = Utils.getLoopbackAddress();
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
 
 		// in case of wrapper chaining: if we already have opened a port to our
 		// wrapper: do not use this port for a sub-process
@@ -258,7 +269,7 @@ public class JVMController extends AbstractController
 						_usedPorts.add(_port);
 						if (getDebug() > 2)
 							getLog().info("binding to port " + _port);
-						ChannelFuture f = _acceptor.bind(_port).sync();
+						ChannelFuture f = _acceptor.bind(address, _port).sync();
 						if (f.isSuccess())
 						{
 							_parentChannel = f.channel();

@@ -59,7 +59,7 @@ public class HubServiceServer implements HubService
     	Set<String> channelOptions = new HashSet();
     	channelOptions.add("TCP_NODELAY");
 
-    	DefaultServer server = new DefaultServer(NioServerSocketChannel.class, builder, channelOptions, port);
+    	DefaultServer server = new DefaultServer(NioServerSocketChannel.class, builder, channelOptions, port, null);
 
         server.start();
 	}
