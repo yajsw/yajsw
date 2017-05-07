@@ -159,6 +159,7 @@ public class JVMController extends AbstractController
 		ControllerPipelineFactory pipelineFactory = new ControllerPipelineFactory(
 				this);
 
+		setDebug(((WrappedJavaProcess)wrappedJavaProcess).getDebug());
 		pipelineFactory.setDebug(_debug > 2);
 		_acceptor = new ServerBootstrap().group(_bossGroup, _workerGroup)
 				.channel(OioServerSocketChannel.class)
@@ -221,6 +222,7 @@ public class JVMController extends AbstractController
 			setState(STATE_WAITING);
 			return true;
 		}
+		
 		int myPort = -1;
 		InetAddress address = null;
 		try

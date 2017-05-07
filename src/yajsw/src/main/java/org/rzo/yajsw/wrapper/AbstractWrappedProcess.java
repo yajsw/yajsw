@@ -2383,7 +2383,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	 * 
 	 * @return true, if is debug
 	 */
-	int getDebug()
+	public int getDebug()
 	{
 		return _debug;
 	}
