@@ -47,6 +47,10 @@ public class ControllerHandler extends ChannelInboundHandlerAdapter implements
 		switch (message.getCode())
 		{
 		case WRAPPER_MSG_KEY:
+			// @see https://sourceforge.net/p/yajsw/discussion/810311/thread/ff5805cc/
+			// if we already received the key -> ignore
+			if (_controller.getState() == JVMController.STATE_LOGGED_ON)
+				break;
 			// check if JVM sent us correct key
 			if (_controller._key.equals(message.getMessage()))
 			{
