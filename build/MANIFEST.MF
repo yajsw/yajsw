@@ -54,7 +54,7 @@ Class-Path-App:
   
 Class-Path-App-Extended: 
  ./lib/extended/groovy/groovy-patch.jar 
- ./lib/extended/groovy/groovy-all-2.3.11.jar
+ ./lib/extended/groovy/groovy-all-2.4.11.jar
  
 Main-Class: org.rzo.yajsw.boot.WrapperExeBooter
 
