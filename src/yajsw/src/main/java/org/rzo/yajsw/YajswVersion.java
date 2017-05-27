@@ -17,7 +17,7 @@ package org.rzo.yajsw;
 
 public class YajswVersion
 {
-	public static final String YAJSW_VERSION = "yajsw-stable-12.08";
+	public static final String YAJSW_VERSION = "yajsw-stable-12.09";
 	public static final String OS_VERSION = System.getProperty("os.name") + "/"
 			+ System.getProperty("os.version") + "/"
 			+ System.getProperty("os.arch");
