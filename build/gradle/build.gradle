@@ -26,7 +26,7 @@ commons_vfs2_version 					= '2.0'
 groovy_all_version 						= '2.3.11'
 jna_version 									= '4.4.0'
 platform_version 							= '4.4.0'
-netty_version 								= 'all-4.0.35.Final'
+netty_version 								= 'all-4.0.47.Final'
 automaton_version 						= '1.11'
 formsrt_version 							= ''
 forms_version 								= '1.2.0'
@@ -63,6 +63,8 @@ repositories {
 
 
 sourceCompatibility = 1.6
+targetCompatibility = 1.6
+//options.bootClasspath = "${System.getProperty('java6.home')}/jre/lib/rt.jar"
 version = ''
 
 }

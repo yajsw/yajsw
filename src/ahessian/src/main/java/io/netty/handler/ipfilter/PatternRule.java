@@ -24,6 +24,7 @@ import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.regex.Pattern;
@@ -192,8 +193,12 @@ public class PatternRule implements IpFilterRule, Comparable<Object>
     	  if (interfaces != null)
     		  for (NetworkInterface in : Collections.list(interfaces))
     		  {
+    			  for (InetAddress addr: Collections.list(in.getInetAddresses()))
+  		            if (addr != null && Arrays.equals(addr.getAddress(), address.getAddress()))
+ 		               return true;
+    				  
     		      for (InterfaceAddress addr :  in.getInterfaceAddresses())
-    		            if (addr.getAddress().equals(address))
+    		            if (addr != null && Arrays.equals(addr.getAddress().getAddress(), address.getAddress()))
     		               return true;
     			 
     		  }

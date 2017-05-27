@@ -156,6 +156,7 @@ public class DiscoveryServer extends MulticastEndpoint
 		{
 			Constants.ahessianLogger.warn("", ex);
 		}
+		result = "127.0.0.1";
 		return result;
 
 	}
