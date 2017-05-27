@@ -1,32 +1,33 @@
 /*
- * Copyright 2003-2013 the original author or authors.
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  */
 package org.codehaus.groovy.runtime.m12n;
 
 import groovy.lang.MetaMethod;
-import io.netty.util.internal.logging.InternalLogger;
-import io.netty.util.internal.logging.InternalLoggerFactory;
-
-import java.util.LinkedList;
-import java.util.List;
-
 import org.codehaus.groovy.reflection.CachedClass;
 import org.codehaus.groovy.reflection.CachedMethod;
 import org.codehaus.groovy.reflection.ReflectionCache;
 import org.codehaus.groovy.runtime.metaclass.NewInstanceMetaMethod;
 import org.codehaus.groovy.runtime.metaclass.NewStaticMetaMethod;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * An extension module which provides extension methods using a {@link org.codehaus.groovy.runtime.DefaultGroovyMethods}-like implementation, that
@@ -85,7 +86,7 @@ import org.codehaus.groovy.runtime.metaclass.NewStaticMetaMethod;
  */
 public abstract class SimpleExtensionModule extends ExtensionModule {
 
-    private final static InternalLogger LOG = InternalLoggerFactory.getInstance(SimpleExtensionModule.class.getName());
+    private static final Logger LOG = Logger.getLogger(SimpleExtensionModule.class.getName());
 
     public SimpleExtensionModule(final String moduleName, final String moduleVersion) {
         super(moduleName, moduleVersion);
@@ -100,7 +101,7 @@ public abstract class SimpleExtensionModule extends ExtensionModule {
             try {
                 createMetaMethods(extensionClass, metaMethods, false);
             } catch (LinkageError e) {
-                LOG.warn("Module ["+getName()+"] - Unable to load extension class ["+extensionClass+"] due to ["+e.getMessage()+"]. Maybe this module is not supported by your JVM version.");
+                LOG.warning("Module ["+getName()+"] - Unable to load extension class ["+extensionClass+"] due to ["+e.getMessage()+"]. Maybe this module is not supported by your JVM version.");
             }
         }
         extensionClasses = getStaticMethodsExtensionClasses();
@@ -108,13 +109,13 @@ public abstract class SimpleExtensionModule extends ExtensionModule {
             try {
                 createMetaMethods(extensionClass, metaMethods, true);
             } catch (LinkageError e) {
-                LOG.warn("Module ["+getName()+"] - Unable to load extension class ["+extensionClass+"] due to ["+e.getMessage()+"]. Maybe this module is not supported by your JVM version.");
+                LOG.warning("Module ["+getName()+"] - Unable to load extension class ["+extensionClass+"] due to ["+e.getMessage()+"]. Maybe this module is not supported by your JVM version.");
             }
         }
         return metaMethods;
     }
 
-    private void createMetaMethods(final Class extensionClass, final List<MetaMethod> metaMethods, final boolean isStatic) {
+    private static void createMetaMethods(final Class extensionClass, final List<MetaMethod> metaMethods, final boolean isStatic) {
         CachedClass cachedClass = ReflectionCache.getCachedClass(extensionClass);
         CachedMethod[] methods = cachedClass.getMethods();
         for (CachedMethod method : methods) {

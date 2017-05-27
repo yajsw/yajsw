@@ -1,17 +1,20 @@
 /*
- * Copyright 2007-2012 the original author or authors.
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  */
 package org.codehaus.groovy.binding;
 
@@ -22,6 +25,12 @@ import groovy.lang.MissingMethodException;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
+import org.codehaus.groovy.runtime.InvokerHelper;
+import org.codehaus.groovy.runtime.InvokerInvocationException;
+import org.codehaus.groovy.runtime.ResourceGroovyMethods;
+import org.codehaus.groovy.runtime.typehandling.DefaultTypeTransformation;
+
+import javax.swing.SwingUtilities;
 import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -36,22 +45,15 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.swing.SwingUtilities;
-
-import org.codehaus.groovy.runtime.InvokerHelper;
-import org.codehaus.groovy.runtime.InvokerInvocationException;
-import org.codehaus.groovy.runtime.ResourceGroovyMethods;
-import org.codehaus.groovy.runtime.typehandling.DefaultTypeTransformation;
-
 
 /**
  * @author <a href="mailto:shemnon@yahoo.com">Danno Ferrin</a>
  * @author Andres Almiray
- * @version $Revision$
  * @since Groovy 1.1
  */
 public class PropertyBinding implements SourceBinding, TargetBinding, TriggerBinding {
     private static final ExecutorService DEFAULT_EXECUTOR_SERVICE = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    //private static final Logger LOG = Logger.getLogger(PropertyBinding.class.getName());
 	private static final InternalLogger LOG = InternalLoggerFactory.getInstance(PropertyBinding.class.getName());
     private static final Map<Class, Class<? extends PropertyAccessor>> ACCESSORS = new LinkedHashMap<Class, Class<? extends PropertyAccessor>>();
 
@@ -168,7 +170,7 @@ public class PropertyBinding implements SourceBinding, TargetBinding, TriggerBin
         return updateStrategy;
     }
 
-    private UpdateStrategy pickUpdateStrategy(Object bean, UpdateStrategy updateStrategy) {
+    private static UpdateStrategy pickUpdateStrategy(Object bean, UpdateStrategy updateStrategy) {
         if (bean instanceof Component) {
             return UpdateStrategy.MIXED;
         } else if (updateStrategy != null) {
@@ -210,10 +212,10 @@ public class PropertyBinding implements SourceBinding, TargetBinding, TriggerBin
                     try {
                         SwingUtilities.invokeAndWait(runnable);
                     } catch (InterruptedException e) {
-                        LOG.error("Error notifying propertyChangeListener", e);
+                        LOG.warn("Error notifying propertyChangeListener", e);
                         throw new GroovyRuntimeException(e);
                     } catch (InvocationTargetException e) {
-                        LOG.warn( "Error notifying propertyChangeListener", e.getTargetException());
+                        LOG.warn("Error notifying propertyChangeListener", e.getTargetException());
                         throw new GroovyRuntimeException(e.getTargetException());
                     }
                 }

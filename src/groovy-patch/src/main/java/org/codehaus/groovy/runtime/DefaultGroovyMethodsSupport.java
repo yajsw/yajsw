@@ -1,46 +1,35 @@
 /*
- * Copyright 2003-2008 the original author or authors.
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  */
 package org.codehaus.groovy.runtime;
 
 import groovy.lang.EmptyRange;
+import groovy.lang.IntRange;
 import groovy.lang.Range;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
+import org.codehaus.groovy.runtime.typehandling.DefaultTypeTransformation;
+
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Queue;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.Stack;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.Vector;
-
-import org.codehaus.groovy.runtime.typehandling.DefaultTypeTransformation;
+import java.lang.reflect.Array;
+import java.util.*;
 
 /**
  * Support methods for DefaultGroovyMethods and PluginDefaultMethods.
@@ -49,9 +38,13 @@ public class DefaultGroovyMethodsSupport {
 
     //private static final Logger LOG = Logger.getLogger(DefaultGroovyMethodsSupport.class.getName());
 	private static final InternalLogger LOG = InternalLoggerFactory.getInstance(DefaultGroovyMethodsSupport.class.getName());
+	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
     // helper method for getAt and putAt
     protected static RangeInfo subListBorders(int size, Range range) {
+        if (range instanceof IntRange) {
+            return ((IntRange)range).subListBorders(size);
+        }
         int from = normaliseIndex(DefaultTypeTransformation.intUnbox(range.getFrom()), size);
         int to = normaliseIndex(DefaultTypeTransformation.intUnbox(range.getTo()), size);
         boolean reverse = range.isReverse();
@@ -74,7 +67,7 @@ public class DefaultGroovyMethodsSupport {
     /**
      * This converts a possibly negative index to a real index into the array.
      *
-     * @param i    the unnormalised index
+     * @param i    the unnormalized index
      * @param size the array size
      * @return the normalised index
      */
@@ -119,18 +112,7 @@ public class DefaultGroovyMethodsSupport {
         }
     }
 
-    protected static class RangeInfo {
-        public final int from;
-        public final int to;
-        public final boolean reverse;
-
-        public RangeInfo(int from, int to, boolean reverse) {
-            this.from = from;
-            this.to = to;
-            this.reverse = reverse;
-        }
-    }
-
+    @SuppressWarnings("unchecked")
     protected static <T> Collection<T> cloneSimilarCollection(Collection<T> orig, int newCapacity) {
         Collection<T> answer = (Collection<T>) cloneObject(orig);
         if (answer != null) return answer;
@@ -144,7 +126,7 @@ public class DefaultGroovyMethodsSupport {
     private static Object cloneObject(Object orig) {
         if (orig instanceof Cloneable) {
             try {
-                return InvokerHelper.invokeMethod(orig, "clone", new Object[0]);
+                return InvokerHelper.invokeMethod(orig, "clone", EMPTY_OBJECT_ARRAY);
             } catch (Exception ex) {
                 // ignore
             }
@@ -157,6 +139,14 @@ public class DefaultGroovyMethodsSupport {
             return createSimilarCollection((Collection<?>) object);
         }
         return new ArrayList();
+    }
+
+    protected static <T> Collection<T> createSimilarCollection(Iterable<T> iterable) {
+        if (iterable instanceof Collection) {
+            return createSimilarCollection((Collection<T>) iterable);
+        } else {
+            return new ArrayList<T>();
+        }
     }
 
     protected static <T> Collection<T> createSimilarCollection(Collection<T> collection) {
@@ -189,6 +179,13 @@ public class DefaultGroovyMethodsSupport {
         return new ArrayList<T>(newCapacity);
     }
 
+    @SuppressWarnings("unchecked")
+    protected static <T> T[] createSimilarArray(T[] orig, int newCapacity) {
+        Class<T> componentType = (Class<T>) orig.getClass().getComponentType();
+        return (T[]) Array.newInstance(componentType, newCapacity);
+    }
+
+    @SuppressWarnings("unchecked")
     protected static <T> Set<T> createSimilarSet(Set<T> orig) {
         if (orig instanceof SortedSet) {
             return new TreeSet<T>(((SortedSet)orig).comparator());
@@ -196,6 +193,7 @@ public class DefaultGroovyMethodsSupport {
         return new LinkedHashSet<T>();
     }
 
+    @SuppressWarnings("unchecked")
     protected static <K, V> Map<K, V> createSimilarMap(Map<K, V> orig) {
         if (orig instanceof SortedMap) {
             return new TreeMap<K, V>(((SortedMap)orig).comparator());
@@ -209,6 +207,7 @@ public class DefaultGroovyMethodsSupport {
         return new LinkedHashMap<K, V>();
     }
 
+    @SuppressWarnings("unchecked")
     protected static <K, V> Map<K ,V> cloneSimilarMap(Map<K, V> orig) {
         Map<K, V> answer = (Map<K, V>) cloneObject(orig);
         if (answer != null) return answer;
@@ -235,12 +234,13 @@ public class DefaultGroovyMethodsSupport {
      * @param cols an array of collections
      * @return true if the collections are all of the same type
      */
+    @SuppressWarnings("unchecked")
     protected static boolean sameType(Collection[] cols) {
         List all = new LinkedList();
         for (Collection col : cols) {
             all.addAll(col);
         }
-        if (all.size() == 0)
+        if (all.isEmpty())
             return true;
 
         Object first = all.get(0);
