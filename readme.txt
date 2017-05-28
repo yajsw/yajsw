@@ -10,3 +10,12 @@ yajsw-stable-12.09
 	* bug: @see https://sourceforge.net/p/yajsw/discussion/810311/thread/4dad0e51/. Update to jna-4.2.2
 	* bug: posix JAVA_HOME bug. @see https://sourceforge.net/p/yajsw/patches/12/
 	
+NOTE: JNA 4.2.2 has issues with some windows versions, JNA 4.3.0 and JNA 4.4.0 have issues some linux versions.
+This release of yajsw includes JNA 4.4.0 but the build for linux-x86-64 is taken from elasticsearch-5.4.0.
+If you are having issues with JNA please create a ticket.
+
+https://github.com/java-native-access/jna/issues/771
+https://github.com/elastic/elasticsearch/issues/23640
+https://unix.stackexchange.com/questions/176489/how-to-update-glibc-to-2-14-in-centos-6-5
+https://github.com/java-native-access/jna/issues/636
+	
