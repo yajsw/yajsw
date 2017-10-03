@@ -492,6 +492,8 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements
 			result = super.getPropertyInternal(key);
 		else if (key.startsWith("wrapper.on_exit"))
 			return null;
+		else if (key.startsWith("wrapper.on_signal"))
+			return null;
 		else if (key.startsWith("wrapper.exit_on_main_terminate"))
 			result = "0";
 		else if (key.startsWith("wrapper.daemon"))

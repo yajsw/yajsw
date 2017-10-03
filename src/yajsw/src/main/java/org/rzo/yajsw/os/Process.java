@@ -142,6 +142,7 @@ public interface Process
 	 * @return the exit code
 	 */
 	public int getExitCode();
+	public int getExitSignal();
 
 	/**
 	 * Gets the command.

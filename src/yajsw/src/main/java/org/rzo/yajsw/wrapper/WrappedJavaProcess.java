@@ -580,8 +580,11 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 							|| _state == STATE_RESTART_START
 							|| _state == STATE_RESTART_WAIT)
 						return;
-					if (allowRestart() && exitCodeRestart()
+					if ((allowRestart() && exitCodeRestart()
 							&& !exitCodeShutdown() && !exitCodeStop())
+							||
+							(allowRestart() && exitSignalRestart()
+									&& !exitSignalShutdown() && !exitSignalStop()))
 					{
 						restartInternal();
 					}
@@ -613,8 +616,11 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 					if (_state == STATE_RESTART_STOP || _state == STATE_RESTART
 							|| _state == STATE_RESTART_WAIT)
 						return;
-					if (allowRestart() && exitCodeRestart()
+					if ((allowRestart() && exitCodeRestart()
 							&& !exitCodeShutdown() && !exitCodeStop())
+							||
+							(allowRestart() && exitSignalRestart()
+									&& !exitSignalShutdown() && !exitSignalStop()))
 					{
 						restartInternal();
 					}

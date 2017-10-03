@@ -52,6 +52,7 @@ public abstract class AbstractProcess implements Process
 
 	/** The _exit code. */
 	volatile protected int _exitCode = -1;
+	volatile protected int _exitSignal = -1;
 
 	/** The _title. */
 	protected String _title = "";
@@ -180,10 +181,20 @@ public abstract class AbstractProcess implements Process
 	 * @param exitCode
 	 *            the new exit code
 	 */
+	protected void setExitSignal(int exitSignal)
+	{
+		_exitSignal = exitSignal;
+	}
+
+	public int getExitSignal()
+	{
+		return _exitSignal;
+	}
 	protected void setExitCode(int exitCode)
 	{
 		_exitCode = exitCode;
 	}
+
 
 	/*
 	 * (non-Javadoc)

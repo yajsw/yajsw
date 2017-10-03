@@ -811,7 +811,6 @@ public class PosixProcess extends AbstractProcess {
 				if (c != null) {
 					if (c != null && c.indexOf(' ') > -1
 							&& c.indexOf('"') == -1)
-						;
 					c = "\"" + c + "\"";
 					cmd += c + " ";
 				}
@@ -1048,11 +1047,12 @@ public class PosixProcess extends AbstractProcess {
 					int code = status.getValue();
 
 					// Exited Normally
-					if (WIFEXITED(code) != 0)
+					//if (WIFEXITED(code) != 0)
 						_exitCode = WEXITSTATUS(code);
 					// Exited Ab-Normally
-					else
-						_exitCode = 0;
+					//else
+					//	_exitCode = 0;
+						_exitSignal = WTERMSIG(code);
 				}
 				if (_logger != null)
 					_logger.info("exit code posix process: "
@@ -1072,6 +1072,26 @@ public class PosixProcess extends AbstractProcess {
 			posix_spawn_file_actions = getSpawnPipes();
 			posix_spawnattr = getSpawnAttr();
 			String[] spawnCmd = getSpawnCmdLine();
+			for (int i=0; i<spawnCmd.length; i++)
+			{
+				String c = spawnCmd[i];
+				if (c.startsWith("\""))
+				{
+					c = c.replaceAll("\"", "");
+					spawnCmd[i] = c;
+				}
+					
+			}
+			if (_debug)
+			{
+				System.out.println("spawnCmd: ");
+				for (String c : spawnCmd)
+				{
+					System.out.print(c);
+					System.out.print(" ");
+				}
+				System.out.println();
+			}
 			int result = CLibrary.INSTANCE.posix_spawnp(refpid, spawnCmd[0],
 					posix_spawn_file_actions, posix_spawnattr, spawnCmd, _env);
 			if (result == 0) {
@@ -1392,6 +1412,10 @@ public class PosixProcess extends AbstractProcess {
 
 	public int WIFEXITED(int code) {
 		return (code & 0xFF);
+	}
+
+	public int WTERMSIG(int code) {
+		return (code & 0x7f);
 	}
 
 	public int WEXITSTATUS(int code) {

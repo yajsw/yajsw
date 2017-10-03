@@ -106,7 +106,7 @@ public abstract class AbstractScript implements Script
 
 			public void run(Timeout arg0) throws Exception
 			{
-				log("script takes too long -> interrupt");
+				log("script "+_name+" timed out -> interrupt");
 				try
 				{
 					interrupt();

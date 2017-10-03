@@ -19,6 +19,9 @@
 package org.codehaus.groovy.runtime.m12n;
 
 import groovy.lang.MetaMethod;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
+
 import org.codehaus.groovy.reflection.CachedClass;
 import org.codehaus.groovy.reflection.CachedMethod;
 import org.codehaus.groovy.reflection.ReflectionCache;
@@ -86,7 +89,9 @@ import java.util.logging.Logger;
  */
 public abstract class SimpleExtensionModule extends ExtensionModule {
 
-    private static final Logger LOG = Logger.getLogger(SimpleExtensionModule.class.getName());
+    //private static final Logger LOG = Logger.getLogger(SimpleExtensionModule.class.getName());
+    private final static InternalLogger LOG = InternalLoggerFactory.getInstance(SimpleExtensionModule.class.getName());
+
 
     public SimpleExtensionModule(final String moduleName, final String moduleVersion) {
         super(moduleName, moduleVersion);
@@ -101,7 +106,7 @@ public abstract class SimpleExtensionModule extends ExtensionModule {
             try {
                 createMetaMethods(extensionClass, metaMethods, false);
             } catch (LinkageError e) {
-                LOG.warning("Module ["+getName()+"] - Unable to load extension class ["+extensionClass+"] due to ["+e.getMessage()+"]. Maybe this module is not supported by your JVM version.");
+                LOG.warn("Module ["+getName()+"] - Unable to load extension class ["+extensionClass+"] due to ["+e.getMessage()+"]. Maybe this module is not supported by your JVM version.");
             }
         }
         extensionClasses = getStaticMethodsExtensionClasses();
@@ -109,7 +114,7 @@ public abstract class SimpleExtensionModule extends ExtensionModule {
             try {
                 createMetaMethods(extensionClass, metaMethods, true);
             } catch (LinkageError e) {
-                LOG.warning("Module ["+getName()+"] - Unable to load extension class ["+extensionClass+"] due to ["+e.getMessage()+"]. Maybe this module is not supported by your JVM version.");
+                LOG.warn("Module ["+getName()+"] - Unable to load extension class ["+extensionClass+"] due to ["+e.getMessage()+"]. Maybe this module is not supported by your JVM version.");
             }
         }
         return metaMethods;

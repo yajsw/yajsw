@@ -204,11 +204,13 @@ public class WrapperLoader
 						System.out.println("WARNING: lib not found: "
 								+ myFile.getCanonicalPath());
 					}
+					/*
 					else
 					{
 						System.out.println("INFO: lib not found: "
 								+ myFile.getCanonicalPath());
 					}
+					*/
 				}
 				else
 					classpath.add(myFile);

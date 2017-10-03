@@ -154,6 +154,12 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	Set _stopExitCodes = new HashSet();
 	/** The _exit code default restart. */
 	boolean _exitCodeDefaultRestart = false;
+	Set _startupSignalCodes = new HashSet();
+	/** The _shutdown exit codes. */
+	Set _shutdownSignalCodes = new HashSet();
+	Set _stopSignalCodes = new HashSet();
+	/** The _exit code default restart. */
+	boolean _signalCodeDefaultRestart = false;
 	/** The _local configuration. */
 	protected Configuration _localConfiguration = new BaseConfiguration();
 	/** The _app logger. */
@@ -227,6 +233,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	volatile long _stoppingHintSetTime = 0;
 	volatile boolean _appReportedReady = false;
 	volatile String _stopReason;
+	volatile int _delayShutdown = 0;
 
 	JdkLogger2Factory _internalLoggerFactory = null;
 
@@ -363,6 +370,70 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			}
 		}
 
+		for (Iterator it = _config.getKeys("wrapper.on_signal"); it.hasNext();)
+		{
+			String key = (String) it.next();
+			String value = _config.getString(key);
+			if ("RESTART".equals(value))
+			{
+				String postfix = key.substring(key.lastIndexOf(".") + 1);
+				if ("default".equals(postfix))
+					_signalCodeDefaultRestart = true;
+				else
+					try
+					{
+						_startupSignalCodes.add(Integer.parseInt(postfix));
+					}
+					catch (Exception ex)
+					{
+						getWrapperLogger().info(
+								"error evaluating " + key + " "
+										+ ex.getMessage());
+					}
+
+			}
+			if ("SHUTDOWN".equals(value))
+			{
+				String postfix = key.substring(key.lastIndexOf(".") + 1);
+				if ("default".equals(postfix))
+				// do nothing
+				{
+				}
+				else
+					try
+					{
+						_shutdownSignalCodes.add(Integer.parseInt(postfix));
+					}
+					catch (Exception ex)
+					{
+						getWrapperLogger().info(
+								"error evaluating " + key + " "
+										+ ex.getMessage());
+					}
+
+			}
+			if ("STOP".equals(value))
+			{
+				String postfix = key.substring(key.lastIndexOf(".") + 1);
+				if ("default".equals(postfix))
+				// do nothing
+				{
+				}
+				else
+					try
+					{
+						_stopSignalCodes.add(Integer.parseInt(postfix));
+					}
+					catch (Exception ex)
+					{
+						getWrapperLogger().info(
+								"error evaluating " + key + " "
+										+ ex.getMessage());
+					}
+
+			}
+		}
+
 		if (_timer == null)
 			_timer = TimerFactory.createTimer(_config, this);
 		_timer.init();
@@ -429,6 +500,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		_minAppLogLines = _config.getInt("wrapper.app.status.log.lines",
 				MIN_PROCESS_LINES_TO_LOG);
 		Utils.verifyIPv4IsPreferred(getWrapperLogger());
+		
+		_delayShutdown = _config.getInt("wrapper.delay_shutdown", 0) * 1000;
 
 		_init = true;
 
@@ -869,6 +942,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	{
 		if (_state == STATE_USER_STOP || _state == STATE_SHUTDOWN)
 			return false;
+		if (exitSignalShutdown())
+			return false;
 		if (_startupExitCodes.contains(_osProcess.getExitCode()))
 		{
 			getWrapperLogger().info("restart process due to exit code rule");
@@ -878,6 +953,25 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		{
 			getWrapperLogger().info(
 					"restart process due to default exit code rule");
+			return true;
+		}
+
+		return false;
+	}
+
+	protected boolean exitSignalRestart()
+	{
+		if (_state == STATE_USER_STOP || _state == STATE_SHUTDOWN)
+			return false;
+		if (_startupSignalCodes.contains(_osProcess.getExitSignal()))
+		{
+			getWrapperLogger().info("restart process due to signal code rule");
+			return true;
+		}
+		else if (_signalCodeDefaultRestart)
+		{
+			getWrapperLogger().info(
+					"restart process due to default signal code rule");
 			return true;
 		}
 
@@ -900,11 +994,33 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		return false;
 	}
 
+	protected boolean exitSignalShutdown()
+	{
+		if (_shutdownSignalCodes.contains(_osProcess.getExitSignal()))
+		{
+			getWrapperLogger().info("shutdown wrapper due to exit signal rule");
+			return true;
+		}
+
+		return false;
+	}
+
 	protected boolean exitCodeStop()
 	{
 		if (_stopExitCodes.contains(_osProcess.getExitCode()))
 		{
 			getWrapperLogger().info("stop process due to exit code rule");
+			return true;
+		}
+
+		return false;
+	}
+
+	protected boolean exitSignalStop()
+	{
+		if (_stopSignalCodes.contains(_osProcess.getExitSignal()))
+		{
+			getWrapperLogger().info("stop process due to exit signal rule");
 			return true;
 		}
 
@@ -3535,6 +3651,12 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	public void shutdown()
 	{
 		setState(STATE_SHUTDOWN);
+		if (_delayShutdown > 0)
+			try {
+				Thread.sleep(_delayShutdown);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 	}
 
 	public void osProcessTerminated()

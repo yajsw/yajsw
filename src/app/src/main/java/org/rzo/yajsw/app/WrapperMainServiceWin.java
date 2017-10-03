@@ -17,6 +17,9 @@
 package org.rzo.yajsw.app;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -104,10 +107,15 @@ public class WrapperMainServiceWin extends Win32Service implements
 		service.setServiceName(_config.getString("wrapper.ntservice.name"));
 		long timeout = _config.getInt("wrapper.shutdown.timeout",
 				Constants.DEFAULT_SHUTDOWN_TIMEOUT) * 1000;
-		timeout += _config.getInt("wrapper.script.STOP.timeout", 0) * 1000;
-		timeout += _config.getInt("wrapper.script.SHUTDOWN.timeout", 0) * 1000;
-		timeout += _config.getInt("wrapper.script.IDLE.timeout", 0) * 1000;
-		timeout += _config.getInt("wrapper.script.ABORT.timeout", 0) * 1000;
+		int t1 =  _config.getInt("wrapper.script.STOP.timeout", 0) * 1000;
+		int t2 = _config.getInt("wrapper.script.SHUTDOWN.timeout", 0) * 1000;
+		int t3 = _config.getInt("wrapper.script.IDLE.timeout", 0) * 1000;
+		int t4 = _config.getInt("wrapper.script.ABORT.timeout", 0) * 1000;
+		
+		timeout += t1;
+		timeout += t2;
+		timeout += t3;
+		timeout += t4;
 		if (timeout > Integer.MAX_VALUE)
 			timeout = Integer.MAX_VALUE;
 		service.setStopTimeout((int) timeout);

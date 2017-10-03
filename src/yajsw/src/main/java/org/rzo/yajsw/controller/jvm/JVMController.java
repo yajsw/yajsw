@@ -357,6 +357,10 @@ public class JVMController extends AbstractController
 	void pingReceived()
 	{
 		_pingOK = true;
+		if (_channel.get() != null)
+			_channel.get().writeAndFlush(
+					new Message(Constants.WRAPPER_MSG_PING, null));
+
 	}
 
 	void serviceStartup()

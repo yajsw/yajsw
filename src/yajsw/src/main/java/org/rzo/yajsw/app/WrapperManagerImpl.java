@@ -211,6 +211,10 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 	boolean _initGCBeans = false;
 
 	volatile Runnable _shutdownListener;
+	
+	volatile long _pingTime = System.currentTimeMillis();
+	
+	private boolean _wrapperPingCheckAck = false;
 
 	private String getSystemProperty(String key)
 	{
@@ -378,6 +382,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 			_startupTimeout = _config.getInt("wrapper.startup.timeout",
 					DEFAULT_STARTUP_TIMEOUT) * 1000;
 
+			_wrapperPingCheckAck = _config.getBoolean("wrapper.ping.check_ack", false);
 			shutdownScript = _config.getString("wrapper.app.shutdown.script",
 					null);
 			if (shutdownScript != null && !"".equals(shutdownScript))
@@ -1191,10 +1196,17 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 
 					public void run()
 					{
-						ChannelFuture future;
+						ChannelFuture future = null;
 						if (_session != null && _session.isActive()
 								&& !_stopping && !_appearHanging)
 						{
+							// if ping has not been acknowledged by the wrapper
+							if (_wrapperPingCheckAck && System.currentTimeMillis() - _pingTime > 3*getPingInterval())
+							{
+								System.out.println("missing ping ack for "+(System.currentTimeMillis() - _pingTime)+ " ms. Closing tcp/ip connection");
+								_session.close();
+							}
+							else
 							synchronized (_heapDataLock)
 							{
 								if (_sendHeapData)
@@ -1225,6 +1237,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 							}
 							try
 							{
+								if (future != null)
 								future.await(10000);
 							}
 							catch (InterruptedException e)
@@ -1441,6 +1454,10 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 			else if (msg.getCode() == Constants.WRAPPER_MSG_DUMP_HEAP)
 			{
 				dumpHeap(msg.getMessage());
+			}
+			else if (msg.getCode() == Constants.WRAPPER_MSG_PING)
+			{
+				_pingTime = System.currentTimeMillis();
 			}
 		}
 

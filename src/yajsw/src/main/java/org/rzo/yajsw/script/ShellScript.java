@@ -43,8 +43,7 @@ public class ShellScript extends AbstractScript
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
+_pro	 * 
 	 * @see org.rzo.yajsw.script.AbstractScript#execute(java.lang.String,
 	 * java.lang.String, java.lang.String, java.lang.String, java.lang.String,
 	 * java.lang.String, java.lang.Object)
@@ -52,10 +51,10 @@ public class ShellScript extends AbstractScript
 	public Object execute(String line)
 	{
 		String id = _id;
-		String state = _process.getStringState();
-		String count = "" + _process.getRestartCount();
-		String pid = "" + _process.getAppPid();
-		String exitCode = "" + _process.getExitCode();
+		String state = _process != null ? _process.getStringState() : "?";
+		String count = _process != null ? "" + _process.getRestartCount() : "?";
+		String pid = _process != null ? "" + _process.getAppPid() : "?";
+		String exitCode = _process != null ? "" + _process.getExitCode() : "?";
 		try
 		{
 			p = OperatingSystem.instance().processManagerInstance()

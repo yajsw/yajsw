@@ -243,10 +243,17 @@ public class HelloWorld
 		System.out.println("java.library.path: "
 				+ System.getProperty("java.library.path"));
 
-		if (args.length >= 1 && "crash".equals(args[0]))
+		if (args.length >= 2 && "halt".equals(args[0]))
 		{
 			Thread.sleep(5000);
+			int code = Integer.parseInt(args[1]);
 			Runtime.getRuntime().halt(99);
+		}
+		if (args.length >= 2 && "exit".equals(args[0]))
+		{
+			Thread.sleep(5000);
+			int code = Integer.parseInt(args[1]);
+			Runtime.getRuntime().exit(code);
 		}
 		if (args.length >= 1 && "outofmem-thread".equals(args[0]))
 		{

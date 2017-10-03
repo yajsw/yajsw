@@ -23,8 +23,8 @@ Class-Path-Wrapper-Extended:
  ./lib/extended/regex/automaton-1.11.jar 
  ./lib/extended/yajsw/hessian4.jar 
  ./lib/extended/yajsw/srvmgr.jar 
- ./lib/extended/glazedlists/glazedlists-1.8.0_java15.jar 
- ./lib/extended/glazedlists/commons-beanutils-1.8.2.jar 
+ ./lib/extended/glazedlists/glazedlists-1.10.0_java16.jar 
+ ./lib/extended/glazedlists/commons-beanutils-1.9.3.jar 
  ./lib/extended/cron/joda-time-2.7.jar 
  ./lib/extended/cron/yacron4j-00.03.jar 
  ./lib/extended/velocity/velocity-1.7.jar 
@@ -36,8 +36,6 @@ Class-Path-Wrapper-Extended:
  ./lib/extended/vfs-dbx/vfs-dbx-00.02.jar 
  ./lib/extended/vfs-dbx/dropbox-core-sdk-1.7.7.jar 
  ./lib/extended/vfs-dbx/jackson-core-2.2.4.jar 
- ./lib/extended/glazedlists/commons-beanutils-1.8.2.jar 
- ./lib/extended/glazedlists/glazedlists-1.8.0_java15.jar 
  ./lib/extended/keystore/keystore.jar 
  ./lib/extended/abeille/formsrt.jar
   

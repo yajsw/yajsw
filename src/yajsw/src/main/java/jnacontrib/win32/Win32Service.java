@@ -696,9 +696,11 @@ abstract public class Win32Service
 		serviceStatus.dwWaitHint = waitHint;
 		serviceStatus.dwCurrentState = status;
 		serviceStatus.dwCheckPoint = checkPoint;
-		log("reporting status " + checkPoint, 2);
+		log("reporting status " + checkPoint+" "+status+" "+waitHint, 2);
 
-		advapi32.SetServiceStatus(serviceStatusHandle, serviceStatus);
+		if (!advapi32.SetServiceStatus(serviceStatusHandle, serviceStatus))
+			log("error in: advapi32.SetServiceStatus", 1);
+		log("Win32Service.reportStatus: "+status+ " "+waitHint,3);
 	}
 
 	/**
@@ -786,7 +788,7 @@ abstract public class Win32Service
 		 */
 		public int callback(int dwControl, int dwEventType, Pointer lpEventData, Pointer lpContext)
 		{
-			log("received service control " + dwControl, 2);
+			log("Win32Service.callback " + dwControl, 2);
 			switch (dwControl)
 			{
 			case WINSVC.SERVICE_CONTROL_STOP:
@@ -839,6 +841,7 @@ abstract public class Win32Service
 	
 	public void signalStopping(long waitHint)
 	{
+		log("Win32Service.signlaStopping "+waitHint,3);
 		if (_stopping)
 			reportStatus(WINSVC.SERVICE_STOP_PENDING, WINERROR.NO_ERROR, (int)waitHint);
 	}
