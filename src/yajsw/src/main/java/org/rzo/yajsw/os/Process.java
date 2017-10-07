@@ -64,7 +64,7 @@ public interface Process
 	 * @param cpuAffinity
 	 *            the new cpu affinity
 	 */
-	public void setCpuAffinity(int cpuAffinity);
+	public void setCpuAffinity(long cpuAffinity);
 
 	/**
 	 * Sets the visible.

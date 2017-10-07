@@ -58,7 +58,7 @@ public abstract class AbstractProcess implements Process
 	protected String _title = "";
 
 	/** The _cpu affinity. */
-	protected int _cpuAffinity = AFFINITY_UNDEFINED;
+	protected long _cpuAffinity = AFFINITY_UNDEFINED;
 
 	/** The _pipe streams. */
 	protected boolean _pipeStreams = false;
@@ -302,7 +302,7 @@ public abstract class AbstractProcess implements Process
 	 * 
 	 * @return the cpu affinity
 	 */
-	public int getCpuAffinity()
+	public long getCpuAffinity()
 	{
 		return _cpuAffinity;
 	}
@@ -312,7 +312,7 @@ public abstract class AbstractProcess implements Process
 	 * 
 	 * @see org.rzo.yajsw.os.Process#setCpuAffinity(int)
 	 */
-	public void setCpuAffinity(int cpuAffinity)
+	public void setCpuAffinity(long cpuAffinity)
 	{
 		_cpuAffinity = cpuAffinity;
 	}

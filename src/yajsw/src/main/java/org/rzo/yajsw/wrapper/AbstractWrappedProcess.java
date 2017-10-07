@@ -920,11 +920,11 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	 * 
 	 * @return the affinity
 	 */
-	protected int getAffinity(String affinity)
+	protected long getAffinity(String affinity)
 	{
 		try
 		{
-			return Integer.parseInt(affinity);
+			return Long.parseLong(affinity);
 		}
 		catch (Exception ex)
 		{

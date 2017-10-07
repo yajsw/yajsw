@@ -640,8 +640,8 @@ public class WindowsXPProcess extends AbstractProcess
 		 * @return true, if successful
 		 */
 		boolean GetProcessAffinityMask(HANDLE handle,
-				IntByReference lpProcessAffinityMask,
-				IntByReference lpSystemAffinityMask);
+				LongByReference lpProcessAffinityMask,
+				LongByReference lpSystemAffinityMask);
 
 		/*
 		 * BOOL WINAPI SetProcessAffinityMask( __in HANDLE hProcess, __in
@@ -657,7 +657,7 @@ public class WindowsXPProcess extends AbstractProcess
 		 * 
 		 * @return true, if successful
 		 */
-		boolean SetProcessAffinityMask(HANDLE handle, int dwProcessAffinityMask);
+		boolean SetProcessAffinityMask(HANDLE handle, long dwProcessAffinityMask);
 
 		/*
 		 * BOOL WINAPI SetPriorityClass( _In_ HANDLE hProcess,_In_ DWORD
@@ -2398,12 +2398,14 @@ public class WindowsXPProcess extends AbstractProcess
 				// return false;
 			}
 
-			int affinity = getProcessAffinity();
+			long affinity = getProcessAffinity();
 			if (affinity > 0)
 			{
 				if (!MyKernel32.INSTANCE.SetProcessAffinityMask(
 						_processInformation.hProcess, affinity))
 					log("could not set process affinity");
+				else if (_debug)
+					log("Affinity set to: "+Long.toBinaryString(affinity));
 			}
 
 			if (_pipeStreams)
@@ -2465,12 +2467,12 @@ public class WindowsXPProcess extends AbstractProcess
 	 * 
 	 * @return the process affinity
 	 */
-	private int getProcessAffinity()
+	private long getProcessAffinity()
 	{
 		if (_cpuAffinity <= 0)
 			return 0;
-		IntByReference lpProcessAffinityMask = new IntByReference();
-		IntByReference lpSystemAffinityMask = new IntByReference();
+		LongByReference lpProcessAffinityMask = new LongByReference();
+	LongByReference lpSystemAffinityMask = new LongByReference();
 		if (MyKernel32.INSTANCE.GetProcessAffinityMask(
 				_processInformation.hProcess, lpProcessAffinityMask,
 				lpSystemAffinityMask))

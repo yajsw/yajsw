@@ -29,6 +29,7 @@ import org.rzo.yajsw.os.posix.PosixProcess;
 
 import com.sun.jna.Native;
 import com.sun.jna.ptr.IntByReference;
+import com.sun.jna.ptr.LongByReference;
 
 public class MacOsXProcess extends PosixProcess
 {
@@ -297,7 +298,7 @@ public class MacOsXProcess extends PosixProcess
 
 			if (_cpuAffinity != AFFINITY_UNDEFINED)
 			{
-				IntByReference affinity = new IntByReference();
+				LongByReference affinity = new LongByReference();
 				affinity.setValue(_cpuAffinity);
 				if (CLibrary.INSTANCE.sched_setaffinity(_pid, 4, affinity) == -1)
 					log("error setting affinity");
