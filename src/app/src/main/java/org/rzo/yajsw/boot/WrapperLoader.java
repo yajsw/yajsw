@@ -38,9 +38,6 @@ public class WrapperLoader
 		int ix = path.indexOf("!");
 		if (ix == -1)
 		{
-			System.out
-					.println("<yajsw>/wrapper.jar not found, please check classpath. aborting wrapper !");
-			Runtime.getRuntime().halt(999);// -> groovy eclipse plugin crashes
 			return false;
 		}
 		return true;
@@ -169,6 +166,15 @@ public class WrapperLoader
 			wrapperJar = getWrapperAppJar();
 		else
 			wrapperJar = getWrapperJar();
+		
+		if (wrapperJar == null)
+		{
+			System.out
+			.println("<yajsw>/wrapper.jar not found, please check classpath. aborting wrapper !");
+			Runtime.getRuntime().halt(999);// -> groovy eclipse plugin crashes
+
+		}
+		
 		Manifest manifest;
 		try
 		{
