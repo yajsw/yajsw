@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # -----------------------------------------------------------------------------
 # generate a YAJSW configuration file
 # arguments: pid : process ID of the process which should be wrapped
