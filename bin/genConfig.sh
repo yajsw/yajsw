@@ -1,9 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # -----------------------------------------------------------------------------
 # generate a YAJSW configuration file
 # arguments: pid : process ID of the process which should be wrapped
 #
 # -----------------------------------------------------------------------------
+
+set -e
 
 # resolve links - $0 may be a softlink
 PRG="$0"

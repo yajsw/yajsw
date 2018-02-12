@@ -155,6 +155,12 @@ public class MyFileHandler extends StreamHandler
 	private AtomicInteger descCounter = new AtomicInteger(0);
 	private LinkedList<File> oldFiles = new LinkedList<File>();
 	private int umask;
+	volatile private boolean _compress = false;
+	
+	public void setCompress(boolean value)
+	{
+		_compress = value;
+	}
 
 	interface FileChangeListner
 	{
@@ -204,17 +210,17 @@ public class MyFileHandler extends StreamHandler
 				{
 					if (i == 0)
 						files[i] = new File(parseFileName(pattern, i, uniqueID,
-								count));
+								count, _compress));
 					else
 					{
 						files[count - i] = new File(parseFileName(pattern, i
-								+ k, uniqueID, count));
+								+ k, uniqueID, count, _compress));
 						while (files[count - i].exists())
 						{
 							oldFiles.addLast(files[count - i]);
 							k++;
 							files[count - i] = new File(parseFileName(pattern,
-									i + k, uniqueID, count));
+									i + k, uniqueID, count, _compress));
 						}
 					}
 
@@ -225,7 +231,7 @@ public class MyFileHandler extends StreamHandler
 				{
 					// cache all file names for rotation use
 					files[generation] = new File(parseFileName(pattern,
-							generation, uniqueID, count));
+							generation, uniqueID, count, _compress));
 				}
 
 			descCounter.set(count + k);
@@ -302,6 +308,7 @@ public class MyFileHandler extends StreamHandler
 		setLevel(Level.OFF);
 
 		super.close();
+		compress();
 		if (desc)
 			rotateDesc();
 		else
@@ -319,6 +326,19 @@ public class MyFileHandler extends StreamHandler
 		}
 		setLevel(oldLevel);
 	}
+
+	private void compress() {
+		if (_compress)
+		{
+			File fname = zipFileName(files[0]); 
+			Compress.compress(fname.getAbsolutePath(), files[0].getAbsolutePath());
+			fname.delete();
+		}
+	}
+
+	private File zipFileName(File fname) {
+		return new File(fname.getParentFile(), fname.getName().substring(0, fname.getName().lastIndexOf(".")));
+		}
 
 	private void rotateAsc()
 	{
@@ -354,7 +374,7 @@ public class MyFileHandler extends StreamHandler
 		try
 		{
 			files[1] = new File(parseFileName(pattern,
-					descCounter.getAndIncrement(), uniqueID, count));
+					descCounter.getAndIncrement(), uniqueID, count, _compress));
 		}
 		catch (Exception e)
 		{
@@ -373,6 +393,8 @@ public class MyFileHandler extends StreamHandler
 	private void open(File fname, boolean append) throws IOException
 	{
 		int len = 0;
+		if (fname.getName().endsWith(".zip"))
+			fname = zipFileName(fname);
 		if (append)
 		{
 			len = (int) fname.length();
@@ -445,6 +467,7 @@ public class MyFileHandler extends StreamHandler
 	void findNextGeneration()
 	{
 		super.close();
+		compress();
 		for (int i = count - 1; i > 0; i--)
 		{
 			if (files[i].exists())
@@ -455,8 +478,11 @@ public class MyFileHandler extends StreamHandler
 		}
 		try
 		{
+			File f = files[0];
+			if (f.getName().endsWith(".zip"))
+				f = zipFileName(f);
 			output = new MeasureOutputStream(new BufferedOutputStream(
-					new FileOutputStream(files[0])));
+					new FileOutputStream(f)));
 		}
 		catch (FileNotFoundException e1)
 		{
@@ -475,7 +501,7 @@ public class MyFileHandler extends StreamHandler
 	 * @return transformed filename ready for use.
 	 */
 	public static String parseFileName(String pattern, int gen, int unique,
-			int count)
+			int count, boolean compress)
 	{
 		int cur = 0;
 		int next = 0;
@@ -554,7 +580,10 @@ public class MyFileHandler extends StreamHandler
 			sb.append(".").append(unique);
 		}
 
-		return sb.toString();
+		if (compress)
+		return sb.toString()+".zip";
+		else
+			return sb.toString();
 	}
 
 	public File currentFile()
@@ -745,9 +774,10 @@ public class MyFileHandler extends StreamHandler
 	 * @throws NullPointerException
 	 *             if {@code pattern} is {@code null}.
 	 */
-	public MyFileHandler(String pattern, int limit, int count, boolean append)
+	public MyFileHandler(String pattern, int limit, int count, boolean append, boolean compress)
 			throws IOException
 	{
+		_compress = compress;
 		if (pattern.isEmpty())
 		{
 			throw new IllegalArgumentException("Pattern cannot be empty");
@@ -761,18 +791,19 @@ public class MyFileHandler extends StreamHandler
 	}
 
 	public MyFileHandler(String pattern, int limit, int count, boolean append,
-			boolean desc, int umask) throws IOException
+			boolean desc, int umask, boolean compress) throws IOException
 	{
-		this(pattern, limit, count, append);
+		this(pattern, limit, count, append, compress);
 		this.desc = desc;
 		this.umask = umask;
+		_compress =compress;
 	}
 
 	public MyFileHandler(String pattern, int limit, int count, boolean append,
 			PatternFormatter fileFormatter, Level logLevel, String encoding,
-			boolean desc, int umask) throws IOException
+			boolean desc, int umask, boolean compress) throws IOException
 	{
-		this(pattern, limit, count, append);
+		this(pattern, limit, count, append, compress);
 		this.desc = desc;
 		this.umask = umask;
 		if (encoding != null)
@@ -789,6 +820,7 @@ public class MyFileHandler extends StreamHandler
 	{
 		// release locks
 		super.close();
+		compress();
 		allLocks.remove(fileName);
 		try
 		{

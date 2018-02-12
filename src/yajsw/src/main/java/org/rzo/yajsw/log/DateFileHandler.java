@@ -69,6 +69,7 @@ public class DateFileHandler extends Handler
 	volatile int _maxDays = -1;
 	volatile boolean _desc = false;
 	volatile int _umask = -1;
+	volatile boolean _compress;
 
 	/**
 	 * Instantiates a new date file handler.
@@ -90,7 +91,7 @@ public class DateFileHandler extends Handler
 	public DateFileHandler(String pattern, int limit, int count,
 			boolean append, boolean rollDate, PatternFormatter fileFormatter,
 			Level logLevel, String encoding, int maxDays, boolean desc,
-			int umask)
+			int umask, boolean compress)
 	{
 		_umask = umask;
 		_desc = desc;
@@ -100,6 +101,7 @@ public class DateFileHandler extends Handler
 		_append = append;
 		_rollDate = rollDate;
 		_maxDays = maxDays;
+		_compress = compress;
 		_init = true;
 		if (encoding != null)
 			try
@@ -191,7 +193,7 @@ public class DateFileHandler extends Handler
 		try
 		{
 			File dd = new File(MyFileHandler.parseFileName(pattern, 0, 0,
-					_count));
+					_count, false));
 			if (!dd.getParentFile().exists())
 				dd.getParentFile().mkdirs();
 		}
@@ -210,7 +212,7 @@ public class DateFileHandler extends Handler
 		try
 		{
 			_handler = new MyFileHandler(pattern, _limit, _count, _append,
-					_desc, _umask);
+					_desc, _umask, _compress);
 			if (_init)
 			{
 				_handler.setEncoding(this.getEncoding());
@@ -264,7 +266,7 @@ public class DateFileHandler extends Handler
 			try
 			{
 				f = new File(MyFileHandler.parseFileName(pattern, 0, unique,
-						_count));
+						_count, false));
 				if (!f.exists())
 					break;
 			}
@@ -277,7 +279,7 @@ public class DateFileHandler extends Handler
 				try
 				{
 					f = new File(MyFileHandler.parseFileName(pattern,
-							generation, unique, _count));
+							generation, unique, _count, false));
 					if (f.exists())
 					{
 						f.delete();
@@ -296,9 +298,9 @@ public class DateFileHandler extends Handler
 		{
 			// remove old lock files
 			f = new File(MyFileHandler.parseFileName(pattern + ".lck", 0, 0,
-					_count));
+					_count, false));
 			f.delete();
-			f = new File(MyFileHandler.parseFileName(pattern, 0, 0, _count));
+			f = new File(MyFileHandler.parseFileName(pattern, 0, 0, _count, false));
 			while (!f.getName().contains(date))
 				f = f.getParentFile();
 			if (f.isDirectory())
@@ -330,7 +332,7 @@ public class DateFileHandler extends Handler
 			File f;
 			try
 			{
-				f = new File(MyFileHandler.parseFileName(pattern, 0, 0, _count));
+				f = new File(MyFileHandler.parseFileName(pattern, 0, 0, _count, false));
 				if (f.exists())
 				{
 					dateFound = true;

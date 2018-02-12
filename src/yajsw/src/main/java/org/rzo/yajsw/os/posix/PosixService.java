@@ -418,6 +418,8 @@ public class PosixService extends AbstractService implements Constants
 			context.put("w_wrapper_pid_file", _wrapperPidFile);
 			context.put("w_start_levels", _updateRcParser.getStartLevels());
 			context.put("w_stop_levels", _updateRcParser.getStopLevels());
+			context.put("w_start_priority", _config.getString("chkconfig_start_priority", ""));
+			context.put("w_stop_priority", _config.getString("chkconfig_stop_priority", ""));
 			context.put("start_dependencies", getStartDependencies());
 			context.put("stop_dependencies", getInternalStopDependencies());
 			FileWriter writer = new FileWriter(_daemonScript);

@@ -1623,13 +1623,14 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			int umask = Utils.parseOctal(_config.getString(
 					"wrapper.logfile.umask", null));
 			String encoding = _config.getString("wrapper.log.encoding");
+			boolean compress = _config.getBoolean("wrapper.logfile.compress", false);
 			int maxDays = _config.getInt("wrapper.logfile.maxdays", -1);
 			_fileHandler = fileName.contains("%d") ? new DateFileHandler(
 					fileName, limit, count, append, rollDate,
 					getFileFormatter(), getLogLevel(fileLogLevel), encoding,
-					maxDays, desc, umask) : new MyFileHandler(fileName, limit,
+					maxDays, desc, umask, compress) : new MyFileHandler(fileName, limit,
 					count, append, getFileFormatter(),
-					getLogLevel(fileLogLevel), encoding, desc, umask);
+					getLogLevel(fileLogLevel), encoding, desc, umask, compress);
 		}
 		catch (Exception e)
 		{
@@ -1740,7 +1741,9 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	{
 		String wFormat = _config.getString("wrapper.logfile.format",
 				Constants.DEFAULT_LOG_FORMAT);
-		return getFormatter(wFormat);
+		String tFormat = _config.getString("wrapper.logfile.time_format",
+				Constants.DEFAULT_LOG_FORMAT);
+		return getFormatter(wFormat, tFormat);
 
 	}
 
@@ -1753,7 +1756,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	{
 		String wFormat = _config.getString("wrapper.console.format",
 				Constants.DEFAULT_LOG_FORMAT);
-		return getFormatter(wFormat);
+		return getFormatter(wFormat, null);
 	}
 
 	/**
@@ -1761,13 +1764,16 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	 * 
 	 * @param wFormat
 	 *            the w format
+	 * @param tFormat 
 	 * 
 	 * @return the formatter
 	 */
-	private PatternFormatter getFormatter(String wFormat)
+	private PatternFormatter getFormatter(String wFormat, String tFormat)
 	{
 		PatternFormatter formatter = new PatternFormatter();
 		String pattern = "";
+		if (tFormat == null || tFormat.length() == 0)
+		{
 		if (wFormat.contains("Z"))
 		{
 			formatter.setTimeFormat("yy-MM-dd HH:mm:ss.SS");
@@ -1776,6 +1782,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		{
 			formatter.setTimeFormat("yy-MM-dd HH:mm:ss");
 		}
+		}
+		else formatter.setTimeFormat(tFormat);
 		for (int i = 0; i < wFormat.length(); i++)
 		{
 			char c = wFormat.charAt(i);
@@ -2333,6 +2341,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			if (!_exiting)
 				setState(STATE_IDLE);
 		removeShutdownHooks();
+		_pidFile.delete();
 	}
 
 	private void removeShutdownHooks()

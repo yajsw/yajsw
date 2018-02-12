@@ -30,7 +30,7 @@ import org.codehaus.groovy.runtime.metaclass.NewStaticMetaMethod;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Logger;
+//import java.util.logging.Logger;
 
 /**
  * An extension module which provides extension methods using a {@link org.codehaus.groovy.runtime.DefaultGroovyMethods}-like implementation, that
