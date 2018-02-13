@@ -1742,7 +1742,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 		String wFormat = _config.getString("wrapper.logfile.format",
 				Constants.DEFAULT_LOG_FORMAT);
 		String tFormat = _config.getString("wrapper.logfile.time_format",
-				Constants.DEFAULT_LOG_FORMAT);
+				"yy-MM-dd HH:mm:ss");
 		return getFormatter(wFormat, tFormat);
 
 	}
@@ -2341,7 +2341,8 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			if (!_exiting)
 				setState(STATE_IDLE);
 		removeShutdownHooks();
-		_pidFile.delete();
+		if (_pidFile != null && _pidFile.exists())
+			_pidFile.delete();
 	}
 
 	private void removeShutdownHooks()
