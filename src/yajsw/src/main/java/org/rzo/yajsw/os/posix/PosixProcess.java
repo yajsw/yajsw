@@ -1060,7 +1060,7 @@ public class PosixProcess extends AbstractProcess {
 				}
 				if (_logger != null)
 					_logger.info("exit code posix process: "
-							+ status.getValue() + " application: " + _exitCode);
+							+ status.getValue() + " application(status/signal): " + _exitCode+"/"+_exitSignal);
 				_terminated = true;
 			}
 

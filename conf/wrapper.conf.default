@@ -230,6 +230,13 @@ wrapper.on_exit.0=SHUTDOWN
 wrapper.on_exit.default=RESTART
 
 #********************************************************************
+# Posix Signal Properties
+# Restart on non 9 signal code
+#********************************************************************
+wrapper.on_signal.9=SHUTDOWN
+wrapper.on_signal.default=RESTART
+
+#********************************************************************
 # Trigger actions on console output
 #********************************************************************
 # On Exception show message in system tray
