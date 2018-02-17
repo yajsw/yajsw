@@ -405,7 +405,16 @@ public class PosixService extends AbstractService implements Constants
 			// TODO find a way to set a non static logger
 			VelocityLog.setLogger(_logger);
 			ve.init();
-			Template t = ve.getTemplate(daemonTemplate.getName());
+			Template t = null;
+			try
+			{
+				t = ve.getTemplate(daemonTemplate.getName());				
+			}
+			catch (Throwable ex)
+			{
+				ex.printStackTrace();
+				return false;
+			}
 			VelocityContext context = new VelocityContext();
 			context.put("w_name", _name);
 			context.put("w_long_name", _displayName);
@@ -481,6 +490,8 @@ public class PosixService extends AbstractService implements Constants
 		{
 			if (_logger != null)
 				_logger.throwing(this.getClass().getName(), "install", ex);
+			else
+				ex.printStackTrace();
 			return false;
 		}
 		return true;
