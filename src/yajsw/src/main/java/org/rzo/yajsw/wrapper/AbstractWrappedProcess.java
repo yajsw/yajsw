@@ -3667,6 +3667,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+		removePidFile();
 	}
 
 	public void osProcessTerminated()

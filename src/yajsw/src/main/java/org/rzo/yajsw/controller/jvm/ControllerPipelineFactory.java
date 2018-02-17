@@ -88,15 +88,23 @@ class ControllerPipelineFactory extends ChannelInitializer<SocketChannel>
 		try
 		{
 			firewall.allowAll(InetAddress.getAllByName("127.0.0.1"));
-			firewall.allow(InetAddress.getLocalHost());
-			pipeline.addLast("firewall", firewall);
 		}
 		catch (UnknownHostException e)
 		{
-			_controller.getLog().throwing(JVMController.class.getName(),
-					"start", e);
+			_controller.getLog().warning("error getting 127.0.0.1 by name: "+e.getMessage());
+		}
+		try
+		{
+			firewall.allow(InetAddress.getLocalHost());
+		}
+		catch (UnknownHostException e)
+		{
+			_controller.getLog().warning("error getting localhost by name: "+e.getMessage());
 		}
 
+		pipeline.addLast("firewall", firewall);
+
+		
 		// add a framer to split incoming bytes to message chunks
 		pipeline.addLast("framer", new DelimiterBasedFrameDecoder(8192, true,
 				Delimiters.nulDelimiter()));
