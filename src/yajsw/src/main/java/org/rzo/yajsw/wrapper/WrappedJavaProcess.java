@@ -189,7 +189,7 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 				result.add(checkValue(Utils.getDOption(key,
 						_config.getCachedPath())));
 			}
-			else
+			else if (_config.getProperty(key) != null)
 			{
 				String opt = Utils.getDOption(key, _config.getProperty(key)
 						.toString());
