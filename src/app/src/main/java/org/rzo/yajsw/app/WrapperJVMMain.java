@@ -58,6 +58,7 @@ public class WrapperJVMMain extends AbstractWrapperJVMMain
 		try
 		{
 			mainMethod.invoke(null, new Object[] { mainMethodArgs });
+			WRAPPER_MANAGER.warn("main method terminated");
 		}
 		catch (Throwable e)
 		{

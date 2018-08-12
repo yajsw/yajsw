@@ -96,4 +96,6 @@ public interface WrapperManager
 	public String getStopReason();
 
 	public void setShutdownListener(Runnable listener);
+
+	public void warn(String string);
 }

@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -28,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.rzo.yacron4j.Scheduler;
 import org.rzo.yacron4j.SchedulerOptions;
+import org.rzo.yacron4j.TaskOptions;
 import org.rzo.yajsw.config.YajswConfigurationImpl;
 import org.rzo.yajsw.wrapper.WrappedProcess;
 
@@ -353,8 +355,13 @@ public class TimerImpl implements Timer
 		if (trigger instanceof MyCronTrigger)
 			try
 			{
+				TaskOptions taskOptions = new TaskOptions();
+				String cronExpression = getCronExpression(trigger);
+				TimeZone timeZone = getTimeZone(trigger);
+				if (timeZone != null)
+					taskOptions.setTimeZone(timeZone);
 				getCronScheduler().schedule(jobDetail,
-						((MyCronTrigger) trigger)._cronExpression);
+						cronExpression, taskOptions);
 			}
 			catch (Exception e)
 			{
@@ -389,6 +396,30 @@ public class TimerImpl implements Timer
 			}
 
 		}
+	}
+
+	private TimeZone getTimeZone(Trigger trigger) {
+		String result = ((MyCronTrigger) trigger)._cronExpression;
+		int i = result.indexOf('@');
+		if (i != -1)
+		{
+			result = result.substring(i+1);
+			TimeZone tz = TimeZone.getTimeZone(result.trim());
+			if (!tz.getID().equals(result) && !tz.getDisplayName().equals(result))
+				throw new RuntimeException("timezone not found: "+result);
+			return tz;
+		}
+		return null;
+	}
+
+	private String getCronExpression(Trigger trigger) {
+		String result = ((MyCronTrigger) trigger)._cronExpression;
+		int i = result.indexOf('@');
+		if (i != -1)
+			result = result.substring(0, i);
+		return result;
+			
+		
 	}
 
 	private Scheduler getCronScheduler()

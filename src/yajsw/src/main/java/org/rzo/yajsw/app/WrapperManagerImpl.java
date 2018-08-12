@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -102,7 +103,7 @@ import com.sun.management.HotSpotDiagnosticMXBean;
 public class WrapperManagerImpl implements WrapperManager, Constants,
 		WrapperManagerImplMBean
 {
-
+	
 	/** The _port. */
 	int _port = DEFAULT_PORT;
 
@@ -1134,7 +1135,8 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 		}
 
 		connector = new Bootstrap();
-		EventLoopGroup workerGroup = new OioEventLoopGroup();
+		EventLoopGroup workerGroup = new OioEventLoopGroup(0, new DaemonThreadFactory(
+				"netty", Thread.MAX_PRIORITY));
 		// workerGroup.setIoRatio(99);
 		connector.group(workerGroup);
 		connector.channel(OioSocketChannel.class);
@@ -1931,6 +1933,12 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 	public void setShutdownListener(Runnable listener)
 	{
 		_shutdownListener = listener;
+	}
+
+	@Override
+	public void warn(String string) {
+		if (_debug > 1)
+			System.out.println(string);
 	}
 
 }

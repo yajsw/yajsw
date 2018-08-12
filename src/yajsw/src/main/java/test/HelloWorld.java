@@ -142,6 +142,9 @@ public class HelloWorld
 	// test for application main.
 	public static void main(final String[] args) throws Exception
 	{
+		if (args.length >= 1 && "exception".equals(args[0]))
+			throw new RuntimeException("yajsw test exception");
+
 		// OperatingSystem.instance().setWorkingDir("..");
 		System.out.println("TESTENV :" + System.getenv("TESTENV"));
 		System.out.println("TESTPROP: " + System.getProperty("D_1"));
