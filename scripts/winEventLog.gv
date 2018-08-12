@@ -1,0 +1,81 @@
+/*
+ * Sample script for writing to windows sys log. Create an event log when process restarts
+ * 
+ * Arguments: -
+ * 
+ * Configuration Example:
+ * 
+ * wrapper.script.RESTART=scripts/winEventLog.gv
+ *
+ */
+import com.sun.jna.platform.win32.Advapi32; 
+import com.sun.jna.platform.win32.Advapi32Util; 
+import com.sun.jna.platform.win32.Kernel32; 
+import com.sun.jna.platform.win32.Win32Exception; 
+import com.sun.jna.platform.win32.WinNT; 
+import com.sun.jna.platform.win32.WinNT.HANDLE; 
+import com.sun.jna.platform.win32.WinReg;
+
+   _source = "yajsw"; 
+   _server = null; 
+   _handle = null; 
+ 
+   void close() { 
+  if (_handle != null) { 
+   if (!Advapi32.INSTANCE.DeregisterEventSource(_handle)) { 
+    Exception e = new Win32Exception(Kernel32.INSTANCE.GetLastError()); 
+    logger.error("Could not close appender.", e, ErrorCode.CLOSE_FAILURE); 
+   } 
+   _handle = null; 
+  } 
+ } 
+ 
+  HANDLE registerEventSource(String server, String source) { 
+  String eventSourceKeyPath = 'SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\'+ source; 
+  if (Advapi32Util.registryCreateKey(WinReg.HKEY_LOCAL_MACHINE, 
+    eventSourceKeyPath)) { 
+   // TODO: set event message file and source 
+   // EventMessageFile 
+   // CategoryMessageFile 
+   Advapi32Util.registrySetIntValue(WinReg.HKEY_LOCAL_MACHINE, 
+     eventSourceKeyPath, "TypesSupported", 7); 
+   Advapi32Util.registrySetIntValue(WinReg.HKEY_LOCAL_MACHINE, 
+     eventSourceKeyPath, "CategoryCount", 6); 
+  } 
+ 
+  HANDLE h = Advapi32.INSTANCE.RegisterEventSource(server, source); 
+  if (h == null) { 
+   throw new Win32Exception(Kernel32.INSTANCE.GetLastError()); 
+  } 
+ 
+  return h; 
+ } 
+  
+  void registerEventSource() { 
+  close(); 
+   
+  try { 
+   _handle = registerEventSource(_server, _source); 
+  } catch (Exception e) { 
+   logger.error("Could not register event source.", e); 
+   close(); 
+  } 
+ } 
+ 
+   void reportEvent(message) { 
+  // This is the only message supported by the package. It is backed by 
+  // a message resource which consists of just '%1' which is replaced 
+  // by the string we just created. 
+  final int messageID = 0x1000; 
+ 
+  String[] buffer = [ message ]; 
+  if (!Advapi32.INSTANCE.ReportEvent(_handle, WinNT.EVENTLOG_ERROR_TYPE, 
+    0, messageID, null, 1, 0, buffer, 
+    null)) { 
+   logger.error("Failed to report event ["+message+"]."+Kernel32.INSTANCE.GetLastError()); 
+  } 
+ } 
+ 
+ registerEventSource();
+ reportEvent('restarting crashed service');
+ close();
