@@ -1,4 +1,8 @@
-yajsw-stable-12.13
+	yajsw-stable-12.13a
+
+    * Change: showing old version number on start
+
+	yajsw-stable-12.13
 
     * Change: bash scripts
     * Bug: stop app not started
