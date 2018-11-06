@@ -26,6 +26,8 @@ import groovy.transform.stc.ClosureParams;
 import groovy.transform.stc.FirstParam;
 import groovy.transform.stc.FromString;
 import groovy.transform.stc.SimpleType;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 import org.codehaus.groovy.runtime.callsite.BooleanClosureWrapper;
 
 import java.io.BufferedReader;
@@ -52,7 +54,6 @@ import java.util.Formatter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.callClosureForLine;
@@ -101,7 +102,7 @@ import static org.codehaus.groovy.runtime.DefaultGroovyMethods.callClosureForLin
  */
 public class IOGroovyMethods extends DefaultGroovyMethodsSupport {
 
-    private static final Logger LOG = Logger.getLogger(IOGroovyMethods.class.getName());
+    private static final InternalLogger LOG = InternalLoggerFactory.getInstance(IOGroovyMethods.class.getName());
 
     /**
      * Overloads the leftShift operator for Writer to allow an object to be written
@@ -692,7 +693,7 @@ public class IOGroovyMethods extends DefaultGroovyMethodsSupport {
             input.mark(charBufferSize);
         } catch (IOException e) {
             // this should never happen
-            LOG.warning("Caught exception setting mark on supporting reader: " + e);
+            LOG.warn("Caught exception setting mark on supporting reader: " + e);
             // fallback
             return readLineFromReaderWithoutMark(input);
         }

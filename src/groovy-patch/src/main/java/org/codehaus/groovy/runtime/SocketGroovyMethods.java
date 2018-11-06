@@ -22,6 +22,8 @@ import groovy.lang.Closure;
 import groovy.transform.stc.ClosureParams;
 import groovy.transform.stc.SimpleType;
 
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -30,7 +32,6 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.logging.Logger;
 
 /**
  * This class defines new groovy methods for Sockets which enhance
@@ -45,7 +46,7 @@ import java.util.logging.Logger;
  * aim to keep the method available from within Groovy.
  */
 public class SocketGroovyMethods extends DefaultGroovyMethodsSupport {
-    private static final Logger LOG = Logger.getLogger(SocketGroovyMethods.class.getName());
+    private static final InternalLogger LOG = InternalLoggerFactory.getInstance(SocketGroovyMethods.class.getName());
 
     /**
      * Passes the Socket's InputStream and OutputStream to the closure.  The
@@ -197,7 +198,7 @@ public class SocketGroovyMethods extends DefaultGroovyMethodsSupport {
                 try {
                     socket.close();
                 } catch (IOException e) {
-                    LOG.warning("Caught exception closing socket: " + e);
+                    LOG.warn("Caught exception closing socket: " + e);
                 }
             }
         }
