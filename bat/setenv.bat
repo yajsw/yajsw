@@ -13,8 +13,16 @@ rem location of the wrapper jar file. necessary lib files will be loaded by this
 set wrapper_jar="%wrapper_home%/wrapper.jar"
 set wrapper_app_jar="%wrapper_home%/wrapperApp.jar"
 
+rem get java version
+for /f "delims=" %%j in ('%java_exe% -fullversion 2^>^&1') do @set "jver=%%j"
+set java_version=%jver:~19,2%
+
 rem setting java options for wrapper process. depending on the scripts used, the wrapper may require more memory.
+if "%java_version%" == "1." (
+set wrapper_java_options=-Xmx30m -Dwrapper_home="%wrapper_home%" -Djna_tmpdir="%wrapper_home%/tmp" -Djava.net.preferIPv4Stack=true
+) else (
 set wrapper_java_options=-Xmx30m -Dwrapper_home="%wrapper_home%" -Djna_tmpdir="%wrapper_home%/tmp" -Djava.net.preferIPv4Stack=true --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED
+)
 
 rem wrapper bat file for running the wrapper
 set wrapper_bat="%wrapper_home%/bat/wrapper.bat"
