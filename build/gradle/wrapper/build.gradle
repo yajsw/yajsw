@@ -1,4 +1,4 @@
-projectHome = '../../..'
+def projectHome = '../../..'
 
 // set the sources for this build
 sourceSets.main.java.srcDirs = ["$projectHome/src/yajsw/src/main/java", "$projectHome/src/app/src/main/java"]
@@ -18,7 +18,7 @@ dependencies {
     compile group: 'commons-lang3', 				name: 'commons-lang3', 						version: "$commons_lang_version"
     compile group: 'commons-logging', 		name: 'commons-logging', 					version: "$commons_logging_version"
     compile group: 'commons-vfs2', 				name: 'commons-vfs2', 						version: "$commons_vfs2_version"
-    compile group: 'groovy-all', 					name: 'groovy-all', 							version: "$groovy_all_version"
+    compile group: 'groovy', 					name: 'groovy', 							version: "$groovy_version"
     compile group: 'jna', 								name: 'jna', 											version: "$jna_version"
     compile group: 'jna', 								name: 'jna-platform', 						version: "$platform_version"
     compile group: 'netty', 							name: 'netty', 										version: "$netty_version"

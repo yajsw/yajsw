@@ -1,4 +1,6 @@
+ext {
 projectHome = '../../..'
+}
 sourceSets.main.java.srcDirs = ["$projectHome/src/groovy-patch/src/main/java"]
 
 //println '---------------------------'
@@ -13,7 +15,7 @@ dependencies {
 }
 
 dependencies {
-    compile group: 'groovy-all', 					name: 'groovy-all', 							version: "$groovy_all_version"
+    compile group: 'groovy-all', 					name: 'groovy', 							version: "$groovy_version"
 }
 
 //println '---------------------------'

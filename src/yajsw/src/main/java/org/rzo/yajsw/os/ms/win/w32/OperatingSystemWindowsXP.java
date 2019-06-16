@@ -16,6 +16,8 @@
 
 package org.rzo.yajsw.os.ms.win.w32;
 
+import java.util.Map;
+
 import org.apache.commons.configuration2.Configuration;
 import org.rzo.yajsw.os.ErrorHandler;
 import org.rzo.yajsw.os.FileManager;
@@ -26,6 +28,8 @@ import org.rzo.yajsw.os.OperatingSystem;
 import org.rzo.yajsw.os.ProcessManager;
 import org.rzo.yajsw.os.ServiceManager;
 import org.rzo.yajsw.os.SystemInformation;
+
+import com.sun.jna.platform.win32.Kernel32Util;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -151,5 +155,21 @@ public class OperatingSystemWindowsXP extends OperatingSystem
 			ex.printStackTrace();
 		}
 	}
+	
+	public Map<String, String> getOSEnv()
+	{
+		try
+		{
+		Map<String, String> result = Kernel32Util.getEnvironmentVariables();		
+			return result;
+		}
+		catch (Error ex)
+		{
+			System.out.println("warning: "+ex.getMessage());
+			return System.getenv();
+		}
+	}
+
+
 
 }

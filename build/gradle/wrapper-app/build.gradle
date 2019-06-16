@@ -1,4 +1,6 @@
+ext {
 projectHome = '../../..'
+}
 sourceSets.main.java.srcDirs = ["$projectHome/src/app/src/main/java"]
 
 //println '---------------------------'

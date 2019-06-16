@@ -303,7 +303,7 @@ public interface Process
 	public Map<String, String> getEnvironmentAsMap();
 
 	public void setEnvironment(List<String[]> env);
-
+	
 	public void setDebug(boolean debug);
 
 	public void setMinimized(boolean b);

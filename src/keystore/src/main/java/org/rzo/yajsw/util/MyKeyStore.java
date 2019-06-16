@@ -164,7 +164,7 @@ public class MyKeyStore implements MyKeyStoreInterface
 		AclFileAttributeView aclAttr = Files.getFileAttributeView(path,
 				AclFileAttributeView.class);
 
-		System.out.println("owner: " + aclAttr.getOwner());
+		System.out.println("keystore owner: " + aclAttr.getOwner());
 
 		UserPrincipalLookupService upls = path.getFileSystem()
 				.getUserPrincipalLookupService();
@@ -188,7 +188,12 @@ public class MyKeyStore implements MyKeyStoreInterface
 
 	private UserPrincipal getDefaultFileOwner() throws Exception
 	{
-		new File("x.tmp").createNewFile();
+		File tmp = new File("x.tmp");
+		if (tmp.exists())
+			tmp.delete();
+		tmp.createNewFile();
+		if (!tmp.exists())
+			System.out.println("keystore error: cannot create "+tmp);
 		Path path = Paths.get("x.tmp");
 		AclFileAttributeView aclAttr = Files.getFileAttributeView(path,
 				AclFileAttributeView.class);
@@ -201,13 +206,16 @@ public class MyKeyStore implements MyKeyStoreInterface
 
 	public static void main(String[] args) throws Exception
 	{
-		MyKeyStore ks = new MyKeyStore("mykeystore2.dat", "test".toCharArray());
+		MyKeyStore ks = new MyKeyStore();//new MyKeyStore("mykeystore2.dat", "test".toCharArray());
+		ks.start();
 		while (true)
 		{
-			// ks.put("pwd1",
-			// ("gehjeim-"+System.currentTimeMillis()).toCharArray());
-			// ks.put("pwd2",
-			// ("gehjeim2-"+System.currentTimeMillis()).toCharArray());
+			 /*
+			  ks.put("pwd1",
+			 ("gehjeim-"+System.currentTimeMillis()).toCharArray());
+			 ks.put("pwd2",
+			 ("gehjeim2-"+System.currentTimeMillis()).toCharArray());
+			 */
 			System.out.println(new String(ks.get("pwd1")));
 			System.out.println(new String(ks.get("pwd2")));
 			Thread.sleep(1000);

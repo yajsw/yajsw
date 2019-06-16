@@ -84,7 +84,6 @@ import java.util.List;
  * }
  * </pre>
  *
- * @author Cedric Champeau
  * @since 2.0.0
  */
 public abstract class SimpleExtensionModule extends ExtensionModule {
@@ -106,6 +105,7 @@ public abstract class SimpleExtensionModule extends ExtensionModule {
             try {
                 createMetaMethods(extensionClass, metaMethods, false);
             } catch (LinkageError e) {
+                //LOG.warning("Module ["+getName()+"] - Unable to load extension class ["+extensionClass+"] due to ["+e.getMessage()+"]. Maybe this module is not supported by your JVM version.");
                 LOG.warn("Module ["+getName()+"] - Unable to load extension class ["+extensionClass+"] due to ["+e.getMessage()+"]. Maybe this module is not supported by your JVM version.");
             }
         }
@@ -114,6 +114,7 @@ public abstract class SimpleExtensionModule extends ExtensionModule {
             try {
                 createMetaMethods(extensionClass, metaMethods, true);
             } catch (LinkageError e) {
+                //LOG.warning("Module ["+getName()+"] - Unable to load extension class ["+extensionClass+"] due to ["+e.getMessage()+"]. Maybe this module is not supported by your JVM version.");
                 LOG.warn("Module ["+getName()+"] - Unable to load extension class ["+extensionClass+"] due to ["+e.getMessage()+"]. Maybe this module is not supported by your JVM version.");
             }
         }

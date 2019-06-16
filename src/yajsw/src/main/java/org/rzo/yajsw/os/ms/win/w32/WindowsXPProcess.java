@@ -4452,5 +4452,12 @@ public class WindowsXPProcess extends AbstractProcess
 			System.out.println("error executing reboot "+err+ " "+Kernel32Util.formatMessageFromLastErrorCode(err));
 		}
 	}
+	
+	public Map<String, String> getOSProcessEnv()
+	{
+		Map<String, String> result = Kernel32Util.getEnvironmentVariables();		
+			return result;
+	}
+
 
 }

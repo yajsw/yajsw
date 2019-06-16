@@ -203,9 +203,10 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements
 		}
 		// _systemConfiguration.addConfiguration(new
 		// EnvironmentConfiguration());
+		Map osEnv = OperatingSystem.instance().getOSEnv();
 		_systemConfiguration.addConfiguration(new MapConfiguration(
 				!OperatingSystem.instance().isPosix() ? new CaseInsensitiveMap(
-						System.getenv()) : new HashMap(System.getenv())));
+						osEnv) : new HashMap(osEnv)));
 
 		addConfiguration(_systemConfiguration);
 		// check if we have config file

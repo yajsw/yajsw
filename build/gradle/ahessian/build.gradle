@@ -1,4 +1,6 @@
-projectHome = '../../..'
+ext {
+		projectHome = '../../..'
+}
 
 sourceSets.main.java.srcDirs = ["$projectHome/src/ahessian/src/main/java"]
 

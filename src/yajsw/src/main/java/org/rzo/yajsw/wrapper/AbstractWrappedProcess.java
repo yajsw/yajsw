@@ -1460,8 +1460,9 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 			return null;
 		}
 		// get env. of this process from java
+		Map osEnv = OperatingSystem.instance().getOSEnv();
 		Map<String, String> jEnv = (Map<String, String>) (Platform.isWindows() ? new CaseInsensitiveMap(
-				System.getenv()) : new HashMap<String, String>(System.getenv()));
+				osEnv) : new HashMap<String, String>(osEnv));
 		// overwrite with user settings
 		for (Iterator keys = config.getKeys("wrapper.app.env"); keys.hasNext();)
 		{

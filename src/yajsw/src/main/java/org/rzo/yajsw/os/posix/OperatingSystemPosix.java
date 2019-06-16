@@ -15,9 +15,14 @@
  *******************************************************************************/
 package org.rzo.yajsw.os.posix;
 
+import java.util.Map;
+
 import org.apache.commons.configuration2.Configuration;
 import org.rzo.yajsw.os.Mouse;
 import org.rzo.yajsw.os.OperatingSystem;
+
+import com.sun.jna.platform.unix.LibC;
+import com.sun.jna.platform.win32.Kernel32Util;
 
 public abstract class OperatingSystemPosix extends OperatingSystem
 {
@@ -38,5 +43,13 @@ public abstract class OperatingSystemPosix extends OperatingSystem
 	{
 		return null;
 	}
+	
+	public Map<String, String> getOSEnv()
+	{
+		
+		Map<String, String> result = System.getenv();
+		return result;
+	}
+
 
 }

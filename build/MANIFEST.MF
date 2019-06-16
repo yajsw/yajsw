@@ -16,7 +16,7 @@ Class-Path-Wrapper-Core:
   
 Class-Path-Wrapper-Extended: 
  ./lib/extended/groovy/groovy-patch.jar 
- ./lib/extended/groovy/groovy-all-2.4.11.jar 
+ ./lib/extended/groovy/groovy-2.5.7.jar 
  ./lib/extended/commons/commons-httpclient-3.0.1.jar 
  ./lib/extended/commons/commons-codec-1.3.jar 
  ./lib/extended/commons/commons-net-3.2.jar 
@@ -52,7 +52,7 @@ Class-Path-App:
   
 Class-Path-App-Extended: 
  ./lib/extended/groovy/groovy-patch.jar 
- ./lib/extended/groovy/groovy-all-2.4.11.jar
+ ./lib/extended/groovy/groovy-2.5.7.jar
  
 Main-Class: org.rzo.yajsw.boot.WrapperExeBooter
 

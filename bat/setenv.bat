@@ -14,7 +14,7 @@ set wrapper_jar="%wrapper_home%/wrapper.jar"
 set wrapper_app_jar="%wrapper_home%/wrapperApp.jar"
 
 rem setting java options for wrapper process. depending on the scripts used, the wrapper may require more memory.
-set wrapper_java_options=-Xmx30m -Dwrapper_home="%wrapper_home%" -Djna_tmpdir="%wrapper_home%/tmp" -Djava.net.preferIPv4Stack=true
+set wrapper_java_options=-Xmx30m -Dwrapper_home="%wrapper_home%" -Djna_tmpdir="%wrapper_home%/tmp" -Djava.net.preferIPv4Stack=true --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED
 
 rem wrapper bat file for running the wrapper
 set wrapper_bat="%wrapper_home%/bat/wrapper.bat"

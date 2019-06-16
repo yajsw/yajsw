@@ -29,7 +29,41 @@ import org.codehaus.groovy.runtime.typehandling.DefaultTypeTransformation;
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Hashtable;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Properties;
+import java.util.Queue;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.Stack;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.Vector;
+import java.util.WeakHashMap;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
+//import java.util.logging.Logger;
 
 /**
  * Support methods for DefaultGroovyMethods and PluginDefaultMethods.
@@ -38,7 +72,8 @@ public class DefaultGroovyMethodsSupport {
 
     //private static final Logger LOG = Logger.getLogger(DefaultGroovyMethodsSupport.class.getName());
 	private static final InternalLogger LOG = InternalLoggerFactory.getInstance(DefaultGroovyMethodsSupport.class.getName());
-	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
+
+    private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
     // helper method for getAt and putAt
     protected static RangeInfo subListBorders(int size, Range range) {
@@ -85,16 +120,33 @@ public class DefaultGroovyMethodsSupport {
     /**
      * Close the Closeable. Logging a warning if any problems occur.
      *
-     * @param c the thing to close
+     * @param closeable the thing to close
      */
-    public static void closeWithWarning(Closeable c) {
-        if (c != null) {
+    public static void closeWithWarning(Closeable closeable) {
+        tryClose(closeable, true); // ignore result
+    }
+
+    /**
+     * Attempts to close the closeable returning rather than throwing
+     * any Exception that may occur.
+     *
+     * @param closeable the thing to close
+     * @param logWarning if true will log a warning if an exception occurs
+     * @return throwable Exception from the close method, else null
+     */
+    static Throwable tryClose(AutoCloseable closeable, boolean logWarning) {
+        Throwable thrown = null;
+        if (closeable != null) {
             try {
-                c.close();
-            } catch (IOException e) {
-                LOG.warn("Caught exception during close(): " + e);
+                closeable.close();
+            } catch (Exception e) {
+                thrown = e;
+                if (logWarning) {
+                    LOG.warn("Caught exception during close(): " + e);
+                }
             }
         }
+        return thrown;
     }
 
     /**
@@ -161,7 +213,7 @@ public class DefaultGroovyMethodsSupport {
             return createSimilarList((List<T>) orig, newCapacity);
         }
         if (orig instanceof Queue) {
-            return new LinkedList<T>();
+            return createSimilarQueue((Queue<T>) orig);
         }
         return new ArrayList<T>(newCapacity);
     }
@@ -176,6 +228,9 @@ public class DefaultGroovyMethodsSupport {
         if (orig instanceof Vector)
             return new Vector<T>();
 
+        if (orig instanceof CopyOnWriteArrayList)
+            return new CopyOnWriteArrayList<T>();
+
         return new ArrayList<T>(newCapacity);
     }
 
@@ -188,23 +243,75 @@ public class DefaultGroovyMethodsSupport {
     @SuppressWarnings("unchecked")
     protected static <T> Set<T> createSimilarSet(Set<T> orig) {
         if (orig instanceof SortedSet) {
-            return new TreeSet<T>(((SortedSet)orig).comparator());
+            Comparator comparator = ((SortedSet) orig).comparator();
+            if (orig instanceof ConcurrentSkipListSet) {
+                return new ConcurrentSkipListSet<T>(comparator);
+            } else {
+                return new TreeSet<T>(comparator);
+            }
+        } else {
+            if (orig instanceof CopyOnWriteArraySet) {
+                return new CopyOnWriteArraySet<T>();
+            } else {
+                // Do not use HashSet
+                return new LinkedHashSet<T>();
+            }
         }
-        return new LinkedHashSet<T>();
+    }
+
+    @SuppressWarnings("unchecked")
+    protected static <T> Queue<T> createSimilarQueue(Queue<T> orig) {
+        if (orig instanceof ArrayBlockingQueue) {
+            ArrayBlockingQueue queue = (ArrayBlockingQueue) orig;
+            return new ArrayBlockingQueue<T>(queue.size() + queue.remainingCapacity());
+        } else if (orig instanceof ArrayDeque) {
+            return new ArrayDeque<T>();
+        } else if (orig instanceof ConcurrentLinkedQueue) {
+            return new ConcurrentLinkedQueue<T>();
+        } else if (orig instanceof DelayQueue) {
+            return new DelayQueue();
+        } else if (orig instanceof LinkedBlockingDeque) {
+            return new LinkedBlockingDeque<T>();
+        } else if (orig instanceof LinkedBlockingQueue) {
+            return new LinkedBlockingQueue<T>();
+        } else if (orig instanceof PriorityBlockingQueue) {
+            return new PriorityBlockingQueue<T>();
+        } else if (orig instanceof PriorityQueue) {
+            return new PriorityQueue<T>(11, ((PriorityQueue) orig).comparator());
+        } else if (orig instanceof SynchronousQueue) {
+            return new SynchronousQueue<T>();
+        } else {
+            return new LinkedList<T>();
+        }
     }
 
     @SuppressWarnings("unchecked")
     protected static <K, V> Map<K, V> createSimilarMap(Map<K, V> orig) {
         if (orig instanceof SortedMap) {
-            return new TreeMap<K, V>(((SortedMap)orig).comparator());
+            Comparator comparator = ((SortedMap) orig).comparator();
+            if (orig instanceof ConcurrentSkipListMap) {
+                return new ConcurrentSkipListMap<K, V>(comparator);
+            } else {
+                return new TreeMap<K, V>(comparator);
+            }
+        } else {
+            if (orig instanceof ConcurrentHashMap) {
+                return new ConcurrentHashMap<K, V>();
+            } else if (orig instanceof Hashtable) {
+                if (orig instanceof Properties) {
+                    return (Map<K, V>) new Properties();
+                } else {
+                    return new Hashtable<K, V>();
+                }
+            } else if (orig instanceof IdentityHashMap) {
+                return new IdentityHashMap<K, V>();
+            } else if (orig instanceof WeakHashMap) {
+                return new WeakHashMap<K, V>();
+            } else {
+                // Do not use HashMap
+                return new LinkedHashMap<K, V>();
+            }
         }
-        if (orig instanceof Properties) {
-            return (Map<K, V>) new Properties();
-        }
-        if (orig instanceof Hashtable) {
-            return new Hashtable<K, V>();
-        }
-        return new LinkedHashMap<K, V>();
     }
 
     @SuppressWarnings("unchecked")
@@ -213,19 +320,32 @@ public class DefaultGroovyMethodsSupport {
         if (answer != null) return answer;
 
         // fall back to some defaults
-        if (orig instanceof TreeMap)
-            return new TreeMap<K, V>(orig);
-
-        if (orig instanceof Properties) {
-            Map<K, V> map = (Map<K, V>) new Properties();
-            map.putAll(orig);
-            return map;
+        if (orig instanceof SortedMap) {
+            if (orig instanceof ConcurrentSkipListMap) {
+                return new ConcurrentSkipListMap<K, V>(orig);
+            } else {
+                return new TreeMap<K, V>(orig);
+            }
+        } else {
+            if (orig instanceof ConcurrentHashMap) {
+                return new ConcurrentHashMap<K, V>(orig);
+            } else if (orig instanceof Hashtable) {
+                if (orig instanceof Properties) {
+                    Map<K, V> map = (Map<K, V>) new Properties();
+                    map.putAll(orig);
+                    return map;
+                } else {
+                    return new Hashtable<K, V>(orig);
+                }
+            } else if (orig instanceof IdentityHashMap) {
+                return new IdentityHashMap<K, V>(orig);
+            } else if (orig instanceof WeakHashMap) {
+                return new WeakHashMap<K, V>(orig);
+            } else {
+                // Do not use HashMap
+                return new LinkedHashMap<K, V>(orig);
+            }
         }
-
-        if (orig instanceof Hashtable)
-            return new Hashtable<K, V>(orig);
-
-        return new LinkedHashMap<K, V>(orig);
     }
 
     /**

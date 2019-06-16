@@ -16,6 +16,8 @@
 
 package org.rzo.yajsw.os;
 
+import java.util.Map;
+
 import org.apache.commons.configuration2.Configuration;
 import org.rzo.yajsw.os.ms.win.w32.OperatingSystemWindowsXP;
 import org.rzo.yajsw.os.posix.bsd.OperatingSystemBSD;
@@ -128,5 +130,8 @@ public abstract class OperatingSystem
 	public abstract long getUptime();
 	
 	public abstract void reboot();
+	
+	public abstract Map<String, String> getOSEnv();
+
 
 }

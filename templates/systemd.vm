@@ -1,0 +1,15 @@
+[Unit]
+Description=$w_description
+Documentation=http://yajsw.sourceforge.net/
+After=syslog.target
+
+[Service]
+Type=forking
+User=${RUN_AS_USER}
+ExecStart=${w_start_cmd}
+ExecStop=${w_stop_cmd}
+Restart=on-abort
+StandardOutput=null
+
+[Install]
+WantedBy=multi-user.target
