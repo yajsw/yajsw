@@ -3,8 +3,8 @@ Class-Path-Wrapper-Core:
  ./wrapperApp.jar 
  ./lib/core/yajsw/ahessian.jar 
  ./lib/core/netty/netty-all-4.0.47.Final.jar 
- ./lib/core/jna/jna-4.5.0.jar 
- ./lib/core/jna/jna-platform-4.5.0.jar 
+ ./lib/core/jna/jna-5.3.1.jar 
+ ./lib/core/jna/jna-platform-5.3.1.jar 
  ./lib/core/commons/commons-configuration2-2.0.jar 
  ./lib/core/commons/commons-vfs2-2.0.jar 
  ./lib/core/commons/commons-collections-3.2.2.jar 

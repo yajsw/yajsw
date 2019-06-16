@@ -39,12 +39,18 @@ public class StringBlock extends Memory
 		{
 			if (strings[i] != null)
 			{
-				setString(offset, strings[i].toString(), wide);
+				if (wide)
+				setWideString(offset, strings[i].toString());
+				else
+				setString(offset, strings[i].toString());					
 				if (wide)
 					offset += (strings[i].toString().length()) * Native.WCHAR_SIZE;
 				else
 					offset += (strings[i].toString().getBytes().length);
-				setString(offset, "\0", wide);
+				if (wide)
+				setWideString(offset, "\0");
+				else
+				setString(offset, "\0");
 				if (wide)
 					offset += Native.WCHAR_SIZE;
 				else

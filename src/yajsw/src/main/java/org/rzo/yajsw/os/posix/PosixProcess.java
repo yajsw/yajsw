@@ -1261,7 +1261,7 @@ public class PosixProcess extends AbstractProcess {
 			long peer = Native.malloc(340);
 			result = new Pointer(peer);
 		} else {
-			result = new Memory(Pointer.SIZE);
+			result = new Memory(Native.POINTER_SIZE);
 		}
 
 		try {
@@ -1298,7 +1298,7 @@ public class PosixProcess extends AbstractProcess {
 			long peer = Native.malloc(80);
 			result = new Pointer(peer);
 		} else {
-			result = new Memory(Pointer.SIZE);
+			result = new Memory(Native.POINTER_SIZE);
 		}
 
 		// Create spawn file actions

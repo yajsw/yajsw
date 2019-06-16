@@ -212,7 +212,7 @@ public class Cluster
 						lpszName, lpcchName);
 				if (result == Clusapi.ERROR_SUCCESS)
 				{
-					String group = lpszName.getString(0, true);
+					String group = lpszName.getWideString(0);
 					ClusterGroupInfo info = getGroupNodeInfo(cluster, group);
 					if (info != null)
 						activeNode = info.getLocation();
@@ -248,7 +248,7 @@ public class Cluster
 
 			int state = Clusapi.INSTANCE.GetClusterGroupState(hGroup,
 					lpszNodeName, lpcchNodeName);
-			String location = lpszNodeName.getString(0, true);
+			String location = lpszNodeName.getWideString(0);
 
 			if (state == Clusapi.CLUSTER_GROUP_STATE_UNKNOWN)
 				_log.severe("unknown group state for group " + groupName
@@ -303,7 +303,7 @@ public class Cluster
 
 				if (returnValue == Clusapi.ERROR_SUCCESS)
 				{
-					String group = lpszName.getString(0, true);
+					String group = lpszName.getWideString(0);
 					ClusterGroupInfo info = getGroupNodeInfo(hCluster, group);
 					if (info != null)
 						result.add(info);
@@ -402,7 +402,7 @@ public class Cluster
 									if (result == Clusapi.ERROR_SUCCESS)
 										doListeners(null,
 												lpdwFilterType.getValue(),
-												lpszName.getString(0, true));
+												lpszName.getWideString(0));
 									else if (result != Clusapi.WAIT_TIMEOUT) // 258
 																				// =
 																				// Wait

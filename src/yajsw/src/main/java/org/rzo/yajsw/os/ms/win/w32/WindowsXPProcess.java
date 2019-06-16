@@ -1888,9 +1888,9 @@ public class WindowsXPProcess extends AbstractProcess
 							cchReferencedDomainName, peUse))
 
 						result._user = lpReferencedDomainName
-								.getString(0, true)
+								.getWideString(0)
 								+ "\\"
-								+ lpName.getString(0, true);
+								+ lpName.getWideString(0);
 					;
 					// System.out.println(result._user);
 				}
@@ -3435,7 +3435,7 @@ public class WindowsXPProcess extends AbstractProcess
 								if (readVirtualMemoryToMemory(
 										userParams.CommandLine.Buffer,
 										stringBuffer))
-									result = stringBuffer.getString(0, true);
+									result = stringBuffer.getWideString(0);
 							}
 
 							if (userParams.CurrentDirectoryPath.MaximumLength > 0)
@@ -3445,8 +3445,7 @@ public class WindowsXPProcess extends AbstractProcess
 								if (readVirtualMemoryToMemory(
 										userParams.CurrentDirectoryPath.Buffer,
 										stringBuffer))
-									_workingDir = stringBuffer.getString(0,
-											true);
+									_workingDir = stringBuffer.getWideString(0);
 							}
 							if (userParams.WindowTitle.MaximumLength > 0)
 							{
@@ -3455,7 +3454,7 @@ public class WindowsXPProcess extends AbstractProcess
 								if (readVirtualMemoryToMemory(
 										userParams.WindowTitle.Buffer,
 										stringBuffer))
-									_title = stringBuffer.getString(0, true);
+									_title = stringBuffer.getWideString(0);
 							}
 							if (userParams.Environment != null)
 							{
@@ -3495,7 +3494,7 @@ public class WindowsXPProcess extends AbstractProcess
 									int l = 0;
 									while (!"".equals(env))
 									{
-										env = mem.getString(l, true);
+										env = mem.getWideString(1);
 										if (env != null && env.length() != 0)
 										{
 											envStrings.add(env);
@@ -3574,7 +3573,7 @@ public class WindowsXPProcess extends AbstractProcess
 							// System.out.println("64 " + 3);
 							if (readVirtualMemoryToMemory(
 									userParams.CommandLine.Buffer, stringBuffer))
-								result = stringBuffer.getString(0, true);
+								result = stringBuffer.getWideString(0);
 						}
 
 					}
