@@ -1270,13 +1270,19 @@ public final class Native implements Version {
     */
     static File getTempDir() throws IOException {
         File jnatmp;
-        String prop = System.getProperty("jna.tmpdir");
+        //String prop = System.getProperty("jna.tmpdir");
+        String prop = System.getProperty("jna_tmpdir");
         if (prop != null) {
+        	prop = prop.replaceAll("\"", "");
             jnatmp = new File(prop);
             jnatmp.mkdirs();
         }
         else {
-            File tmp = new File(System.getProperty("java.io.tmpdir"));
+            //File tmp = new File(System.getProperty("java.io.tmpdir"));
+        	prop = System.getProperty("java.io.tmpdir");
+        	prop = prop.replaceAll("\"", "");
+            File tmp = new File(prop);
+
             if(Platform.isMac()) {
                 // https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/MacOSXDirectories/MacOSXDirectories.html
                 jnatmp = new File(System.getProperty("user.home"), "Library/Caches/JNA/temp");
