@@ -227,4 +227,53 @@ public class SimpleLogger implements InternalLogger
 		info(paramString, paramArrayOfObject);
 	}
 
+	@Override
+	public void trace(Throwable t) {
+		t.printStackTrace();
+	}
+
+	@Override
+	public void debug(Throwable t) {
+		t.printStackTrace();
+	}
+
+	@Override
+	public void info(Throwable t) {
+		t.printStackTrace();
+	}
+
+	@Override
+	public void warn(Throwable t) {
+		t.printStackTrace();
+	}
+
+	@Override
+	public void error(Throwable t) {
+		t.printStackTrace();
+	}
+
+	@Override
+	public void log(InternalLogLevel level, Throwable t) {
+		if (level == InternalLogLevel.ERROR)
+		{
+			error(t);
+		}
+		else if (level == InternalLogLevel.WARN)
+		{
+			warn(t);
+		}
+		else if (level == InternalLogLevel.INFO)
+		{
+			info(t);
+		}
+		else if (level == InternalLogLevel.DEBUG)
+		{
+			debug(t);
+		}
+		else if (level == InternalLogLevel.TRACE)
+		{
+			trace(t);
+		}
+	}
+
 }

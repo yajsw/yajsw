@@ -144,6 +144,16 @@ public class HelloWorld
 	{
 		if (args.length >= 1 && "exception".equals(args[0]))
 			throw new RuntimeException("yajsw test exception");
+		
+		if (args.length >= 1 && "restart".equals(args[0]))
+		{
+		    System.out.println("Started....");
+		    System.out.println("Hello, World!");
+		    Thread.sleep(60000);
+		    System.out.println("Restarting....");
+		    WrapperJVMMain.WRAPPER_MANAGER.restart();
+		}
+
 
 		// OperatingSystem.instance().setWorkingDir("..");
 		System.out.println("TESTENV :" + System.getenv("TESTENV"));

@@ -224,47 +224,174 @@ class JdkLogger2 implements InternalLogger
 	@Override
 	public boolean isEnabled(InternalLogLevel paramInternalLogLevel)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return (paramInternalLogLevel.compareTo(InternalLogLevel.ERROR) == 0 && isErrorEnabled())
+				||
+				(paramInternalLogLevel.compareTo(InternalLogLevel.WARN) >= 0 && isWarnEnabled())
+				||
+				(paramInternalLogLevel.compareTo(InternalLogLevel.INFO) >= 0 && isInfoEnabled())
+				||
+				(paramInternalLogLevel.compareTo(InternalLogLevel.DEBUG) >= 0 && isDebugEnabled())
+				||
+				(paramInternalLogLevel.compareTo(InternalLogLevel.TRACE) >= 0 && isTraceEnabled());
 	}
 
 	@Override
 	public void log(InternalLogLevel paramInternalLogLevel, String paramString)
 	{
-		// TODO Auto-generated method stub
-
+		if (paramInternalLogLevel == InternalLogLevel.ERROR)
+		{
+			error(paramString);
+		}
+		else if (paramInternalLogLevel == InternalLogLevel.WARN)
+		{
+			warn(paramString);
+		}
+		else if (paramInternalLogLevel == InternalLogLevel.INFO)
+		{
+			info(paramString);
+		}
+		else if (paramInternalLogLevel == InternalLogLevel.DEBUG)
+		{
+			debug(paramString);
+		}
+		else if (paramInternalLogLevel == InternalLogLevel.TRACE)
+		{
+			trace(paramString);
+		}
 	}
 
 	@Override
 	public void log(InternalLogLevel paramInternalLogLevel, String paramString,
 			Object paramObject)
 	{
-		// TODO Auto-generated method stub
-
+		if (paramInternalLogLevel == InternalLogLevel.ERROR)
+		{
+			error(paramString, paramObject);
+		}
+		else if (paramInternalLogLevel == InternalLogLevel.WARN)
+		{
+			warn(paramString, paramObject);
+		}
+		else if (paramInternalLogLevel == InternalLogLevel.INFO)
+		{
+			info(paramString, paramObject);
+		}
+		else if (paramInternalLogLevel == InternalLogLevel.DEBUG)
+		{
+			debug(paramString, paramObject);
+		}
+		else if (paramInternalLogLevel == InternalLogLevel.TRACE)
+		{
+			trace(paramString, paramObject);
+		}
 	}
 
 	@Override
 	public void log(InternalLogLevel paramInternalLogLevel, String paramString,
 			Object paramObject1, Object paramObject2)
 	{
-		// TODO Auto-generated method stub
-
+		if (paramInternalLogLevel == InternalLogLevel.ERROR)
+		{
+			error(paramString, paramObject1, paramObject2);
+		}
+		else if (paramInternalLogLevel == InternalLogLevel.WARN)
+		{
+			warn(paramString, paramObject1, paramObject2);
+		}
+		else if (paramInternalLogLevel == InternalLogLevel.INFO)
+		{
+			info(paramString, paramObject1, paramObject2);
+		}
+		else if (paramInternalLogLevel == InternalLogLevel.DEBUG)
+		{
+			debug(paramString, paramObject1, paramObject2);
+		}
+		else if (paramInternalLogLevel == InternalLogLevel.TRACE)
+		{
+			trace(paramString, paramObject1, paramObject2);
+		}	
 	}
 
 	@Override
 	public void log(InternalLogLevel paramInternalLogLevel, String paramString,
 			Object... paramArrayOfObject)
 	{
-		// TODO Auto-generated method stub
-
+		if (paramInternalLogLevel == InternalLogLevel.ERROR)
+		{
+			error(paramString, paramArrayOfObject);
+		}
+		else if (paramInternalLogLevel == InternalLogLevel.WARN)
+		{
+			warn(paramString, paramArrayOfObject);
+		}
+		else if (paramInternalLogLevel == InternalLogLevel.INFO)
+		{
+			info(paramString, paramArrayOfObject);
+		}
+		else if (paramInternalLogLevel == InternalLogLevel.DEBUG)
+		{
+			debug(paramString, paramArrayOfObject);
+		}
+		else if (paramInternalLogLevel == InternalLogLevel.TRACE)
+		{
+			trace(paramString, paramArrayOfObject);
+		}	
 	}
 
 	@Override
 	public void log(InternalLogLevel paramInternalLogLevel, String paramString,
 			Throwable paramThrowable)
 	{
-		// TODO Auto-generated method stub
+			if (paramInternalLogLevel == InternalLogLevel.ERROR)
+			{
+				error(paramString, paramThrowable);
+			}
+			else if (paramInternalLogLevel == InternalLogLevel.WARN)
+			{
+				warn(paramString, paramThrowable);
+			}
+			else if (paramInternalLogLevel == InternalLogLevel.INFO)
+			{
+				info(paramString, paramThrowable);
+			}
+			else if (paramInternalLogLevel == InternalLogLevel.DEBUG)
+			{
+				debug(paramString, paramThrowable);
+			}
+			else if (paramInternalLogLevel == InternalLogLevel.TRACE)
+			{
+				trace(paramString, paramThrowable);
+			}
+	}
 
+	@Override
+	public void debug(Throwable arg0) {
+		debug("", arg0);
+	}
+
+	@Override
+	public void error(Throwable arg0) {
+		error("", arg0);
+	}
+
+	@Override
+	public void info(Throwable arg0) {
+		info("", arg0);	
+	}
+
+	@Override
+	public void log(InternalLogLevel arg0, Throwable arg1) {
+		log(arg0, "", arg1);
+	}
+
+	@Override
+	public void trace(Throwable arg0) {
+		trace("", arg0);		
+	}
+
+	@Override
+	public void warn(Throwable arg0) {
+		warn("", arg0);		
 	}
 
 }

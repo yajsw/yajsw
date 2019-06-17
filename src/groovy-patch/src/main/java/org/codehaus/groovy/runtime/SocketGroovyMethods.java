@@ -21,9 +21,9 @@ package org.codehaus.groovy.runtime;
 import groovy.lang.Closure;
 import groovy.transform.stc.ClosureParams;
 import groovy.transform.stc.SimpleType;
-
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -32,6 +32,7 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.net.ServerSocket;
 import java.net.Socket;
+//import java.util.logging.Logger;
 
 /**
  * This class defines new groovy methods for Sockets which enhance
@@ -46,7 +47,9 @@ import java.net.Socket;
  * aim to keep the method available from within Groovy.
  */
 public class SocketGroovyMethods extends DefaultGroovyMethodsSupport {
-    private static final InternalLogger LOG = InternalLoggerFactory.getInstance(SocketGroovyMethods.class.getName());
+    //private static final Logger LOG = Logger.getLogger(SocketGroovyMethods.class.getName());
+	private static final InternalLogger LOG = InternalLoggerFactory.getInstance(SocketGroovyMethods.class.getName());
+
 
     /**
      * Passes the Socket's InputStream and OutputStream to the closure.  The
@@ -63,7 +66,7 @@ public class SocketGroovyMethods extends DefaultGroovyMethodsSupport {
         InputStream input = socket.getInputStream();
         OutputStream output = socket.getOutputStream();
         try {
-            T result = closure.call(new Object[]{input, output});
+            T result = closure.call(input, output);
 
             InputStream temp1 = input;
             input = null;
@@ -96,7 +99,7 @@ public class SocketGroovyMethods extends DefaultGroovyMethodsSupport {
         ObjectOutputStream oos = new ObjectOutputStream(output);
         ObjectInputStream ois = new ObjectInputStream(input);
         try {
-            T result = closure.call(new Object[]{ois, oos});
+            T result = closure.call(ois, oos);
 
             InputStream temp1 = ois;
             ois = null;
@@ -156,7 +159,7 @@ public class SocketGroovyMethods extends DefaultGroovyMethodsSupport {
      * @param closure      a Closure
      * @return a Socket
      * @throws IOException if an IOException occurs.
-     * @see ServerSocket#accept()
+     * @see java.net.ServerSocket#accept()
      * @since 1.0
      */
     public static Socket accept(ServerSocket serverSocket, @ClosureParams(value=SimpleType.class, options="java.net.Socket") final Closure closure) throws IOException {
@@ -172,7 +175,7 @@ public class SocketGroovyMethods extends DefaultGroovyMethodsSupport {
      * @param closure         a Closure
      * @return a Socket
      * @throws IOException if an IOException occurs.
-     * @see ServerSocket#accept()
+     * @see java.net.ServerSocket#accept()
      * @since 1.7.6
      */
     public static Socket accept(ServerSocket serverSocket, final boolean runInANewThread,

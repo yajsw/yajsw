@@ -3494,7 +3494,7 @@ public class WindowsXPProcess extends AbstractProcess
 									int l = 0;
 									while (!"".equals(env))
 									{
-										env = mem.getWideString(1);
+										env = mem.getWideString(l);
 										if (env != null && env.length() != 0)
 										{
 											envStrings.add(env);
