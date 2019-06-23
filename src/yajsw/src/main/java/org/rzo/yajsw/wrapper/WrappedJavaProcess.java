@@ -21,6 +21,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -445,6 +446,7 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		Collections.sort(configList, new AlphaNumericComparator());
 		List files = new ArrayList();
 		String jar = _config.getString("wrapper.java.app.jar", null);
+		boolean relativizeClasspath = _config.getBoolean("wrapper.java.app.relativize_classapth", false);
 		if (jar != null)
 		{
 			jar = jar.replaceAll("\"", "");
@@ -465,11 +467,14 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		{
 			try
 			{
-				sb.append(((File) it.next()).getCanonicalPath());
+				if (relativizeClasspath)
+					sb.append(relativize(workingDir, (File) it.next()));
+				else
+					sb.append(((File) it.next()).getCanonicalPath());
+
 			}
 			catch (IOException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			if (it.hasNext())
@@ -478,6 +483,26 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 		}
 
 		return sb;
+	}
+
+	private Object relativize(String workingDir, File file) {
+		try
+		{
+		Path workingDirPath = new File(workingDir).toPath();
+		return workingDirPath.relativize(file.toPath()).toString();
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		try {
+			return
+					file.getCanonicalPath();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return file.toString();
 	}
 
 	private Collection classpathFromJar(Collection jars, String workingDir)
