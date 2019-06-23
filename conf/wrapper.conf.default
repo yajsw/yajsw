@@ -241,7 +241,7 @@ wrapper.on_signal.default=RESTART
 #********************************************************************
 # On Exception show message in system tray
 wrapper.filter.trigger.0=Exception
-wrapper.filter.script.0=scripts/trayMessage.gv
+wrapper.filter.script.0=${wrapper_home}/scripts/trayMessage.gv
 wrapper.filter.script.0.args=Exception
 
 #********************************************************************
