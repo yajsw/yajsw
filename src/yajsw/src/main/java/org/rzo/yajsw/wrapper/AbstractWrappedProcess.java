@@ -2243,7 +2243,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 				public Object execute(String line)
 				{
 					if (allowRestart())
-						restartInternal();
+						restartInternal("trigger:"+key);
 					else if (getState() == STATE_RUNNING)
 						stop("TRIGGER");
 					return null;
@@ -2475,7 +2475,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	{
 		if (_state != STATE_RUNNING)
 			return;
-		restartInternal();
+		restartInternal("user");
 	}
 
 	/**
@@ -2926,10 +2926,10 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 	/**
 	 * Restart internal.
 	 */
-	public void restartInternal()
+	public void restartInternal(String source)
 	{
 		setAppReportedReady(false);
-		getWrapperLogger().info("restart internal " + getStringState());
+		getWrapperLogger().info("restart internal " + getStringState()+ " "+source);
 		if (_state == STATE_RUNNING || _state == STATE_STARTING
 				|| _state == STATE_RESTART_START)
 			setState(STATE_RESTART);
@@ -3406,7 +3406,7 @@ public abstract class AbstractWrappedProcess implements WrappedProcess,
 						{
 							_goblerLog
 									.warning("yajsw panicking: gobler terminated but process is still running -> restart process");
-							AbstractWrappedProcess.this.restartInternal();
+							AbstractWrappedProcess.this.restartInternal("panick");
 						}
 					}
 				});

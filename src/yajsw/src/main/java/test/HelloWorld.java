@@ -147,9 +147,25 @@ public class HelloWorld
 		
 		if (args.length >= 1 && "restart".equals(args[0]))
 		{
+			Runtime.getRuntime().addShutdownHook(new Thread(){
+
+				public void run()
+				{
+					System.out.println("shutdown...");
+				}
+			});
+		    long timeout = 60000;
+		    if (args.length >= 2)
+		    	try
+		    {
+		    		timeout = Long.parseLong(args[1]);
+		    }catch(Exception ex)
+		    {
+		    	ex.printStackTrace();
+		    }
 		    System.out.println("Started....");
-		    System.out.println("Hello, World!");
-		    Thread.sleep(60000);
+		    System.out.println("Hello, RESTART! "+timeout);
+		    Thread.sleep(timeout);
 		    System.out.println("Restarting....");
 		    WrapperJVMMain.WRAPPER_MANAGER.restart();
 		}

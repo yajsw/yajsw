@@ -31,6 +31,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.channel.socket.oio.OioSocketChannel;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.Delimiters;
+import io.netty.util.concurrent.Future;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.SimpleLoggerFactory;
 
@@ -1395,14 +1396,14 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 		@Override
 		public void channelRead(ChannelHandlerContext ctx, Object message)
 		{
+			Message msg = (Message) message;
 			if (_stopping)
 				return;
 			Channel session = ctx.channel();
-			Message msg = (Message) message;
 			if (msg.getCode() == Constants.WRAPPER_MSG_STOP)
 				try
 				{
-					System.out.println("wrapper manager received stop command");
+					System.out.println("wrapper manager received "+msg);
 					_stopping = true;
 
 					if (session != null)
@@ -1590,6 +1591,7 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 	public void stop()
 	{
 		if (_session != null)
+		{
 			while (_session != null && !_stopping)
 			{
 				_session.writeAndFlush(new Message(Constants.WRAPPER_MSG_STOP,
@@ -1603,6 +1605,16 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 					e.printStackTrace();
 				}
 			}
+		while (true)
+		{
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		}
 		else
 			System.exit(0);
 
@@ -1635,19 +1647,36 @@ public class WrapperManagerImpl implements WrapperManager, Constants,
 	public void restart()
 	{
 		if (_session != null)
+		{
 			while (_session != null && !_stopping)
 			{
-				_session.writeAndFlush(new Message(
+				Future future = _session.writeAndFlush(new Message(
 						Constants.WRAPPER_MSG_RESTART, null));
+				try {
+					future.await(1000);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				try
 				{
-					Thread.sleep(100);
+					Thread.sleep(500);
 				}
 				catch (InterruptedException e)
 				{
 					e.printStackTrace();
 				}
 			}
+			while (true)
+			{
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 		else
 			System.out
 					.println("not connected to wrapper -> cannot send restart command");

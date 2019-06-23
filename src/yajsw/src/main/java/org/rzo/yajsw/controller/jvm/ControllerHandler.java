@@ -18,14 +18,20 @@ package org.rzo.yajsw.controller.jvm;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 import org.rzo.yajsw.Constants;
 import org.rzo.yajsw.controller.Message;
+import org.rzo.yajsw.util.DaemonThreadFactory;
 
 public class ControllerHandler extends ChannelInboundHandlerAdapter implements
 		Constants
 {
 
 	JVMController _controller;
+	static Executor _executor = Executors
+			.newCachedThreadPool(new DaemonThreadFactory("ControllerHandler"));
 
 	ControllerHandler(JVMController controller)
 	{
@@ -75,8 +81,14 @@ public class ControllerHandler extends ChannelInboundHandlerAdapter implements
 			}
 			break;
 		case Constants.WRAPPER_MSG_STOP:
-			if (_controller._wrappedProcess != null)
-				_controller._wrappedProcess.stop("APPLICATION");
+			_executor.execute(new Runnable() {				
+				@Override
+				public void run() {
+					if (_controller._wrappedProcess != null)
+						_controller._wrappedProcess.stop("APPLICATION");
+				}
+			});
+			Thread.yield();
 			break;
 
 		case Constants.WRAPPER_MSG_STOP_TIMER:
@@ -85,8 +97,15 @@ public class ControllerHandler extends ChannelInboundHandlerAdapter implements
 			break;
 
 		case Constants.WRAPPER_MSG_RESTART:
-			if (_controller._wrappedProcess != null)
-				_controller._wrappedProcess.restartInternal();
+			_executor.execute(new Runnable() {
+				
+				@Override
+				public void run() {
+					if (_controller._wrappedProcess != null)
+						_controller._wrappedProcess.restartInternal("MSG_RESTART");
+				}
+			});
+			Thread.yield();
 
 			break;
 

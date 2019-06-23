@@ -140,7 +140,7 @@ public class WrappedRuntimeProcess extends AbstractWrappedProcess
 				stop();
 			if (allowRestart() && exitCodeRestart() && !exitCodeShutdown())
 			{
-				restartInternal();
+				restartInternal("controller listener stopped");
 			}
 			else
 			{

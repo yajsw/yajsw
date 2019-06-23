@@ -128,7 +128,7 @@ public interface WrappedProcess
 
 	public void stopTimer();
 
-	public void restartInternal();
+	public void restartInternal(String source);
 
 	public void startByTimer();
 

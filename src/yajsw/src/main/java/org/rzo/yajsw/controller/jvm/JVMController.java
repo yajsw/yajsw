@@ -23,6 +23,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.oio.OioEventLoopGroup;
 import io.netty.channel.socket.oio.OioServerSocketChannel;
+import io.netty.util.concurrent.Future;
 
 import java.net.InetAddress;
 import java.util.Collections;
@@ -398,12 +399,18 @@ public class JVMController extends AbstractController
 					String txt = null;
 					if (reason != null && reason.length() > 0)
 						txt = ":" + reason;
-					_channel.get().writeAndFlush(
+					Future future = _channel.get().writeAndFlush(
 							new Message(Constants.WRAPPER_MSG_STOP, txt));
+					try {
+						future.await(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 				try
 				{
-					Thread.sleep(200);
+					Thread.sleep(500);
 				}
 				catch (Exception ex)
 				{

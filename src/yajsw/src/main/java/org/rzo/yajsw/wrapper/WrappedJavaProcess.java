@@ -586,7 +586,7 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 							(allowRestart() && exitSignalRestart()
 									&& !exitSignalShutdown() && !exitSignalStop()))
 					{
-						restartInternal();
+						restartInternal("controller restart handler");
 					}
 					else
 					{
@@ -622,7 +622,7 @@ public class WrappedJavaProcess extends AbstractWrappedProcess
 							(allowRestart() && exitSignalRestart()
 									&& !exitSignalShutdown() && !exitSignalStop()))
 					{
-						restartInternal();
+						restartInternal("controller killed restart handler");
 					}
 					else
 					{

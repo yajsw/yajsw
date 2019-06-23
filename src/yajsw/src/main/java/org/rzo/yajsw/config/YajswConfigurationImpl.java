@@ -33,6 +33,7 @@ import java.util.Set;
 import org.apache.commons.configuration2.CompositeConfiguration;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.ConfigurationConverter;
+import org.apache.commons.configuration2.EnvironmentConfiguration;
 import org.apache.commons.configuration2.MapConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
@@ -201,12 +202,14 @@ public class YajswConfigurationImpl extends CompositeConfiguration implements
 			if (debug)
 				log.debug("added system configuration ");
 		}
-		// _systemConfiguration.addConfiguration(new
-		// EnvironmentConfiguration());
-		Map osEnv = OperatingSystem.instance().getOSEnv();
+		 _systemConfiguration.addConfiguration(new
+		 EnvironmentConfiguration());
+		/*
+		 * Map osEnv = OperatingSystem.instance().getOSEnv();
 		_systemConfiguration.addConfiguration(new MapConfiguration(
 				!OperatingSystem.instance().isPosix() ? new CaseInsensitiveMap(
 						osEnv) : new HashMap(osEnv)));
+						*/
 
 		addConfiguration(_systemConfiguration);
 		// check if we have config file
