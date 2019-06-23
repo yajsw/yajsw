@@ -21,7 +21,7 @@ rem setting java options for wrapper process. depending on the scripts used, the
 if "%java_version%" == "1." (
 set wrapper_java_options=-Xmx30m -Dwrapper_home="%wrapper_home%" -Djna_tmpdir="%wrapper_home%/tmp" -Djava.net.preferIPv4Stack=true
 ) else (
-set wrapper_java_options=-Xmx30m -Dwrapper_home="%wrapper_home%" -Djna_tmpdir="%wrapper_home%/tmp" -Djava.net.preferIPv4Stack=true --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED
+set wrapper_java_options=-Xmx30m -Dwrapper_home="%wrapper_home%" -Djna_tmpdir="%wrapper_home%/tmp" -Djava.net.preferIPv4Stack=true --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED
 )
 
 rem wrapper bat file for running the wrapper

@@ -232,11 +232,17 @@ public class WrapperLoader
 			try
 			{
 				String rt = getRTJar();
+				if (rt != null)
+				{
 				File rtf = new File(rt);
 				if (!rtf.exists())
 					System.out.println("could not find rt.jar");
 				else
 					classpath.add(rtf);
+				}
+				else
+					System.out.println("could not find rt.jar");
+					
 			}
 			catch (Exception ex)
 			{

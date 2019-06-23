@@ -20,6 +20,10 @@
 
 
 
+
+
+  
+  
   
   
   
@@ -57,6 +61,10 @@
 
 
 
+
+
+  
+  
   
   
   
@@ -99,8 +107,12 @@
 
 
 
+
+
 <div style="text-align: center;">
 <table style="text-align: left; width: 1530px; height: 32px;" border="0" cellpadding="0" cellspacing="0">
+
+
 
 
 
@@ -140,7 +152,11 @@
 
 
 
+
+
     <tr>
+
+
 
 
 
@@ -180,6 +196,8 @@
 
 
 
+
+
       <td style="width: 33%; text-align: center;">
       
       
@@ -199,7 +217,11 @@
       
       
       
+      
+      
       <h1>YAJSW - Changes</h1>
+
+
 
 
 
@@ -239,7 +261,11 @@
 
 
 
+
+
       <td style="width: 33%;">&nbsp; </td>
+
+
 
 
 
@@ -279,6 +305,10 @@
 
 
 
+
+
+  
+  
   
   
   
@@ -318,8 +348,12 @@
 
 
 
+
+
 <div style="text-align: left;">
-<h4>yajsw-stable-12.13</h4>
+<h4>yajsw-stable-12.14</h4>
+
+
 
 
 
@@ -331,11 +365,74 @@
 
 
 <ul>
-  <li><a href="https://sourceforge.net/p/yajsw/yajsw/merge-requests/5/?limit=25#e7d4">Change:</a> bash scripts</li>
-  <li><a href="https://sourceforge.net/p/yajsw/support-requests/29/">Bug</a>: stop app not started</li>
-  <li>Change: posix signal: log signal, set default to shutdown on 9, extend docs.</li>
-  <li>Bug: remove pid file, velocity syntax</li>
+
+  <li>Tested with java 12 on win 10 and centos 6</li>
+
+  <li>Update to gradle 5.4.1,<span style="font-weight: bold;"> NOTE: build now requires java 8 for gradle and java 7 for compile</span></li>
+
+  <li>Upgrade commons: cli 1.4, configurtion2 2.5, io 2.6, lang3 3.9, vfs2 2.3</li>
+
+  <li>Upgrade to latest netty 4.1.36</li>
+
+  <li>Merge commit '4ee1a695981821bf253d70cbc5f566e1161b0bbf'</li>
+
+  
+  <ul>
+
+    <li>Updating static Loggers to use InternalLogger</li>
+
+    <li>Adding Groovy runtime classes with static logging</li>
+
+  
+  </ul>
+
+  <li>Avoid WARNING: An illegal reflective access operation has occurred in 
+groovy. NOTE: workaround until availability of groovy 3.0.0 where this 
+should be resolved.</li>
+
+  <li>Upgrade to latest jna 5.3.1</li>
+
+  <li>Upgrade to latest stable groovy-2.5.7</li>
+
+  <li>Bug: random hard kill on restart</li>
+  <li>Merge Request #8: Relativize classpath entries wrt working directory</li>
+  <ul>
+    <li>NOTE: new configuration property: <span style="font-weight: bold; font-style: italic;">wrapper.java.app.relativize_classpath</span></li>
+  </ul>
+
 </ul>
+
+<h4>yajsw-stable-12.13 Sep 1st 2018</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+<ul>
+
+
+  <li><a href="https://sourceforge.net/p/yajsw/yajsw/merge-requests/5/?limit=25#e7d4">Change:</a> bash scripts</li>
+
+
+  <li><a href="https://sourceforge.net/p/yajsw/support-requests/29/">Bug</a>: stop app not started</li>
+
+
+  <li>Change: posix signal: log signal, set default to shutdown on 9, extend docs.</li>
+
+
+  <li>Bug: remove pid file, velocity syntax</li>
+
+
+</ul>
+
+
 <h4>yajsw-stable-12.12 Feb 17th 2018</h4>
 
 
@@ -347,7 +444,11 @@
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -355,7 +456,11 @@
 
 
 
+
+
   <li><a href="https://sourceforge.net/p/yajsw/bugs/142/">Bug</a>: UAC elevation doesn't remember setting of wrapper.home: updated setenv.bat</li>
+
+
 
 
 
@@ -366,15 +471,25 @@ chkconfig_stop_priority</span>, updated &nbsp;daemon.vm</li>
 
 
 
+
+
   <li><a href="https://sourceforge.net/p/yajsw/bugs/144/">Update</a>: API is Missing an Interface: updated documenation</li>
+
+
 
 
   <li><a href="https://sourceforge.net/p/yajsw/bugs/145/">Bug</a>: wrapper doesn't delete pidfile</li>
 
 
+
+
   <li><a href="https://sourceforge.net/p/yajsw/discussion/810311/thread/9445a6cc/">New</a>: How to rotate and compress logs. new configuration property: <span style="font-weight: bold; font-style: italic;">wrapper.logfile.compress&nbsp;</span>compress older file when rotating</li>
 
+
+
   <li><a href="https://sourceforge.net/p/yajsw/yajsw/merge-requests/5/">Change</a>: Small fixes/improvements to the Bash scripts. thanks to&nbsp;            deliriumsky for the patch</li>
+
+
 
   <li><a href="https://sourceforge.net/p/yajsw/yajsw/merge-requests/6/">New</a>:
 Support for systemd: installDaemonD.sh, installDaemonNoPrivD.sh,
@@ -382,7 +497,11 @@ uninstallDaemonD.sh, thanks to deliriumsky for the patch</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -397,7 +516,11 @@ uninstallDaemonD.sh, thanks to deliriumsky for the patch</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -407,12 +530,18 @@ uninstallDaemonD.sh, thanks to deliriumsky for the patch</li>
 
 
 
+
+
   <li>Bug: wrong yajsw version logged</li>
 
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -428,7 +557,11 @@ uninstallDaemonD.sh, thanks to deliriumsky for the patch</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -444,7 +577,11 @@ uninstallDaemonD.sh, thanks to deliriumsky for the patch</li>
 
 
 
+
+
   <li>New: <span style="font-style: italic; font-weight: bold;">wrapper.delay_shutdown</span> property. Delay shutdown to allow scripts, such as emails to terminate.</li>
+
+
 
 
 
@@ -460,7 +597,11 @@ uninstallDaemonD.sh, thanks to deliriumsky for the patch</li>
 
 
 
+
+
   <li>Bug: windows:&nbsp;<span style="font-weight: bold; font-style: italic;">wrapper.affinity</span><em> </em>should support up to 64 processors</li>
+
+
 
 
 
@@ -474,13 +615,19 @@ uninstallDaemonD.sh, thanks to deliriumsky for the patch</li>
 
 
 
+
+
   <li>Bug: Posix: cannot start process if wrapper.java.additional contains blank</li>
 
 
 
 
 
+
+
   <li>Bug: Cannot start jboss wildfily since 12.09: groovy-patch: disable java logging.</li>
+
+
 
 
 
@@ -495,7 +642,11 @@ uninstallDaemonD.sh, thanks to deliriumsky for the patch</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -514,7 +665,11 @@ uninstallDaemonD.sh, thanks to deliriumsky for the patch</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -534,7 +689,11 @@ https://sourceforge.net/p/yajsw/bugs/132/</li>
 
 
 
+
+
   <li>&nbsp;Change: tray open console performance.</li>
+
+
 
 
 
@@ -552,7 +711,11 @@ https://sourceforge.net/p/yajsw/bugs/132/</li>
 
 
 
+
+
   <li>&nbsp;Change: jvm controller: ignore key message if we already received correct key.</li>
+
+
 
 
 
@@ -570,7 +733,11 @@ https://sourceforge.net/p/yajsw/bugs/132/</li>
 
 
 
+
+
   <li>&nbsp;Change: update to groovy-2.4.11 @see https://sourceforge.net/p/yajsw/support-requests/26/</li>
+
+
 
 
 
@@ -588,7 +755,11 @@ https://sourceforge.net/p/yajsw/bugs/132/</li>
 
 
 
+
+
   <li>&nbsp;Bug: @see https://sourceforge.net/p/yajsw/discussion/810311/thread/4dad0e51/. Update to jna-4.2.2</li>
+
+
 
 
 
@@ -606,7 +777,11 @@ https://sourceforge.net/p/yajsw/bugs/132/</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -626,7 +801,11 @@ https://sourceforge.net/p/yajsw/bugs/132/</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -648,7 +827,11 @@ https://sourceforge.net/p/yajsw/bugs/132/</li>
 
 
 
+
+
   <li>Bug: setting jna_tmp has no effect</li>
+
+
 
 
 
@@ -670,7 +853,11 @@ https://sourceforge.net/p/yajsw/bugs/132/</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -696,7 +883,11 @@ https://sourceforge.net/p/yajsw/bugs/132/</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -722,7 +913,11 @@ https://sourceforge.net/p/yajsw/bugs/132/</li>
 
 
 
+
+
   <li>Bug: error in AlphaNumericComparator when sorting parameters and classpath</li>
+
+
 
 
 
@@ -748,7 +943,11 @@ https://sourceforge.net/p/yajsw/bugs/132/</li>
 
 
 
+
+
   <li>Bug: configuration include does not work</li>
+
+
 
 
 
@@ -774,7 +973,11 @@ https://sourceforge.net/p/yajsw/bugs/132/</li>
 
 
 
+
+
   <li>Change: support working dir with non latin chars</li>
+
+
 
 
 
@@ -800,7 +1003,11 @@ https://sourceforge.net/p/yajsw/bugs/132/</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -828,7 +1035,11 @@ https://sourceforge.net/p/yajsw/bugs/132/</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -856,7 +1067,11 @@ https://sourceforge.net/p/yajsw/bugs/132/</li>
 
 
 
+
+
   <li>Bug: No application logs on yajsw 11.11 / Ubuntu 14.04</li>
+
+
 
 
 
@@ -884,6 +1099,8 @@ https://sourceforge.net/p/yajsw/bugs/132/</li>
 
 
 
+
+
   </li>
 
 
@@ -898,7 +1115,11 @@ https://sourceforge.net/p/yajsw/bugs/132/</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -932,7 +1153,11 @@ https://sourceforge.net/p/yajsw/bugs/132/</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -960,7 +1185,11 @@ https://sourceforge.net/p/yajsw/bugs/132/</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -997,6 +1226,8 @@ NOTE: Windows: If you have installed java 8 and an older version on the same mac
 
 
 
+
+
 <ul>
 
 
@@ -1014,7 +1245,11 @@ NOTE: Windows: If you have installed java 8 and an older version on the same mac
 
 
 
+
+
   <li style="font-weight: normal;">Bug: windows service: bad quotes in java service command line.</li>
+
+
 
 
 
@@ -1049,7 +1284,11 @@ NOTE: Windows: If you have installed java 8 and an older version on the same mac
 
 
 
+
+
   <li>Bug: posix_spawn: application does not set working dir.</li>
+
+
 
 
 
@@ -1081,7 +1320,11 @@ NOTE: Windows: If you have installed java 8 and an older version on the same mac
 
 
 
+
+
   <li>Bug: query daemon must be executed with root priv</li>
+
+
 
 
 
@@ -1113,7 +1356,11 @@ NOTE: Windows: If you have installed java 8 and an older version on the same mac
 
 
 
+
+
   <li>Bug: Mac OS X Yosemite: service install fails</li>
+
+
 
 
 
@@ -1145,6 +1392,8 @@ NOTE: Windows: If you have installed java 8 and an older version on the same mac
 
 
 
+
+
   <li>Bug: error writing from system tray icon to stdin of wrapped process</li>
 
 
@@ -1160,7 +1409,11 @@ NOTE: Windows: If you have installed java 8 and an older version on the same mac
 
 
 
+
+
   <li>Bug: some pdh should return long instead of int</li>
+
+
 
 
 
@@ -1193,6 +1446,8 @@ NOTE: Windows: If you have installed java 8 and an older version on the same mac
 
 
 
+
+
   <li>New: keystore function. See documentation for details.</li>
 
 
@@ -1209,7 +1464,11 @@ NOTE: Windows: If you have installed java 8 and an older version on the same mac
 
 
 
+
+
   <li>Change: update to netty 4.0.33 and jna 4.2.1</li>
+
+
 
 
 
@@ -1242,7 +1501,11 @@ NOTE: Windows: If you have installed java 8 and an older version on the same mac
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -1279,7 +1542,11 @@ NOTE: Windows: If you have installed java 8 and an older version on the same mac
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -1302,6 +1569,8 @@ NOTE: Windows: If you have installed java 8 and an older version on the same mac
   <li style="font-weight: normal;">Bug: windows service:
 add
 quotes to java command if it contains blank</li>
+
+
 
 
 
@@ -1344,9 +1613,13 @@ genConfig: error parsing java command line</span><span style="font-weight: norma
 
 
 
+
+
   <li>
     <span style="font-weight: normal;">Bug:
 JVMController: use parameter instead of fixed timeout when reconnecting</span></li>
+
+
 
 
 
@@ -1382,7 +1655,11 @@ JVMController: use parameter instead of fixed timeout when reconnecting</span></
 
 
 
+
+
   <li><span style="font-weight: normal;">Bug: bad quotes in java options</span></li>
+
+
 
 
 
@@ -1418,7 +1695,11 @@ JVMController: use parameter instead of fixed timeout when reconnecting</span></
 
 
 
+
+
     </span></li>
+
+
 
 
 
@@ -1460,8 +1741,12 @@ hdd error)</span></li>
 
 
 
+
+
   <li><span style="font-weight: normal;">Change:
 update ahessian</span></li>
+
+
 
 
 
@@ -1502,8 +1787,12 @@ updated groovy scripts: logging&nbsp;</span></li>
 
 
 
+
+
   <li style="font-weight: bold;"><span style="font-weight: normal;">Change: </span>property:
 wrapper.posix_spawn is now default for all posix OS</li>
+
+
 
 
 
@@ -1544,6 +1833,8 @@ license conflict</span></li>
 
 
 
+
+
   <li style="font-weight: bold;"><span style="font-weight: normal;">Change: log if a folder listing
 returns null (java: error accessing a network drive)</span></li>
 
@@ -1565,7 +1856,11 @@ returns null (java: error accessing a network drive)</span></li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -1606,7 +1901,11 @@ wrapper.posix_spawn is now default for all posix OS</span>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -1628,6 +1927,8 @@ wrapper.posix_spawn is now default for all posix OS</span>
 
   <li>Bug: posix: when wrapper.app.env is set, "java" is not
 found -&gt; changed execve to execvpe</li>
+
+
 
 
 
@@ -1670,7 +1971,11 @@ override wrapper.fork_hack. This implementation is an adaption from
 
 
 
+
+
   <li>New: property: <span style="font-weight: bold;">wrapper.posix_vfork</span></li>
+
+
 
 
 
@@ -1711,6 +2016,8 @@ out there which require java 6.<br>
 
 
 
+
+
   </li>
 
 
@@ -1731,7 +2038,11 @@ out there which require java 6.<br>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -1773,7 +2084,11 @@ higher for both wrapper and wrapped application</span>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -1813,7 +2128,11 @@ higher for both wrapper and wrapped application</span>
 
 
 
+
+
   <li>Bug: multiple bugs in <span style="font-style: italic;">RuntimeJavaMain</span></li>
+
+
 
 
 
@@ -1854,7 +2173,11 @@ to <a style="font-weight: bold;" href="http://sourceforge.net/projects/yacron4j/
 
 
 
+
+
   <li>Change: removed pause from batch files.</li>
+
+
 
 
 
@@ -1894,7 +2217,11 @@ to <a style="font-weight: bold;" href="http://sourceforge.net/projects/yacron4j/
 
 
 
+
+
   <li>New: Configuration property: <span style="font-style: italic;">wrapper....script.&lt;n&gt;.maxConcInvoc</span></li>
+
+
 
 
 
@@ -1936,6 +2263,8 @@ dropbox.</li>
 
 
 
+
+
   <li>New: Configuration property: <span style="font-style: italic;">wrapper.debug.level</span></li>
 
 
@@ -1956,7 +2285,11 @@ dropbox.</li>
 
 
 
+
+
   <li>New: Configuration property: <span style="font-style: italic;">wrapper.filter.debug.default</span></li>
+
+
 
 
 
@@ -1997,6 +2330,8 @@ wrapper.appJar</span></li>
 
 
 
+
+
   <li>New: Configuration property:&nbsp;<span style="font-style: italic;">wrapper.logfile.desc</span><br>
 
 
@@ -2017,7 +2352,11 @@ wrapper.appJar</span></li>
 
 
 
+
+
   </li>
+
+
 
 
 
@@ -2058,8 +2397,12 @@ Make the console output fill the window when resized&nbsp;</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/p/yajsw/patches/10/">Patch</a>:
 Startup under AIX 7.1 fails due to StringIndexOutOfBoundsException</li>
+
+
 
 
 
@@ -2100,8 +2443,12 @@ Fix "No such file or directory" error on Mac OSX with Java 1.7</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/u/gorenuru/yajsw/ci/05ca0a47f3bdb26000ca8351f96810053b825865/tree/src/yajsw/src/main/java/org/rzo/yajsw/os/posix/bsd/macosx/MacOsXService.java?diff=04d73af0c07bb00d9ca4bc583ef63d1bfc808cc4">Patch</a>:
 Fix getPid() in MacOSXService</li>
+
+
 
 
 
@@ -2143,8 +2490,12 @@ custom services installed yet and directory is not exists)</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/u/shekhargulati/yajsw/ci/f6f520b6bb4c6cd8107a5483d5dde911f6212b3f/tree/src/yajsw/src/main/java/org/rzo/yajsw/os/posix/bsd/macosx/MacOsXService.java?diff=04d73af0c07bb00d9ca4bc583ef63d1bfc808cc4">Patch</a>:
 made sure wrapper works on Mac when installed in directory with spaces</li>
+
+
 
 
 
@@ -2186,7 +2537,11 @@ command</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -2228,7 +2583,11 @@ java 7 or higher.</span></big>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -2269,8 +2628,12 @@ MacOsX - thanks for the patch</li>
 
 
 
+
+
   <li>Bug: WrappedRuntimeProcess: sort arguments according to
 configuration keys</li>
+
+
 
 
 
@@ -2313,8 +2676,12 @@ groovy-all-2.3.0-beta-2</li>
 
 
 
+
+
   <li>Change: <span style="font-weight: bold;">move
 groovy dependency to lib/extended</span></li>
+
+
 
 
 
@@ -2355,6 +2722,8 @@ or services</li>
 
 
 
+
+
   <li>Change: minor logging changes &nbsp;and other minor
 changes.</li>
 
@@ -2376,8 +2745,12 @@ changes.</li>
 
 
 
+
+
   <li>Change:<span style="font-weight: bold;">
 license change</span> - see documentation</li>
+
+
 
 
 
@@ -2420,7 +2793,11 @@ changed</span></li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -2460,7 +2837,11 @@ changed</span></li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -2501,6 +2882,8 @@ process is open although new process started.</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/p/yajsw/discussion/810310/thread/eb9151d2/?limit=25#9ec5">Bug</a>:
 11.10 zip file incorrect version</li>
 
@@ -2522,7 +2905,11 @@ process is open although new process started.</li>
 
 
 
+
+
   <li>Bug: Linux: quotes and spaces in command line paths</li>
+
+
 
 
 
@@ -2563,7 +2950,11 @@ file does not exist</li>
 
 
 
+
+
   <li>Bug: Minor changes in RuntimeJavaMain</li>
+
+
 
 
 
@@ -2604,8 +2995,12 @@ WrappedRuntimeProcess</li>
 
 
 
+
+
   <li>Bug: NPE when restartGC is set but no no output format is
 set.</li>
+
+
 
 
 
@@ -2645,7 +3040,11 @@ set.</li>
 
 
 
+
+
   <li>New: new: Property <span style="font-weight: bold; font-style: italic;">wrapper.ntservice.process_priority</span></li>
+
+
 
 
 
@@ -2685,6 +3084,8 @@ set.</li>
 
 
 
+
+
 <h4>yajsw-stable-11.10 January 3rd 2014</h4>
 
 
@@ -2705,7 +3106,11 @@ set.</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -2747,7 +3152,11 @@ blank</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -2787,7 +3196,11 @@ blank</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -2809,6 +3222,8 @@ blank</li>
 
   <li>New: Property: <span style="font-weight: bold; font-style: italic;">wrapper.runtime.pidfile</span>:
 create a pid file for runtime applications</li>
+
+
 
 
 
@@ -2851,8 +3266,12 @@ secondary java wrapper without restarting the native application.</li>
 
 
 
+
+
   <li>New: Property <span style="font-weight: bold; font-style: italic;">wrapper.filter.debug.&lt;trigger
 key&gt;</span>=true to enable logging of trigger executions</li>
+
+
 
 
 
@@ -2893,8 +3312,12 @@ enable tcp/ip communication trace with wrapped application</li>
 
 
 
+
+
   <li>New: Property: <span style="font-weight: bold; font-style: italic;">wrapper.ntservice.stop_dependency</span>:
 Linux stop dependency</li>
+
+
 
 
 
@@ -2934,7 +3357,11 @@ Linux stop dependency</li>
 
 
 
+
+
   <li>Change: source folder structure</li>
+
+
 
 
 
@@ -2956,6 +3383,8 @@ Linux stop dependency</li>
 
   <li>Change: src folder structure to meet maven requirements.
 Gradle build scripts adapted accordingly.</li>
+
+
 
 
 
@@ -2999,8 +3428,12 @@ controller.</li>
 
 
 
+
+
   <li>Change: app shutdown script: be invoked only once; avoid
 triggering of shutdown hook when executing app shutdown script<br>
+
+
 
 
 
@@ -3041,8 +3474,12 @@ be killed after timeout</li>
 
 
 
+
+
   <li>Change: ahessian: (not relevant for yajsw): new: inverse
 server rpc.</li>
+
+
 
 
 
@@ -3083,8 +3520,12 @@ Searching for 32-bit JVMs on Windows x64</li>
 
 
 
+
+
   <li><a href="https://sourceforge.net/p/yajsw/bugs/85/">Bug</a>:
 error in mbean objectname when title includes ":"</li>
+
+
 
 
 
@@ -3125,8 +3566,12 @@ abs path wrapper.java.classpath with * in linux not working</li>
 
 
 
+
+
   <li><a href="https://sourceforge.net/p/yajsw/bugs/90/">Bug</a>:
 Linux service scripts not compatible with chkconfig</li>
+
+
 
 
 
@@ -3167,7 +3612,11 @@ Linux service scripts not compatible with chkconfig</li>
 
 
 
+
+
   <li>Bug: CyclicBufferFileInputStream: probable endless loop</li>
+
+
 
 
 
@@ -3208,7 +3657,11 @@ a trigger</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -3248,7 +3701,11 @@ a trigger</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -3289,8 +3746,12 @@ System tray icon on windows 7</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/p/yajsw/discussion/810310/thread/69a73119/">Change</a>:
 check java 7 also for wrapped application and system tray icon</li>
+
+
 
 
 
@@ -3331,7 +3792,11 @@ notify port issues for system tray icon</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -3371,7 +3836,11 @@ notify port issues for system tray icon</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -3412,8 +3881,12 @@ checking java 7</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/projects/yajsw/forums/forum/810311/topic/7374820">Bug</a>:
 Memory Leak -&gt; update to netty 3.5.6</li>
+
+
 
 
 
@@ -3454,8 +3927,12 @@ have the same out_, err_, in_ file names.</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/p/yajsw/discussion/810311/thread/5035584f/">Bug</a>:
 Linux: Permission denied since 11.4 </li>
+
+
 
 
 
@@ -3497,8 +3974,12 @@ application</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/projects/yajsw/forums/forum/810311/topic/7999129">New</a>:
 new property: <span style="font-weight: bold; font-style: italic;">wrapper.ntservice.reduce_signals</span></li>
+
+
 
 
 
@@ -3538,7 +4019,11 @@ new property: <span style="font-weight: bold; font-style: italic;">wrapper.ntser
 
 
 
+
+
   <li>New: new property: <span style="font-weight: bold; font-style: italic;">wrapper.app.status.log.lines</span><br>
+
+
 
 
 
@@ -3578,7 +4063,11 @@ new property: <span style="font-weight: bold; font-style: italic;">wrapper.ntser
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -3618,7 +4107,11 @@ new property: <span style="font-weight: bold; font-style: italic;">wrapper.ntser
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -3659,6 +4152,8 @@ Jna tmp folder</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=3608009&amp;group_id=224503&amp;atid=1061881">Bug</a>:
 yajsw prints wrong version</li>
 
@@ -3680,8 +4175,12 @@ yajsw prints wrong version</li>
 
 
 
+
+
   <li>Bug:&nbsp;netty: do not use <span style="font-style: italic;">sun.misc.Unsafe</span>,
 this may crash the JVM (we do not need high performance)</li>
+
+
 
 
 
@@ -3724,7 +4223,11 @@ file and service command line</li>
 
 
 
+
+
   <li>Bug: possible loop in JVMController.processStarted()</li>
+
+
 
 
 
@@ -3765,8 +4268,12 @@ WrappedJavaProcess.reconnect()</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/projects/yajsw/forums/forum/810311/topic/7103764">New</a>:
 new property: <span style="font-weight: bold; font-style: italic;">wrapper.restart.reload_cache</span></li>
+
+
 
 
 
@@ -3806,7 +4313,11 @@ new property: <span style="font-weight: bold; font-style: italic;">wrapper.resta
 
 
 
+
+
   </li>
+
+
 
 
 
@@ -3846,7 +4357,11 @@ new property: <span style="font-weight: bold; font-style: italic;">wrapper.resta
 
 
 
+
+
 <h4>yajsw-stable-11.05 &nbsp;March 3rd 2013</h4>
+
+
 
 
 
@@ -3886,8 +4401,12 @@ new property: <span style="font-weight: bold; font-style: italic;">wrapper.resta
 
 
 
+
+
   <li><a href="http://sourceforge.net/support/tracker.php?aid=3601783">Bug</a>:
 WrapperJVMMain.WRAPPER_MANAGER.signalStopping() is broken</li>
+
+
 
 
 
@@ -3929,8 +4448,12 @@ immediatly stop the application.</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/projects/yajsw/forums/forum/810311/topic/6896276">Bug</a>:
 NPE in WrapperManagerImpl</li>
+
+
 
 
 
@@ -3972,8 +4495,12 @@ org/rzo/yajsw/srvmgr/server/Ser <span style="font-weight: bold;"></span><strong 
 
 
 
+
+
   <li>Change: WrappedProcess.start() now resets the restart
 counter.</li>
+
+
 
 
 
@@ -4013,6 +4540,8 @@ counter.</li>
 
 
 
+
+
 <h4>yajsw-stable-11.04 January 11th 2013</h4>
 
 
@@ -4033,7 +4562,11 @@ counter.</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -4074,8 +4607,12 @@ for details</li>
 
 
 
+
+
   <li><a href="https://sourceforge.net/projects/yajsw/forums/forum/810311/topic/6182590">New</a>:
 command "-rw": remove and wait until the service has been removed.</li>
+
+
 
 
 
@@ -4116,8 +4653,12 @@ property <span style="font-weight: bold; font-style: italic;">wrapper.logfile.ma
 
 
 
+
+
   <li><a href="https://sourceforge.net/projects/yajsw/forums/forum/810311/topic/6440092">Bug</a>:
 Installing a multi-config wrapper as daemon</li>
+
+
 
 
 
@@ -4158,8 +4699,12 @@ AIX, FreeBSD: Undefined symbol "stdout", error installing daemon</li>
 
 
 
+
+
   <li><a href="https://sourceforge.net/projects/yajsw/forums/forum/810311/topic/5591296">Bug</a>:
 Mac OS Can't connect to Window</li>
+
+
 
 
 
@@ -4200,8 +4745,12 @@ wrapper.app.env broken in 11.03</li>
 
 
 
+
+
   <li><a href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=3587141&amp;group_id=224503&amp;atid=1061881">Bug</a>:
 wrapper.cleanup_tmp not working as supposed</li>
+
+
 
 
 
@@ -4242,8 +4791,12 @@ Nested braces / absolute path in wrapper.conf</li>
 
 
 
+
+
   <li><a href="https://sourceforge.net/projects/yajsw/forums/forum/810311/topic/6013828">Bug</a>:
 Changed VFS so that it does not use an xml parser</li>
+
+
 
 
 
@@ -4284,8 +4837,12 @@ wait timeout negative</li>
 
 
 
+
+
   <li><a href="https://sourceforge.net/projects/yajsw/forums/forum/810310/topic/5869793">Bug</a>:
 JarBuilder: Source code discrepancy</li>
+
+
 
 
 
@@ -4326,7 +4883,11 @@ set.</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -4371,7 +4932,11 @@ number of files.
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -4412,8 +4977,12 @@ number of files.
 
 
 
+
+
   <li><a href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=3541605&amp;group_id=224503&amp;atid=1061881">Bug</a>:
 .svn dir in src\ahessian\org\jboss\netty\handler\ipfilter</li>
+
+
 
 
 
@@ -4455,9 +5024,13 @@ instead of stack trace</li>
 
 
 
+
+
   <li><a href="https://sourceforge.net/projects/yajsw/forums/forum/810311/topic/5435529/index/page/1">Bug</a>:
 configuration file: error evaluating &nbsp;include directives with
 env vars.</li>
+
+
 
 
 
@@ -4498,8 +5071,12 @@ Problems geting stdout with Solaris 10 sparc:</li>
 
 
 
+
+
   <li><a href="https://sourceforge.net/projects/yajsw/forums/forum/810311/topic/4685606">Bug</a>:
 Windows: totalRAM in WindowsXPSystemInformation</li>
+
+
 
 
 
@@ -4539,7 +5116,11 @@ Windows: totalRAM in WindowsXPSystemInformation</li>
 
 
 
+
+
   <li>Bug: Error creating wrapper.app.pre.script</li>
+
+
 
 
 
@@ -4580,8 +5161,12 @@ connection to wrapper controller</li>
 
 
 
+
+
   <li>Bug: ahessian may hang similar <a href="http://bugs.sun.com/view_bug.do?bug_id=6822370">to
 java bug in ReentrantLock</a></li>
+
+
 
 
 
@@ -4622,8 +5207,12 @@ System.getEnv()</li>
 
 
 
+
+
   <li>Change: Executing jar files: classpath from manifest are
 added to the classpath of the application.</li>
+
+
 
 
 
@@ -4665,8 +5254,12 @@ for user defined scripts within the configuration</li>
 
 
 
+
+
   <li>New: <span style="font-weight: bold; font-style: italic;">decode.gv</span>
 groovy script for decoding properties within the configuration file</li>
+
+
 
 
 
@@ -4709,6 +5302,8 @@ order of the scripts is the alpha-numeric order of &lt;n&gt;</li>
 
 
 
+
+
   <li><a href="https://sourceforge.net/projects/yajsw/forums/forum/810311/topic/5399307">New</a>:
 Unset properties by setting&nbsp; ${return null}</li>
 
@@ -4730,8 +5325,12 @@ Unset properties by setting&nbsp; ${return null}</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/projects/yajsw/forums/forum/810311/topic/5300585?message=11599335">New</a>:
 \r\n line endings: &nbsp;wrapper.logfile.format=LPNTM\r\n</li>
+
+
 
 
 
@@ -4773,7 +5372,11 @@ Note: jna cleans up its files at startup.</li>
 
 
 
+
+
   <li>New: property <span style="font-weight: bold; font-style: italic;">wrapper.tray.spawn_process</span></li>
+
+
 
 
 
@@ -4813,6 +5416,8 @@ Note: jna cleans up its files at startup.</li>
 
 
 
+
+
 <h4>yajsw-stable-11.02 June 10th 2012</h4>
 
 
@@ -4833,7 +5438,11 @@ Note: jna cleans up its files at startup.</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -4874,8 +5483,12 @@ cmd line config override broken since 10.5</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/tracker/?func=detail&amp;aid=3522537&amp;group_id=224503&amp;atid=1061881">Bug</a>:
 Linux: evaluating wrapper.ntservice.additional</li>
+
+
 
 
 
@@ -4915,8 +5528,12 @@ Linux: evaluating wrapper.ntservice.additional</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/support/tracker.php?aid=3532511">Bug</a>:
 WRAPPER log rolling doesn't work</li>
+
+
 
 
 
@@ -4958,8 +5575,12 @@ files for every date</li>
 
 
 
+
+
   <li>Bug: in stop configuration include of main configuration
 must be absolute.</li>
+
+
 
 
 
@@ -5000,8 +5621,12 @@ installDaemon.sh not doesn't work</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/projects/yajsw/forums/forum/810311/topic/4685606/">Bug:</a>&nbsp;
 totalRAM() hangs</li>
+
+
 
 
 
@@ -5024,6 +5649,8 @@ totalRAM() hangs</li>
   <li>New:<span style="font-style: italic; font-weight: bold;">
 wrapper.script.reload</span> allow update of scripts without
 restart of wrapper: file changed date is checked before script execution</li>
+
+
 
 
 
@@ -5067,6 +5694,8 @@ files.</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/tracker/?func=detail&amp;aid=3521453&amp;group_id=224503&amp;atid=1061881">New</a>:
     <span style="font-weight: bold; font-style: italic;">wrapper.console.pipestreams</span>
 for wrapped java processes: stdout and stderr are streamed to the
@@ -5090,7 +5719,11 @@ wrapper instead of t-ing System.out and System.err</li>
 
 
 
+
+
   <li>New: log os, yajsw, jvm versions</li>
+
+
 
 
 
@@ -5131,8 +5764,12 @@ netty-3.5.0Beta1, commons-vfs2-2.0, jna-3.4.1</li>
 
 
 
+
+
   <li>Change: <span style="font-weight: bold;">Separated
 Posix and Windows batch files to folders bat and bin !</span></li>
+
+
 
 
 
@@ -5173,8 +5810,12 @@ calculate totalRAM/freeRAM only when required.</li>
 
 
 
+
+
   <li>Change: build: dependency versions defined in main build
 script</li>
+
+
 
 
 
@@ -5214,6 +5855,8 @@ script</li>
 
 
 
+
+
 <h4>yajsw-stable-11.01 April 11th 2012</h4>
 
 
@@ -5234,7 +5877,11 @@ script</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -5276,8 +5923,12 @@ trigger too early, ping timeout may result in stop instead of restart.</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/tracker/?func=detail&amp;aid=3398506&amp;group_id=224503&amp;atid=1061881">Bug</a>:&nbsp;Duplicate
 parameters for launched service</li>
+
+
 
 
 
@@ -5318,6 +5969,8 @@ Linux: app.wrapper.account doesn't with fork_hack</li>
 
 
 
+
+
   <li><a href="https://sourceforge.net/projects/yajsw/forums/forum/810311/topic/5163743/">Bug</a>:
 Linux: wrapper.fork_hack spawns java with wrong jna lib</li>
 
@@ -5339,7 +5992,11 @@ Linux: wrapper.fork_hack spawns java with wrong jna lib</li>
 
 
 
+
+
   <li>Bug: Linux: randomly process will not restart</li>
+
+
 
 
 
@@ -5381,8 +6038,12 @@ wrapper.on_exit.1=SHUTDOWN
 
 
 
+
+
   <li><a href="https://sourceforge.net/projects/yajsw/forums/forum/810311/topic/5078302">Bug</a>:
 exception when stopping wrapper console using CNTRL-C</li>
+
+
 
 
 
@@ -5426,11 +6087,15 @@ will stop the application and the wrapper</li>
 
 
 
+
+
   <li><a href="https://sourceforge.net/tracker/?func=detail&amp;aid=3414960&amp;group_id=224503&amp;atid=1061884">Change</a>:
 java system property &nbsp;<span style="font-weight: bold; font-style: italic;">jna.tmpdir</span>
 for setting the tmp folder for jna library files.Please refer to the
 documentation. <span style="font-weight: bold; font-style: italic;">wrapper.tmp.path</span>
 per default set to jna.tmpdir</li>
+
+
 
 
 
@@ -5471,8 +6136,12 @@ per default set to jna.tmpdir</li>
 
 
 
+
+
   <li>Change: per default log files are created in
 &lt;yajsw&gt;/log</li>
+
+
 
 
 
@@ -5512,8 +6181,12 @@ per default set to jna.tmpdir</li>
 
 
 
+
+
   <li><a href="https://sourceforge.net/projects/yajsw/forums/forum/810311/topic/5078958">Change</a>:
 use wrapper.app.parameter &nbsp;for native exes</li>
+
+
 
 
 
@@ -5555,6 +6228,8 @@ cyclic thread dump</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=3506101&amp;group_id=224503&amp;atid=1061881">Change</a>:
 ROLLNUM always appended
 to logfile</li>
@@ -5577,8 +6252,12 @@ to logfile</li>
 
 
 
+
+
   <li>Change: Linux: installDaemon.sh, startDaemon.sh,
 stopDaemon.sh calls sudo</li>
+
+
 
 
 
@@ -5621,8 +6300,12 @@ excessive memory or full scan gc usage:&nbsp;<span style="font-weight: bold; fon
 
 
 
+
+
   <li><a href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=3506101&amp;group_id=224503&amp;atid=1061881">New</a>:
 wrapper.logfile.rollmode= DATE<br>
+
+
 
 
 
@@ -5662,7 +6345,11 @@ wrapper.logfile.rollmode= DATE<br>
 
 
 
+
+
   <br>
+
+
 
 
 
@@ -5702,7 +6389,11 @@ wrapper.logfile.rollmode= DATE<br>
 
 
 
+
+
 <h4>yajsw-stable-11.0 &nbsp;Februray 22nd 2012</h4>
+
+
 
 
 
@@ -5742,8 +6433,12 @@ wrapper.logfile.rollmode= DATE<br>
 
 
 
+
+
   <li><a href="http://sourceforge.net/projects/yajsw/forums/forum/810311/topic/4959106">Bug</a>:
 System tray icon causes exception</li>
+
+
 
 
 
@@ -5785,8 +6480,12 @@ handles wild cards differently !</li>
 
 
 
+
+
   <li><a href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=3485343&amp;group_id=224503&amp;atid=1061881">Bug</a>:
 error resolving wild cards in case classpath is "lib/<span style="color: red;"> </span>folder/*"</li>
+
+
 
 
 
@@ -5828,9 +6527,13 @@ found.</li>
 
 
 
+
+
   <li><a href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=3401298&amp;group_id=224503&amp;atid=1061881">Bug</a>:
 Not equals configuration under Windows and Unix: <span style="font-weight: bold;">replaced in unix batches yajsw
 with wrapper !!</span></li>
+
+
 
 
 
@@ -5871,7 +6574,11 @@ environment variables.<span style="font-weight: bold;"><span style="font-weight:
 
 
 
+
+
     </span></li>
+
+
 
 
 
@@ -5894,6 +6601,8 @@ environment variables.<span style="font-weight: bold;"><span style="font-weight:
   <li><a href="https://sourceforge.net/projects/yajsw/forums/forum/810310/topic/4975334/index/page/1">Change</a>:
     <span style="font-weight: bold; font-style: italic;">wrapper.java.customProcName</span>:
 if this is an absolute path, the given path is used.</li>
+
+
 
 
 
@@ -5936,8 +6645,12 @@ added.&nbsp;</li>
 
 
 
+
+
   <li><a href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=3463563&amp;group_id=224503&amp;atid=1061884">Change</a>:
 Enhanced logging when determining java command.</li>
+
+
 
 
 
@@ -5977,7 +6690,11 @@ Enhanced logging when determining java command.</li>
 
 
 
+
+
   <li>Change: update to netty release 3.3.1</li>
+
+
 
 
 
@@ -6017,9 +6734,13 @@ Enhanced logging when determining java command.</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/tracker/?func=detail&amp;aid=3434665&amp;group_id=224503&amp;atid=1061881">New</a>:
 Configuration property <span style="font-weight: bold; font-style: italic;">wrapper.save_interpolation</span>,
 default: value <span style="font-weight: bold;">true</span></li>
+
+
 
 
 
@@ -6062,10 +6783,14 @@ wrapper.ntservice.delayed_autostart</span>, <span style="font-weight: bold; font
 
 
 
+
+
   <li><a href="https://sourceforge.net/tracker/?func=detail&amp;aid=3303944&amp;group_id=224503&amp;atid=1061884">New</a>:
 property <span style="font-weight: bold; font-style: italic;">wrapper.ntservice.java.command</span>
 for running the service wrapper process with a java command different
 then wrapper.java.command.</li>
+
+
 
 
 
@@ -6107,6 +6832,8 @@ command of the service wrapper process.</li>
 
 
 
+
+
 </ul>
 
 
@@ -6127,7 +6854,11 @@ command of the service wrapper process.</li>
 
 
 
+
+
 <br>
+
+
 
 
 
@@ -6170,7 +6901,11 @@ only with java version prior to 6_17 or higher than 7_0.
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -6212,9 +6947,13 @@ daemon on Linux</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/projects/yajsw/forums/forum/810310/topic/4851007">Bug</a>:
 yajsw-beta-10.11 manifest missing jars. Note: jars&nbsp; moved from
 lib/core to lib/extended</li>
+
+
 
 
 
@@ -6254,6 +6993,8 @@ lib/core to lib/extended</li>
 
 
 
+
+
 <h4>yajsw-beta-10.11 November 27th 2011</h4>
 
 
@@ -6274,7 +7015,11 @@ lib/core to lib/extended</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -6316,8 +7061,12 @@ java.util.logging in WrapperJVMMain</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/projects/yajsw/forums/forum/810311/topic/4776215">Bug</a>:
 Error resolving ".." and "." in wrapper.java.classpath property</li>
+
+
 
 
 
@@ -6358,8 +7107,12 @@ Reworked setenv.gv script</li>
 
 
 
+
+
   <li>Bug: Error parsing groovy script -&gt; remove
 index.list from glazedlist jar file.</li>
+
+
 
 
 
@@ -6400,8 +7153,12 @@ PosixService.stop() fixed timeout. thanks to ddahlmann for the patch</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/tracker/?func=detail&amp;aid=3423578&amp;group_id=224503&amp;atid=1061881">Bug</a>:
 maxmemory parameter doesn't work without initmemory</li>
+
+
 
 
 
@@ -6442,9 +7199,13 @@ Added logging in application scripts</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/projects/yajsw/forums/forum/810311/topic/4807968">Change</a>:
 Absolute Minimum Files To Run On Windows -&gt; removed unused jar
 files, moved jar files to lib/extended</li>
+
+
 
 
 
@@ -6487,10 +7248,14 @@ when installing a service. Up to now only interpolations were
 
 
 
+
+
   <li><a href="http://sourceforge.net/tracker/?func=detail&amp;aid=3434665&amp;group_id=224503&amp;atid=1061881">New</a>:
 Interpolated config options become "hard coded" -&gt; new
 configuration property: <span style="font-weight: bold; font-style: italic;">wrapper.save_interpolated</span>,
 default value: true</li>
+
+
 
 
 
@@ -6530,7 +7295,11 @@ default value: true</li>
 
 
 
+
+
   <li>New: Sample configuration file for JBoss 7</li>
+
+
 
 
 
@@ -6570,7 +7339,11 @@ default value: true</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -6610,6 +7383,8 @@ default value: true</li>
 
 
 
+
+
 <ul>
 
 
@@ -6630,7 +7405,11 @@ default value: true</li>
 
 
 
+
+
   <li>Bug: genConfig: error parsing jvm options.</li>
+
+
 
 
 
@@ -6671,7 +7450,11 @@ after first restart</li>
 
 
 
+
+
   <li>Bug: tray icon: possible port leak if connection fails.</li>
+
+
 
 
 
@@ -6712,8 +7495,12 @@ flood if running on multiple computers in a network</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/projects/yajsw/forums/forum/810310/topic/3808825/index/page/2">Bug</a>:
 windows: install service: bad java exe</li>
+
+
 
 
 
@@ -6754,6 +7541,8 @@ application not started on linux: new property: <span style="font-weight: bold; 
 
 
 
+
+
   <li><a href="http://sourceforge.net/projects/yajsw/forums/forum/810311/topic/4755774">Bug</a>:
 Linux: application restarts every 25 days.<br>
 
@@ -6775,7 +7564,11 @@ Linux: application restarts every 25 days.<br>
 
 
 
+
+
   </li>
+
+
 
 
 
@@ -6820,8 +7613,12 @@ implement this for linux, pls let me know.</li>
 
 
 
+
+
   <li>Change: split ahessian.jar -&gt; ahessian.jar,
 hessian4.jar in future these may be extracted to a separate project.</li>
+
+
 
 
 
@@ -6862,8 +7659,12 @@ stop(), so we can stop a process while it is restarting/starting.</li>
 
 
 
+
+
   <li> <a href="http://sourceforge.net/projects/yajsw/forums/forum/810311/topic/4678860?message=10670101">New</a>:
 added authentication to sendMail script.</li>
+
+
 
 
 
@@ -6905,9 +7706,13 @@ service start, stop, install, remove.</li>
 
 
 
+
+
   <li>New: windows: support service installation with<a href="http://msdn.microsoft.com/en-us/library/windows/desktop/ms685155%28v=VS.85%29.aspx">
 delayed autostart</a>:<span style="font-style: italic;"><span style="font-weight: bold;">
 wrapper.ntservice.starttype=DELAYED_AUTO_START</span></span></li>
+
+
 
 
 
@@ -6950,8 +7755,12 @@ class name&gt;</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/projects/yajsw/forums/forum/810311/topic/4746090">New</a>:
 tray icon: display virtual and private memory.</li>
+
+
 
 
 
@@ -6991,7 +7800,11 @@ tray icon: display virtual and private memory.</li>
 
 
 
+
+
 <h4>yajsw-beta-10.9 August 14th 2011</h4>
+
+
 
 
 
@@ -7031,6 +7844,8 @@ tray icon: display virtual and private memory.</li>
 
 
 
+
+
   <li>Bug: Corrupt source file in distribution</li>
 
 
@@ -7051,7 +7866,11 @@ tray icon: display virtual and private memory.</li>
 
 
 
+
+
   <li>Bug: NPE in ahessian.</li>
+
+
 
 
 
@@ -7092,8 +7911,12 @@ genConfig: Error parsing -jar with space in jar path.</li>
 
 
 
+
+
   <li>Bug: application not restarted on server with high load:
 Thread race issue</li>
+
+
 
 
 
@@ -7134,6 +7957,8 @@ Linux: genConfig: NPE.</li>
 
 
 
+
+
   <li>Bug: class not found exception in applications which use
 commons configuration: error in build script</li>
 
@@ -7155,7 +7980,11 @@ commons configuration: error in build script</li>
 
 
 
+
+
   <li>Bug: error in build script: adjusted dependencies</li>
+
+
 
 
 
@@ -7196,7 +8025,11 @@ misspelled "relative" in default configuration.</li>
 
 
 
+
+
   <li>Bug: RESTART state change trigger may stop the application</li>
+
+
 
 
 
@@ -7238,6 +8071,8 @@ DateFileHandler.rotateDate() using 24h time</span></li>
 
 
 
+
+
   <li><span style="font-size: 11pt;"><a href="https://sourceforge.net/projects/yajsw/forums/forum/810311/topic/4635191/index/page/1">Bug</a>:
     </span><em>monitor gc: could not find minorGCBean</em></li>
 
@@ -7259,8 +8094,12 @@ DateFileHandler.rotateDate() using 24h time</span></li>
 
 
 
+
+
   <li><a href="https://sourceforge.net/projects/yajsw/forums/forum/810311/topic/4606898">Bug</a>:
 Windows: missing WrappedProcess.getCluster()</li>
+
+
 
 
 
@@ -7302,9 +8141,13 @@ icon console.</li>
 
 
 
+
+
   <li>New: method <span style="font-weight: bold; font-style: italic;">WrappedProcess.dumpHeap(String
 file)</span> &amp; dump heap button in system tray icon
 console</li>
+
+
 
 
 
@@ -7346,8 +8189,12 @@ waitHint)</span>.Thanks to&nbsp;<a href="http://sourceforge.net/users/ddahlmann/
 
 
 
+
+
   <li><a href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=3385477&amp;group_id=224503&amp;atid=1061884">New</a>:
 method <span style="font-weight: bold; font-style: italic;">WrapperJVMMain.WRAPPER_MANAGER.getProperties()</span>.</li>
+
+
 
 
 
@@ -7371,6 +8218,8 @@ method <span style="font-weight: bold; font-style: italic;">WrapperJVMMain.WRAPP
 Returns a string indicating why the application is being stopped:
 "SERVICE", "COMPUTER", "USER", "PING_TIMEOUT", "RESTART", null. This
 method can be called within a shutdown hook of the application.</li>
+
+
 
 
 
@@ -7417,6 +8266,8 @@ Thanks to <a href="http://sourceforge.net/users/shacharo/" title="shachar ochayo
 
 
 
+
+
   <li>New: Tray Icon: Dialog before stopping
 wrapper/application/tray controlled by property:&nbsp;<span style="font-weight: bold; font-style: italic;">wrapper.tray.dialog</span>.
 Default: true</li>
@@ -7439,7 +8290,11 @@ Default: true</li>
 
 
 
+
+
   <li>New: Tray Icon: Script to set tray icon state color</li>
+
+
 
 
 
@@ -7480,7 +8335,11 @@ windows bat: runConsoleW.bat, systemTrayIconW.bat</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -7520,7 +8379,11 @@ windows bat: runConsoleW.bat, systemTrayIconW.bat</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -7561,6 +8424,8 @@ daemon is not shut down cleanly</li>
 
 
 
+
+
   <li>Bug: <span style="font-style: italic;">wrapper.restart.reload_configuration&nbsp;</span>error
 on application restart</li>
 
@@ -7582,7 +8447,11 @@ on application restart</li>
 
 
 
+
+
   <li>Bug: genConfig aborts for "java -jar app.jar"</li>
+
+
 
 
 
@@ -7625,6 +8494,8 @@ the name of the desktop for the application. Should be set to&nbsp;<span style="
 
 
 
+
+
   <li>New: Configuration property: <span style="font-weight: bold; font-style: italic;">wrapper.java.monitor.gc</span>,
     <span style="font-weight: bold; font-style: italic;">wrapper.java.monitor.gc.intervall</span>
 to print gc logging to System.err</li>
@@ -7647,9 +8518,13 @@ to print gc logging to System.err</li>
 
 
 
+
+
   <li>New: Configuration property: <span style="font-weight: bold; font-style: italic;">wrapper.filter.missing.autostop.&lt;n&gt;</span>.
 Default true. If set to false the trigger will remain active after the
 trigger has been activated, resulting in continuous trigger monitoring.</li>
+
+
 
 
 
@@ -7692,10 +8567,14 @@ under windows.</li>
 
 
 
+
+
   <li>Change: systemInformation().totalRAM() hangs on some
 machines
 -&gt; avoid invocation if configuration does not require RAM
 calculation</li>
+
+
 
 
 
@@ -7736,7 +8615,11 @@ not need to call wmi.</li>
 
 
 
+
+
   <li>Change: do not replace "\\" by "/" in environment variables.</li>
+
+
 
 
 
@@ -7776,7 +8659,11 @@ not need to call wmi.</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -7816,7 +8703,11 @@ not need to call wmi.</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -7838,6 +8729,8 @@ not need to call wmi.</li>
 
   <li><a href="http://sourceforge.net/projects/yajsw/forums/forum/810311/topic/4438875">Bug</a>:
 Error restarting application when using&nbsp;<span style="font-style: italic;">wrapper.stop.conf</span></li>
+
+
 
 
 
@@ -7879,8 +8772,12 @@ returns current working dir instead of C:/</li>
 
 
 
+
+
   <li><a href="https://sourceforge.net/tracker/?func=detail&amp;aid=3291045&amp;group_id=224503&amp;atid=1061881">Bug</a>:
 Default startup timeout is 15 and not 30 as documented</li>
+
+
 
 
 
@@ -7921,8 +8818,12 @@ Linux: Error in environment variable expansion</li>
 
 
 
+
+
   <li>Bug: setting <span style="font-style: italic;">wrapper.app.pre_main.script&nbsp;</span>causes
 class not found exception</li>
+
+
 
 
 
@@ -7963,8 +8864,12 @@ class not found exception</li>
 
 
 
+
+
   <li>Bug: Deadlock if WrappedProcess.start() is called while
 process is restarting.</li>
+
+
 
 
 
@@ -8006,9 +8911,13 @@ for details please refer to the configuration documentation.</li>
 
 
 
+
+
   <li>New: Windows: <span style="font-style: italic; font-weight: bold;">wrapper.console.minimized</span>
 for indicating if the console of the application should be minimized at
 startup.</li>
+
+
 
 
 
@@ -8048,6 +8957,8 @@ startup.</li>
 
 
 
+
+
 <h4>yajsw-beta-10.6 March 19th 2011</h4>
 
 
@@ -8068,7 +8979,11 @@ startup.</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -8110,9 +9025,13 @@ instead of&nbsp;wrapper.logf.format <strong></strong></li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/tracker/?func=detail&amp;aid=3211705&amp;group_id=224503&amp;atid=1061881">Bug</a>:
 class cast exception when&nbsp;<span style="font-style: italic;">wrapper.java.app.jar</span>
 is set</li>
+
+
 
 
 
@@ -8153,6 +9072,8 @@ yajsw exception when using jrockit jvm.</li>
 
 
 
+
+
 </ul>
 
 
@@ -8173,7 +9094,11 @@ yajsw exception when using jrockit jvm.</li>
 
 
 
+
+
 <h4>yajsw-beta-10.5 March 6th 2011</h4>
+
+
 
 
 
@@ -8217,7 +9142,11 @@ and if you like it by giving them 5 stars rating. Thanks !</div>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -8239,6 +9168,8 @@ and if you like it by giving them 5 stars rating. Thanks !</div>
 
   <li>New: logging format: added '<span style="font-weight: bold;">N</span>' option&nbsp;
 -&gt; display application name.&nbsp;</li>
+
+
 
 
 
@@ -8281,6 +9212,8 @@ the first configuration.</li>
 
 
 
+
+
   <li>New: <span style="font-weight: bold; font-style: italic;">maxStartup.gv</span>
 sample script to check that application reports startup within a
 timeout by printing a "started" messasge on the console.</li>
@@ -8303,8 +9236,12 @@ timeout by printing a "started" messasge on the console.</li>
 
 
 
+
+
   <li>New: sample for running eclipse equinox OSGI server with
 clean shutdown</li>
+
+
 
 
 
@@ -8346,8 +9283,12 @@ a given duration</li>
 
 
 
+
+
   <li>New: <a href="http://gradle.org/">gradle</a>
 build script for yajsw</li>
+
+
 
 
 
@@ -8387,7 +9328,11 @@ build script for yajsw</li>
 
 
 
+
+
   <li>Change: ahessian and srvmgr now in separate jars.</li>
+
+
 
 
 
@@ -8427,7 +9372,11 @@ build script for yajsw</li>
 
 
 
+
+
   <li>Change: reworked windows Cluster.java and Pdh.java</li>
+
+
 
 
 
@@ -8468,7 +9417,11 @@ os.ms.win32 package</li>
 
 
 
+
+
   <li>Change: newest groovy and netty releases.</li>
+
+
 
 
 
@@ -8509,8 +9462,12 @@ Windows 2008 handling of user credentials&nbsp; in service</li>
 
 
 
+
+
   <li>Bug: groovy script initialization may cause memory leak if
 process is restarted often</li>
+
+
 
 
 
@@ -8551,8 +9508,12 @@ Windows: Windows Services manager reports error when service stops</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/projects/yajsw/forums/forum/810311/topic/4384689">Bug</a>:
 Environment variables are not set in application</li>
+
+
 
 
 
@@ -8593,8 +9554,12 @@ Linux: GenConfig: command line max 1024</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/tracker/?func=detail&amp;aid=3089790&amp;group_id=224503&amp;atid=1061881">Bug</a>:
 Remove shutdown hooks to avoid memory leaks</li>
+
+
 
 
 
@@ -8635,7 +9600,11 @@ In case wrapper.jar.app.jar is set, add the jar to the classpath</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -8675,7 +9644,11 @@ In case wrapper.jar.app.jar is set, add the jar to the classpath</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -8717,8 +9690,12 @@ use newest jna release.<strong></strong></li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/projects/yajsw/forums/forum/810311/topic/3763993">Bug</a>:
 Vista: Wait for service to start before showing "service not started"</li>
+
+
 
 
 
@@ -8759,8 +9736,12 @@ Linux: account group not set</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/projects/yajsw/forums/forum/810311/topic/3784442">Bug</a>:
 Linux: NPE when starting a daemon</li>
+
+
 
 
 
@@ -8801,8 +9782,12 @@ restarting an application.</li>
 
 
 
+
+
   <li><a href="https://sourceforge.net/projects/yajsw/forums/forum/810311/topic/3862134">Bug</a>:
 Ping timeout on Windows 2008</li>
+
+
 
 
 
@@ -8844,9 +9829,13 @@ for setting application environment variables.</li>
 
 
 
+
+
   <li><a href="http://sourceforge.net/projects/yajsw/forums/forum/810310/topic/3808825">New</a>:
 Windows: <span style="font-style: italic;"><span style="font-weight: bold;">WrapperJVMMain.WRAPPER_MANAGER.reportServiceStartup()</span>
     </span>and configuration property &nbsp;<span style="font-style: italic; font-weight: bold;">wrapper.ntservice.autoreport.startup</span></li>
+
+
 
 
 
@@ -8886,7 +9875,11 @@ Windows: <span style="font-style: italic;"><span style="font-weight: bold;">Wrap
 
 
 
+
+
   </li>
+
+
 
 
 
@@ -8927,6 +9920,8 @@ keys to lower case.</li>
 
 
 
+
+
   <li>Change: newest netty release.</li>
 
 
@@ -8947,7 +9942,11 @@ keys to lower case.</li>
 
 
 
+
+
   <li>Change: ahessian changes for android</li>
+
+
 
 
 
@@ -8989,8 +9988,12 @@ distros.</li>
 
 
 
+
+
   <li>Change: genConfig: do not set user account, since most
 users will comment this out.</li>
+
+
 
 
 
@@ -9031,7 +10034,11 @@ application, wrapper file descriptors not closed on fork of application.</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -9071,7 +10078,11 @@ application, wrapper file descriptors not closed on fork of application.</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -9113,9 +10124,13 @@ wrapper.filter.trigger.1=,
 
 
 
+
+
   <li>Bug: Defining&nbsp;wrapper.filter.trigger.1=x,
 &nbsp;wrapper.filter.script.1=,&nbsp;wrapper.filter.trigger.2=x,
 &nbsp;wrapper.filter.script.2= will execute only one script</li>
+
+
 
 
 
@@ -9159,10 +10174,14 @@ thread and return to windows service controller asap</li>
 
 
 
+
+
   <li>Bug: under high load on application restart: restart
 triggered by
 multiple state changes -&gt; supress restart if we are already
 restarting.</li>
+
+
 
 
 
@@ -9204,9 +10223,13 @@ On the same occasion: changed posix daemon template to conform to LSB</li>
 
 
 
+
+
   <li>Bug: [<a href="http://sourceforge.net/tracker/?func=detail&amp;aid=3011626&amp;group_id=224503&amp;atid=1061881">3011626</a>]
 wrapper.script.STOP
 doesn't work</li>
+
+
 
 
 
@@ -9247,8 +10270,12 @@ Windows: service shutdown does not wait for application termination.</li>
 
 
 
+
+
   <li>Bug: Exception in CyclicBufferFileInputStream if file is
 closed.</li>
+
+
 
 
 
@@ -9289,8 +10316,12 @@ lines, at random the scripts are called with the wrong line.</li>
 
 
 
+
+
   <li>Bug: Cannot start application in case main method is
 inherited from a super class.</li>
+
+
 
 
 
@@ -9333,8 +10364,12 @@ wrapper.script.&lt;state&gt;.timeout</span><span style="font-weight: bold;">.</s
 
 
 
+
+
   <li>Change: updated to newest releases of: groovy, jna, quartz,
 velocity</li>
+
+
 
 
 
@@ -9357,6 +10392,8 @@ velocity</li>
   <li>Change: System tray icon now uses asyncrhonous hessian over
 netty and
 multicast discovery instead of rmi.</li>
+
+
 
 
 
@@ -9401,6 +10438,8 @@ default group of the user. </li>
 
 
 
+
+
   <li><span style="font-weight: bold;">!! Change:
 Posix: the syntax of </span><span style="font-style: italic; font-weight: bold;">wrapper.daemon.run_level_dir</span><span style="font-weight: bold;"> has changed</span>:&nbsp;wrapper.daemon.run_level_dir
 per default ist set to&nbsp;<span style="font-style: italic;">&lt;wrapper.daemon.dir&gt;/rcX.d</span>,
@@ -9424,9 +10463,13 @@ for Ubuntu this property should be set to /etc/rcX.d.</li>
 
 
 
+
+
   <li><span style="font-weight: bold;">!! Change:
 Posix: the property <span style="font-style: italic;">wrapper.daemon.k_order</span>
 has been removed</span>. Use&nbsp;&nbsp;<span style="font-style: italic;">wrapper.daemon.update_rc </span>instead.</li>
+
+
 
 
 
@@ -9469,9 +10512,13 @@ command. Default value is the default of &nbsp;that command.<span style="font-we
 
 
 
+
+
   <li><span style="font-weight: bold;"></span>New:
 System tray icon console: pause, clear &amp; filter
 console output.</li>
+
+
 
 
 
@@ -9516,7 +10563,11 @@ same trigger or for the same state change.</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -9556,7 +10607,11 @@ same trigger or for the same state change.</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -9597,8 +10652,12 @@ same trigger or for the same state change.</li>
 
 
 
+
+
   <li>Bug: Windows: when server is under high load: cannot stop
 wrapped process: isRunning() returns true although process is stopped</li>
+
+
 
 
 
@@ -9639,6 +10698,8 @@ the patch</li>
 
 
 
+
+
   <li>!! Bug: since beta 10.1: Socket.ReuseAddress(true) in
 wrapper -&gt; multiple wrappers use same port.</li>
 
@@ -9660,7 +10721,11 @@ wrapper -&gt; multiple wrappers use same port.</li>
 
 
 
+
+
   <li>Bug: Mac OS X: genConfig uses posix methods instead of BSD.</li>
+
+
 
 
 
@@ -9701,8 +10766,12 @@ application. -&gt; keep wrapper server socket bound on restart.</li>
 
 
 
+
+
   <li>Changed: removed counter in &nbsp;WrapperManagerImpl.
 Now waiting until startup timeout.</li>
+
+
 
 
 
@@ -9742,8 +10811,12 @@ Now waiting until startup timeout.</li>
 
 
 
+
+
   <li>Changed: extended JSW migration guide to include
 environment variables</li>
+
+
 
 
 
@@ -9786,7 +10859,11 @@ listening.</li>
 
 
 
+
+
   <li>New: sample configurations for activemq and jboss</li>
+
+
 
 
 
@@ -9828,6 +10905,8 @@ timeouts to maximum value</li>
 
 
 
+
+
   <li>New: configuration property<span style="font-style: italic;"> wrapper.jmx.user</span>, <span style="font-style: italic;">wrapper.jmx.password</span>
 -&gt; sets the credentials for remote access to the wrapper jmx
 server</li>
@@ -9850,8 +10929,12 @@ server</li>
 
 
 
+
+
   <li>New: included sample security profile file. Fine grained
 security profile can be generated using src\build\secmanager.</li>
+
+
 
 
 
@@ -9894,7 +10977,11 @@ and a connection has been established to the wrapper.</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -9934,7 +11021,11 @@ and a connection has been established to the wrapper.</li>
 
 
 
+
+
 <h4>yajsw-beta-10.1 February 20th 2010</h4>
+
+
 
 
 
@@ -9974,6 +11065,8 @@ and a connection has been established to the wrapper.</li>
 
 
 
+
+
   <li>Bug: Windows: JVM crashed when getting process environment</li>
 
 
@@ -9994,7 +11087,11 @@ and a connection has been established to the wrapper.</li>
 
 
 
+
+
   <li>Bug: ServiceManagerServer: minor bugs.</li>
+
+
 
 
 
@@ -10035,6 +11132,8 @@ classpath from environment</li>
 
 
 
+
+
   <li>Bug: Linux: Classpath File not found</li>
 
 
@@ -10055,7 +11154,11 @@ classpath from environment</li>
 
 
 
+
+
   <li>Change: Network Install: can use yajsw zip from sourceforge</li>
+
+
 
 
 
@@ -10096,7 +11199,11 @@ client on android -&gt; removed hessian.jar from lib folder</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -10136,6 +11243,8 @@ client on android -&gt; removed hessian.jar from lib folder</li>
 
 
 
+
+
 <ul>
 
 
@@ -10156,7 +11265,11 @@ client on android -&gt; removed hessian.jar from lib folder</li>
 
 
 
+
+
   <li>Bug:&nbsp;genconfig : error parsing java command line</li>
+
+
 
 
 
@@ -10198,7 +11311,11 @@ manifest but not in classpath</li>
 
 
 
+
+
   <li>Bug: genConfig: get CLASSPATH from process environment</li>
+
+
 
 
 
@@ -10239,8 +11356,12 @@ after&nbsp;timeout expired</li>
 
 
 
+
+
   <li>Bug: Linux: File handlers not closed: handlers and pipes
 are now closed</li>
+
+
 
 
 
@@ -10281,8 +11402,12 @@ restart</li>
 
 
 
+
+
   <li>Bug: In case of gobler panic: do not restart if already in
 restart state.</li>
+
+
 
 
 
@@ -10322,7 +11447,11 @@ restart state.</li>
 
 
 
+
+
   <li>Bug: Linux: classpath wildcard error when path is absolute</li>
+
+
 
 
 
@@ -10363,8 +11492,12 @@ in state RESTART.</li>
 
 
 
+
+
   <li>Change: [2910062]move println to logging. Thanks to lokman
 for the patch.</li>
+
+
 
 
 
@@ -10405,8 +11538,12 @@ only</li>
 
 
 
+
+
   <li>New: network loading: can load a zip -&gt; does not
 required webdav. Demo changed to run from yajsw.sourceforge.net</li>
+
+
 
 
 
@@ -10446,7 +11583,11 @@ required webdav. Demo changed to run from yajsw.sourceforge.net</li>
 
 
 
+
+
 <h4><br>
+
+
 
 
 
@@ -10486,7 +11627,11 @@ required webdav. Demo changed to run from yajsw.sourceforge.net</li>
 
 
 
+
+
 <h4>yajsw-alpha-9.5 November 24th 2010</h4>
+
+
 
 
 
@@ -10526,7 +11671,11 @@ required webdav. Demo changed to run from yajsw.sourceforge.net</li>
 
 
 
+
+
   <li>Bug: Posix: pid file location</li>
+
+
 
 
 
@@ -10567,7 +11716,11 @@ required webdav. Demo changed to run from yajsw.sourceforge.net</li>
 
 
 
+
+
   <li>Bug: MacOsX fork process</li>
+
+
 
 
 
@@ -10611,10 +11764,14 @@ WindowsXPProcess.start(). This seems to help, but do not ask me why.</li>
 
 
 
+
+
   <li>Bug: Since 9.4: error using commons Configuration in java
 application. -&gt; split wrapper.jar &nbsp;in 2 jars:
 wrapper.jar,
 wrapperApp.jar.</li>
+
+
 
 
 
@@ -10654,7 +11811,11 @@ wrapperApp.jar.</li>
 
 
 
+
+
   <li>Bug: Restart native application</li>
+
+
 
 
 
@@ -10694,7 +11855,11 @@ wrapperApp.jar.</li>
 
 
 
+
+
   <li>Bug: [2875747] Posix: wrapper.shutdown.timeout has no effect</li>
+
+
 
 
 
@@ -10738,8 +11903,12 @@ start</li>
 
 
 
+
+
   <li>Bug: Stack overflow in CyclicBufferFilePrintStream in case
 wrapper is slower than application.</li>
+
+
 
 
 
@@ -10780,6 +11949,8 @@ documented</li>
 
 
 
+
+
   <li>Change: Posix: added conf/pid/description to daemon script
 header</li>
 
@@ -10801,7 +11972,11 @@ header</li>
 
 
 
+
+
   <li>Change: optimized CyclicFileBuffer</li>
+
+
 
 
 
@@ -10843,7 +12018,11 @@ for same &lt;n&gt; a k or s link is created in the given folder.</li>
 
 
 
+
+
   <li>Change: newest jna.jar and groovy.jar</li>
+
+
 
 
 
@@ -10884,7 +12063,11 @@ for same &lt;n&gt; a k or s link is created in the given folder.</li>
 
 
 
+
+
   <li>Change: restructured src folder <span style="font-weight: bold;"></span><strong></strong></li>
+
+
 
 
 
@@ -10926,10 +12109,14 @@ sucsessfull, 1, 10</span></li>
 
 
 
+
+
   <li>New: property to define a script for calculation of restart
 delay. <span style="font-style: italic;">wrapper.restart.delay.script</span>.
 Thus restart delay can be set for example to a linear function, or to
 check availability of resources before restarting.</li>
+
+
 
 
 
@@ -10973,11 +12160,15 @@ service.</li>
 
 
 
+
+
   <li>New: Windows Cluster: New method&nbsp; <span style="font-style: italic;">process.cluster.groupInfo</span>:
 returns a Map&lt;String, String&gt; with &lt;group-name,
 current-node-of-group&gt;. One may thus start/stop the
 application&nbsp;
 when specific cluster groups change.</li>
+
+
 
 
 
@@ -11018,8 +12209,12 @@ start</li>
 
 
 
+
+
   <li>New: enabled multiple commands: java -jar wrapper.jar <span style="font-style: italic;">-ity</span>
 &lt;conf&gt; : install, start service and start tray icon.</li>
+
+
 
 
 
@@ -11059,6 +12254,8 @@ start</li>
 
 
 
+
+
 <span style="font-weight: bold;">NOTE</span>:&nbsp;<br>
 
 
@@ -11079,7 +12276,11 @@ start</li>
 
 
 
+
+
 take care when building wrapper.jar, wrapperApp.jar, wrapperWS.jar: <br>
+
+
 
 
 
@@ -11120,8 +12321,12 @@ include</span> the classes: ...yajsw.app.* <span style="font-style: italic;">exc
 
 
 
+
+
 wrapperApp.jar <span style="font-style: italic;">includes
 only</span> the classes ...yajsw.app.* + ...yajsw.boot.* <span style="font-style: italic;">except for</span> *Impl*<br>
+
+
 
 
 
@@ -11161,7 +12366,11 @@ both have the same manifest.<br>
 
 
 
+
+
 <br>
+
+
 
 
 
@@ -11204,7 +12413,11 @@ jar has to be signed. You may use build/sign.bat for this.
 
 
 
+
+
 </h4>
+
+
 
 
 
@@ -11244,7 +12457,11 @@ jar has to be signed. You may use build/sign.bat for this.
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -11284,7 +12501,11 @@ jar has to be signed. You may use build/sign.bat for this.
 
 
 
+
+
   <li>Bug: windows: user account/password&nbsp;</li>
+
+
 
 
 
@@ -11325,7 +12546,11 @@ server is overloaded</li>
 
 
 
+
+
   <li>Bug: MacOsX: launchd typo</li>
+
+
 
 
 
@@ -11365,6 +12590,8 @@ server is overloaded</li>
 
 
 
+
+
   <li>Bug: windows: service description corrupt</li>
 
 
@@ -11385,7 +12612,11 @@ server is overloaded</li>
 
 
 
+
+
   <li>Change: newest mina.jar and jna.jar</li>
+
+
 
 
 
@@ -11426,7 +12657,11 @@ to see if something went wrong during startup.</li>
 
 
 
+
+
   <li>New: unit tests using testNG and Groovy and jmock</li>
+
+
 
 
 
@@ -11467,6 +12702,8 @@ groovy jar now part of core libs</li>
 
 
 
+
+
   <li>New: enter passwords through CLI or system tray icon</li>
 
 
@@ -11487,7 +12724,11 @@ groovy jar now part of core libs</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -11529,7 +12770,11 @@ release
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -11569,6 +12814,8 @@ release
 
 
 
+
+
   <li>Bug: Windows:&nbsp; time out on service stop</li>
 
 
@@ -11589,7 +12836,11 @@ release
 
 
 
+
+
   <li>Bug: Remote Launch: /x/x could not be copied</li>
+
+
 
 
 
@@ -11630,8 +12881,12 @@ uninstall it first then reinstall it</li>
 
 
 
+
+
   <li>Change: System Tray Icon now runs in a separate process.
 New: Buttons for: stop wrapper, start service, wrapper thread dump</li>
+
+
 
 
 
@@ -11672,7 +12927,11 @@ recursive folder download</li>
 
 
 
+
+
   <li>Change: JVMController: logging changed to info.</li>
+
+
 
 
 
@@ -11712,7 +12971,11 @@ recursive folder download</li>
 
 
 
+
+
   <li>New: cofiguration sample for <a href="http://db.apache.org/derby/">Apache Derby</a></li>
+
+
 
 
 
@@ -11752,7 +13015,11 @@ recursive folder download</li>
 
 
 
+
+
 <h4>yajsw-alpha-9.2 August 20 2009</h4>
+
+
 
 
 
@@ -11792,7 +13059,11 @@ recursive folder download</li>
 
 
 
+
+
   <li>Bug: wrapper hangs on cntrl-c</li>
+
+
 
 
 
@@ -11833,8 +13104,12 @@ configuration-snapshot jar</li>
 
 
 
+
+
   <li>Bug: network launch: handling of wild cards reworked. For
 now supporting: .../*/*.jar only to one level.</li>
+
+
 
 
 
@@ -11875,8 +13150,12 @@ script is active</li>
 
 
 
+
+
   <li>Bug: allow stopper configuration to set its own logging
 properties</li>
+
+
 
 
 
@@ -11916,7 +13195,11 @@ properties</li>
 
 
 
+
+
   <li>Change: jackrabit jar now includes only the webdav client</li>
+
+
 
 
 
@@ -11956,7 +13239,11 @@ properties</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -11996,7 +13283,11 @@ properties</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -12037,7 +13328,11 @@ jdk 1.6 instead of jdk 1.5</li>
 
 
 
+
+
   <li>Bug: [<span><strong>2828484]&nbsp;</strong></span>wrapper.java.initmemory.relative</li>
+
+
 
 
 
@@ -12077,6 +13372,8 @@ jdk 1.6 instead of jdk 1.5</li>
 
 
 
+
+
 <h4>yajsw-alpha-9.0 July 26 2009</h4>
 
 
@@ -12097,7 +13394,11 @@ jdk 1.6 instead of jdk 1.5</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -12138,8 +13439,12 @@ include=${&lt;system-prop&gt;}.x.conf</li>
 
 
 
+
+
   <li>New:<span style="font-style: italic;">
 wrapper.restart.reload_configuration</span></li>
+
+
 
 
 
@@ -12182,6 +13487,8 @@ wrapper.cache.local</span>,&nbsp;<span style="font-style: italic;">wrapper.resou
 
 
 
+
+
   <li>New: Support JNLP configuration<span style="font-style: italic;"><br>
 
 
@@ -12202,7 +13509,11 @@ wrapper.cache.local</span>,&nbsp;<span style="font-style: italic;">wrapper.resou
 
 
 
+
+
     </span></li>
+
+
 
 
 
@@ -12242,6 +13553,8 @@ wrapper.cache.local</span>,&nbsp;<span style="font-style: italic;">wrapper.resou
 
 
 
+
+
     </span></li>
 
 
@@ -12262,7 +13575,11 @@ wrapper.cache.local</span>,&nbsp;<span style="font-style: italic;">wrapper.resou
 
 
 
+
+
   <li>New: <span style="font-style: italic;">wrapper.startup.delay</span></li>
+
+
 
 
 
@@ -12303,6 +13620,8 @@ Handle leak on native application restart</li>
 
 
 
+
+
   <li>Bug: genConfig throws Exception when java command contains
 main args</li>
 
@@ -12324,7 +13643,11 @@ main args</li>
 
 
 
+
+
   <li>Bug: ubuntu 9.04-x86 crash in genConfig.sh</li>
+
+
 
 
 
@@ -12365,8 +13688,12 @@ on JVMMain.WRAPPER_MANAGER.restart()</li>
 
 
 
+
+
   <li>Bug: Windows: service requires long time to stop, since
 alpha-8.4</li>
+
+
 
 
 
@@ -12406,6 +13733,8 @@ alpha-8.4</li>
 
 
 
+
+
   <li>Bug: Posix shell scripts</li>
 
 
@@ -12426,7 +13755,11 @@ alpha-8.4</li>
 
 
 
+
+
   <li>Bug: Linux daemon script generation</li>
+
+
 
 
 
@@ -12467,7 +13800,11 @@ console title or main class name.</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -12507,7 +13844,11 @@ console title or main class name.</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -12547,6 +13888,8 @@ console title or main class name.</li>
 
 
 
+
+
   <li>Bug: WrappedRuntimeProcess: wrapper.working.dir not set</li>
 
 
@@ -12567,7 +13910,11 @@ console title or main class name.</li>
 
 
 
+
+
   <li>Bug: Exception on restart due to ping timeout</li>
+
+
 
 
 
@@ -12608,7 +13955,11 @@ in the java launcher</li>
 
 
 
+
+
   <li>New: <span style="font-style: italic;">wrapper.control</span></li>
+
+
 
 
 
@@ -12648,7 +13999,11 @@ in the java launcher</li>
 
 
 
+
+
   <li>Bug: GenConfig: split jvmArgs so that we can quote them</li>
+
+
 
 
 
@@ -12688,6 +14043,8 @@ in the java launcher</li>
 
 
 
+
+
 <h4>yajsw-alpha-8.3 May 4th 2009</h4>
 
 
@@ -12708,7 +14065,11 @@ in the java launcher</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -12750,9 +14111,13 @@ setting -Xmx</li>
 
 
 
+
+
   <li>New: property <span style="font-style: italic;">wrapper.exit_on_main_exception</span>
 for setting exit code of java application in case the main method
 throws an exception</li>
+
+
 
 
 
@@ -12792,6 +14157,8 @@ throws an exception</li>
 
 
 
+
+
   <li>New: groovified YAJSW : WrapperBuilder</li>
 
 
@@ -12812,7 +14179,11 @@ throws an exception</li>
 
 
 
+
+
   <li>New: Sample: nutch recrawl script, nutch solr crawl script</li>
+
+
 
 
 
@@ -12853,8 +14224,12 @@ DeleteNativeLibrary exec may hang -&gt; do not spwan this exec.</li>
 
 
 
+
+
   <li>Bug: wrapper.java.classpath.&lt;n&gt; = ${var}
 &nbsp;not expanded</li>
+
+
 
 
 
@@ -12894,7 +14269,11 @@ DeleteNativeLibrary exec may hang -&gt; do not spwan this exec.</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -12935,7 +14314,11 @@ DeleteNativeLibrary exec may hang -&gt; do not spwan this exec.</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -12977,7 +14360,11 @@ thus overriding any streams set with System.setErr()</li>
 
 
 
+
+
   <li>Bug: threaddump with backlog appender</li>
+
+
 
 
 
@@ -13017,7 +14404,11 @@ thus overriding any streams set with System.setErr()</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -13057,7 +14448,11 @@ thus overriding any streams set with System.setErr()</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -13098,8 +14493,12 @@ starting a process or installing a service</li>
 
 
 
+
+
   <li>Bug: Windows: error in case classpath file has absolute
 path.</li>
+
+
 
 
 
@@ -13142,8 +14541,12 @@ distributions</strong></a></li>
 
 
 
+
+
   <li>Bug: thread dump: use "original" stream to bypass logger
 streams.</li>
+
+
 
 
 
@@ -13183,6 +14586,8 @@ streams.</li>
 
 
 
+
+
 <h4>yajsw-alpha-8.0 April 11th 2009</h4>
 
 
@@ -13203,7 +14608,11 @@ streams.</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -13244,7 +14653,11 @@ streams.</li>
 
 
 
+
+
   <li>NEW : State <span style="font-style: italic;">SHUTDOWN</span></li>
+
+
 
 
 
@@ -13285,6 +14698,8 @@ wrapper.port.max</span></li>
 
 
 
+
+
   <li>Bug: Posix, Windows: handling of spaces in path</li>
 
 
@@ -13305,7 +14720,11 @@ wrapper.port.max</span></li>
 
 
 
+
+
   <li>NEW: support for FreeBSD 32 and 64</li>
+
+
 
 
 
@@ -13347,8 +14766,12 @@ DEFAULT_EXIT_ON_MAIN_TERMINATE&nbsp;&nbsp;&nbsp;
 
 
 
+
+
   <li>NEW: Linux, Solaris: System Tray Console: display threads,
 cpu, memory, handles (handles == number of &nbsp;file descriptors)</li>
+
+
 
 
 
@@ -13388,7 +14811,11 @@ cpu, memory, handles (handles == number of &nbsp;file descriptors)</li>
 
 
 
+
+
   <li>NEW: runScript.bat to test scripts</li>
+
+
 
 
 
@@ -13432,10 +14859,14 @@ reinstalled.</li>
 
 
 
+
+
   <li>Change: wrapper.java.command: first check if this
 is relative to wrapper.jar parent folder (eg wrapper home), thus
 defining wrapper.java.command=jre/bin/java will resolve to
 &lt;yajsw&gt;/jre/bin/java if this file exists</li>
+
+
 
 
 
@@ -13475,6 +14906,8 @@ defining wrapper.java.command=jre/bin/java will resolve to
 
 
 
+
+
 <h4>yajsw-alpha-7.1 March 22nd 2009</h4>
 
 
@@ -13495,7 +14928,11 @@ defining wrapper.java.command=jre/bin/java will resolve to
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -13538,8 +14975,12 @@ instead of ../scripts/sendMail.gv)</li>
 
 
 
+
+
   <li>Bug: Linux: + MacOsX: missing templates folder + templates
 folder not used&nbsp;</li>
+
+
 
 
 
@@ -13580,6 +15021,8 @@ title&nbsp;under SYSTEM user</li>
 
 
 
+
+
   <li>Bug: wrong state of WrappedProcess in case process does not
 start.</li>
 
@@ -13601,7 +15044,11 @@ start.</li>
 
 
 
+
+
   <li>Tested: Linux 64 bit (Suse 11.1 64 bit) :OK</li>
+
+
 
 
 
@@ -13642,7 +15089,11 @@ yet run on FreeBSD 64 bit)</li>
 
 
 
+
+
   <li>Bug: missing src folder</li>
+
+
 
 
 
@@ -13682,7 +15133,11 @@ yet run on FreeBSD 64 bit)</li>
 
 
 
+
+
   <li>Bug: parse trigger configuration properties.</li>
+
+
 
 
 
@@ -13722,7 +15177,11 @@ yet run on FreeBSD 64 bit)</li>
 
 
 
+
+
   <li>Tested: Oracle/JRockit JVM on Win32 : OK</li>
+
+
 
 
 
@@ -13763,8 +15222,12 @@ sendMail.gv</li>
 
 
 
+
+
   <li>Change: log groovy script exceptions, so we may have these
 on file.</li>
+
+
 
 
 
@@ -13809,11 +15272,15 @@ wrapper.jar)</li>
 
 
 
+
+
   <li>New:
 Alpha Release for solaris. Tested runConsole with sol-10-u6-ga1-x86.
 Note: could not get stdout/in/err -&gt; workaround using default
 file
 numbers 0, 1, 2. genConfig + Daemon not yet tested.</li>
+
+
 
 
 
@@ -13853,6 +15320,8 @@ numbers 0, 1, 2. genConfig + Daemon not yet tested.</li>
 
 
 
+
+
 <h4>yajsw-alpha-7.0 Feb 28th 2009</h4>
 
 
@@ -13873,7 +15342,11 @@ numbers 0, 1, 2. genConfig + Daemon not yet tested.</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -13916,7 +15389,11 @@ support</li>
 
 
 
+
+
   <li>Bug: Linux:&nbsp; daemon.vm</li>
+
+
 
 
 
@@ -13957,6 +15434,8 @@ wrapper.launchd.dir, wrapper.launchd.template</span> properties</li>
 
 
 
+
+
   <li>Change:&nbsp;daemon.vm template and launchd.plist.vm
 now in directory <span style="font-style: italic;">templates</span>.</li>
 
@@ -13978,8 +15457,12 @@ now in directory <span style="font-style: italic;">templates</span>.</li>
 
 
 
+
+
   <li>Bug: Windows: Handle, thread, file, memory leak when
 restarting process</li>
+
+
 
 
 
@@ -14022,6 +15505,8 @@ currently only standard ascii characters)</li>
 
 
 
+
+
   <li>New: full win64 support (tested on Windows 2003 x64).
 Wrapper and Application may run on 64 bit jdk.</li>
 
@@ -14043,7 +15528,11 @@ Wrapper and Application may run on 64 bit jdk.</li>
 
 
 
+
+
   <li>Bug: TeeInputStream.</li>
+
+
 
 
 
@@ -14084,7 +15573,11 @@ instead of &nbsp;KeepAliveFilter</li>
 
 
 
+
+
   <li>Bug: Thread leak</li>
+
+
 
 
 
@@ -14124,6 +15617,8 @@ instead of &nbsp;KeepAliveFilter</li>
 
 
 
+
+
   <li>Bug: class loading : slf4j issue</li>
 
 
@@ -14144,7 +15639,11 @@ instead of &nbsp;KeepAliveFilter</li>
 
 
 
+
+
   <li>Bug: Linux: System.out hangs</li>
+
+
 
 
 
@@ -14185,8 +15684,12 @@ wrapper.console.visible</span>: default: false</li>
 
 
 
+
+
   <li>Change: using Cycler (Thread.sleep)&nbsp; instead of
 Timer, so we are not influenced by system time changes.</li>
+
+
 
 
 
@@ -14227,7 +15730,11 @@ pings.</li>
 
 
 
+
+
   <li>Bug: short living applications state remains running</li>
+
+
 
 
 
@@ -14267,6 +15774,8 @@ pings.</li>
 
 
 
+
+
 <h4>yajsw-alpha-6.0 January 5th, 2009</h4>
 
 
@@ -14287,7 +15796,11 @@ pings.</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -14328,8 +15841,12 @@ wrap groovy scripts</li>
 
 
 
+
+
   <li>New: property <span style="font-style: italic;">wrapper.stop.conf</span>
 : stop a wrapped application by invoking another application</li>
+
+
 
 
 
@@ -14370,7 +15887,11 @@ realtive to workingDir.</li>
 
 
 
+
+
   <li>New: script for sending SNMP traps</li>
+
+
 
 
 
@@ -14415,6 +15936,8 @@ daemon script</li>
 
 
 
+
+
   <li>New: property <span style="font-style: italic;">wrapper.ntservice.starttype,&nbsp;</span><span style="font-style: italic;">wrapper.ntservice.account,&nbsp;</span><span style="font-style: italic;">wrapper.ntservice.password</span></li>
 
 
@@ -14435,7 +15958,11 @@ daemon script</li>
 
 
 
+
+
   <li>Change: Linux: default pid dir: /var/run</li>
+
+
 
 
 
@@ -14480,7 +16007,11 @@ and console applications.</li>
 
 
 
+
+
   <li>Bug: file conf/daemon.gv missing in alpha-5.1</li>
+
+
 
 
 
@@ -14521,7 +16052,11 @@ wrapper.tray.icon</span> : enable system tray icon.</li>
 
 
 
+
+
   <li>New: script for displaying tray messages</li>
+
+
 
 
 
@@ -14563,8 +16098,12 @@ wrapper.java.initialmemory.relative</span></li>
 
 
 
+
+
   <li>Bug: Linux: spaces in command line calling application
 removed.</li>
+
+
 
 
 
@@ -14604,6 +16143,8 @@ removed.</li>
 
 
 
+
+
   <li>Change: Log file: directory is created if it does not exist</li>
 
 
@@ -14624,7 +16165,11 @@ removed.</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -14664,7 +16209,11 @@ removed.</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -14704,7 +16253,11 @@ removed.</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -14744,7 +16297,11 @@ removed.</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -14766,6 +16323,8 @@ removed.</li>
 
   <li>New: groovy scripts can now be passed arguments from the
 wrapper configuration properties</li>
+
+
 
 
 
@@ -14807,8 +16366,12 @@ such as time interval, file existence, mail receiption etc.</li>
 
 
 
+
+
   <li>New: groovy scripts maintain their bindings between
 invocations</li>
+
+
 
 
 
@@ -14848,7 +16411,11 @@ invocations</li>
 
 
 
+
+
   <li>Linux: configuration generator now available for Linux</li>
+
+
 
 
 
@@ -14890,6 +16457,10 @@ java -jar wrapper.jar options -i (install) -t (start) -s(stop) -q/-qs
 
 
 
+
+
+  
+  
   
   
   
@@ -14909,6 +16480,8 @@ java -jar wrapper.jar options -i (install) -t (start) -s(stop) -q/-qs
   
   
   <ul>
+
+
 
 
 
@@ -14949,7 +16522,11 @@ copies the file to /etc/init.d</li>
 
 
 
+
+
     <li>-t starts the daemon</li>
+
+
 
 
 
@@ -14989,6 +16566,8 @@ copies the file to /etc/init.d</li>
 
 
 
+
+
     <li>-u removes the script from the daemon dir.</li>
 
 
@@ -15009,6 +16588,10 @@ copies the file to /etc/init.d</li>
 
 
 
+
+
+  
+  
   
   
   
@@ -15028,6 +16611,8 @@ copies the file to /etc/init.d</li>
   
   
   </ul>
+
+
 
 
 
@@ -15068,7 +16653,11 @@ after max_failed_invocations.</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -15108,7 +16697,11 @@ after max_failed_invocations.</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -15151,7 +16744,11 @@ win32)</li>
 
 
 
+
+
   <li>New: JMX support</li>
+
+
 
 
 
@@ -15191,7 +16788,11 @@ win32)</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -15231,7 +16832,11 @@ win32)</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -15271,7 +16876,11 @@ win32)</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -15311,7 +16920,11 @@ win32)</li>
 
 
 
+
+
 <ul>
+
+
 
 
 
@@ -15353,8 +16966,12 @@ org.rzo.yajsw.app.WrapperJVMMain</li>
 
 
 
+
+
   <li>added support for wrapping native exes. Restriction: cannot
 reconnect to native exes.</li>
+
+
 
 
 
@@ -15395,8 +17012,12 @@ yet available for Linux: visible console, automatic install of daemons</li>
 
 
 
+
+
   <li>This version is stable on Windows and is being used in
 production on win32 and win64</li>
+
+
 
 
 
@@ -15436,7 +17057,11 @@ production on win32 and win64</li>
 
 
 
+
+
 <h4>yajsw-alpha-2.0 August 20 2008</h4>
+
+
 
 
 
@@ -15476,7 +17101,11 @@ production on win32 and win64</li>
 
 
 
+
+
   <li>Regular &nbsp;Expressions Filters</li>
+
+
 
 
 
@@ -15516,7 +17145,11 @@ production on win32 and win64</li>
 
 
 
+
+
   <li>Sample Groovy script for sending emails</li>
+
+
 
 
 
@@ -15556,7 +17189,11 @@ production on win32 and win64</li>
 
 
 
+
+
   <li>Windows services now bug free</li>
+
+
 
 
 
@@ -15596,6 +17233,8 @@ production on win32 and win64</li>
 
 
 
+
+
   <li>Cpu affinity and process priority</li>
 
 
@@ -15616,7 +17255,11 @@ production on win32 and win64</li>
 
 
 
+
+
   <li>Automatic JVM selection</li>
+
+
 
 
 
@@ -15657,7 +17300,11 @@ Application</li>
 
 
 
+
+
 </ul>
+
+
 
 
 
@@ -15697,7 +17344,11 @@ Application</li>
 
 
 
+
+
 Initial release<br>
+
+
 
 
 
@@ -15738,6 +17389,8 @@ functions and configuration properties.<br>
 
 
 
+
+
 <br>
 
 
@@ -15758,27 +17411,33 @@ functions and configuration properties.<br>
 
 
 
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+
+
 
 
 
